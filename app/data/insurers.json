@@ -1,0 +1,7 @@
+[
+  {"id":"koop","name":"Kooperativa pojišťovna, a.s.","short":"KOOP","active":true},
+  {"id":"gcp","name":"Generali Česká pojišťovna a.s.","short":"GČP","active":true},
+  {"id":"cpp","name":"Česká podnikatelská pojišťovna, a.s.","short":"ČPP","active":true},
+  {"id":"allianz","name":"Allianz pojišťovna, a.s.","short":"Allianz","active":true},
+  {"id":"uniqa","name":"UNIQA pojišťovna, a.s.","short":"UNIQA","active":true}
+]

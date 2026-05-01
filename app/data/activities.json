@@ -1,0 +1,6 @@
+[
+  {"code":"stavba","name":"Stavební firma","risk_level":"vysoké","description":"Práce na stavbách, u zákazníků, subdodavatelé, odpovědnost za vady a následné škody.","limit_hint":"10–30 mil. Kč, u větších zakázek 50+ mil. Kč"},
+  {"code":"vyroba","name":"Výrobní firma","risk_level":"vysoké","description":"Výroba, dodávky výrobků, výrobková odpovědnost, následné škody, spojení a smísení.","limit_hint":"10–20 mil. Kč, automotive/export výrazně více"},
+  {"code":"bezpecnost","name":"Bezpečnostní agentura","risk_level":"vysoké","description":"Ostraha objektů, odpovědnost za cizí majetek, selhání zaměstnanců, škody z opomenutí.","limit_hint":"10–30 mil. Kč, velké objekty 50+ mil. Kč"},
+  {"code":"doprava","name":"Autodopravce","risk_level":"střední až vysoké","description":"Silniční doprava, odpovědnost dopravce, škody na nákladu, mezinárodní přeprava.","limit_hint":"5–10 mil. Kč, mezinárodní a hodnotný náklad více"}
+]
