@@ -627,6 +627,13 @@ async function getInquiryItems(){
   try{ const res=await api('/api/inquiries'); window.__lastInquiryItems=(res.items||[]).map(x=>({...x,source:'db'})); return window.__lastInquiryItems; }
   catch(e){ return localInquiryBackups().map(x=>({id:x.id||'', local_key:x.local_key, title:x.title||('Poptávka – '+(x.client?.name||'klient')), client_name:x.client?.name||'', activity_name:x.activity?.name||'', adviser_name:x.adviser?.name||'', adviser_email:x.adviser?.email||'', status:x.status||'rozpracováno', offer_count:Object.keys(x.offers||{}).length, updated_at:x.local_saved_at||'', source:'local'})); }
 }
+
+function workflowTilesHtml(items){
+  const statuses=['rozpracováno','odesláno pojišťovnám','nabídky přijaty','odesláno klientovi','uzavřeno','zrušeno'];
+  const counts=Object.fromEntries(statuses.map(s=>[s,0]));
+  (items||[]).forEach(i=>{ const st=i.status||'rozpracováno'; counts[st]=(counts[st]||0)+1; });
+  return `<div class="tile-row compact">${statuses.map(st=>`<div class="workflow-tile ${statusClass(st)}"><div>${st}</div><strong>${counts[st]||0}</strong></div>`).join('')}</div>`;
+}
 function workflowTableHtml(items, showAdvisor){
   if(!items.length) return '<div class="admin-empty">Žádná poptávka neodpovídá filtru.</div>';
   return `<table><thead><tr><th>ID</th><th>Klient</th><th>Činnost</th>${showAdvisor?'<th>Poradce</th>':''}<th>Stav</th><th>Nabídky</th><th>Poslední změna</th><th>Akce</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.source==='db'?'#'+i.id:'lokální'}</td><td><b>${i.client_name||i.title||'Bez názvu'}</b><br><small>${i.ico||''}</small></td><td>${i.activity_name||'—'}</td>${showAdvisor?`<td>${i.adviser_name||'—'}<br><small>${i.adviser_email||''}</small></td>`:''}<td><span class="workflow-badge ${statusClass(i.status)}">${i.status||'rozpracováno'}</span></td><td>${i.offer_count ?? 0}</td><td>${formatDateTimeCz(i.updated_at)||'—'}</td><td><button class="secondary small-open" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source||'db'}">Otevřít</button></td></tr>`).join('')}</tbody></table>`;
@@ -637,6 +644,7 @@ async function renderMyInquiries(){
   const items=(await getInquiryItems()).filter(i=>(i.adviser_email||'').toLowerCase()===(currentUser?.email||'').toLowerCase() || currentUser?.role==='admin');
   const status=$('myInquiryStatusFilter')?.value||''; const search=$('myInquirySearch')?.value||'';
   const filtered=items.filter(i=>inquiryMatchesFilters(i,status,search));
+  if($('myInquiryTiles')) $('myInquiryTiles').innerHTML=workflowTilesHtml(items);
   el.innerHTML=workflowTableHtml(filtered,false);
   el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
 }
@@ -645,6 +653,7 @@ async function renderAdminInquiries(){
   el.innerHTML='Načítám...';
   const status=$('adminInquiryStatusFilter')?.value||''; const search=$('adminInquirySearch')?.value||'';
   const items=(await getInquiryItems()).filter(i=>inquiryMatchesFilters(i,status,search));
+  if($('adminInquiryTiles')) $('adminInquiryTiles').innerHTML=workflowTilesHtml(items);
   if($('adminInquiryCount')) $('adminInquiryCount').textContent=`Zobrazeno ${items.length} poptávek`;
   el.innerHTML=workflowTableHtml(items,true);
   el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));

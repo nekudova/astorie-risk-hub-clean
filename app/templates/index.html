@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.27 · evidence + oprava načítání</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.28 · Moje poptávky + workflow</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -76,6 +76,7 @@
             <label>Stav<select id="myInquiryStatusFilter"><option value="">Všechny stavy</option><option>rozpracováno</option><option>odesláno pojišťovnám</option><option>nabídky přijaty</option><option>odesláno klientovi</option><option>uzavřeno</option><option>zrušeno</option></select></label>
             <label>Hledat<input id="myInquirySearch" placeholder="klient, činnost, ID..."></label>
           </div>
+          <div id="myInquiryTiles" class="workflow-tiles"></div>
           <div id="myInquiriesTable" class="workflow-table"></div>
         </section>
       </section>
@@ -339,6 +340,7 @@
           <div id="inquiriesAdmin" class="admin-section hidden">
             <div class="section-head"><div><h3>Přehled všech poptávek BO</h3><p class="muted">Evidence celého workflow: komu byla poptávka odeslána, kolik je nabídek, stav zpracování a poslední změna.</p></div><button id="refreshAdminInquiriesBtn" class="secondary">Aktualizovat</button></div>
             <div class="admin-workbar workflow-adminbar"><label>Stav<select id="adminInquiryStatusFilter"><option value="">Všechny stavy</option><option>rozpracováno</option><option>odesláno pojišťovnám</option><option>nabídky přijaty</option><option>odesláno klientovi</option><option>uzavřeno</option><option>zrušeno</option></select></label><label>Hledat<input id="adminInquirySearch" placeholder="klient, poradce, činnost, ID..."></label><span id="adminInquiryCount" class="muted"></span></div>
+            <div id="adminInquiryTiles" class="workflow-tiles"></div>
             <div id="adminInquiriesTable" class="workflow-table"></div>
           </div>
           <div id="insurersAdmin" class="admin-section">
