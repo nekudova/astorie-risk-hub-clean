@@ -1,13 +1,3 @@
-# Centrum obchodních rizik ASTORIE v0.22
+# Centrum obchodních rizik ASTORIE v0.23
 
-Čisté nasazení aplikace ASTORIE Risk Hub.
-
-Build command:
-```bash
-pip install -r requirements.txt
-```
-
-Start command:
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
+Oprava načítání uložených poptávek/nabídek a profesionální detailní formuláře v adminu.

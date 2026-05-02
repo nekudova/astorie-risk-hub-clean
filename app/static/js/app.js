@@ -7,6 +7,7 @@ let state = {
 };
 let currentRiskIndex = null;
 let currentUser = null;
+let currentAdminDetail = null;
 
 const $ = (id)=>document.getElementById(id);
 const text = (v)=> (v ?? "").toString().trim();
@@ -77,6 +78,11 @@ function bindUI(){
   if($('aiDocsLabel')) $('aiDocsLabel').addEventListener('input', renderAIPrompt);
   $('closeModal').onclick = ()=>$('riskModal').classList.add('hidden');
   $('saveRiskDetail').onclick = saveRiskModal;
+  if($('closeSavedModal')) $('closeSavedModal').onclick = ()=>$('savedInquiryModal').classList.add('hidden');
+  if($('closeAdminDetail')) $('closeAdminDetail').onclick = ()=>$('adminDetailModal').classList.add('hidden');
+  if($('cancelAdminDetail')) $('cancelAdminDetail').onclick = ()=>$('adminDetailModal').classList.add('hidden');
+  if($('saveAdminDetail')) $('saveAdminDetail').onclick = saveAdminDetailModal;
+  setupAdminDetailObserver();
   document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
   document.querySelectorAll('.admin-tab').forEach(btn=>btn.onclick=()=>showAdminTab(btn.dataset.adminTab));
   $('addInsurerAdmin').onclick = addAdminInsurer;
@@ -486,23 +492,59 @@ async function saveInquiry(){
   try{
     const res = await api('/api/inquiries', {method:'POST', body:JSON.stringify(state)});
     if(res.id){ state.id=res.id; $('inquiryId').value=res.id; }
+    backupInquiryLocally(state);
     $('saveStatus').textContent=res.message || 'Uloženo.';
-  }catch(e){ $('saveStatus').textContent='Chyba: '+e.message; }
+  }catch(e){
+    backupInquiryLocally(state);
+    $('saveStatus').textContent='DB chyba, uloženo alespoň lokálně v prohlížeči: '+e.message;
+  }
+}
+function localInquiryBackups(){
+  try{return JSON.parse(localStorage.getItem('arh_inquiry_backups')||'[]')}catch(e){return []}
+}
+function backupInquiryLocally(item){
+  const backups=localInquiryBackups();
+  const key = item.id ? 'db_'+item.id : 'local_'+Date.now();
+  const clean = JSON.parse(JSON.stringify({...item, local_key:key, local_saved_at:new Date().toISOString()}));
+  const idx=backups.findIndex(x=>(item.id && x.id===item.id) || x.local_key===key);
+  if(idx>=0) backups[idx]=clean; else backups.unshift(clean);
+  localStorage.setItem('arh_inquiry_backups', JSON.stringify(backups.slice(0,30)));
 }
 async function loadInquiries(){
-  $('inquiriesList').innerHTML='Načítám...';
+  const target = $('savedInquiryModalList') || $('inquiriesList');
+  if($('savedInquiryModal')) $('savedInquiryModal').classList.remove('hidden');
+  target.innerHTML='Načítám uložené poptávky...';
   try{
     const res = await api('/api/inquiries');
-    const items=res.items||[];
-    $('inquiriesList').innerHTML = items.length ? items.map(i=>`<div class="item"><div><b>#${i.id} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${i.updated_at||''}</span></div><button class="secondary" data-id="${i.id}">Otevřít</button></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
-    $('inquiriesList').querySelectorAll('button').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id));
-  }catch(e){ $('inquiriesList').innerHTML='Chyba: '+e.message; }
+    const dbItems=(res.items||[]).map(x=>({...x, source:'db'}));
+    const localItems=localInquiryBackups().map(x=>({id:x.id||'', local_key:x.local_key, title:x.title||('Poptávka – '+(x.client?.name||'klient')), client_name:x.client?.name||'', activity_name:x.activity?.name||'', updated_at:x.local_saved_at||'', source:'local'}));
+    const seen=new Set();
+    const items=[...dbItems,...localItems].filter(i=>{const k=(i.source==='db'?'db_'+i.id:(i.local_key||'')); if(seen.has(k)) return false; seen.add(k); return true;});
+    renderInquiryList(items, target);
+    if($('inquiriesList') && target!==$('inquiriesList')) renderInquiryList(items, $('inquiriesList'));
+  }catch(e){
+    const localItems=localInquiryBackups().map(x=>({id:x.id||'', local_key:x.local_key, title:x.title||('Poptávka – '+(x.client?.name||'klient')), client_name:x.client?.name||'', activity_name:x.activity?.name||'', updated_at:x.local_saved_at||'', source:'local'}));
+    target.innerHTML='<p class="warning"><b>Databáze se nepodařila načíst.</b><br>'+e.message+'</p>';
+    if(localItems.length){ target.innerHTML += '<h3>Lokální záloha v tomto prohlížeči</h3>'; renderInquiryList(localItems, target, true); }
+  }
 }
-async function openInquiry(id){
-  const res = await api('/api/inquiries/'+id);
-  applyState(res.item);
+function renderInquiryList(items, container, append=false){
+  const html = items.length ? items.map(i=>`<div class="item"><div><b>${i.source==='db'?'#'+i.id:'Lokální záloha'} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${formatDateTimeCz(i.updated_at)||i.updated_at||''}</span></div><div class="item-actions"><span class="pill">${i.source==='db'?'DB':'lokálně'}</span><button class="secondary" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Otevřít</button></div></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
+  if(append) container.innerHTML += html; else container.innerHTML = html;
+  container.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+}
+async function openInquiry(id, source='db', localKey=''){
+  if(source==='local'){
+    const item=localInquiryBackups().find(x=>x.local_key===localKey || String(x.id||'')===String(id));
+    if(!item){ alert('Lokální záloha nebyla nalezena.'); return; }
+    applyState(item);
+  } else {
+    const res = await api('/api/inquiries/'+id);
+    applyState(res.item);
+  }
+  if($('savedInquiryModal')) $('savedInquiryModal').classList.add('hidden');
   showView('inquiryView');
-  $('saveStatus').textContent='Poptávka načtena.';
+  $('saveStatus').textContent='Poptávka načtena včetně nabídek a zprávy.';
 }
 function applyState(s){
   state = {...state, ...s, offers:s.offers||{}};
@@ -527,7 +569,7 @@ function showAdminTab(id){
   $(id).classList.remove('hidden');
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active', t.dataset.adminTab===id));
 }
-function renderAdmin(){ renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); }
+function renderAdmin(){ renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
 function renderAdminInsurers(){
   const rows = (CATALOG.insurers||[]).map((i,idx)=>`<div class="admin-row insurer" data-idx="${idx}"><input class="adm-id" value="${i.id||''}" placeholder="id"><input class="adm-name" value="${i.name||''}" placeholder="název pojišťovny"><input class="adm-short" value="${i.short||''}" placeholder="zkratka"><select class="adm-active"><option value="true" ${i.active?'selected':''}>aktivní</option><option value="false" ${!i.active?'selected':''}>neaktivní</option></select><button class="secondary adm-del">Smazat</button></div>`).join('');
   $('insurersAdminTable').innerHTML = `<div class="admin-row insurer admin-head"><div>ID</div><div>Název</div><div>Zkratka</div><div>Stav</div><div></div></div>${rows}`;
@@ -703,6 +745,77 @@ function collectAdminPolicyRefs(){
   CATALOG.policyReferences = Array.from(el.querySelectorAll('.admin-row.policyref:not(.admin-head)')).map(row=>({insurer_id:row.querySelector('.pr-insurer').value.trim(), risk_id:row.querySelector('.pr-risk').value.trim(), document:row.querySelector('.pr-doc').value.trim(), article:row.querySelector('.pr-article').value.trim(), note:row.querySelector('.pr-note').value.trim(), url:row.querySelector('.pr-url').value.trim()})).filter(r=>r.insurer_id || r.risk_id || r.document);
 }
 function addAdminPolicyRef(){ collectAdminPolicyRefs(); CATALOG.policyReferences.push({insurer_id:'', risk_id:'', document:'', article:'', note:'', url:''}); renderAdminPolicyRefs(); }
+
+
+function setupAdminDetailObserver(){
+  const root = $('adminView');
+  if(!root || root.dataset.detailObserver==='1') return;
+  root.dataset.detailObserver='1';
+  const obs = new MutationObserver(()=>enhanceAdminDetailButtons());
+  obs.observe(root,{childList:true,subtree:true});
+}
+function enhanceAdminDetailButtons(){
+  document.querySelectorAll('#adminView .admin-row:not(.admin-head)').forEach(row=>{
+    if(row.querySelector('.adm-open-detail')) return;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='secondary adm-open-detail';
+    btn.textContent='Upravit detail';
+    btn.onclick=(ev)=>{ev.preventDefault(); openAdminDetailModal(row);};
+    const del=row.querySelector('.adm-del');
+    if(del) row.insertBefore(btn,del); else row.appendChild(btn);
+  });
+}
+function niceAdminLabel(el, idx){
+  const ph = el.getAttribute('placeholder');
+  if(ph) return ph.charAt(0).toUpperCase()+ph.slice(1);
+  const cls=[...el.classList].find(c=>!['adm-open-detail','adm-del'].includes(c));
+  const map={
+    'adm-id':'ID','adm-name':'Název','adm-short':'Zkratka','adm-active':'Stav','adm-email':'E-mail','adm-role':'Role','adm-company':'Společnost','adm-reg':'Registrace / status',
+    'act-code':'Kód činnosti','act-name':'Název činnosti','act-desc':'Popis činnosti','act-risk':'Rizikovost','act-limit':'Orientační limit',
+    'risk-act':'Činnost','risk-id':'ID rizika','risk-name':'Název rizika','risk-priority':'Priorita','risk-desc':'Popis pro poradce','risk-limit':'Limit','risk-question':'Otázka pro klienta','risk-reason':'Důvod doporučení','risk-default':'Předvolba',
+    'rm-act':'Činnost','rm-risk':'ID rizika','rm-name':'Název rizika','rm-critical':'Kritičnost','rm-obligation':'Povinnost','rm-weight':'Váha','rm-limit':'Doporučený limit','rm-rec':'Doporučení / upozornění',
+    'dict-risk':'ID rizika','dict-standard':'Jednotný název ASTORIE','dict-aliases':'Synonyma / názvy pojišťoven',
+    'pr-insurer':'Pojišťovna','pr-risk':'ID rizika','pr-doc':'Dokument','pr-article':'Článek / odstavec / strana','pr-note':'Poznámka / výklad','pr-url':'Odkaz'
+  };
+  return map[cls] || ('Pole '+(idx+1));
+}
+function openAdminDetailModal(row){
+  currentAdminDetail = {row, fields:[]};
+  const title = row.querySelector('input[value], textarea')?.value || row.querySelector('input')?.value || 'Detail záznamu';
+  $('adminDetailTitle').textContent = 'Detail záznamu – ' + (title || 'úprava');
+  const form=$('adminDetailForm'); form.innerHTML='';
+  const fields=[...row.querySelectorAll('input, textarea, select')].filter(el=>!el.classList.contains('adm-open-detail') && !el.classList.contains('adm-del'));
+  fields.forEach((el,idx)=>{
+    const label=document.createElement('label');
+    if(el.tagName==='TEXTAREA') label.classList.add('full');
+    label.textContent=niceAdminLabel(el,idx);
+    let clone;
+    if(el.tagName==='SELECT'){
+      clone=document.createElement('select');
+      [...el.options].forEach(o=>{const no=document.createElement('option'); no.value=o.value; no.textContent=o.textContent; no.selected=o.selected; clone.appendChild(no);});
+    }else if(el.tagName==='TEXTAREA'){
+      clone=document.createElement('textarea'); clone.value=el.value || '';
+    }else{
+      clone=document.createElement('input'); clone.type=el.type||'text'; clone.value=el.value || '';
+    }
+    clone.dataset.fieldIndex=idx;
+    label.appendChild(clone); form.appendChild(label);
+    currentAdminDetail.fields.push({source:el, edit:clone});
+  });
+  $('adminDetailModal').classList.remove('hidden');
+}
+function saveAdminDetailModal(){
+  if(!currentAdminDetail) return;
+  currentAdminDetail.fields.forEach(f=>{
+    f.source.value=f.edit.value;
+    f.source.dispatchEvent(new Event('input',{bubbles:true}));
+    f.source.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  $('adminDetailModal').classList.add('hidden');
+  collectAdminInsurers(); collectAdminAdvisers(); collectAdminActivities(); collectAdminRisks(); collectAdminReqTypes(); collectAdminDictionary(); collectAdminPolicyRefs(); collectRiskModelAdmin();
+  renderCatalogs(); updateAll(); enhanceAdminDetailButtons();
+}
 
 function parseDelimitedTable(raw){
   const lines = raw.trim().split(/\r?\n/).filter(Boolean);
