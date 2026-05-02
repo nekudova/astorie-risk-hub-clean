@@ -1,3 +1,3 @@
-# Centrum obchodních rizik ASTORIE v0.25
+# Centrum obchodních rizik ASTORIE v0.27
 
-MVP 0.26 – workflow evidence BO/poradce, aktivní poptávka, stavy poptávky a přehledy nabídek.
+Oprava načítání přehledu poptávek při starších datech v DB + workflow evidence.
