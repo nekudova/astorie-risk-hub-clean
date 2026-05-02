@@ -69,6 +69,14 @@ function bindUI(){
   $('addRequirementBtn').onclick = ()=>addRequirement();
   $('saveInquiryBtn').onclick = saveInquiry;
   $('loadListBtn').onclick = loadInquiries;
+  if($('changeInquiryBtn')) $('changeInquiryBtn').onclick = loadInquiries;
+  if($('inquiryStatusSelect')) $('inquiryStatusSelect').onchange = ()=>{ state.status=$('inquiryStatusSelect').value; updateActiveInquiryBanner(); };
+  if($('refreshMyInquiriesBtn')) $('refreshMyInquiriesBtn').onclick = renderMyInquiries;
+  if($('myInquiryStatusFilter')) $('myInquiryStatusFilter').onchange = renderMyInquiries;
+  if($('myInquirySearch')) $('myInquirySearch').oninput = renderMyInquiries;
+  if($('refreshAdminInquiriesBtn')) $('refreshAdminInquiriesBtn').onclick = renderAdminInquiries;
+  if($('adminInquiryStatusFilter')) $('adminInquiryStatusFilter').onchange = renderAdminInquiries;
+  if($('adminInquirySearch')) $('adminInquirySearch').oninput = renderAdminInquiries;
   $('newInquiryBtn').onclick = ()=>resetInquiry(true);
   $('refreshOffersBtn').onclick = renderOffers;
   if($('copyAiPromptBtn')) $('copyAiPromptBtn').onclick = copyAIPrompt;
@@ -118,6 +126,7 @@ function showView(id){
   document.querySelectorAll('.app-section').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+  if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
   if(id==='offersView') renderOffers();
   if(id==='comparisonView') renderComparison();
@@ -147,6 +156,7 @@ function resetInquiry(confirmIt){
   $('inquiriesList').innerHTML='';
   fillAdviser();
   selectActivity((CATALOG.activities&&CATALOG.activities[0]?.code) || 'construction');
+  updateActiveInquiryBanner();
   updateAll();
 }
 
@@ -225,7 +235,8 @@ function insurerName(id){ const i=(CATALOG.insurers||[]).find(x=>x.id===id); ret
 function activeRisks(){ return (state.risks||[]).filter(r=>r.enabled); }
 function selectedInsurers(){ return (state.selected_insurers||[]).map(id=>(CATALOG.insurers||[]).find(i=>i.id===id)).filter(Boolean); }
 
-function updateAll(){ collectForm(); updateDocs(); renderComparison(); if(document.getElementById('guideView') && !document.getElementById('guideView').classList.contains('hidden')) renderGuide(); }
+function updateAll(){
+  updateActiveInquiryBanner(); collectForm(); updateDocs(); renderComparison(); if(document.getElementById('guideView') && !document.getElementById('guideView').classList.contains('hidden')) renderGuide(); }
 function showTab(id){
   document.querySelectorAll('.doc-view').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
@@ -506,6 +517,7 @@ async function saveInquiry(){
     if(res.id){ state.id=res.id; $('inquiryId').value=res.id; }
     backupInquiryLocally(state);
     $('saveStatus').textContent=res.message || 'Uloženo.';
+    updateActiveInquiryBanner();
   }catch(e){
     backupInquiryLocally(state);
     $('saveStatus').textContent='DB chyba, uloženo alespoň lokálně v prohlížeči: '+e.message;
@@ -529,6 +541,7 @@ async function loadInquiries(){
   try{
     const res = await api('/api/inquiries');
     const dbItems=(res.items||[]).map(x=>({...x, source:'db'}));
+    window.__lastInquiryItems = dbItems;
     const localItems=localInquiryBackups().map(x=>({id:x.id||'', local_key:x.local_key, title:x.title||('Poptávka – '+(x.client?.name||'klient')), client_name:x.client?.name||'', activity_name:x.activity?.name||'', updated_at:x.local_saved_at||'', source:'local'}));
     const seen=new Set();
     const items=[...dbItems,...localItems].filter(i=>{const k=(i.source==='db'?'db_'+i.id:(i.local_key||'')); if(seen.has(k)) return false; seen.add(k); return true;});
@@ -541,10 +554,11 @@ async function loadInquiries(){
   }
 }
 function renderInquiryList(items, container, append=false){
-  const html = items.length ? items.map(i=>`<div class="item"><div><b>${i.source==='db'?'#'+i.id:'Lokální záloha'} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${formatDateTimeCz(i.updated_at)||i.updated_at||''}</span></div><div class="item-actions"><span class="pill">${i.source==='db'?'DB':'lokálně'}</span><button class="secondary" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Otevřít</button></div></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
+  const html = items.length ? items.map(i=>`<div class="item"><div><b>${i.source==='db'?'#'+i.id:'Lokální záloha'} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${formatDateTimeCz(i.updated_at)||i.updated_at||''}</span><br><small>Stav: <b>${i.status||'rozpracováno'}</b> · Nabídek: <b>${i.offer_count ?? countOffersFromLocal(i)}</b></small></div><div class="item-actions"><span class="pill">${i.source==='db'?'DB':'lokálně'}</span><button class="secondary" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Otevřít</button></div></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
   if(append) container.innerHTML += html; else container.innerHTML = html;
   container.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
 }
+function countOffersFromLocal(i){ try{return Object.keys(i.offers||{}).length}catch(e){return 0} }
 async function openInquiry(id, source='db', localKey=''){
   if(source==='local'){
     const item=localInquiryBackups().find(x=>x.local_key===localKey || String(x.id||'')===String(id));
@@ -557,6 +571,7 @@ async function openInquiry(id, source='db', localKey=''){
   if($('savedInquiryModal')) $('savedInquiryModal').classList.add('hidden');
   showView('inquiryView');
   $('saveStatus').textContent='Poptávka načtena včetně nabídek a zprávy.';
+  updateActiveInquiryBanner();
 }
 function applyState(s){
   state = {...state, ...s, offers:s.offers||{}};
@@ -565,6 +580,7 @@ function applyState(s){
     if(local){ state.offers = local.offers; $('saveStatus').textContent='Nabídky byly doplněny z lokální zálohy prohlížeče.'; }
   }
   $('inquiryId').value = state.id || '';
+  if($('inquiryStatusSelect')) $('inquiryStatusSelect').value = state.status || 'rozpracováno';
   fillAdviser();
   $('clientIco').value=state.client?.ico||''; $('clientName').value=state.client?.name||''; $('clientLegal').value=state.client?.legal_form||''; $('clientAddress').value=state.client?.address||''; $('clientDataBox').value=state.client?.data_box||''; $('clientContact').value=state.client?.contact_person||''; $('clientEmail').value=state.client?.contact_email||''; $('clientPhone').value=state.client?.contact_phone||''; $('clientWeb').value=state.client?.website||'';
   $('insuranceStart').value=state.questionnaire?.insurance_start||''; $('turnover').value=state.questionnaire?.turnover||''; $('employees').value=state.questionnaire?.employees||'';
@@ -580,12 +596,66 @@ function setSelectOrCustom(selectId, customId, value){
   if(exists) sel.value=value; else {sel.value='custom'; $(customId).value=value;}
 }
 
+
+function statusClass(st){
+  const s=(st||'rozpracováno').toLowerCase();
+  if(s.includes('uzav')) return 'done';
+  if(s.includes('zru')) return 'bad';
+  if(s.includes('klient')) return 'client';
+  if(s.includes('nabíd')) return 'offers';
+  if(s.includes('poji')) return 'sent';
+  return 'draft';
+}
+function updateActiveInquiryBanner(){
+  const b=$('activeInquiryBanner'); if(!b) return;
+  const has=!!state.id;
+  b.classList.toggle('hidden', !has);
+  if(!has) return;
+  const offerCount=Object.keys(state.offers||{}).length;
+  const client=state.client?.name || 'Bez názvu klienta';
+  const activity=state.activity?.name || 'bez činnosti';
+  $('activeInquiryTitle').textContent = `#${state.id} – ${client}`;
+  $('activeInquiryMeta').innerHTML = `<span class="workflow-badge ${statusClass(state.status)}">${state.status||'rozpracováno'}</span> · ${activity} · Nabídky: ${offerCount} · zdroj: DB`;
+  if($('inquiryStatusSelect')) $('inquiryStatusSelect').value = state.status || 'rozpracováno';
+}
+function inquiryMatchesFilters(i, status, search){
+  if(status && (i.status||'')!==status) return false;
+  if(!search) return true;
+  return JSON.stringify(i||{}).toLowerCase().includes(search.toLowerCase().trim());
+}
+async function getInquiryItems(){
+  try{ const res=await api('/api/inquiries'); window.__lastInquiryItems=(res.items||[]).map(x=>({...x,source:'db'})); return window.__lastInquiryItems; }
+  catch(e){ return localInquiryBackups().map(x=>({id:x.id||'', local_key:x.local_key, title:x.title||('Poptávka – '+(x.client?.name||'klient')), client_name:x.client?.name||'', activity_name:x.activity?.name||'', adviser_name:x.adviser?.name||'', adviser_email:x.adviser?.email||'', status:x.status||'rozpracováno', offer_count:Object.keys(x.offers||{}).length, updated_at:x.local_saved_at||'', source:'local'})); }
+}
+function workflowTableHtml(items, showAdvisor){
+  if(!items.length) return '<div class="admin-empty">Žádná poptávka neodpovídá filtru.</div>';
+  return `<table><thead><tr><th>ID</th><th>Klient</th><th>Činnost</th>${showAdvisor?'<th>Poradce</th>':''}<th>Stav</th><th>Nabídky</th><th>Poslední změna</th><th>Akce</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.source==='db'?'#'+i.id:'lokální'}</td><td><b>${i.client_name||i.title||'Bez názvu'}</b><br><small>${i.ico||''}</small></td><td>${i.activity_name||'—'}</td>${showAdvisor?`<td>${i.adviser_name||'—'}<br><small>${i.adviser_email||''}</small></td>`:''}<td><span class="workflow-badge ${statusClass(i.status)}">${i.status||'rozpracováno'}</span></td><td>${i.offer_count ?? 0}</td><td>${formatDateTimeCz(i.updated_at)||'—'}</td><td><button class="secondary small-open" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source||'db'}">Otevřít</button></td></tr>`).join('')}</tbody></table>`;
+}
+async function renderMyInquiries(){
+  const el=$('myInquiriesTable'); if(!el) return;
+  el.innerHTML='Načítám...';
+  const items=(await getInquiryItems()).filter(i=>(i.adviser_email||'').toLowerCase()===(currentUser?.email||'').toLowerCase() || currentUser?.role==='admin');
+  const status=$('myInquiryStatusFilter')?.value||''; const search=$('myInquirySearch')?.value||'';
+  const filtered=items.filter(i=>inquiryMatchesFilters(i,status,search));
+  el.innerHTML=workflowTableHtml(filtered,false);
+  el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+}
+async function renderAdminInquiries(){
+  const el=$('adminInquiriesTable'); if(!el) return;
+  el.innerHTML='Načítám...';
+  const status=$('adminInquiryStatusFilter')?.value||''; const search=$('adminInquirySearch')?.value||'';
+  const items=(await getInquiryItems()).filter(i=>inquiryMatchesFilters(i,status,search));
+  if($('adminInquiryCount')) $('adminInquiryCount').textContent=`Zobrazeno ${items.length} poptávek`;
+  el.innerHTML=workflowTableHtml(items,true);
+  el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+}
+
 function showAdminTab(id){
   document.querySelectorAll('.admin-section').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active', t.dataset.adminTab===id));
 }
-function renderAdmin(){ ensureAdminFilters(); renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
+function renderAdmin(){ ensureAdminFilters(); renderAdminInquiries(); renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
 function renderAdminInsurers(){
   ensureAdminFilters();
   const search = adminFilterText('adminInsurerSearch');

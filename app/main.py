@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="0.25")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="0.26")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -167,7 +167,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "0.25"}
+    return {"ok": True, "database_connected": ok, "version": "0.26"}
 
 
 def get_catalogs() -> Dict[str, Any]:
@@ -401,11 +401,14 @@ def list_inquiries():
             cur.execute(
                 """
                 SELECT i.id, i.title, i.status, i.activity_name, i.adviser_name, i.adviser_email,
-                       i.created_at, i.updated_at, c.ico, c.name AS client_name
+                       i.created_at, i.updated_at, c.ico, c.name AS client_name,
+                       COALESCE(jsonb_object_length(i.full_payload->'offers'), 0) AS offer_count,
+                       COALESCE(jsonb_array_length(i.selected_insurers), 0) AS selected_insurer_count,
+                       i.full_payload->'report'->>'client_selected_offer' AS client_selected_offer
                 FROM inquiries i
                 LEFT JOIN clients c ON c.id = i.client_id
                 ORDER BY i.updated_at DESC
-                LIMIT 100;
+                LIMIT 300;
                 """
             )
             rows = cur.fetchall()
