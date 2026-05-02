@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.24 · admin filtry + ukládání nabídek</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.25 · admin redesign + oprava načítání</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -300,11 +300,11 @@
           </div>
           <div id="insurersAdmin" class="admin-section">
             <div class="section-head"><div><h3>Pojišťovny pro poptávku</h3><p class="muted">Tento číselník se používá ve výběru pojišťoven a v modulu Nabídky.</p></div><button id="addInsurerAdmin" class="secondary">+ Přidat pojišťovnu</button></div>
-            <div class="admin-table" id="insurersAdminTable"></div>
+            <div class="admin-workbar"><label>Hledat pojišťovnu<input id="adminInsurerSearch" placeholder="název, zkratka, ID..."></label><span class="muted">Tip: dlouhé údaje upravujte přes tlačítko Upravit detail.</span></div><div class="admin-table" id="insurersAdminTable"></div>
           </div>
           <div id="advisersAdmin" class="admin-section hidden">
             <div class="section-head"><div><h3>Poradci / makléři</h3><p class="muted">Dočasně zde spravujeme přihlašovací údaje a role. Později doplníme bezpečné nastavení hesel.</p></div><button id="addAdviserAdmin" class="secondary">+ Přidat poradce</button></div>
-            <div class="admin-table" id="advisersAdminTable"></div>
+            <div class="admin-workbar"><label>Hledat poradce<input id="adminAdviserSearch" placeholder="jméno, e-mail, společnost..."></label><label>Role<select id="adminAdviserRoleFilter"><option value="">Všechny role</option><option value="admin">Admin</option><option value="advisor">Poradce</option></select></label><span class="muted">Správa přístupů a rolí.</span></div><div class="admin-table" id="advisersAdminTable"></div>
           </div>
           <div id="activitiesAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Typy klientů / činnosti</h2><p class="muted">Sem BO doplňuje obory podnikání, které se následně zobrazují poradci ve vstupním dotazníku.</p></div><button id="addActivityAdmin" class="secondary">+ Přidat činnost</button></div>
@@ -316,7 +316,7 @@
           </div>
           <div id="requirementsAdmin" class="admin-section hidden">
             <div class="section-head"><h2>Typy doplňujících údajů</h2><button id="addReqTypeAdmin" class="secondary">+ Přidat typ</button></div>
-            <div class="admin-table" id="reqTypesAdminTable"></div>
+            <div class="admin-workbar"><label>Hledat typ informace<input id="adminReqTypeSearch" placeholder="např. výluka, osoba, požadavek..."></label><span class="muted">Používá se ve vstupním dotazníku klienta.</span></div><div class="admin-table" id="reqTypesAdminTable"></div>
           </div>
           <div id="dictionaryAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Slovník názvosloví pojišťoven</h2><p class="muted">Mapuje různé názvy pojišťoven na jednotné riziko ASTORIE. Používá se v AI promptu i porovnání.</p></div><button id="addDictionaryAdmin" class="secondary">+ Přidat mapování</button></div>

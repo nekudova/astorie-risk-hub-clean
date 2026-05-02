@@ -320,6 +320,18 @@ function formatDateCz(value){
   }
   return value;
 }
+
+function formatDateTimeCz(value){
+  if(!value) return '';
+  try{
+    const d = new Date(value);
+    if(isNaN(d.getTime())) return String(value);
+    return d.toLocaleString('cs-CZ', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  }catch(e){ return String(value); }
+}
 function coverageBase(c){
   const st=(c?.state||'').toLowerCase();
   if(st==='splněno') return 1;
@@ -575,10 +587,14 @@ function showAdminTab(id){
 }
 function renderAdmin(){ ensureAdminFilters(); renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
 function renderAdminInsurers(){
-  const rows = (CATALOG.insurers||[]).map((i,idx)=>`<div class="admin-row insurer" data-idx="${idx}"><input class="adm-id" value="${i.id||''}" placeholder="id"><input class="adm-name" value="${i.name||''}" placeholder="název pojišťovny"><input class="adm-short" value="${i.short||''}" placeholder="zkratka"><select class="adm-active"><option value="true" ${i.active?'selected':''}>aktivní</option><option value="false" ${!i.active?'selected':''}>neaktivní</option></select><button class="secondary adm-del">Smazat</button></div>`).join('');
-  $('insurersAdminTable').innerHTML = `<div class="admin-row insurer admin-head"><div>ID</div><div>Název</div><div>Zkratka</div><div>Stav</div><div></div></div>${rows}`;
+  ensureAdminFilters();
+  const search = adminFilterText('adminInsurerSearch');
+  const list = (CATALOG.insurers||[]).map((i,idx)=>({...i,_idx:idx})).filter(i=>rowMatchesSearch(i,search));
+  const rows = list.map((i)=>`<div class="admin-row insurer" data-idx="${i._idx}"><input class="adm-id" value="${i.id||''}" placeholder="id"><input class="adm-name" value="${i.name||''}" placeholder="název pojišťovny"><input class="adm-short" value="${i.short||''}" placeholder="zkratka"><select class="adm-active"><option value="true" ${i.active?'selected':''}>aktivní</option><option value="false" ${!i.active?'selected':''}>neaktivní</option></select><button class="secondary adm-del">Smazat</button></div>`).join('');
+  $('insurersAdminTable').innerHTML = `<div class="admin-row insurer admin-head"><div>ID</div><div>Název</div><div>Zkratka</div><div>Stav</div><div></div></div>${rows || '<div class="admin-empty">Žádná pojišťovna neodpovídá filtru.</div>'}`;
   $('insurersAdminTable').querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.insurers.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminInsurers(); renderCatalogs(); updateAll(); });
   $('insurersAdminTable').querySelectorAll('input,select').forEach(el=>el.oninput=collectAdminInsurers);
+  enhanceAdminDetailButtons();
 }
 function collectAdminInsurers(){
   CATALOG.insurers = Array.from(document.querySelectorAll('#insurersAdminTable .admin-row.insurer:not(.admin-head)')).map(row=>({id:row.querySelector('.adm-id').value.trim() || ('ins_'+Date.now()), name:row.querySelector('.adm-name').value.trim(), short:row.querySelector('.adm-short').value.trim(), active:row.querySelector('.adm-active').value==='true'}));
@@ -586,10 +602,15 @@ function collectAdminInsurers(){
 }
 function addAdminInsurer(){ collectAdminInsurers(); CATALOG.insurers.push({id:'nova_'+Date.now(), name:'Nová pojišťovna', short:'', active:true}); renderAdminInsurers(); renderCatalogs(); }
 function renderAdminAdvisers(){
-  const rows = (CATALOG.advisers||[]).map((a,idx)=>`<div class="admin-row adviser" data-idx="${idx}"><input class="adm-email" value="${a.email||''}" placeholder="email"><input class="adm-name" value="${a.name||''}" placeholder="jméno"><select class="adm-role"><option value="advisor" ${a.role!=='admin'?'selected':''}>poradce</option><option value="admin" ${a.role==='admin'?'selected':''}>admin</option></select><input class="adm-company" value="${a.company||'ASTORIE a.s.'}" placeholder="společnost"><input class="adm-reg" value="${a.registration||''}" placeholder="registrace"><button class="secondary adm-del">Smazat</button></div>`).join('');
-  $('advisersAdminTable').innerHTML = `<div class="admin-row adviser admin-head"><div>E-mail</div><div>Jméno</div><div>Role</div><div>Společnost</div><div>Status</div><div></div></div>${rows}`;
+  ensureAdminFilters();
+  const search = adminFilterText('adminAdviserSearch');
+  const role = $('adminAdviserRoleFilter')?.value || '';
+  const list = (CATALOG.advisers||[]).map((a,idx)=>({...a,_idx:idx})).filter(a=>(!role || a.role===role) && rowMatchesSearch(a,search));
+  const rows = list.map((a)=>`<div class="admin-row adviser" data-idx="${a._idx}"><input class="adm-email" value="${a.email||''}" placeholder="email"><input class="adm-name" value="${a.name||''}" placeholder="jméno"><select class="adm-role"><option value="advisor" ${a.role!=='admin'?'selected':''}>poradce</option><option value="admin" ${a.role==='admin'?'selected':''}>admin</option></select><input class="adm-company" value="${a.company||'ASTORIE a.s.'}" placeholder="společnost"><input class="adm-reg" value="${a.registration||''}" placeholder="registrace"><button class="secondary adm-del">Smazat</button></div>`).join('');
+  $('advisersAdminTable').innerHTML = `<div class="admin-row adviser admin-head"><div>E-mail</div><div>Jméno</div><div>Role</div><div>Společnost</div><div>Status</div><div></div></div>${rows || '<div class="admin-empty">Žádný poradce neodpovídá filtru.</div>'}`;
   $('advisersAdminTable').querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.advisers.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminAdvisers(); });
   $('advisersAdminTable').querySelectorAll('input,select').forEach(el=>el.oninput=collectAdminAdvisers);
+  enhanceAdminDetailButtons();
 }
 function collectAdminAdvisers(){
   const oldByEmail = Object.fromEntries((CATALOG.advisers||[]).map(a=>[a.email,a]));
@@ -597,10 +618,14 @@ function collectAdminAdvisers(){
 }
 function addAdminAdviser(){ collectAdminAdvisers(); CATALOG.advisers.push({email:'novy.poradce@astorie.local', name:'Nový poradce', role:'advisor', company:'ASTORIE a.s.', registration:'samostatný zprostředkovatel', password:'Astorie2026!'}); renderAdminAdvisers(); }
 function renderAdminReqTypes(){
-  const rows = (CATALOG.requirementTypes||[]).map((r,idx)=>`<div class="admin-row reqtype" data-idx="${idx}"><input class="adm-id" value="${r.id||''}" placeholder="id"><input class="adm-name" value="${r.name||''}" placeholder="název"><button class="secondary adm-del">Smazat</button></div>`).join('');
-  $('reqTypesAdminTable').innerHTML = `<div class="admin-row reqtype admin-head"><div>ID</div><div>Název</div><div></div></div>${rows}`;
+  ensureAdminFilters();
+  const search = adminFilterText('adminReqTypeSearch');
+  const list = (CATALOG.requirementTypes||[]).map((r,idx)=>({...r,_idx:idx})).filter(r=>rowMatchesSearch(r,search));
+  const rows = list.map((r)=>`<div class="admin-row reqtype" data-idx="${r._idx}"><input class="adm-id" value="${r.id||''}" placeholder="id"><input class="adm-name" value="${r.name||''}" placeholder="název"><button class="secondary adm-del">Smazat</button></div>`).join('');
+  $('reqTypesAdminTable').innerHTML = `<div class="admin-row reqtype admin-head"><div>ID</div><div>Název</div><div></div></div>${rows || '<div class="admin-empty">Žádný typ neodpovídá filtru.</div>'}`;
   $('reqTypesAdminTable').querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.requirementTypes.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminReqTypes(); });
   $('reqTypesAdminTable').querySelectorAll('input').forEach(el=>el.oninput=collectAdminReqTypes);
+  enhanceAdminDetailButtons();
 }
 function collectAdminReqTypes(){ CATALOG.requirementTypes = Array.from(document.querySelectorAll('#reqTypesAdminTable .admin-row.reqtype:not(.admin-head)')).map(row=>({id:row.querySelector('.adm-id').value.trim() || ('typ_'+Date.now()), name:row.querySelector('.adm-name').value.trim()})); }
 function addAdminReqType(){ collectAdminReqTypes(); CATALOG.requirementTypes.push({id:'novy_'+Date.now(), name:'Nový typ doplňující informace'}); renderAdminReqTypes(); }
@@ -671,6 +696,10 @@ function ensureAdminFilters(){
   if($('adminRiskActivityFilter')) $('adminRiskActivityFilter').innerHTML = activityOptionsHtml($('adminRiskActivityFilter').value||'', true);
   if($('adminRiskModelActivityFilter')) $('adminRiskModelActivityFilter').innerHTML = activityOptionsHtml($('adminRiskModelActivityFilter').value||'', true);
   if($('adminPolicyInsurerFilter')) $('adminPolicyInsurerFilter').innerHTML = '<option value="">Všechny pojišťovny</option>' + (CATALOG.insurers||[]).map(i=>`<option value="${i.id||''}" ${($('adminPolicyInsurerFilter').value||'')===(i.id||'')?'selected':''}>${i.short||''} – ${i.name||''}</option>`).join('');
+  bind('adminInsurerSearch', renderAdminInsurers);
+  bind('adminAdviserSearch', renderAdminAdvisers);
+  bind('adminAdviserRoleFilter', renderAdminAdvisers);
+  bind('adminReqTypeSearch', renderAdminReqTypes);
   bind('adminActivitySearch', renderAdminActivities);
   bind('adminRiskActivityFilter', renderAdminRisks);
   bind('adminRiskSearch', renderAdminRisks);

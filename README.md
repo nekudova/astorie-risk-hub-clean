@@ -1,3 +1,3 @@
-# Centrum obchodních rizik ASTORIE v0.24
+# Centrum obchodních rizik ASTORIE v0.25
 
-Opravy: admin filtry podle činnosti, ukotvené hlavičky, čitelnější detailní editace, automatická lokální záloha a auto-uložení nabídek k poptávce.
+MVP 0.25 – admin redesign, filtry ve všech hlavních admin sekcích, oprava načítání uložených poptávek (formatDateTimeCz), kompaktní tabulky bez vnitřního vertikálního scrollu.
