@@ -254,8 +254,8 @@ function renderOffers(){
   if(!insurers.length){ $('offersList').innerHTML='<div class="empty">Nejdříve vyber pojišťovny v poptávce.</div>'; return; }
   insurers.forEach(i=>{ if(!state.offers[i.id]) state.offers[i.id]={premium:'',deductible:'',valid_until:'',status:'čekáme na nabídku',note:'',coverages:{}}; });
   $('offersList').innerHTML = insurers.map(i=>offerCardHtml(i)).join('');
-  $('offersList').querySelectorAll('input,select,textarea').forEach(el=>el.oninput=()=>{ collectOffers(true); renderComparison(); });
-  $('offersList').querySelectorAll('.money-input').forEach(el=>el.onblur=()=>{ normaliseMoneyInput(el); collectOffers(true); renderComparison(); });
+  $('offersList').querySelectorAll('input,select,textarea').forEach(el=>el.oninput=()=>{ collectOffers(true); renderComparison(); scheduleOfferAutosave(); });
+  $('offersList').querySelectorAll('.money-input').forEach(el=>el.onblur=()=>{ normaliseMoneyInput(el); collectOffers(true); renderComparison(); scheduleOfferAutosave(); });
 }
 function getPolicyReference(insurerId, riskId){
   return (CATALOG.policyReferences||[]).find(x=>x.insurer_id===insurerId && x.risk_id===riskId) || null;
@@ -548,6 +548,10 @@ async function openInquiry(id, source='db', localKey=''){
 }
 function applyState(s){
   state = {...state, ...s, offers:s.offers||{}};
+  if((!state.offers || !Object.keys(state.offers).length) && state.id){
+    const local = localInquiryBackups().find(x=>String(x.id||'')===String(state.id) && x.offers && Object.keys(x.offers).length);
+    if(local){ state.offers = local.offers; $('saveStatus').textContent='Nabídky byly doplněny z lokální zálohy prohlížeče.'; }
+  }
   $('inquiryId').value = state.id || '';
   fillAdviser();
   $('clientIco').value=state.client?.ico||''; $('clientName').value=state.client?.name||''; $('clientLegal').value=state.client?.legal_form||''; $('clientAddress').value=state.client?.address||''; $('clientDataBox').value=state.client?.data_box||''; $('clientContact').value=state.client?.contact_person||''; $('clientEmail').value=state.client?.contact_email||''; $('clientPhone').value=state.client?.contact_phone||''; $('clientWeb').value=state.client?.website||'';
@@ -569,7 +573,7 @@ function showAdminTab(id){
   $(id).classList.remove('hidden');
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active', t.dataset.adminTab===id));
 }
-function renderAdmin(){ renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
+function renderAdmin(){ ensureAdminFilters(); renderAdminInsurers(); renderAdminAdvisers(); renderAdminActivities(); renderAdminRisks(); renderAdminReqTypes(); renderAdminDictionary(); renderAdminPolicyRefs(); renderRiskModelAdmin(); enhanceAdminDetailButtons(); }
 function renderAdminInsurers(){
   const rows = (CATALOG.insurers||[]).map((i,idx)=>`<div class="admin-row insurer" data-idx="${idx}"><input class="adm-id" value="${i.id||''}" placeholder="id"><input class="adm-name" value="${i.name||''}" placeholder="název pojišťovny"><input class="adm-short" value="${i.short||''}" placeholder="zkratka"><select class="adm-active"><option value="true" ${i.active?'selected':''}>aktivní</option><option value="false" ${!i.active?'selected':''}>neaktivní</option></select><button class="secondary adm-del">Smazat</button></div>`).join('');
   $('insurersAdminTable').innerHTML = `<div class="admin-row insurer admin-head"><div>ID</div><div>Název</div><div>Zkratka</div><div>Stav</div><div></div></div>${rows}`;
@@ -602,7 +606,13 @@ function collectAdminReqTypes(){ CATALOG.requirementTypes = Array.from(document.
 function addAdminReqType(){ collectAdminReqTypes(); CATALOG.requirementTypes.push({id:'novy_'+Date.now(), name:'Nový typ doplňující informace'}); renderAdminReqTypes(); }
 
 function renderRiskModelAdmin(){
-  const rows = (CATALOG.riskModel||[]).map((m,idx)=>`<div class="admin-row riskmodel" data-idx="${idx}">
+  ensureAdminFilters();
+  const activity = $('adminRiskModelActivityFilter')?.value || '';
+  const search = adminFilterText('adminRiskModelSearch');
+  const all = (CATALOG.riskModel||[]).map((m,idx)=>({...m,_idx:idx}));
+  const filtered = all.filter(m=>(!activity || m.activity_code===activity) && rowMatchesSearch(m,search));
+  if($('adminRiskModelCount')) $('adminRiskModelCount').textContent = `Zobrazeno ${filtered.length} z ${all.length} pravidel`;
+  const rows = filtered.map((m)=>`<div class="admin-row riskmodel" data-idx="${m._idx}">
     <input class="rm-act" value="${m.activity_code||''}" placeholder="kód činnosti">
     <input class="rm-risk" value="${m.risk_id||''}" placeholder="id rizika">
     <input class="rm-name" value="${m.risk_name||''}" placeholder="název rizika">
@@ -611,11 +621,12 @@ function renderRiskModelAdmin(){
     <input class="rm-weight" type="number" min="0" max="150" value="${m.weight||50}" placeholder="váha">
     <input class="rm-limit" value="${m.recommended_limit||''}" placeholder="doporučený limit">
     <textarea class="rm-rec" placeholder="text doporučení">${m.recommendation_text||''}</textarea>
-    <button class="secondary adm-del">Smazat</button>
+    <button type="button" class="secondary adm-del">Smazat</button>
   </div>`).join('');
-  $('riskModelAdminTable').innerHTML = `<div class="admin-row riskmodel admin-head"><div>Činnost</div><div>Riziko ID</div><div>Název</div><div>Kritičnost</div><div>Povinnost</div><div>Váha</div><div>Limit</div><div>Doporučení</div><div></div></div>${rows}`;
+  $('riskModelAdminTable').innerHTML = `<div class="admin-row riskmodel admin-head"><div>Činnost</div><div>Riziko ID</div><div>Název</div><div>Kritičnost</div><div>Povinnost</div><div>Váha</div><div>Limit</div><div>Doporučení</div><div></div></div>${rows || '<div class="admin-empty">Žádné pravidlo neodpovídá filtru.</div>'}`;
   $('riskModelAdminTable').querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.riskModel.splice(+btn.closest('.admin-row').dataset.idx,1); renderRiskModelAdmin(); updateAll(); });
   $('riskModelAdminTable').querySelectorAll('input,select,textarea').forEach(el=>el.oninput=collectRiskModelAdmin);
+  enhanceAdminDetailButtons();
 }
 function collectRiskModelAdmin(){
   CATALOG.riskModel = Array.from(document.querySelectorAll('#riskModelAdminTable .admin-row.riskmodel:not(.admin-head)')).map(row=>({
@@ -634,7 +645,8 @@ function collectRiskModelAdmin(){
 }
 function addRiskModelRule(){
   collectRiskModelAdmin();
-  CATALOG.riskModel.push({activity_code:state.activity?.code||'stavba', risk_id:'nove_riziko', risk_name:'Nové riziko', criticality:'střední', obligation:'doporučené', weight:50, recommended_limit:'', evaluation_type:'kombinace', recommendation_text:'', warning_text:'Ověřit v podmínkách.', active:true});
+  const act=$('adminRiskModelActivityFilter')?.value || state.activity?.code || 'stavba';
+  CATALOG.riskModel.push({activity_code:act, risk_id:'nove_riziko', risk_name:'Nové riziko', criticality:'střední', obligation:'doporučené', weight:50, recommended_limit:'', evaluation_type:'kombinace', recommendation_text:'', warning_text:'Ověřit v podmínkách.', active:true});
   renderRiskModelAdmin();
 }
 
@@ -649,19 +661,60 @@ async function saveAdminCatalogs(){
 }
 
 
+function activityOptionsHtml(selected='', includeAll=true){
+  const opts = (CATALOG.activities||[]).map(a=>`<option value="${a.code||''}" ${selected===(a.code||'')?'selected':''}>${a.name||a.code||''}</option>`).join('');
+  return (includeAll?'<option value="">Všechny činnosti</option>':'') + opts;
+}
+function adminFilterText(id){ return ($(id)?.value || '').toLowerCase().trim(); }
+function ensureAdminFilters(){
+  const bind = (id, fn)=>{ const el=$(id); if(el && el.dataset.bound!=='1'){ el.dataset.bound='1'; el.oninput=fn; el.onchange=fn; }};
+  if($('adminRiskActivityFilter')) $('adminRiskActivityFilter').innerHTML = activityOptionsHtml($('adminRiskActivityFilter').value||'', true);
+  if($('adminRiskModelActivityFilter')) $('adminRiskModelActivityFilter').innerHTML = activityOptionsHtml($('adminRiskModelActivityFilter').value||'', true);
+  if($('adminPolicyInsurerFilter')) $('adminPolicyInsurerFilter').innerHTML = '<option value="">Všechny pojišťovny</option>' + (CATALOG.insurers||[]).map(i=>`<option value="${i.id||''}" ${($('adminPolicyInsurerFilter').value||'')===(i.id||'')?'selected':''}>${i.short||''} – ${i.name||''}</option>`).join('');
+  bind('adminActivitySearch', renderAdminActivities);
+  bind('adminRiskActivityFilter', renderAdminRisks);
+  bind('adminRiskSearch', renderAdminRisks);
+  bind('adminRiskModelActivityFilter', renderRiskModelAdmin);
+  bind('adminRiskModelSearch', renderRiskModelAdmin);
+  bind('adminDictionarySearch', renderAdminDictionary);
+  bind('adminPolicyInsurerFilter', renderAdminPolicyRefs);
+  bind('adminPolicySearch', renderAdminPolicyRefs);
+}
+function rowMatchesSearch(obj, search){
+  if(!search) return true;
+  return JSON.stringify(obj||{}).toLowerCase().includes(search);
+}
+function saveCurrentWorkLocally(){
+  try{ collectForm(); collectOffers(true); backupInquiryLocally(state); }catch(e){ console.warn('Lokální záloha se nepodařila', e); }
+}
+let offerAutosaveTimer=null;
+function scheduleOfferAutosave(){
+  saveCurrentWorkLocally();
+  if(!state.id) return;
+  clearTimeout(offerAutosaveTimer);
+  offerAutosaveTimer=setTimeout(async()=>{
+    try{ collectForm(); collectOffers(true); await api('/api/inquiries', {method:'POST', body:JSON.stringify(state)}); $('saveStatus').textContent='Nabídky byly automaticky uloženy.'; }
+    catch(e){ $('saveStatus').textContent='Nabídky jsou v lokální záloze. DB uložení selhalo: '+e.message; }
+  }, 900);
+}
+
 function renderAdminActivities(){
-  const rows = (CATALOG.activities||[]).map((a,idx)=>`<div class="admin-row activity" data-idx="${idx}">
+  ensureAdminFilters();
+  const search = adminFilterText('adminActivitySearch');
+  const base = (CATALOG.activities||[]).map((a,idx)=>({...a,_idx:idx})).filter(a=>rowMatchesSearch(a,search));
+  const rows = base.map((a)=>`<div class="admin-row activity" data-idx="${a._idx}">
     <input class="act-code" value="${a.code||''}" placeholder="kód">
     <input class="act-name" value="${a.name||''}" placeholder="název činnosti">
     <textarea class="act-desc" placeholder="laický popis pro poradce">${a.description||''}</textarea>
     <input class="act-risk" value="${a.risk_level||''}" placeholder="rizikovost">
     <input class="act-limit" value="${a.limit_hint||''}" placeholder="orientační limit">
-    <button class="secondary adm-del">Smazat</button>
+    <button type="button" class="secondary adm-del">Smazat</button>
   </div>`).join('');
   const el=$('activitiesAdminTable'); if(!el) return;
-  el.innerHTML = `<div class="admin-row activity admin-head"><div>Kód</div><div>Název</div><div>Popis</div><div>Rizikovost</div><div>Limit</div><div></div></div>${rows}`;
+  el.innerHTML = `<div class="admin-row activity admin-head"><div>Kód</div><div>Název</div><div>Popis</div><div>Rizikovost</div><div>Limit</div><div></div></div>${rows || '<div class="admin-empty">Žádný záznam neodpovídá filtru.</div>'}`;
   el.querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.activities.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminActivities(); renderCatalogs(); updateAll(); });
   el.querySelectorAll('input,textarea').forEach(x=>x.oninput=collectAdminActivities);
+  enhanceAdminDetailButtons();
 }
 function collectAdminActivities(){
   const el=$('activitiesAdminTable'); if(!el) return;
@@ -686,7 +739,13 @@ function setRisksFromRows(rows){
   CATALOG.risks = grouped;
 }
 function renderAdminRisks(){
-  const rows = allRiskRows().map((r,idx)=>`<div class="admin-row riskdef" data-idx="${idx}">
+  ensureAdminFilters();
+  const activity = $('adminRiskActivityFilter')?.value || '';
+  const search = adminFilterText('adminRiskSearch');
+  const all = allRiskRows().map((r,idx)=>({...r,_idx:idx}));
+  const filtered = all.filter(r=>(!activity || r.activity_code===activity) && rowMatchesSearch(r,search));
+  if($('adminRiskCount')) $('adminRiskCount').textContent = `Zobrazeno ${filtered.length} z ${all.length} rizik`;
+  const rows = filtered.map((r)=>`<div class="admin-row riskdef" data-idx="${r._idx}">
     <input class="risk-act" value="${r.activity_code||''}" placeholder="kód činnosti">
     <input class="risk-id" value="${r.id||''}" placeholder="id rizika">
     <input class="risk-name" value="${r.name||''}" placeholder="název rizika">
@@ -696,12 +755,13 @@ function renderAdminRisks(){
     <textarea class="risk-question" placeholder="otázka pro klienta">${r.question||''}</textarea>
     <textarea class="risk-reason" placeholder="důvod doporučení">${r.reason||''}</textarea>
     <select class="risk-default"><option value="true" ${r.default_on!==false?'selected':''}>předvolit</option><option value="false" ${r.default_on===false?'selected':''}>nepředvolit</option></select>
-    <button class="secondary adm-del">Smazat</button>
+    <button type="button" class="secondary adm-del">Smazat</button>
   </div>`).join('');
   const el=$('risksAdminTable'); if(!el) return;
-  el.innerHTML = `<div class="admin-row riskdef admin-head"><div>Činnost</div><div>ID</div><div>Název</div><div>Priorita</div><div>Popis</div><div>Limit</div><div>Otázka</div><div>Důvod</div><div>Stav</div><div></div></div>${rows}`;
+  el.innerHTML = `<div class="admin-row riskdef admin-head"><div>Činnost</div><div>ID</div><div>Název</div><div>Priorita</div><div>Popis</div><div>Limit</div><div>Otázka</div><div>Důvod</div><div>Stav</div><div></div></div>${rows || '<div class="admin-empty">Žádné riziko neodpovídá filtru.</div>'}`;
   el.querySelectorAll('.adm-del').forEach(btn=>{ btn.onclick=()=>{ const arr=allRiskRows(); arr.splice(+btn.closest('.admin-row').dataset.idx,1); setRisksFromRows(arr); renderAdminRisks(); renderCatalogs(); updateAll(); }; });
   el.querySelectorAll('input,select,textarea').forEach(x=>x.oninput=collectAdminRisks);
+  enhanceAdminDetailButtons();
 }
 function collectAdminRisks(){
   const el=$('risksAdminTable'); if(!el) return;
@@ -718,14 +778,18 @@ function collectAdminRisks(){
   })).filter(r=>r.name || r.id);
   setRisksFromRows(rows);
 }
-function addAdminRisk(){ collectAdminRisks(); const rows=allRiskRows(); rows.push({activity_code:state.activity?.code||'univerzal', id:'nove_riziko_'+Date.now(), name:'Nové riziko', priority:'DOPORUČENÉ', description:'Doplňte vysvětlení pro poradce.', limit:'', question:'Doplňte otázku pro klienta.', reason:'Doplňte důvod doporučení.', default_on:true}); setRisksFromRows(rows); renderAdminRisks(); renderCatalogs(); }
+function addAdminRisk(){ collectAdminRisks(); const rows=allRiskRows(); const act=$('adminRiskActivityFilter')?.value || state.activity?.code || 'univerzal'; rows.push({activity_code:act, id:'nove_riziko_'+Date.now(), name:'Nové riziko', priority:'DOPORUČENÉ', description:'Doplňte vysvětlení pro poradce.', limit:'', question:'Doplňte otázku pro klienta.', reason:'Doplňte důvod doporučení.', default_on:true}); setRisksFromRows(rows); renderAdminRisks(); renderCatalogs(); }
 
 function renderAdminDictionary(){
-  const rows = (CATALOG.coverageDictionary||[]).map((d,idx)=>`<div class="admin-row dictionary" data-idx="${idx}"><input class="dict-risk" value="${d.risk_id||''}" placeholder="risk_id"><input class="dict-standard" value="${d.standard_name||''}" placeholder="jednotný název"><textarea class="dict-aliases" placeholder="alternativní názvy oddělené čárkou">${(d.aliases||[]).join(', ')}</textarea><button class="secondary adm-del">Smazat</button></div>`).join('');
+  ensureAdminFilters();
+  const search = adminFilterText('adminDictionarySearch');
+  const data=(CATALOG.coverageDictionary||[]).map((d,idx)=>({...d,_idx:idx})).filter(d=>rowMatchesSearch(d,search));
+  const rows = data.map((d)=>`<div class="admin-row dictionary" data-idx="${d._idx}"><input class="dict-risk" value="${d.risk_id||''}" placeholder="risk_id"><input class="dict-standard" value="${d.standard_name||''}" placeholder="jednotný název"><textarea class="dict-aliases" placeholder="alternativní názvy oddělené čárkou">${(d.aliases||[]).join(', ')}</textarea><button type="button" class="secondary adm-del">Smazat</button></div>`).join('');
   const el=$('dictionaryAdminTable'); if(!el) return;
-  el.innerHTML = `<div class="admin-row dictionary admin-head"><div>Risk ID</div><div>Název ASTORIE</div><div>Názvy pojišťoven / synonyma</div><div></div></div>${rows}`;
+  el.innerHTML = `<div class="admin-row dictionary admin-head"><div>Risk ID</div><div>Název ASTORIE</div><div>Názvy pojišťoven / synonyma</div><div></div></div>${rows || '<div class="admin-empty">Žádné mapování neodpovídá filtru.</div>'}`;
   el.querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.coverageDictionary.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminDictionary(); });
   el.querySelectorAll('input,textarea').forEach(x=>x.oninput=collectAdminDictionary);
+  enhanceAdminDetailButtons();
 }
 function collectAdminDictionary(){
   const el=$('dictionaryAdminTable'); if(!el) return;
@@ -734,11 +798,16 @@ function collectAdminDictionary(){
 function addAdminDictionary(){ collectAdminDictionary(); CATALOG.coverageDictionary.push({risk_id:'nove_riziko', standard_name:'Nové mapování', aliases:[]}); renderAdminDictionary(); }
 
 function renderAdminPolicyRefs(){
-  const rows = (CATALOG.policyReferences||[]).map((r,idx)=>`<div class="admin-row policyref" data-idx="${idx}"><input class="pr-insurer" value="${r.insurer_id||''}" placeholder="pojišťovna ID"><input class="pr-risk" value="${r.risk_id||''}" placeholder="risk_id"><input class="pr-doc" value="${r.document||''}" placeholder="dokument"><input class="pr-article" value="${r.article||''}" placeholder="článek/odstavec/strana"><textarea class="pr-note" placeholder="poznámka / výklad">${r.note||''}</textarea><input class="pr-url" value="${r.url||''}" placeholder="odkaz"><button class="secondary adm-del">Smazat</button></div>`).join('');
+  ensureAdminFilters();
+  const insurer=$('adminPolicyInsurerFilter')?.value || '';
+  const search=adminFilterText('adminPolicySearch');
+  const data=(CATALOG.policyReferences||[]).map((r,idx)=>({...r,_idx:idx})).filter(r=>(!insurer || r.insurer_id===insurer) && rowMatchesSearch(r,search));
+  const rows = data.map((r)=>`<div class="admin-row policyref" data-idx="${r._idx}"><input class="pr-insurer" value="${r.insurer_id||''}" placeholder="pojišťovna ID"><input class="pr-risk" value="${r.risk_id||''}" placeholder="risk_id"><input class="pr-doc" value="${r.document||''}" placeholder="dokument"><input class="pr-article" value="${r.article||''}" placeholder="článek/odstavec/strana"><textarea class="pr-note" placeholder="poznámka / výklad">${r.note||''}</textarea><input class="pr-url" value="${r.url||''}" placeholder="odkaz"><button type="button" class="secondary adm-del">Smazat</button></div>`).join('');
   const el=$('policyRefsAdminTable'); if(!el) return;
-  el.innerHTML = `<div class="admin-row policyref admin-head"><div>Pojišťovna</div><div>Risk ID</div><div>Dokument</div><div>Článek</div><div>Poznámka</div><div>Odkaz</div><div></div></div>${rows}`;
+  el.innerHTML = `<div class="admin-row policyref admin-head"><div>Pojišťovna</div><div>Risk ID</div><div>Dokument</div><div>Článek</div><div>Poznámka</div><div>Odkaz</div><div></div></div>${rows || '<div class="admin-empty">Žádný zdroj neodpovídá filtru.</div>'}`;
   el.querySelectorAll('.adm-del').forEach(btn=>btn.onclick=()=>{ CATALOG.policyReferences.splice(+btn.closest('.admin-row').dataset.idx,1); renderAdminPolicyRefs(); });
   el.querySelectorAll('input,textarea').forEach(x=>x.oninput=collectAdminPolicyRefs);
+  enhanceAdminDetailButtons();
 }
 function collectAdminPolicyRefs(){
   const el=$('policyRefsAdminTable'); if(!el) return;

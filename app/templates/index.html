@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.23 · uložené nabídky + detailní admin</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.24 · admin filtry + ukládání nabídek</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -308,11 +308,11 @@
           </div>
           <div id="activitiesAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Typy klientů / činnosti</h2><p class="muted">Sem BO doplňuje obory podnikání, které se následně zobrazují poradci ve vstupním dotazníku.</p></div><button id="addActivityAdmin" class="secondary">+ Přidat činnost</button></div>
-            <div class="admin-table activities-table" id="activitiesAdminTable"></div>
+            <div class="admin-workbar"><label>Filtrovat činnosti<input id="adminActivitySearch" placeholder="např. stavba, výroba, doprava"></label><span class="muted">Tip: v tabulce zůstává jen přehled. Dlouhé texty upravujte přes detail.</span></div><div class="admin-table activities-table" id="activitiesAdminTable"></div>
           </div>
           <div id="risksAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Rizika podle činnosti</h2><p class="muted">Tady se buduje hlavní know-how. Každé riziko patří k činnosti, má otázku pro klienta, vysvětlení, limit a důvod doporučení.</p></div><button id="addRiskAdmin" class="secondary">+ Přidat riziko</button></div>
-            <div class="admin-table risks-table" id="risksAdminTable"></div>
+            <div class="admin-workbar"><label>Činnost<select id="adminRiskActivityFilter"></select></label><label>Hledat riziko<input id="adminRiskSearch" placeholder="název, ID, otázka..."></label><span id="adminRiskCount" class="muted"></span></div><div class="admin-table risks-table" id="risksAdminTable"></div>
           </div>
           <div id="requirementsAdmin" class="admin-section hidden">
             <div class="section-head"><h2>Typy doplňujících údajů</h2><button id="addReqTypeAdmin" class="secondary">+ Přidat typ</button></div>
@@ -320,16 +320,16 @@
           </div>
           <div id="dictionaryAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Slovník názvosloví pojišťoven</h2><p class="muted">Mapuje různé názvy pojišťoven na jednotné riziko ASTORIE. Používá se v AI promptu i porovnání.</p></div><button id="addDictionaryAdmin" class="secondary">+ Přidat mapování</button></div>
-            <div class="admin-table dictionary-table" id="dictionaryAdminTable"></div>
+            <div class="admin-workbar"><label>Hledat ve slovníku<input id="adminDictionarySearch" placeholder="risk ID, název, synonymum..."></label></div><div class="admin-table dictionary-table" id="dictionaryAdminTable"></div>
           </div>
           <div id="policyRefsAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>VPP/DPP zdroje a články</h2><p class="muted">Pracovní databáze zdrojů. Postupně sem doplníme dokumenty, články, odstavce a odkazy pro kontrolu krytí.</p></div><button id="addPolicyRefAdmin" class="secondary">+ Přidat zdroj</button></div>
-            <div class="admin-table policyrefs-table" id="policyRefsAdminTable"></div>
+            <div class="admin-workbar"><label>Pojišťovna<select id="adminPolicyInsurerFilter"></select></label><label>Hledat zdroj<input id="adminPolicySearch" placeholder="risk ID, dokument, článek..."></label></div><div class="admin-table policyrefs-table" id="policyRefsAdminTable"></div>
           </div>
           <div id="riskModelAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Rizikový model ASTORIE</h2><p class="muted">BO zde určuje, co je pro daný typ klienta kritické, jakou má riziko váhu a jaké doporučení se má propsat do porovnání a AI promptu.</p></div><button id="addRiskModelAdmin" class="secondary">+ Přidat pravidlo</button></div>
             <div class="admin-note">Doporučení: kritická rizika a vysoké váhy používejte pouze tam, kde je krytí pro danou činnost skutečně zásadní. Hodnoty se použijí v porovnání nabídek.</div>
-            <div class="admin-table riskmodel-table" id="riskModelAdminTable"></div>
+            <div class="admin-workbar"><label>Činnost<select id="adminRiskModelActivityFilter"></select></label><label>Hledat pravidlo<input id="adminRiskModelSearch" placeholder="název, ID rizika..."></label><span id="adminRiskModelCount" class="muted"></span></div><div class="admin-table riskmodel-table" id="riskModelAdminTable"></div>
           </div>
           <div id="importAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Import / export číselníků</h2><p class="muted">Pro rychlé naplnění databáze. Excel si ulož jako CSV nebo z něj zkopíruj tabulku včetně hlaviček. Import se před uložením promítne do adminu, trvale se uloží až tlačítkem „Uložit admin číselníky do DB“.</p></div></div>
