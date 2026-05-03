@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.31 · rozšířený dotazník podle Excelu</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.32 · oprava dynamických polí</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -117,7 +117,7 @@
         </section>
 
         <section class="panel">
-          <h2>3. Vstupní dotazník klienta</h2>
+          <div class="section-head"><div><h2>3. Vstupní dotazník klienta</h2><p>Obecné údaje z poptávky. Když některý údaj chybí, poradce jej může doplnit vlastním řádkem.</p></div><button id="addQuestionnaireExtraRowBtn" class="secondary" type="button">+ Přidat údaj</button></div>
           <div class="grid3">
             <label>Požadovaný počátek pojištění<input id="insuranceStart" type="date"></label>
             <label>Požadovaná pojistná doba
@@ -135,6 +135,7 @@
             </label>
             <label>Vlastní export<input id="exportCustom"></label>
           </div>
+          <div id="questionnaireExtraRows" class="dynamic-list"></div>
         </section>
 
         <section class="panel">
@@ -153,12 +154,12 @@
             <label class="wide">Přílohy / podklady<textarea id="clientAttachments" placeholder="výpis OR, smlouvy, certifikáty, bezpečnostní dokumentace..."></textarea></label>
             <label class="wide">Poznámky ke klientovi<textarea id="clientExtraNotes" placeholder="důležité informace od poradce nebo klienta"></textarea></label>
           </div>
-          <div class="section-head"><h3>Vlastní doplňující údaje</h3><button id="addClientExtraRowBtn" class="secondary">+ Přidat údaj</button></div>
+          <div class="section-head"><h3>Vlastní doplňující údaje</h3><button id="addClientExtraRowBtn" class="secondary" type="button">+ Přidat údaj</button></div>
           <div id="clientExtraRows" class="dynamic-list"></div>
         </section>
 
         <section class="panel">
-          <h2>5. Pojistné nastavení</h2>
+          <div class="section-head"><div><h2>5. Pojistné nastavení</h2><p>Pojistné technické údaje. Poradce může doplnit vlastní údaj, pokud v předvolbě chybí.</p></div><button id="addInsuranceExtraRowBtn" class="secondary" type="button">+ Přidat údaj</button></div>
           <div class="grid3">
             <label>Pojistné období<input id="policyPeriod" placeholder="např. roční"></label>
             <label>Splatnost pojistného<input id="premiumDue" placeholder="např. ročně / pololetně"></label>
@@ -169,20 +170,21 @@
             <label>Retroaktivita<input id="retroactivity" placeholder="např. ne / od data"></label>
             <label>Časová působnost<input id="timeScope" placeholder="např. claims-made / loss occurrence"></label>
           </div>
+          <div id="insuranceExtraRows" class="dynamic-list"></div>
         </section>
 
         <section class="panel">
-          <div class="section-head"><div><h2>6. Další pojištěné osoby</h2><p>Opakovatelný blok podle Excelu – poradce může přidat další osoby.</p></div><button id="addInsuredPersonBtn" class="secondary">+ Přidat osobu</button></div>
+          <div class="section-head"><div><h2>6. Další pojištěné osoby</h2><p>Opakovatelný blok podle Excelu – poradce může přidat další osoby.</p></div><button id="addInsuredPersonBtn" class="secondary" type="button">+ Přidat osobu</button></div>
           <div id="insuredPersonsList" class="dynamic-list"></div>
         </section>
 
         <section class="panel">
-          <div class="section-head"><div><h2>7. Parametry odpovědnosti</h2><p>Pracovní parametry pro poptávku odpovědnosti – limit, sublimit, spoluúčast a poznámka.</p></div><button id="addLiabilityParamBtn" class="secondary">+ Přidat parametr</button></div>
+          <div class="section-head"><div><h2>7. Parametry odpovědnosti</h2><p>Pracovní parametry pro poptávku odpovědnosti – limit, sublimit, spoluúčast a poznámka.</p></div><button id="addLiabilityParamBtn" class="secondary" type="button">+ Přidat parametr</button></div>
           <div id="liabilityParamsList" class="dynamic-list"></div>
         </section>
 
         <section class="panel">
-          <div class="section-head"><div><h2>8. Speciální ujednání</h2><p>Knihovna / pracovní seznam ujednání, která mají jít do poptávky.</p></div><button id="addSpecialClauseBtn" class="secondary">+ Přidat ujednání</button></div>
+          <div class="section-head"><div><h2>8. Speciální ujednání</h2><p>Knihovna / pracovní seznam ujednání, která mají jít do poptávky.</p></div><button id="addSpecialClauseBtn" class="secondary" type="button">+ Přidat ujednání</button></div>
           <div id="specialClausesList" class="dynamic-list"></div>
         </section>
 
