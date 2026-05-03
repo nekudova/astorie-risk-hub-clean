@@ -117,3 +117,17 @@ body{font-size:15px;}
 .workflow-tile{border:1px solid var(--line);background:#f7fbfc;border-radius:18px;padding:12px 14px;font-weight:800;color:var(--p);display:flex;justify-content:space-between;align-items:center;min-height:54px}
 .workflow-tile strong{font-size:24px}
 .workflow-tile.st-draft{background:#f4f7f8}.workflow-tile.st-sent{background:#edf6ff}.workflow-tile.st-offers{background:#fff7e8}.workflow-tile.st-client{background:#ecfff5}.workflow-tile.st-closed{background:#eef2f4}.workflow-tile.st-cancelled{background:#fff0f0}
+
+/* MVP 0.31 – rozšířený dotazník podle poradenského Excelu */
+.grid3 .wide { grid-column: span 3; }
+.dynamic-list { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.dynamic-row { display:grid; grid-template-columns: repeat(5, minmax(120px, 1fr)) auto; gap:10px; align-items:end; padding:12px; border:1px solid var(--border); border-radius:16px; background:#fff; }
+.dynamic-row.two { grid-template-columns: 220px 1fr auto; }
+.dynamic-row.three { grid-template-columns: repeat(3, minmax(140px, 1fr)) auto; }
+.dynamic-row label { margin:0; }
+.dynamic-row textarea { min-height:44px; }
+.dynamic-row .checkline { display:flex; align-items:center; gap:8px; min-height:44px; }
+@media (max-width: 1000px){
+  .dynamic-row, .dynamic-row.two, .dynamic-row.three { grid-template-columns:1fr; }
+  .grid3 .wide { grid-column: span 1; }
+}
