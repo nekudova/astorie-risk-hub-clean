@@ -601,11 +601,43 @@ function addInsuranceExtraRow(row={}){ return makeExtraRow('insuranceExtraRows',
 function addClientExtraRow(row={}){ return makeExtraRow('clientExtraRows','client-extra-row','extraKey','extraValue',row,'addClientExtraRowBtn'); }
 function addInsuredPerson(row={}){
   const wrap=ensureWrap('insuredPersonsList','addInsuredPersonBtn'); if(!wrap) throw new Error('Chybí kontejner pro další pojištěné osoby');
-  const div=document.createElement('div'); div.className='dynamic-row insured-person-row compact-person-row';
-  div.innerHTML=`<label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}"></label><label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}"></label><button type="button" class="secondary ipAresBtn">Načíst z ARES</button><label class="wide">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}"></label><label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}"></label><label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}"></label><button type="button" class="secondary delRow">Smazat</button><div class="ipAresMsg dynamic-hint"></div>`;
-  wrap.appendChild(div); bindDynamicRow(div);
+  const div=document.createElement('div');
+  div.className='insured-person-row insured-person-card';
+  div.innerHTML=`
+    <div class="insured-card-head">
+      <div>
+        <div class="eyebrow small-eyebrow">Další pojištěná osoba</div>
+        <h3>${escAttr(row.name||'Nová osoba')}</h3>
+      </div>
+      <button type="button" class="secondary delRow">Smazat osobu</button>
+    </div>
+    <div class="insured-grid client-like-grid">
+      <label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}" placeholder="např. dceřiná společnost"></label>
+      <label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}" placeholder="IČ nebo RČ"></label>
+      <label>Vztah ke klientovi<select class="ipRelation">
+        <option value="">vyberte / doplňte níže</option>
+        <option>dceřiná společnost</option>
+        <option>mateřská společnost</option>
+        <option>propojená osoba / skupina</option>
+        <option>subdodavatel</option>
+        <option>objednatel / investor</option>
+        <option>zaměstnanec / fyzická osoba</option>
+        <option value="custom">jiný vztah</option>
+      </select></label>
+      <button type="button" class="secondary ipAresBtn">Načíst z ARES</button>
+      <label class="wide">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}" placeholder="adresa / sídlo"></label>
+      <label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}" placeholder="činnost osoby"></label>
+      <label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}" placeholder="např. 10 000 000 Kč"></label>
+      <label class="wide">Poznámka ke vztahu / rozsahu pojištění<input class="ipRelationCustom" value="${escAttr(row.relation_custom||'')}" placeholder="např. společné zakázky, krytí jen pro vybrané činnosti"></label>
+    </div>
+    <div class="ipAresMsg dynamic-hint"></div>`;
+  wrap.appendChild(div);
+  if(row.relation){ div.querySelector('.ipRelation').value=row.relation; }
+  bindDynamicRow(div);
+  const syncTitle=()=>{ div.querySelector('.insured-card-head h3').textContent = div.querySelector('.ipName')?.value || 'Nová osoba'; };
+  div.querySelector('.ipName')?.addEventListener('input', syncTitle);
   const aresBtn=div.querySelector('.ipAresBtn');
-  if(aresBtn) aresBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); loadAresForInsuredRow(div); });
+  if(aresBtn) aresBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); loadAresForInsuredRow(div); syncTitle(); });
   return div;
 }
 function addLiabilityParam(row={}){
@@ -686,7 +718,7 @@ function collectDynamicBlocks(){
     jurisdiction:$('jurisdiction')?.value||'', retroactivity:$('retroactivity')?.value||'', time_scope:$('timeScope')?.value||'',
     extra_rows:Array.from(document.querySelectorAll('.insurance-extra-row')).map(r=>({key:r.querySelector('.ieKey').value,value:r.querySelector('.ieValue').value})).filter(x=>text(x.key)||text(x.value))
   };
-  state.insured_persons = Array.from(document.querySelectorAll('.insured-person-row')).map(r=>({name:r.querySelector('.ipName').value,id_number:r.querySelector('.ipId').value,address:r.querySelector('.ipAddress').value,activity:r.querySelector('.ipActivity').value,turnover:r.querySelector('.ipTurnover').value})).filter(x=>Object.values(x).some(text));
+  state.insured_persons = Array.from(document.querySelectorAll('.insured-person-row')).map(r=>({name:r.querySelector('.ipName')?.value||'',id_number:r.querySelector('.ipId')?.value||'',relation:r.querySelector('.ipRelation')?.value||'',relation_custom:r.querySelector('.ipRelationCustom')?.value||'',address:r.querySelector('.ipAddress')?.value||'',activity:r.querySelector('.ipActivity')?.value||'',turnover:r.querySelector('.ipTurnover')?.value||''})).filter(x=>Object.values(x).some(text));
   state.liability_params = Array.from(document.querySelectorAll('.liability-param-row')).map(r=>({subject:r.querySelector('.lpSubject').value,limit:r.querySelector('.lpLimit').value,sublimit:r.querySelector('.lpSublimit').value,deductible:r.querySelector('.lpDeductible').value,note:r.querySelector('.lpNote').value})).filter(x=>Object.values(x).some(text));
   state.special_clauses = Array.from(document.querySelectorAll('.special-clause-row')).map(r=>({name:r.querySelector('.scName').value,text:r.querySelector('.scText').value,note:r.querySelector('.scNote').value,include:r.querySelector('.scInclude').checked})).filter(x=>text(x.name)||text(x.text)||text(x.note));
 }
@@ -723,7 +755,7 @@ function extendedClientHtml(){
   const extra=(e.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
   const qExtra=(state.questionnaire?.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
   const insExtra=(state.insurance_settings?.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
-  return `<h3>Doplňující informace o klientovi</h3><table><tr><th>Zastupující osoba</th><td>${e.represented_by||''}</td></tr><tr><th>Podepisující osoba</th><td>${e.signer||''}</td></tr><tr><th>Způsob podpisu</th><td>${e.signature_method||''}</td></tr><tr><th>OR / evidence</th><td>${e.commercial_register||''}</td></tr><tr><th>Účetní rok</th><td>${e.fiscal_year_from||''} – ${e.fiscal_year_to||''}</td></tr><tr><th>Hlavní / další činnost</th><td>${e.main_business_activity||''} ${e.additional_business_activities?'<br>'+e.additional_business_activities:''}</td></tr><tr><th>Přílohy</th><td>${formatAttachmentsForReport(e)}</td></tr><tr><th>Poznámky</th><td>${e.notes||''}</td></tr>${extra}</table><h3>Pojistné nastavení</h3><table><tr><th>Pojistné období</th><td>${ins.policy_period||''}</td></tr><tr><th>Splatnost</th><td>${ins.premium_due||''}</td></tr><tr><th>Měna</th><td>${ins.currency||''}</td></tr><tr><th>Inkaso</th><td>${ins.premium_collection||''}</td></tr><tr><th>Účet / poznámka k inkasu</th><td>${[ins.broker_account,ins.broker_payment_note].filter(Boolean).join('<br>')}</td></tr><tr><th>Jurisdikce</th><td>${ins.jurisdiction||''}</td></tr><tr><th>Retroaktivita</th><td>${ins.retroactivity||''}</td></tr><tr><th>Časová působnost</th><td>${ins.time_scope||''}</td></tr>${insExtra}</table>${rowsTable(state.insured_persons,[['Název/osoba','name'],['IČ/RČ','id_number'],['Sídlo','address'],['Činnost','activity'],['Obrat','turnover']])}${rowsTable(state.liability_params,[['Parametr','subject'],['Limit','limit'],['Sublimit','sublimit'],['Spoluúčast','deductible'],['Poznámka','note']])}${rowsTable((state.special_clauses||[]).filter(x=>x.include!==false),[['Ujednání','name'],['Text','text'],['Poznámka','note']])}`;
+  return `<h3>Doplňující informace o klientovi</h3><table><tr><th>Zastupující osoba</th><td>${e.represented_by||''}</td></tr><tr><th>Podepisující osoba</th><td>${e.signer||''}</td></tr><tr><th>Způsob podpisu</th><td>${e.signature_method||''}</td></tr><tr><th>OR / evidence</th><td>${e.commercial_register||''}</td></tr><tr><th>Účetní rok</th><td>${e.fiscal_year_from||''} – ${e.fiscal_year_to||''}</td></tr><tr><th>Hlavní / další činnost</th><td>${e.main_business_activity||''} ${e.additional_business_activities?'<br>'+e.additional_business_activities:''}</td></tr><tr><th>Přílohy</th><td>${formatAttachmentsForReport(e)}</td></tr><tr><th>Poznámky</th><td>${e.notes||''}</td></tr>${extra}</table><h3>Pojistné nastavení</h3><table><tr><th>Pojistné období</th><td>${ins.policy_period||''}</td></tr><tr><th>Splatnost</th><td>${ins.premium_due||''}</td></tr><tr><th>Měna</th><td>${ins.currency||''}</td></tr><tr><th>Inkaso</th><td>${ins.premium_collection||''}</td></tr><tr><th>Účet / poznámka k inkasu</th><td>${[ins.broker_account,ins.broker_payment_note].filter(Boolean).join('<br>')}</td></tr><tr><th>Jurisdikce</th><td>${ins.jurisdiction||''}</td></tr><tr><th>Retroaktivita</th><td>${ins.retroactivity||''}</td></tr><tr><th>Časová působnost</th><td>${ins.time_scope||''}</td></tr>${insExtra}</table>${rowsTable(state.insured_persons,[['Název/osoba','name'],['IČ/RČ','id_number'],['Vztah','relation'],['Vlastní vztah / poznámka','relation_custom'],['Sídlo','address'],['Činnost','activity'],['Obrat','turnover']])}${rowsTable(state.liability_params,[['Parametr','subject'],['Limit','limit'],['Sublimit','sublimit'],['Spoluúčast','deductible'],['Poznámka','note']])}${rowsTable((state.special_clauses||[]).filter(x=>x.include!==false),[['Ujednání','name'],['Text','text'],['Poznámka','note']])}`;
 }
 
 function syncSelectedInsurers(){
