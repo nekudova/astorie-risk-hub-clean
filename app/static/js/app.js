@@ -13,6 +13,7 @@ let currentAdminDetail = null;
 const $ = (id)=>document.getElementById(id);
 const text = (v)=> (v ?? "").toString().trim();
 function safeUpdateAll(){ try { updateAll(); } catch(e) { console.error('ASTORIE update error:', e); } }
+function flashStatus(msg){ const el=$('saveStatus')||$('importStatus'); if(el){ el.textContent=msg; setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 2500); } }
 
 async function api(path, opts={}){
   const r = await fetch(path, {headers:{"Content-Type":"application/json"}, ...opts});
@@ -132,22 +133,31 @@ function bindUI(){
 
 
 document.addEventListener('click', (e)=>{
-  const btn=e.target.closest('button');
-  if(!btn || e.defaultPrevented) return;
-  const map={
-    addQuestionnaireExtraRowBtn:addQuestionnaireExtraRow,
-    addClientExtraRowBtn:addClientExtraRow,
-    addInsuranceExtraRowBtn:addInsuranceExtraRow,
-    addInsuredPersonBtn:addInsuredPerson,
-    addLiabilityParamBtn:addLiabilityParam,
-    addSpecialClauseBtn:addSpecialClause
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const map = {
+    addQuestionnaireExtraRowBtn: addQuestionnaireExtraRow,
+    addClientExtraRowBtn: addClientExtraRow,
+    addInsuranceExtraRowBtn: addInsuranceExtraRow,
+    addInsuredPersonBtn: addInsuredPerson,
+    addLiabilityParamBtn: addLiabilityParam,
+    addSpecialClauseBtn: addSpecialClause
   };
-  if(map[btn.id]){
-    e.preventDefault();
-    map[btn.id]();
+  const fn = map[btn.id];
+  if(!fn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  try {
+    fn();
     safeUpdateAll();
+    const msg = btn.textContent.replace('+','').trim();
+    flashStatus(msg ? (msg + ' přidáno.') : 'Řádek přidán.');
+  } catch(err) {
+    console.error('ASTORIE dynamic button error:', err);
+    alert('Nepodařilo se přidat řádek. Chyba: ' + (err?.message || err));
   }
-});
+}, true);
+
 
 function showView(id){
   collectForm();
@@ -246,41 +256,61 @@ function addRequirement(req={}){
 
 
 
-function makeExtraRow(wrapId, className, keyClass, valueClass, row={}){
-  const wrap=$(wrapId); if(!wrap) return;
+function escAttr(v){ return (v ?? '').toString().replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escTextArea(v){ return (v ?? '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function ensureWrap(wrapId, buttonId){
+  let wrap=$(wrapId);
+  if(!wrap && buttonId && $(buttonId)){
+    wrap=document.createElement('div');
+    wrap.id=wrapId;
+    wrap.className='dynamic-list';
+    $(buttonId).closest('.section-head')?.after(wrap);
+  }
+  return wrap;
+}
+function bindDynamicRow(div){
+  const del=div.querySelector('.delRow');
+  if(del) del.addEventListener('click',(e)=>{ e.preventDefault(); div.remove(); safeUpdateAll(); });
+  div.querySelectorAll('input,textarea,select').forEach(el=>{
+    el.addEventListener('input', safeUpdateAll);
+    el.addEventListener('change', safeUpdateAll);
+  });
+  div.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function makeExtraRow(wrapId, className, keyClass, valueClass, row={}, buttonId){
+  const wrap=ensureWrap(wrapId, buttonId); if(!wrap) throw new Error('Chybí kontejner ' + wrapId);
   const div=document.createElement('div'); div.className='dynamic-row two '+className;
-  div.innerHTML=`<label>Název údaje<input class="${keyClass}" value="${row.key||''}" placeholder="např. další místo pojištění, skladování, certifikace"></label><label>Hodnota / poznámka<textarea class="${valueClass}" placeholder="doplňující údaj">${row.value||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div);
-  div.querySelector('.delRow').onclick=(e)=>{e.preventDefault(); div.remove(); safeUpdateAll();};
-  div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
+  div.innerHTML=`<label>Název údaje<input class="${keyClass}" value="${escAttr(row.key||'')}" placeholder="např. další místo pojištění, skladování, certifikace"></label><label>Hodnota / poznámka<textarea class="${valueClass}" placeholder="doplňující údaj">${escTextArea(row.value||'')}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
+  wrap.appendChild(div); bindDynamicRow(div); return div;
 }
-function addQuestionnaireExtraRow(row={}){ makeExtraRow('questionnaireExtraRows','questionnaire-extra-row','qeKey','qeValue',row); }
-function addInsuranceExtraRow(row={}){ makeExtraRow('insuranceExtraRows','insurance-extra-row','ieKey','ieValue',row); }
-
-function addClientExtraRow(row={}){
-  const wrap=$('clientExtraRows'); if(!wrap) return;
-  const div=document.createElement('div'); div.className='dynamic-row two client-extra-row';
-  div.innerHTML=`<label>Název údaje<input class="extraKey" value="${row.key||''}" placeholder="např. certifikace, skladování"></label><label>Hodnota / poznámka<textarea class="extraValue" placeholder="doplňující údaj">${row.value||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
-}
+function addQuestionnaireExtraRow(row={}){ return makeExtraRow('questionnaireExtraRows','questionnaire-extra-row','qeKey','qeValue',row,'addQuestionnaireExtraRowBtn'); }
+function addInsuranceExtraRow(row={}){ return makeExtraRow('insuranceExtraRows','insurance-extra-row','ieKey','ieValue',row,'addInsuranceExtraRowBtn'); }
+function addClientExtraRow(row={}){ return makeExtraRow('clientExtraRows','client-extra-row','extraKey','extraValue',row,'addClientExtraRowBtn'); }
 function addInsuredPerson(row={}){
-  const wrap=$('insuredPersonsList'); if(!wrap) return;
+  const wrap=ensureWrap('insuredPersonsList','addInsuredPersonBtn'); if(!wrap) throw new Error('Chybí kontejner pro další pojištěné osoby');
   const div=document.createElement('div'); div.className='dynamic-row insured-person-row';
-  div.innerHTML=`<label>Název / osoba<input class="ipName" value="${row.name||''}"></label><label>IČ / RČ<input class="ipId" value="${row.id_number||''}"></label><label>Sídlo / adresa<input class="ipAddress" value="${row.address||''}"></label><label>Činnost<input class="ipActivity" value="${row.activity||''}"></label><label>Obrat<input class="ipTurnover" value="${row.turnover||''}"></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
+  div.innerHTML=`<label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}"></label><label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}"></label><label>Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}"></label><label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}"></label><label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}"></label><button type="button" class="secondary delRow">Smazat</button>`;
+  wrap.appendChild(div); bindDynamicRow(div); return div;
 }
 function addLiabilityParam(row={}){
-  const wrap=$('liabilityParamsList'); if(!wrap) return;
+  const wrap=ensureWrap('liabilityParamsList','addLiabilityParamBtn'); if(!wrap) throw new Error('Chybí kontejner pro parametry odpovědnosti');
   const div=document.createElement('div'); div.className='dynamic-row liability-param-row';
-  div.innerHTML=`<label>Předmět / parametr<input class="lpSubject" value="${row.subject||''}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${row.limit||''}"></label><label>Sublimit<input class="lpSublimit" value="${row.sublimit||''}"></label><label>Spoluúčast<input class="lpDeductible" value="${row.deductible||''}"></label><label>Poznámka<textarea class="lpNote">${row.note||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
+  div.innerHTML=`<label>Předmět / parametr<input class="lpSubject" value="${escAttr(row.subject||'')}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label>Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
+  wrap.appendChild(div); bindDynamicRow(div); return div;
 }
 function addSpecialClause(row={}){
-  const wrap=$('specialClausesList'); if(!wrap) return;
+  const wrap=ensureWrap('specialClausesList','addSpecialClauseBtn'); if(!wrap) throw new Error('Chybí kontejner pro speciální ujednání');
   const div=document.createElement('div'); div.className='dynamic-row special-clause-row';
-  div.innerHTML=`<label>Název<input class="scName" value="${row.name||''}"></label><label>Text ujednání<textarea class="scText">${row.text||''}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${row.note||''}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include===false?'':'checked'}> zahrnout do poptávky</label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
+  div.innerHTML=`<label>Název<input class="scName" value="${escAttr(row.name||'')}"></label><label>Text ujednání<textarea class="scText">${escTextArea(row.text||'')}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${escTextArea(row.note||'')}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include===false?'':'checked'}> zahrnout do poptávky</label><button type="button" class="secondary delRow">Smazat</button>`;
+  wrap.appendChild(div); bindDynamicRow(div); return div;
 }
+window.addQuestionnaireExtraRow=addQuestionnaireExtraRow;
+window.addInsuranceExtraRow=addInsuranceExtraRow;
+window.addClientExtraRow=addClientExtraRow;
+window.addInsuredPerson=addInsuredPerson;
+window.addLiabilityParam=addLiabilityParam;
+window.addSpecialClause=addSpecialClause;
+
 function collectDynamicBlocks(){
   state.extended_client = {
     represented_by:$('clientRepresentedBy')?.value||'', signer:$('clientSigner')?.value||'',

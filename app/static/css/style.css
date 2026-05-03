@@ -136,3 +136,19 @@ body{font-size:15px;}
 .label-title{font-weight:900;margin-bottom:8px;color:var(--p)}
 .preset-box .checkline{display:inline-flex;align-items:center;gap:8px;margin:4px 14px 8px 0;font-weight:800}
 .preset-box textarea{margin-top:8px}
+
+
+/* MVP 0.35 – stabilní dynamická pole + profesionálnější přílohy */
+.dynamic-list{display:flex;flex-direction:column;gap:12px;margin-top:14px;width:100%;}
+.dynamic-row{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr)) auto;gap:10px;align-items:end;border:1px solid var(--border);background:#f8fcfd;border-radius:18px;padding:14px;box-shadow:0 8px 24px rgba(0,61,76,.05);}
+.dynamic-row.two{grid-template-columns:minmax(220px,.7fr) minmax(320px,1.3fr) auto;}
+.dynamic-row label{margin:0;}
+.dynamic-row textarea{min-height:52px;resize:vertical;}
+.dynamic-row .delRow{align-self:end;min-width:92px;}
+.attachment-card{border:1px solid var(--border);background:#f8fcfd;border-radius:20px;padding:16px;}
+.attachment-head{display:flex;justify-content:space-between;gap:16px;margin-bottom:12px;}
+.attachment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:10px 0 14px;}
+.attachment-pill{display:flex!important;align-items:center;gap:10px;border:1px solid var(--border);background:white;border-radius:16px;padding:12px 14px;font-weight:800;color:var(--p);min-height:50px;}
+.attachment-pill input{width:18px;height:18px;accent-color:var(--o);}
+.small{font-size:13px;margin:.25rem 0 0;}
+@media(max-width:900px){.dynamic-row,.dynamic-row.two{grid-template-columns:1fr}.dynamic-row .delRow{width:100%;}}
