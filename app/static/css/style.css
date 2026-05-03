@@ -272,3 +272,80 @@ body{font-size:15px;}
 .insured-person-card .ipAresMsg{margin-top:12px;color:var(--mut);font-size:14px;font-weight:800;}
 @media(max-width:1000px){.insured-client-grid{grid-template-columns:1fr 1fr}.insured-client-grid .span2{grid-column:1 / -1;}}
 @media(max-width:720px){.insured-client-grid{grid-template-columns:1fr}.professional-card-head{flex-direction:column}.professional-card-head .delRow{width:100%;}}
+
+/* MVP 0.41 – finální vizuál Další pojištěné osoby jako sekce Klient */
+#insuredPersonsList.dynamic-list{
+  margin-top:18px!important;
+  display:grid!important;
+  gap:20px!important;
+}
+.insured-person-card.enterprise-person-card{
+  border:1px solid var(--line)!important;
+  background:#fff!important;
+  border-radius:var(--r)!important;
+  padding:26px!important;
+  box-shadow:var(--shadow)!important;
+  margin-top:0!important;
+}
+.insured-person-card .professional-card-head{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-start!important;
+  gap:20px!important;
+  padding-bottom:16px!important;
+  margin-bottom:18px!important;
+  border-bottom:1px solid var(--line)!important;
+}
+.insured-person-card .professional-card-head h3{
+  font-size:24px!important;
+  line-height:1.15!important;
+  margin:4px 0 0!important;
+  color:var(--p)!important;
+}
+.insured-person-card .card-label{
+  color:var(--o)!important;
+  text-transform:uppercase!important;
+  letter-spacing:3px!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+.insured-client-grid.real-client-grid{
+  display:grid!important;
+  grid-template-columns:1fr 1fr 1fr!important;
+  gap:18px 20px!important;
+  align-items:end!important;
+}
+.insured-client-grid.real-client-grid label{
+  display:block!important;
+  margin:0!important;
+  font-weight:800!important;
+  color:var(--text)!important;
+}
+.insured-client-grid.real-client-grid input,
+.insured-client-grid.real-client-grid select{
+  min-height:48px!important;
+  margin-top:8px!important;
+  width:100%!important;
+}
+.insured-client-grid.real-client-grid .ares-inline-btn{
+  min-height:48px!important;
+  width:100%!important;
+  margin-top:24px!important;
+  white-space:nowrap!important;
+}
+.insured-client-grid.real-client-grid .span2{grid-column:span 2!important;}
+.insured-person-card .ipAresMsg{
+  margin-top:12px!important;
+  color:var(--mut)!important;
+  font-size:14px!important;
+  font-weight:800!important;
+}
+@media(max-width:1000px){
+  .insured-client-grid.real-client-grid{grid-template-columns:1fr 1fr!important;}
+  .insured-client-grid.real-client-grid .span2{grid-column:1 / -1!important;}
+}
+@media(max-width:720px){
+  .insured-client-grid.real-client-grid{grid-template-columns:1fr!important;}
+  .insured-person-card .professional-card-head{flex-direction:column!important;}
+  .insured-person-card .professional-card-head .delRow{width:100%!important;}
+}

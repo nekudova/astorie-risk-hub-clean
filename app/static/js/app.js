@@ -606,15 +606,15 @@ function addInsuredPerson(row={}){
   div.innerHTML=`
     <div class="insured-card-head professional-card-head">
       <div>
-        <div class="card-label">Pojištěná osoba / subjekt</div>
-        <h3>${escAttr(row.name||'Nová pojištěná osoba')}</h3>
+        <div class="card-label">Subjekt zahrnutý do pojištění</div>
+        <h3>${escAttr(row.name||'Nová osoba / subjekt')}</h3>
       </div>
-      <button type="button" class="secondary delRow">Smazat osobu</button>
+      <button type="button" class="secondary delRow">Smazat</button>
     </div>
-    <div class="insured-grid insured-client-grid">
-      <label>Identifikační číslo / rodné číslo<input class="ipId" value="${escAttr(row.id_number||'')}" placeholder="IČO nebo RČ"></label>
-      <button type="button" class="secondary ipAresBtn align-end">Načíst z ARES</button>
-      <label>Název / jméno osoby<input class="ipName" value="${escAttr(row.name||'')}" placeholder="název společnosti nebo jméno osoby"></label>
+    <div class="insured-client-grid real-client-grid">
+      <label>Název / jméno osoby<input class="ipName" value="${escAttr(row.name||'')}" placeholder="Název společnosti nebo jméno osoby"></label>
+      <label>Identifikační číslo / rodné číslo<input class="ipId" value="${escAttr(row.id_number||'')}" placeholder="IČO nebo rodné číslo"></label>
+      <button type="button" class="secondary ipAresBtn ares-inline-btn">Načíst z ARES</button>
 
       <label>Vztah ke klientovi<select class="ipRelation">
         <option value="">Vyberte vztah</option>
@@ -626,20 +626,35 @@ function addInsuredPerson(row={}){
         <option>zaměstnanec / fyzická osoba</option>
         <option value="custom">jiný vztah</option>
       </select></label>
-      <label>Roční obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}" placeholder="roční obrat v Kč"></label>
-      <label>Předmět činnosti<input class="ipActivity" value="${escAttr(row.activity||'')}" placeholder="hlavní činnost osoby/subjektu"></label>
+      <label>Roční obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}" placeholder="Roční obrat v Kč"></label>
+      <label>Předmět činnosti<input class="ipActivity" value="${escAttr(row.activity||'')}" placeholder="Hlavní činnost osoby nebo subjektu"></label>
 
-      <label class="span2">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}" placeholder="sídlo nebo kontaktní adresa"></label>
-      <label>Poznámka k rozsahu pojištění<input class="ipRelationCustom" value="${escAttr(row.relation_custom||'')}" placeholder="upřesnění vztahu nebo rozsahu krytí"></label>
+      <label class="span2">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}" placeholder="Sídlo nebo kontaktní adresa"></label>
+      <label>Upřesnění vztahu / rozsahu pojištění<input class="ipRelationCustom" value="${escAttr(row.relation_custom||'')}" placeholder="Poznámka k rozsahu krytí nebo vztahu ke klientovi"></label>
     </div>
     <div class="ipAresMsg dynamic-hint"></div>`;
   wrap.appendChild(div);
   if(row.relation){ div.querySelector('.ipRelation').value=row.relation; }
   bindDynamicRow(div);
-  const syncTitle=()=>{ div.querySelector('.insured-card-head h3').textContent = div.querySelector('.ipName')?.value || 'Nová pojištěná osoba'; };
+  const syncTitle=()=>{ div.querySelector('.insured-card-head h3').textContent = div.querySelector('.ipName')?.value || 'Nová osoba / subjekt'; };
   div.querySelector('.ipName')?.addEventListener('input', syncTitle);
-  const aresBtn=div.querySelector('.ipAresBtn');
-  if(aresBtn) aresBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); loadAresForInsuredRow(div); syncTitle(); });
+  div.querySelector('.ipAresBtn')?.addEventListener('click', async(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const id=(div.querySelector('.ipId')?.value||'').replace(/\D/g,'');
+    const msg=div.querySelector('.ipAresMsg');
+    if(!id){ if(msg) msg.textContent='Zadejte identifikační číslo subjektu.'; return; }
+    if(msg) msg.textContent='Načítám údaje z ARES...';
+    try{
+      const res=await fetch('/api/ares/'+encodeURIComponent(id));
+      const data=await res.json();
+      if(!res.ok || !data.ok) throw new Error(data.detail||'ARES údaje se nepodařilo načíst.');
+      if(data.name) div.querySelector('.ipName').value=data.name;
+      if(data.address) div.querySelector('.ipAddress').value=data.address;
+      syncTitle();
+      if(msg) msg.textContent='Údaje z ARES byly načteny. Zkontrolujte je a doplňte chybějící informace.';
+      safeUpdateAll();
+    }catch(err){ if(msg) msg.textContent='ARES se nepodařilo načíst: '+err.message; }
+  });
   return div;
 }
 function addLiabilityParam(row={}){
