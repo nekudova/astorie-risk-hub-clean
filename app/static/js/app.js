@@ -12,6 +12,7 @@ let currentAdminDetail = null;
 
 const $ = (id)=>document.getElementById(id);
 const text = (v)=> (v ?? "").toString().trim();
+function safeUpdateAll(){ try { updateAll(); } catch(e) { console.error('ASTORIE update error:', e); } }
 
 async function api(path, opts={}){
   const r = await fetch(path, {headers:{"Content-Type":"application/json"}, ...opts});
@@ -68,12 +69,12 @@ function bindUI(){
   $('activitySelect').onchange = ()=>selectActivity($('activitySelect').value);
   $('addRiskBtn').onclick = addCustomRisk;
   $('addRequirementBtn').onclick = ()=>addRequirement();
-  if($('addClientExtraRowBtn')) $('addClientExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addClientExtraRow(); updateAll(); };
-  if($('addQuestionnaireExtraRowBtn')) $('addQuestionnaireExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addQuestionnaireExtraRow(); updateAll(); };
-  if($('addInsuranceExtraRowBtn')) $('addInsuranceExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addInsuranceExtraRow(); updateAll(); };
-  if($('addInsuredPersonBtn')) $('addInsuredPersonBtn').onclick = (e)=>{ e.preventDefault(); addInsuredPerson(); updateAll(); };
-  if($('addLiabilityParamBtn')) $('addLiabilityParamBtn').onclick = (e)=>{ e.preventDefault(); addLiabilityParam(); updateAll(); };
-  if($('addSpecialClauseBtn')) $('addSpecialClauseBtn').onclick = (e)=>{ e.preventDefault(); addSpecialClause(); updateAll(); };
+  if($('addClientExtraRowBtn')) $('addClientExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addClientExtraRow(); safeUpdateAll(); };
+  if($('addQuestionnaireExtraRowBtn')) $('addQuestionnaireExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addQuestionnaireExtraRow(); safeUpdateAll(); };
+  if($('addInsuranceExtraRowBtn')) $('addInsuranceExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addInsuranceExtraRow(); safeUpdateAll(); };
+  if($('addInsuredPersonBtn')) $('addInsuredPersonBtn').onclick = (e)=>{ e.preventDefault(); addInsuredPerson(); safeUpdateAll(); };
+  if($('addLiabilityParamBtn')) $('addLiabilityParamBtn').onclick = (e)=>{ e.preventDefault(); addLiabilityParam(); safeUpdateAll(); };
+  if($('addSpecialClauseBtn')) $('addSpecialClauseBtn').onclick = (e)=>{ e.preventDefault(); addSpecialClause(); safeUpdateAll(); };
   $('saveInquiryBtn').onclick = saveInquiry;
   $('loadListBtn').onclick = loadInquiries;
   if($('changeInquiryBtn')) $('changeInquiryBtn').onclick = loadInquiries;
@@ -125,7 +126,7 @@ function bindUI(){
   if($('saveSuggestionBtn')) $('saveSuggestionBtn').onclick = saveSuggestion;
   if($('loadSuggestionsBtn')) $('loadSuggestionsBtn').onclick = loadSuggestions;
   document.querySelectorAll('input[name=advisorMode]').forEach(r=>r.onchange=renderGuide);
-  ['insuranceStart','insurancePeriodSelect','insurancePeriodCustom','turnover','employees','territorySelect','territoryCustom','exportSelect','exportCustom','clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','adviserName','adviserEmail','adviserCompany','adviserRegistration','clientRepresentedBy','clientSigner','signatureMethod','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','currency','premiumCollection','premiumCollectionCustom','jurisdiction','retroactivity','timeScope'].forEach(id=>{ if($(id)) $(id).addEventListener('input', updateAll); });
+  ['insuranceStart','insurancePeriodSelect','insurancePeriodCustom','turnover','employees','territorySelect','territoryCustom','exportSelect','exportCustom','clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','adviserName','adviserEmail','adviserCompany','adviserRegistration','clientRepresentedBy','clientSigner','signatureMethod','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','currency','premiumCollection','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope','attOrExtract','attAstoriePower','attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).addEventListener('input', updateAll); if($(id)) $(id).addEventListener('change', updateAll); });
   ['turnover'].forEach(id=>$(id).addEventListener('blur', e=>{ normaliseMoneyInput(e.target); updateAll(); }));
 }
 
@@ -144,7 +145,7 @@ document.addEventListener('click', (e)=>{
   if(map[btn.id]){
     e.preventDefault();
     map[btn.id]();
-    updateAll();
+    safeUpdateAll();
   }
 });
 
@@ -176,9 +177,9 @@ function resetInquiry(confirmIt){
   const user = state.adviser;
   state = { id:null, adviser:user, client:{}, questionnaire:{}, activity:null, extended_client:{}, insurance_settings:{}, insured_persons:[], liability_params:[], special_clauses:[], risks:[], selected_insurers:[], additional_requirements:[], offers:{}, ai_imports:[], title:"", status:"rozpracováno", comparison_strategy:"bezpecnost", report:{advisor_note:"", client_selected_offer:"", client_choice_reason:""} };
   $('inquiryId').value = '';
-  ['clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','insuranceStart','insurancePeriodCustom','turnover','employees','territoryCustom','exportCustom','clientRepresentedBy','clientSigner','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','premiumCollectionCustom','jurisdiction','retroactivity','timeScope'].forEach(id=>{ if($(id)) $(id).value=''; });
+  ['clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','insuranceStart','insurancePeriodCustom','turnover','employees','territoryCustom','exportCustom','clientRepresentedBy','clientSigner','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope'].forEach(id=>{ if($(id)) $(id).value=''; });
   $('insurancePeriodSelect').value='1 rok'; $('territorySelect').value='Česká republika'; $('exportSelect').value='Ne';
-  if($('signatureMethod')) $('signatureMethod').value='elektronicky'; if($('currency')) $('currency').value='CZK'; if($('premiumCollection')) $('premiumCollection').value='Ne';
+  if($('signatureMethod')) $('signatureMethod').value='elektronicky'; if($('currency')) $('currency').value='CZK'; if($('premiumCollection')) $('premiumCollection').value='Ne'; ['attOrExtract','attAstoriePower'].forEach(id=>{ if($(id)) $(id).checked=true; }); ['attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).checked=false; });
   ['clientExtraRows','insuredPersonsList','liabilityParamsList','specialClausesList'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
   $('insurersList').querySelectorAll('input').forEach(cb=>cb.checked=false);
   $('requirementsList').innerHTML='';
@@ -238,8 +239,8 @@ function addRequirement(req={}){
   div.innerHTML = `<label>Typ<select class="reqType">${types}</select></label><label>Text požadavku<input class="reqText" value="${req.text||''}" placeholder="např. požadavek na vyloučení konkrétní výluky"></label><label>Propisovat<select class="reqOutput"><option value="all">všude</option><option value="insurer">jen pojišťovně</option><option value="client">jen klientovi</option><option value="zzj">jen ZZJ</option></select></label><button class="secondary reqDel">Smazat</button>`;
   $('requirementsList').appendChild(div);
   if(req.output) div.querySelector('.reqOutput').value=req.output;
-  div.querySelector('.reqDel').onclick=()=>{div.remove(); updateAll();};
-  div.querySelectorAll('input,select').forEach(el=>el.oninput=updateAll);
+  div.querySelector('.reqDel').onclick=()=>{div.remove(); safeUpdateAll();};
+  div.querySelectorAll('input,select').forEach(el=>el.oninput=safeUpdateAll);
   updateAll();
 }
 
@@ -250,8 +251,8 @@ function makeExtraRow(wrapId, className, keyClass, valueClass, row={}){
   const div=document.createElement('div'); div.className='dynamic-row two '+className;
   div.innerHTML=`<label>Název údaje<input class="${keyClass}" value="${row.key||''}" placeholder="např. další místo pojištění, skladování, certifikace"></label><label>Hodnota / poznámka<textarea class="${valueClass}" placeholder="doplňující údaj">${row.value||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
   wrap.appendChild(div);
-  div.querySelector('.delRow').onclick=(e)=>{e.preventDefault(); div.remove(); updateAll();};
-  div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=updateAll);
+  div.querySelector('.delRow').onclick=(e)=>{e.preventDefault(); div.remove(); safeUpdateAll();};
+  div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
 }
 function addQuestionnaireExtraRow(row={}){ makeExtraRow('questionnaireExtraRows','questionnaire-extra-row','qeKey','qeValue',row); }
 function addInsuranceExtraRow(row={}){ makeExtraRow('insuranceExtraRows','insurance-extra-row','ieKey','ieValue',row); }
@@ -260,25 +261,25 @@ function addClientExtraRow(row={}){
   const wrap=$('clientExtraRows'); if(!wrap) return;
   const div=document.createElement('div'); div.className='dynamic-row two client-extra-row';
   div.innerHTML=`<label>Název údaje<input class="extraKey" value="${row.key||''}" placeholder="např. certifikace, skladování"></label><label>Hodnota / poznámka<textarea class="extraValue" placeholder="doplňující údaj">${row.value||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); updateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=updateAll);
+  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
 }
 function addInsuredPerson(row={}){
   const wrap=$('insuredPersonsList'); if(!wrap) return;
   const div=document.createElement('div'); div.className='dynamic-row insured-person-row';
   div.innerHTML=`<label>Název / osoba<input class="ipName" value="${row.name||''}"></label><label>IČ / RČ<input class="ipId" value="${row.id_number||''}"></label><label>Sídlo / adresa<input class="ipAddress" value="${row.address||''}"></label><label>Činnost<input class="ipActivity" value="${row.activity||''}"></label><label>Obrat<input class="ipTurnover" value="${row.turnover||''}"></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); updateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=updateAll);
+  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
 }
 function addLiabilityParam(row={}){
   const wrap=$('liabilityParamsList'); if(!wrap) return;
   const div=document.createElement('div'); div.className='dynamic-row liability-param-row';
   div.innerHTML=`<label>Předmět / parametr<input class="lpSubject" value="${row.subject||''}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${row.limit||''}"></label><label>Sublimit<input class="lpSublimit" value="${row.sublimit||''}"></label><label>Spoluúčast<input class="lpDeductible" value="${row.deductible||''}"></label><label>Poznámka<textarea class="lpNote">${row.note||''}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); updateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=updateAll);
+  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
 }
 function addSpecialClause(row={}){
   const wrap=$('specialClausesList'); if(!wrap) return;
   const div=document.createElement('div'); div.className='dynamic-row special-clause-row';
   div.innerHTML=`<label>Název<input class="scName" value="${row.name||''}"></label><label>Text ujednání<textarea class="scText">${row.text||''}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${row.note||''}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include===false?'':'checked'}> zahrnout do poptávky</label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); updateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=updateAll);
+  wrap.appendChild(div); div.querySelector('.delRow').onclick=()=>{div.remove(); safeUpdateAll();}; div.querySelectorAll('input,textarea,select').forEach(el=>el.oninput=safeUpdateAll);
 }
 function collectDynamicBlocks(){
   state.extended_client = {
@@ -286,12 +287,13 @@ function collectDynamicBlocks(){
     signature_method:($('signatureMethod')?.value==='custom' ? $('signatureMethodCustom')?.value : $('signatureMethod')?.value)||'',
     commercial_register:$('commercialRegister')?.value||'', fiscal_year_from:$('fiscalYearFrom')?.value||'', fiscal_year_to:$('fiscalYearTo')?.value||'',
     main_business_activity:$('mainBusinessActivity')?.value||'', additional_business_activities:$('additionalBusinessActivities')?.value||'',
-    attachments:$('clientAttachments')?.value||'', notes:$('clientExtraNotes')?.value||'',
+    attachments:$('clientAttachments')?.value||'', attachment_presets:{or_extract:!!$('attOrExtract')?.checked, astorie_power:!!$('attAstoriePower')?.checked, insurance_docs:!!$('attInsuranceDocs')?.checked, claims_history:!!$('attClaimsHistory')?.checked, contracts:!!$('attContracts')?.checked}, notes:$('clientExtraNotes')?.value||'',
     extra_rows:Array.from(document.querySelectorAll('.client-extra-row')).map(r=>({key:r.querySelector('.extraKey').value,value:r.querySelector('.extraValue').value})).filter(x=>text(x.key)||text(x.value))
   };
   state.insurance_settings = {
     policy_period:$('policyPeriod')?.value||'', premium_due:$('premiumDue')?.value||'', currency:$('currency')?.value||'CZK',
     premium_collection:($('premiumCollection')?.value==='custom' ? $('premiumCollectionCustom')?.value : $('premiumCollection')?.value)||'',
+    broker_account:$('brokerAccount')?.value||'', broker_payment_note:$('brokerPaymentNote')?.value||'',
     jurisdiction:$('jurisdiction')?.value||'', retroactivity:$('retroactivity')?.value||'', time_scope:$('timeScope')?.value||'',
     extra_rows:Array.from(document.querySelectorAll('.insurance-extra-row')).map(r=>({key:r.querySelector('.ieKey').value,value:r.querySelector('.ieValue').value})).filter(x=>text(x.key)||text(x.value))
   };
@@ -301,8 +303,8 @@ function collectDynamicBlocks(){
 }
 function renderDynamicBlocksFromState(){
   if(!$('clientExtraRows')) return;
-  $('clientRepresentedBy').value=state.extended_client?.represented_by||''; $('clientSigner').value=state.extended_client?.signer||''; setSelectOrCustom('signatureMethod','signatureMethodCustom',state.extended_client?.signature_method||'elektronicky'); $('commercialRegister').value=state.extended_client?.commercial_register||''; $('fiscalYearFrom').value=state.extended_client?.fiscal_year_from||''; $('fiscalYearTo').value=state.extended_client?.fiscal_year_to||''; $('mainBusinessActivity').value=state.extended_client?.main_business_activity||''; $('additionalBusinessActivities').value=state.extended_client?.additional_business_activities||''; $('clientAttachments').value=state.extended_client?.attachments||''; $('clientExtraNotes').value=state.extended_client?.notes||'';
-  $('policyPeriod').value=state.insurance_settings?.policy_period||''; $('premiumDue').value=state.insurance_settings?.premium_due||''; $('currency').value=state.insurance_settings?.currency||'CZK'; setSelectOrCustom('premiumCollection','premiumCollectionCustom',state.insurance_settings?.premium_collection||'Ne'); $('jurisdiction').value=state.insurance_settings?.jurisdiction||''; $('retroactivity').value=state.insurance_settings?.retroactivity||''; $('timeScope').value=state.insurance_settings?.time_scope||'';
+  $('clientRepresentedBy').value=state.extended_client?.represented_by||''; $('clientSigner').value=state.extended_client?.signer||''; setSelectOrCustom('signatureMethod','signatureMethodCustom',state.extended_client?.signature_method||'elektronicky'); $('commercialRegister').value=state.extended_client?.commercial_register||''; $('fiscalYearFrom').value=state.extended_client?.fiscal_year_from||''; $('fiscalYearTo').value=state.extended_client?.fiscal_year_to||''; $('mainBusinessActivity').value=state.extended_client?.main_business_activity||''; $('additionalBusinessActivities').value=state.extended_client?.additional_business_activities||''; $('clientAttachments').value=state.extended_client?.attachments||''; $('clientExtraNotes').value=state.extended_client?.notes||''; const ap=state.extended_client?.attachment_presets||{}; if($('attOrExtract')) $('attOrExtract').checked = ap.or_extract !== false; if($('attAstoriePower')) $('attAstoriePower').checked = ap.astorie_power !== false; if($('attInsuranceDocs')) $('attInsuranceDocs').checked=!!ap.insurance_docs; if($('attClaimsHistory')) $('attClaimsHistory').checked=!!ap.claims_history; if($('attContracts')) $('attContracts').checked=!!ap.contracts;
+  $('policyPeriod').value=state.insurance_settings?.policy_period||''; $('premiumDue').value=state.insurance_settings?.premium_due||''; $('currency').value=state.insurance_settings?.currency||'CZK'; setSelectOrCustom('premiumCollection','premiumCollectionCustom',state.insurance_settings?.premium_collection||'Ne'); if($('brokerAccount')) $('brokerAccount').value=state.insurance_settings?.broker_account||''; if($('brokerPaymentNote')) $('brokerPaymentNote').value=state.insurance_settings?.broker_payment_note||''; $('jurisdiction').value=state.insurance_settings?.jurisdiction||''; $('retroactivity').value=state.insurance_settings?.retroactivity||''; $('timeScope').value=state.insurance_settings?.time_scope||'';
   if($('questionnaireExtraRows')) { $('questionnaireExtraRows').innerHTML=''; (state.questionnaire?.extra_rows||[]).forEach(addQuestionnaireExtraRow); }
   if($('insuranceExtraRows')) { $('insuranceExtraRows').innerHTML=''; (state.insurance_settings?.extra_rows||[]).forEach(addInsuranceExtraRow); }
   $('clientExtraRows').innerHTML=''; (state.extended_client?.extra_rows||[]).forEach(addClientExtraRow);
@@ -310,6 +312,19 @@ function renderDynamicBlocksFromState(){
   $('liabilityParamsList').innerHTML=''; (state.liability_params||[]).forEach(addLiabilityParam);
   $('specialClausesList').innerHTML=''; (state.special_clauses||[]).forEach(addSpecialClause);
 }
+
+function formatAttachmentsForReport(e){
+  const ap=e?.attachment_presets||{};
+  const arr=[];
+  if(ap.or_extract!==false) arr.push('Výpis z OR / evidence');
+  if(ap.astorie_power!==false) arr.push('Plná moc ASTORIE');
+  if(ap.insurance_docs) arr.push('Dosavadní pojistné smlouvy / pojistky');
+  if(ap.claims_history) arr.push('Škodní průběh');
+  if(ap.contracts) arr.push('Smlouvy / obchodní podmínky klienta');
+  if(e?.attachments) arr.push(e.attachments);
+  return arr.join('<br>');
+}
+
 function rowsTable(rows, cols){
   if(!rows || !rows.length) return '';
   return `<table><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td>${r[c[1]]||''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
@@ -319,7 +334,7 @@ function extendedClientHtml(){
   const extra=(e.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
   const qExtra=(state.questionnaire?.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
   const insExtra=(state.insurance_settings?.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
-  return `<h3>Doplňující informace o klientovi</h3><table><tr><th>Zastupující osoba</th><td>${e.represented_by||''}</td></tr><tr><th>Podepisující osoba</th><td>${e.signer||''}</td></tr><tr><th>Způsob podpisu</th><td>${e.signature_method||''}</td></tr><tr><th>OR / evidence</th><td>${e.commercial_register||''}</td></tr><tr><th>Účetní rok</th><td>${e.fiscal_year_from||''} – ${e.fiscal_year_to||''}</td></tr><tr><th>Hlavní / další činnost</th><td>${e.main_business_activity||''} ${e.additional_business_activities?'<br>'+e.additional_business_activities:''}</td></tr><tr><th>Přílohy</th><td>${e.attachments||''}</td></tr><tr><th>Poznámky</th><td>${e.notes||''}</td></tr>${extra}</table><h3>Pojistné nastavení</h3><table><tr><th>Pojistné období</th><td>${ins.policy_period||''}</td></tr><tr><th>Splatnost</th><td>${ins.premium_due||''}</td></tr><tr><th>Měna</th><td>${ins.currency||''}</td></tr><tr><th>Inkaso</th><td>${ins.premium_collection||''}</td></tr><tr><th>Jurisdikce</th><td>${ins.jurisdiction||''}</td></tr><tr><th>Retroaktivita</th><td>${ins.retroactivity||''}</td></tr><tr><th>Časová působnost</th><td>${ins.time_scope||''}</td></tr>${insExtra}</table>${rowsTable(state.insured_persons,[['Název/osoba','name'],['IČ/RČ','id_number'],['Sídlo','address'],['Činnost','activity'],['Obrat','turnover']])}${rowsTable(state.liability_params,[['Parametr','subject'],['Limit','limit'],['Sublimit','sublimit'],['Spoluúčast','deductible'],['Poznámka','note']])}${rowsTable((state.special_clauses||[]).filter(x=>x.include!==false),[['Ujednání','name'],['Text','text'],['Poznámka','note']])}`;
+  return `<h3>Doplňující informace o klientovi</h3><table><tr><th>Zastupující osoba</th><td>${e.represented_by||''}</td></tr><tr><th>Podepisující osoba</th><td>${e.signer||''}</td></tr><tr><th>Způsob podpisu</th><td>${e.signature_method||''}</td></tr><tr><th>OR / evidence</th><td>${e.commercial_register||''}</td></tr><tr><th>Účetní rok</th><td>${e.fiscal_year_from||''} – ${e.fiscal_year_to||''}</td></tr><tr><th>Hlavní / další činnost</th><td>${e.main_business_activity||''} ${e.additional_business_activities?'<br>'+e.additional_business_activities:''}</td></tr><tr><th>Přílohy</th><td>${formatAttachmentsForReport(e)}</td></tr><tr><th>Poznámky</th><td>${e.notes||''}</td></tr>${extra}</table><h3>Pojistné nastavení</h3><table><tr><th>Pojistné období</th><td>${ins.policy_period||''}</td></tr><tr><th>Splatnost</th><td>${ins.premium_due||''}</td></tr><tr><th>Měna</th><td>${ins.currency||''}</td></tr><tr><th>Inkaso</th><td>${ins.premium_collection||''}</td></tr><tr><th>Účet / poznámka k inkasu</th><td>${[ins.broker_account,ins.broker_payment_note].filter(Boolean).join('<br>')}</td></tr><tr><th>Jurisdikce</th><td>${ins.jurisdiction||''}</td></tr><tr><th>Retroaktivita</th><td>${ins.retroactivity||''}</td></tr><tr><th>Časová působnost</th><td>${ins.time_scope||''}</td></tr>${insExtra}</table>${rowsTable(state.insured_persons,[['Název/osoba','name'],['IČ/RČ','id_number'],['Sídlo','address'],['Činnost','activity'],['Obrat','turnover']])}${rowsTable(state.liability_params,[['Parametr','subject'],['Limit','limit'],['Sublimit','sublimit'],['Spoluúčast','deductible'],['Poznámka','note']])}${rowsTable((state.special_clauses||[]).filter(x=>x.include!==false),[['Ujednání','name'],['Text','text'],['Poznámka','note']])}`;
 }
 
 function syncSelectedInsurers(){
@@ -345,7 +360,14 @@ function activeRisks(){ return (state.risks||[]).filter(r=>r.enabled); }
 function selectedInsurers(){ return (state.selected_insurers||[]).map(id=>(CATALOG.insurers||[]).find(i=>i.id===id)).filter(Boolean); }
 
 function updateAll(){
-  updateActiveInquiryBanner(); collectForm(); updateDocs(); renderComparison(); if(document.getElementById('guideView') && !document.getElementById('guideView').classList.contains('hidden')) renderGuide(); }
+  updateActiveInquiryBanner();
+  collectForm();
+  try { updateDocs(); } catch(e) { console.error('Chyba aktualizace dokumentů:', e); }
+  try { renderComparison(); } catch(e) { console.error('Chyba aktualizace porovnání:', e); }
+  if(document.getElementById('guideView') && !document.getElementById('guideView').classList.contains('hidden')) {
+    try { renderGuide(); } catch(e) { console.error('Chyba průvodce:', e); }
+  }
+}
 function showTab(id){
   document.querySelectorAll('.doc-view').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
@@ -362,6 +384,7 @@ function risksTable(){
 function updateDocs(){
   collectForm();
   const insurers = selectedInsurers().map(i=>`${i.short||''} – ${i.name||''}`).join(', ') || 'Zatím nevybráno';
+  const qExtra = (state.questionnaire?.extra_rows||[]).map(x=>`<tr><th>${x.key||''}</th><td>${x.value||''}</td></tr>`).join('');
   const clientBlock = `<table><tr><th>Klient</th><td>${state.client.name||''}</td></tr><tr><th>IČO</th><td>${state.client.ico||''}</td></tr><tr><th>Sídlo</th><td>${state.client.address||''}</td></tr><tr><th>Kontakt</th><td>${state.client.contact_person||''} ${state.client.contact_email||''} ${state.client.contact_phone||''}</td></tr><tr><th>Činnost</th><td>${state.activity?.name||''}</td></tr><tr><th>Obrat / zaměstnanci</th><td>${state.questionnaire.turnover||''} / ${state.questionnaire.employees||''}</td></tr><tr><th>Územní rozsah</th><td>${state.questionnaire.territory||''}; export: ${state.questionnaire.export_info||''}</td></tr><tr><th>Pojistná doba</th><td>${state.questionnaire.insurance_period||''}; počátek: ${state.questionnaire.insurance_start||''}</td></tr>${qExtra}<tr><th>Oslovené pojišťovny</th><td>${insurers}</td></tr></table>`;
   const extBlock = extendedClientHtml();
   $('insurerDoc').innerHTML = `<h2>Poptávka pro pojišťovny</h2><p class="muted">Tento výstup je určený pro zaslání vybraným pojišťovnám. Obsahuje jednotné názvosloví ASTORIE, aby bylo možné nabídky následně porovnat.</p>${clientBlock}${extBlock}<h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Proč jej řešíme</th><th>Orientační limit</th></tr></thead><tbody>${risksTable()}</tbody></table><h3>Doplňující požadavky pro pojišťovnu</h3><table><thead><tr><th>Typ</th><th>Požadavek / poznámka</th></tr></thead><tbody>${renderReqRows('insurer')}</tbody></table>`;
@@ -1387,3 +1410,13 @@ async function loadSuggestions(){
     $('suggestionsList').innerHTML = items.length ? items.map(s=>`<div class="suggestion-card"><div class="meta">${s.type||''} · ${s.priority||''} · ${s.area||''}</div><h3>${s.title||''}</h3><p>${s.detail||''}</p><p class="muted">${s.actor_email||''} · ${s.created_at||''}</p></div>`).join('') : '<p class="muted">Zatím nejsou uložené žádné náměty.</p>';
   }catch(e){ $('suggestionsList').innerHTML='Chyba: '+e.message; }
 }
+
+
+// Fallback pro dynamická tlačítka – aby fungovala i při změně pořadí načítání skriptů.
+window.addQuestionnaireExtraRow = addQuestionnaireExtraRow;
+window.addClientExtraRow = addClientExtraRow;
+window.addInsuranceExtraRow = addInsuranceExtraRow;
+window.addInsuredPerson = addInsuredPerson;
+window.addLiabilityParam = addLiabilityParam;
+window.addSpecialClause = addSpecialClause;
+window.safeUpdateAll = safeUpdateAll;

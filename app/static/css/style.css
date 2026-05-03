@@ -131,3 +131,8 @@ body{font-size:15px;}
   .dynamic-row, .dynamic-row.two, .dynamic-row.three { grid-template-columns:1fr; }
   .grid3 .wide { grid-column: span 1; }
 }
+
+.preset-box{border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:#fbfdfe}
+.label-title{font-weight:900;margin-bottom:8px;color:var(--p)}
+.preset-box .checkline{display:inline-flex;align-items:center;gap:8px;margin:4px 14px 8px 0;font-weight:800}
+.preset-box textarea{margin-top:8px}
