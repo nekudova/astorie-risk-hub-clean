@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="0.28")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="0.30")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -429,6 +429,9 @@ def list_inquiries():
         # Zajistí doplnění sloupců i u databáze vytvořené starší verzí aplikace.
         init_db()
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # DŮLEŽITÉ: počet nabídek nepočítáme SQL funkcemi jsonb_object_length.
+            # Na některých PostgreSQL/typových kombinacích na Renderu tato funkce padá.
+            # Proto načteme payload a bezpečně dopočítáme počty v Pythonu.
             cur.execute(
                 """
                 SELECT
@@ -443,18 +446,8 @@ def list_inquiries():
                     i.updated_at,
                     COALESCE(c.ico, i.full_payload->'client'->>'ico', '') AS ico,
                     COALESCE(c.name, i.full_payload->'client'->>'name', '') AS client_name,
-                    CASE
-                        WHEN jsonb_typeof(COALESCE(i.full_payload->'offers', '{}'::jsonb)) = 'object'
-                            THEN jsonb_object_length(COALESCE(i.full_payload->'offers', '{}'::jsonb))
-                        WHEN jsonb_typeof(COALESCE(i.full_payload->'offers', '[]'::jsonb)) = 'array'
-                            THEN jsonb_array_length(COALESCE(i.full_payload->'offers', '[]'::jsonb))
-                        ELSE 0
-                    END AS offer_count,
-                    CASE
-                        WHEN jsonb_typeof(COALESCE(i.selected_insurers, '[]'::jsonb)) = 'array'
-                            THEN jsonb_array_length(COALESCE(i.selected_insurers, '[]'::jsonb))
-                        ELSE 0
-                    END AS selected_insurer_count,
+                    i.selected_insurers,
+                    i.full_payload,
                     COALESCE(i.full_payload->'report'->>'client_selected_offer', '') AS client_selected_offer
                 FROM inquiries i
                 LEFT JOIN clients c ON c.id = i.client_id
@@ -463,11 +456,46 @@ def list_inquiries():
                 """
             )
             rows = cur.fetchall()
+            items = []
             for r in rows:
+                payload = r.get("full_payload") or {}
+                if isinstance(payload, str):
+                    try:
+                        payload = json.loads(payload)
+                    except Exception:
+                        payload = {}
+                if not isinstance(payload, dict):
+                    payload = {}
+
+                offers = payload.get("offers") or {}
+                if isinstance(offers, dict):
+                    offer_count = len(offers)
+                elif isinstance(offers, list):
+                    offer_count = len(offers)
+                else:
+                    offer_count = 0
+
+                selected = r.get("selected_insurers")
+                if isinstance(selected, str):
+                    try:
+                        selected = json.loads(selected)
+                    except Exception:
+                        selected = []
+                if isinstance(selected, list):
+                    selected_count = len(selected)
+                else:
+                    selected_count = 0
+
+                item = dict(r)
+                item.pop("full_payload", None)
+                item.pop("selected_insurers", None)
+                item["offer_count"] = offer_count
+                item["selected_insurer_count"] = selected_count
                 for k in ("created_at", "updated_at"):
-                    if r.get(k):
-                        r[k] = r[k].isoformat()
-            return {"ok": True, "db": True, "items": rows}
+                    if item.get(k):
+                        item[k] = item[k].isoformat()
+                items.append(item)
+            return {"ok": True, "db": True, "items": items}
     except Exception as exc:
         print(f"List inquiries failed: {exc}")
         raise HTTPException(status_code=500, detail=f"Nepodařilo se načíst poptávky: {exc}")
