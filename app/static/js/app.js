@@ -602,20 +602,22 @@ function addClientExtraRow(row={}){ return makeExtraRow('clientExtraRows','clien
 function addInsuredPerson(row={}){
   const wrap=ensureWrap('insuredPersonsList','addInsuredPersonBtn'); if(!wrap) throw new Error('Chybí kontejner pro další pojištěné osoby');
   const div=document.createElement('div');
-  div.className='insured-person-row insured-person-card';
+  div.className='insured-person-row insured-person-card enterprise-person-card';
   div.innerHTML=`
-    <div class="insured-card-head">
+    <div class="insured-card-head professional-card-head">
       <div>
-        <div class="eyebrow small-eyebrow">Další pojištěná osoba</div>
-        <h3>${escAttr(row.name||'Nová osoba')}</h3>
+        <div class="card-label">Pojištěná osoba / subjekt</div>
+        <h3>${escAttr(row.name||'Nová pojištěná osoba')}</h3>
       </div>
       <button type="button" class="secondary delRow">Smazat osobu</button>
     </div>
-    <div class="insured-grid client-like-grid">
-      <label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}" placeholder="např. dceřiná společnost"></label>
-      <label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}" placeholder="IČ nebo RČ"></label>
+    <div class="insured-grid insured-client-grid">
+      <label>Identifikační číslo / rodné číslo<input class="ipId" value="${escAttr(row.id_number||'')}" placeholder="IČO nebo RČ"></label>
+      <button type="button" class="secondary ipAresBtn align-end">Načíst z ARES</button>
+      <label>Název / jméno osoby<input class="ipName" value="${escAttr(row.name||'')}" placeholder="název společnosti nebo jméno osoby"></label>
+
       <label>Vztah ke klientovi<select class="ipRelation">
-        <option value="">vyberte / doplňte níže</option>
+        <option value="">Vyberte vztah</option>
         <option>dceřiná společnost</option>
         <option>mateřská společnost</option>
         <option>propojená osoba / skupina</option>
@@ -624,17 +626,17 @@ function addInsuredPerson(row={}){
         <option>zaměstnanec / fyzická osoba</option>
         <option value="custom">jiný vztah</option>
       </select></label>
-      <button type="button" class="secondary ipAresBtn">Načíst z ARES</button>
-      <label class="wide">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}" placeholder="adresa / sídlo"></label>
-      <label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}" placeholder="činnost osoby"></label>
-      <label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}" placeholder="např. 10 000 000 Kč"></label>
-      <label class="wide">Poznámka ke vztahu / rozsahu pojištění<input class="ipRelationCustom" value="${escAttr(row.relation_custom||'')}" placeholder="např. společné zakázky, krytí jen pro vybrané činnosti"></label>
+      <label>Roční obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}" placeholder="roční obrat v Kč"></label>
+      <label>Předmět činnosti<input class="ipActivity" value="${escAttr(row.activity||'')}" placeholder="hlavní činnost osoby/subjektu"></label>
+
+      <label class="span2">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}" placeholder="sídlo nebo kontaktní adresa"></label>
+      <label>Poznámka k rozsahu pojištění<input class="ipRelationCustom" value="${escAttr(row.relation_custom||'')}" placeholder="upřesnění vztahu nebo rozsahu krytí"></label>
     </div>
     <div class="ipAresMsg dynamic-hint"></div>`;
   wrap.appendChild(div);
   if(row.relation){ div.querySelector('.ipRelation').value=row.relation; }
   bindDynamicRow(div);
-  const syncTitle=()=>{ div.querySelector('.insured-card-head h3').textContent = div.querySelector('.ipName')?.value || 'Nová osoba'; };
+  const syncTitle=()=>{ div.querySelector('.insured-card-head h3').textContent = div.querySelector('.ipName')?.value || 'Nová pojištěná osoba'; };
   div.querySelector('.ipName')?.addEventListener('input', syncTitle);
   const aresBtn=div.querySelector('.ipAresBtn');
   if(aresBtn) aresBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); loadAresForInsuredRow(div); syncTitle(); });

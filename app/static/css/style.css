@@ -168,7 +168,7 @@ body{font-size:15px;}
 .dynamic-row .delRow{align-self:end;}
 @media(max-width:900px){.attachment-professional-grid,.dynamic-row,.dynamic-row.two{grid-template-columns:1fr;}}
 
-/* MVP 0.39 – další pojištěné osoby jako karta ve stylu klienta */
+/* MVP 0.40 – další pojištěné osoby ve stylu klienta */
 .dynamic-row.insured-person-row.compact-person-row {
   grid-template-columns: minmax(180px,1.2fr) 130px 135px minmax(260px,1.8fr) minmax(160px,1fr) minmax(120px,.8fr) 90px;
   align-items: end;
@@ -195,7 +195,7 @@ body{font-size:15px;}
 }
 
 
-/* MVP 0.39 – profesionální karta další pojištěné osoby */
+/* MVP 0.40 – profesionální karta další pojištěné osoby */
 .dynamic-list#insuredPersonsList { gap: 18px; }
 .insured-person-card{
   border:1px solid var(--border);
@@ -237,3 +237,38 @@ body{font-size:15px;}
   .insured-card-head{flex-direction:column;}
   .insured-card-head .delRow{width:100%;}
 }
+
+
+/* MVP 0.40 – skutečný klientský grid pro další pojištěné osoby */
+#insuredPersonsList.dynamic-list{margin-top:18px;display:grid;gap:18px;}
+.insured-person-card.enterprise-person-card{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:var(--r);
+  padding:26px;
+  box-shadow:var(--shadow);
+}
+.professional-card-head{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+  padding-bottom:16px;
+  margin-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.professional-card-head h3{font-size:26px;margin:4px 0 0;color:var(--p);}
+.card-label{color:var(--o);text-transform:uppercase;letter-spacing:3px;font-size:13px;font-weight:900;}
+.insured-client-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:18px;
+  align-items:end;
+}
+.insured-client-grid label{display:block;font-weight:800;color:var(--text);margin:0;}
+.insured-client-grid input,.insured-client-grid select{min-height:48px;margin-top:8px;}
+.insured-client-grid .ipAresBtn{min-height:48px;width:100%;}
+.insured-client-grid .span2{grid-column:span 2;}
+.insured-person-card .ipAresMsg{margin-top:12px;color:var(--mut);font-size:14px;font-weight:800;}
+@media(max-width:1000px){.insured-client-grid{grid-template-columns:1fr 1fr}.insured-client-grid .span2{grid-column:1 / -1;}}
+@media(max-width:720px){.insured-client-grid{grid-template-columns:1fr}.professional-card-head{flex-direction:column}.professional-card-head .delRow{width:100%;}}
