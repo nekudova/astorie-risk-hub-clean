@@ -1,3 +1,3 @@
-# Centrum obchodních rizik ASTORIE v0.27
+# Centrum obchodních rizik ASTORIE v0.29
 
-Oprava načítání přehledu poptávek při starších datech v DB + workflow evidence.
+MVP 0.29 – PDF zpráva klientovi: titulní strana s logem ASTORIE, klientská tisková verze bez interních upozornění.

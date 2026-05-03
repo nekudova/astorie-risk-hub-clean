@@ -107,6 +107,7 @@ function bindUI(){
   if($('recalcComparisonBtn')) $('recalcComparisonBtn').onclick = renderComparison;
   if($('generateReportBtn')) $('generateReportBtn').onclick = renderClientReport;
   if($('copyReportBtn')) $('copyReportBtn').onclick = copyClientReport;
+  if($('printClientPdfBtn')) $('printClientPdfBtn').onclick = printClientPdfReport;
   if($('advisorReportNote')) $('advisorReportNote').addEventListener('input', ()=>{ state.report=state.report||{}; state.report.advisor_note=$('advisorReportNote').value; });
   if($('clientSelectedOffer')) $('clientSelectedOffer').addEventListener('input', ()=>{ state.report=state.report||{}; state.report.client_selected_offer=$('clientSelectedOffer').value; });
   if($('clientChoiceReason')) $('clientChoiceReason').addEventListener('input', ()=>{ state.report=state.report||{}; state.report.client_choice_reason=$('clientChoiceReason').value; });
@@ -503,6 +504,58 @@ function renderClientReport(){
     ${isClientMode ? '<div class="client-note"><b>Poznámka:</b> Finální varianta bude zvolena po projednání rozsahu krytí, limitů, spoluúčastí a pojistného s klientem.</div>' : '<div class="legal-note"><b>Interní upozornění:</b> Výstup aplikace je analytická pomůcka. Nenahrazuje odborné posouzení poradcem, kontrolu pojistných podmínek ani záznam z jednání. Finální doporučení klientovi musí vycházet z jeho požadavků, cílů a potřeb.</div>'}
   `;
 }
+
+function escapeHtmlPdf(v){
+  return String(v ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+function formatDateForPdf(){
+  try { return new Date().toLocaleDateString('cs-CZ', {day:'2-digit', month:'2-digit', year:'numeric'}); } catch(e){ return ''; }
+}
+function buildPdfTitlePage(){
+  const client = state.client || {};
+  const activity = state.activity || {};
+  const adviser = state.adviser || {};
+  const inquiryId = state.id ? ('#' + state.id) : 'rozpracovaná poptávka';
+  return `
+    <section class="pdf-cover">
+      <div class="pdf-cover-top">
+        <div class="pdf-cover-brand-mark">ASTORIE</div>
+        <img class="pdf-cover-logo" src="${location.origin}/static/logo_astorie.png" alt="ASTORIE">
+      </div>
+      <div class="pdf-cover-main">
+        <div class="pdf-kicker">Klientský výstup</div>
+        <h1>Návrh a porovnání pojištění</h1>
+        <p class="pdf-subtitle">Přehled nabídek připravený na základě poptávky klienta.</p>
+        <div class="pdf-meta-grid">
+          <div><span>Klient</span><strong>${escapeHtmlPdf(client.name || '—')}</strong></div>
+          <div><span>Činnost</span><strong>${escapeHtmlPdf(activity.name || '—')}</strong></div>
+          <div><span>ID poptávky</span><strong>${escapeHtmlPdf(inquiryId)}</strong></div>
+          <div><span>Datum zpracování</span><strong>${formatDateForPdf()}</strong></div>
+          <div><span>Poradce</span><strong>${escapeHtmlPdf(adviser.name || '—')}</strong></div>
+          <div><span>Společnost</span><strong>ASTORIE a.s.</strong></div>
+        </div>
+      </div>
+      <div class="pdf-cover-footer">
+        Tento dokument je určen jako podklad pro projednání návrhu pojištění s klientem. Finální rozsah pojištění je vždy sjednáván podle potřeb, požadavků a rozhodnutí klienta.
+      </div>
+    </section>`;
+}
+function printClientPdfReport(){
+  const oldMode = $('reportMode') ? $('reportMode').value : null;
+  if($('reportMode')) $('reportMode').value = 'client';
+  renderClientReport();
+  const reportHtml = $('clientReportDoc')?.innerHTML || '<p>Zpráva zatím není vygenerována.</p>';
+  if($('reportMode') && oldMode) $('reportMode').value = oldMode;
+  const win = window.open('', '_blank');
+  if(!win){ alert('Prohlížeč zablokoval otevření tiskového okna. Povolte vyskakovací okna pro tuto aplikaci.'); return; }
+  const html = `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>ASTORIE – PDF zpráva klientovi</title>
+  <style>
+    @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+    *{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif;color:#003D4C;margin:0;background:white;font-size:12.5px;line-height:1.45} table{width:100%;border-collapse:collapse;margin:10px 0 18px} th,td{border:1px solid #d8e8eb;padding:7px 8px;text-align:left;vertical-align:top} th{background:#edf6f7;color:#003D4C} h1,h2,h3{color:#003D4C;margin:16px 0 8px} h1{font-size:28px} h2{font-size:22px} h3{font-size:15px}.muted{color:#55717a}.cov,.workflow-badge{border-radius:999px;padding:3px 7px;background:#eef6f7;display:inline-block}.splněno{background:#d9f5e3;color:#116b36}.nesplněno,.výluka{background:#fde2e1;color:#9a1d16}.částečně{background:#fff2c7;color:#775600}.client-note{border-left:4px solid #FC4C02;background:#fff7f0;padding:10px 12px;margin-top:10px}.pdf-cover{min-height:267mm;position:relative;padding:4mm 2mm;color:#003D4C;page-break-after:always}.pdf-cover-top{display:flex;justify-content:space-between;align-items:flex-start}.pdf-cover-brand-mark{font-size:12px;letter-spacing:4px;color:#FC4C02;font-weight:800;text-transform:uppercase}.pdf-cover-logo{height:58px;object-fit:contain}.pdf-cover-main{margin-top:45mm;border-top:7px solid #FC4C02;padding-top:22mm}.pdf-kicker{text-transform:uppercase;letter-spacing:3px;color:#FC4C02;font-weight:900;font-size:13px}.pdf-cover h1{font-size:38px;line-height:1.08;margin:10px 0 14px;color:#003D4C;max-width:150mm}.pdf-subtitle{font-size:17px;color:#55717a;margin-bottom:22mm}.pdf-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;max-width:170mm}.pdf-meta-grid div{border:1px solid #d8e8eb;border-radius:10px;padding:10px 12px}.pdf-meta-grid span{display:block;color:#55717a;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}.pdf-meta-grid strong{font-size:15px;color:#003D4C}.pdf-cover-footer{position:absolute;left:2mm;right:2mm;bottom:8mm;border-top:1px solid #d8e8eb;padding-top:8mm;color:#55717a;font-size:12px}.pdf-report{padding-top:0}.pdf-report-header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #003D4C;padding-bottom:8px;margin-bottom:14px}.pdf-report-header img{height:34px}.pdf-report-title{font-weight:900;color:#003D4C}.legal-note{display:none!important}@media print{button{display:none!important}.pdf-cover{page-break-after:always}.pdf-report{page-break-before:auto}}
+  </style></head><body>${buildPdfTitlePage()}<section class="pdf-report"><div class="pdf-report-header"><div class="pdf-report-title">Srovnávací zpráva k nabídkám pojištění</div><img src="${location.origin}/static/logo_astorie.png" alt="ASTORIE"></div>${reportHtml}</section><script>window.onload=function(){setTimeout(function(){window.print();},300);};</script></body></html>`;
+  win.document.open(); win.document.write(html); win.document.close();
+}
+
 function copyClientReport(){
   renderClientReport();
   const t = $('clientReportDoc')?.innerText || '';
