@@ -10,6 +10,331 @@ let currentRiskIndex = null;
 let currentUser = null;
 let currentAdminDetail = null;
 
+const DEFAULT_LIABILITY_PARAMS = [
+  {
+    "subject": "Obecná (provozní) odpovědnosti za újmu  (škodu)",
+    "limit": "1 000 000 Kč",
+    "sublimit": "společný limit na smlouvě pro odpovědnost z činnosti, odp. za výrobek a stažení výrobku z trhu",
+    "deductible": "10 000 Kč",
+    "note": "2 x ročně"
+  },
+  {
+    "subject": "Pojištění odpovědnosti za újmu (škodu) způsobenou vadou výrobku a vadou práce po předání",
+    "limit": "1 000 000 Kč",
+    "sublimit": "sublimit z celkového limitu",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Následná finanční škoda - včetně škod způsobených vadou výrobku a vadou práce po předání",
+    "limit": "1 000 000 Kč",
+    "sublimit": "sublimit z celkového limitu",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Čisté finanční škody - včetně škod způsobených vadou výrobku a vadou práce po předání",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Nemajetková újma neoprávněným zásahem do práva na ochranu osobnosti (psychická újma)",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Škoda na užívané nemovitostti",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Cizí věci převzaté a Majetková újma v souvislostí s vykonávanou objednanou činností",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Cizí věci užívané movité",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - zaměstnanci",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - třetí osoby",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Znečištění životního prostředí",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Regres pojišťovny POV v případě, že řidič pojištěného požil aplkohol, nebo se odmítl podrobit dechové zkoušce, nebo odjel z místa nehody",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Odpojednost za škody způsobené při nakládce a vykládce",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Odpovědnost za škodu na věci odložené a vnesené",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Odpovědnost obchodní korporace za újmu členům statutárních orgánů v souvislosti s výkonem jejich funkce",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Odpovědnosti členů statutárních orgánů za jinou než čistou finanční škodu způsobenou organizaci",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Škody na věcech zaměstnanců",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Křížová odpovědnost mezi spolupojištěnými",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Odpovědnost za škodu způsobenou majetkově propojené osobě",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Škoda způsobená vadně vyrobeným strojem pjištěného",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Náhrada smluvní pokuty  do výše skutečné škody",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Pokuty a penále",
+    "limit": "",
+    "sublimit": "",
+    "deductible": "",
+    "note": ""
+  },
+  {
+    "subject": "Čistá finanční škoda v souvislostí s poskytnutím rady",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Újma způsobená motorovými vozidly nad rámec POV",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle",
+    "limit": "500 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1 x ročně"
+  },
+  {
+    "subject": "Stažení výrobku z trhu organizované první stranou",
+    "limit": "1 000 000 Kč",
+    "sublimit": "v rámci celkového limitu PS",
+    "deductible": "100 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Stažení výrobku z trhu organizované třetí stranou",
+    "limit": "1 000 000 Kč",
+    "sublimit": "v rámci celkového limitu PS",
+    "deductible": "100 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Spojení nebo smísení vadného výrobku s jinou bezvadnou věcí",
+    "limit": "1 000 000 Kč",
+    "sublimit": "v rámci celkového limitu PS",
+    "deductible": "100 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Náklady na demontáž vadného výrobku a montáž bezvadného výrobku",
+    "limit": "1 000 000 Kč",
+    "sublimit": "v rámci celkového limitu PS",
+    "deductible": "100 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Škoda vzniklá dalším opracováním vadného výrobku dodaného pojištěným, aniž došlo k jeho spojení či smísení, nebo montáží s dalšími výrobky.",
+    "limit": "1 000 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "100 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Náklady na kontrolu, zkoušení a třídění vadných výrobků",
+    "limit": "100 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1xročně"
+  },
+  {
+    "subject": "Náklady  na reklamaci u zákazníka pojištěného",
+    "limit": "100 000 Kč",
+    "sublimit": "sublimit",
+    "deductible": "10 000 Kč",
+    "note": "1xročně"
+  }
+];
+const DEFAULT_SPECIAL_CLAUSES = [
+  {
+    "name": "Věci převzaté a užívané:",
+    "text": "Pojištění se vztahuje i na následnou finanční újmu vyplývající z poškození veci převzaté nebo užívané.  Pojištění se nevztahuje na újmu vzniklou ztrátou věci.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle",
+    "text": "Pojištění se vztahuje na újmu vzniklou na oprávněně užívaném dopravním prostředku. Pojištění se nevztahuje na škody na vozidle, které nemá sjednáno havarijní pojištění. Pojištění se dále nevztahuje na odpovědnost za škodu vzniklou na pneumatikách, discích a kolových šroubech nebo přepravovaných věcech. Pro škodu na vozidle pojistitel poskytne pojistné plnění jen v případě, že událost bude šetřena policií.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Majetková újma v souvislostí s vykonávanou objednanou činností",
+    "text": "Pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému majetkovou újmu vzniklou na věci, na které pojištěný vykonával objednanou činnost, pokud k poškození nebo zničení věci došlo tím, že objednaná činnost byla provedena vadně. Pojištění se vztahuje i na následnou finanční újmu z toho vyplývající.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Přirozená práva člověka",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému újmu vzniklou na přirozených právech člověka případně i způsobené duševní útrapy, nesouvisející s újmou při ublížení na zdraví a při usmrcení. Pojistné plnění bude poskytnuto pouze na základě pravomocného rozhodnutí soudu.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Újma způsobená motorovými vozidly nad rámec POV",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu způsobenou motorovými vozidly ve vlastnictví pojistníka nebo vozidly, které pojištěný po právu užívá na základě smlouvy, vzniklou při dopravní nehodě šetřené policií. Pojištění se vztahuje rovněž na újmu způsobenou při práci vozidla jako pracovního stroje, včetně stacionárního pracovního stroje. Pojistitel neposkytne pojistné plnění za újmu způsobenou provozem motorových vozidel v rozsahu, v jakém vznikl nárok na pojistné plnění z povinně smluvního pojištění odpovědnosti za újmu způsobenou provozem vozidla. Pojištění dle tohoto ujednání se nevztahuje na újmu způsobenou na samotném vozidle, jimž byla újma způsobena a na újmu způsobenou provozem motorových vozidel při jejich účasti na organizovaném motoristickém závodu .",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Újma způsobená žáku/studentu, ke které došlo při praktickém vyučování",
+    "text": "pojištění se vztahuje i na odpovědnost za újmu způsobenou žáku/studentu, ke které došlo při praktickém vyučování u pojištěného nebo v přímé souvislosti s ním, příp. k této škodě došlo v souvislosti s jeho účastí na zájmovém vzdělávání. Ujednává se, že pojištění se vztahuje i na odpovědnost studenta/žáka za újmu způsobenou jakékoliv třetí osobě při praktickém vyučování u právnické nebo fyzické osoby anebo v přímé souvislosti s ním. Pojištění se vztahuje i na újmy způsobené pojistníkovi.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Čistá finanční škoda",
+    "text": "pojištění obecné odpovědnosti a pojištění odpovědnosti za újmu způsobenou vadou poskytnuté práce, jež se projeví po jejím předání a pojištění odpovědnosti za újmu způsobenou vadou výrobku se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Pokuty a penále",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu vzniklou tím, že v důsledku vady pojištěným poskytnuté odborné služby nebo dodáním vadného výrobku byly poškozenému uloženy nebo proti němu uplatňovány pokuty, penále nebo jiné správní sankce k tomu oprávněným orgánem přímo na základě právního předpisu.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Montáž a demontáž",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, spočívající v nákladech na odstranění, demontáž, vyjmutí nebo uvolnění vadného výrobku a v nákladech na montáž, připevnění nebo osazení bezvadného výrobku, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající. Pojištění se vztahuje také na náhradu nákladů na přepravu výrobku bez vad určeného k výměně za vadný výrobek, náhradu nákladů na přepravu vadného výrobku a na náhradu nákladů na přepravu jiné věci, která obsahuje vadný výrobek.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Spojení, smísení",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích nastalou v důsledku toho, že věc vzniklá spojením nebo smísením jiné věci s vadným výrobkem vyrobeným nebo dodaným pojištěným je vadná, nebo nastalou v důsledku toho, že věc vzniklá v důsledku dalšího zpracování nebo opracování vadného výrobku vyrobeného nebo dodaného pojištěným je vadná (dále jen „vyrobená vadná věc“).",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Činnosti bez živnostenského oprávnění",
+    "text": "Pojištění se sjednává i pro případ povinnosti pojištěného uhradit škodu a v případě ublížení na zdraví nebo při usmrcení též újmu vzniklou jinému v souvislosti s činnostmi, pro jejichž výkon se živnostenské oprávnění nevyžaduje.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Propojené osoby, křížová odpovědnost",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit újmu vzniklou: - spolupojištěné osobě; - právnické osobě, ve které má pojištěný nebo osoby jemu blízké majetkovou účast; - právnické osobě, ve které pojištěný vykonává funkci statutárního orgánu; - osobě, která je v pozici společníka pojištěného.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Náklady  na reklamaci u zákazníka pojištěného",
+    "text": "Pojišťovna zaplatí  administrativní náklady zákazníka pojištěného s dokladováním škody, které požaduje poškozený zákazník po pojištěném, pokud tyto náklady souvisí s dokladováním pojistné události.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Smluvní ujednání k ručení vlastníka pozemní komunikace za správce pozemní komunikace",
+    "text": "Pojištění se vztahuje i na povinnost pojištěného uhradit poškozenému peněžní částku, pokud mu tato povinnost vznikla ve smyslu § 27 odst.6 zákona č. 13/1997 Sb., o pozemních komunikacích, z důvodu ručení pojištěného za splnění povinnosti správce pozemní komunikace nahradit škodu (újmu). Pojistitel však poskytne pojistné plnění maximálně v rozsahu, v jakém by je poskytl v případě, kdy by výkon správy pozemní komunikace nebyl zajišťován prostřednictvím správce, ale přímo pojištěným.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Pojištění nákladů na kontrolu nebo zkoušení výrobku poškozeného",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit škodu (újmu na jmění) spočívající výlučně v nákladech vzniklých při kontrole nebo zkoušení výrobků poškozeného, která vznikla jinému.",
+    "note": "",
+    "include": false
+  },
+  {
+    "name": "Připojištění odpovědnosti za újmu způsobenou vyrobením vadné věci pomocí vadného stroje",
+    "text": "připojištění se vztahuje na právním předpisem stanovenou povinnost pojištěného nahradit újmu na jmění (škodu) vzniklou v důsledku toho, že věc vzniklá vyrobením/zpracováním/opracováním pomocí vadného stroje, který vadně vyrobil, dodal, (s)montoval nebo vadně udržoval či opravil pojištěný (dále jen \"vadný stroj\") je vadná (dále jen \"vyrobená vadná věc\").",
+    "note": "",
+    "include": false
+  }
+];
+
 const $ = (id)=>document.getElementById(id);
 const text = (v)=> (v ?? "").toString().trim();
 function safeUpdateAll(){ try { updateAll(); } catch(e) { console.error('ASTORIE update error:', e); } }
@@ -161,6 +486,7 @@ function resetInquiry(confirmIt){
   $('insurancePeriodSelect').value='1 rok'; $('territorySelect').value='Česká republika'; $('exportSelect').value='Ne';
   if($('signatureMethod')) $('signatureMethod').value='elektronicky'; if($('currency')) $('currency').value='CZK'; if($('premiumCollection')) $('premiumCollection').value='Ne'; ['attOrExtract','attAstoriePower'].forEach(id=>{ if($(id)) $(id).checked=true; }); ['attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).checked=false; });
   ['clientExtraRows','insuredPersonsList','liabilityParamsList','specialClausesList'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
+  populateDefaultLiabilityAndClauses();
   $('insurersList').querySelectorAll('input').forEach(cb=>cb.checked=false);
   $('requirementsList').innerHTML='';
   $('inquiriesList').innerHTML='';
@@ -182,6 +508,23 @@ async function loadAres(){
     $('aresMsg').textContent = 'Údaje z ARES byly načteny. Zkontrolujte je a doplňte chybějící informace.';
   }catch(e){ $('aresMsg').textContent = e.message; }
   updateAll();
+}
+
+
+async function loadAresForInsuredRow(row){
+  const icoInput = row.querySelector('.ipId');
+  const msg = row.querySelector('.ipAresMsg');
+  const ico = text(icoInput?.value || '');
+  if(!ico){ if(msg) msg.textContent='Doplňte IČ.'; return; }
+  if(msg) msg.textContent='Načítám ARES...';
+  try{
+    const d = await api('/api/ares/' + encodeURIComponent(ico));
+    row.querySelector('.ipName').value = d.name || row.querySelector('.ipName').value || '';
+    row.querySelector('.ipId').value = d.ico || row.querySelector('.ipId').value || '';
+    row.querySelector('.ipAddress').value = d.address || row.querySelector('.ipAddress').value || '';
+    if(msg) msg.textContent='ARES načten.';
+    safeUpdateAll();
+  }catch(e){ if(msg) msg.textContent = e.message || 'ARES se nepodařilo načíst.'; }
 }
 
 function selectActivity(code){
@@ -258,9 +601,12 @@ function addInsuranceExtraRow(row={}){ return makeExtraRow('insuranceExtraRows',
 function addClientExtraRow(row={}){ return makeExtraRow('clientExtraRows','client-extra-row','extraKey','extraValue',row,'addClientExtraRowBtn'); }
 function addInsuredPerson(row={}){
   const wrap=ensureWrap('insuredPersonsList','addInsuredPersonBtn'); if(!wrap) throw new Error('Chybí kontejner pro další pojištěné osoby');
-  const div=document.createElement('div'); div.className='dynamic-row insured-person-row';
-  div.innerHTML=`<label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}"></label><label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}"></label><label>Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}"></label><label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}"></label><label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}"></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); bindDynamicRow(div); return div;
+  const div=document.createElement('div'); div.className='dynamic-row insured-person-row compact-person-row';
+  div.innerHTML=`<label>Název / osoba<input class="ipName" value="${escAttr(row.name||'')}"></label><label>IČ / RČ<input class="ipId" value="${escAttr(row.id_number||'')}"></label><button type="button" class="secondary ipAresBtn">Načíst z ARES</button><label class="wide">Sídlo / adresa<input class="ipAddress" value="${escAttr(row.address||'')}"></label><label>Činnost<input class="ipActivity" value="${escAttr(row.activity||'')}"></label><label>Obrat<input class="ipTurnover" value="${escAttr(row.turnover||'')}"></label><button type="button" class="secondary delRow">Smazat</button><div class="ipAresMsg dynamic-hint"></div>`;
+  wrap.appendChild(div); bindDynamicRow(div);
+  const aresBtn=div.querySelector('.ipAresBtn');
+  if(aresBtn) aresBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); loadAresForInsuredRow(div); });
+  return div;
 }
 function addLiabilityParam(row={}){
   const wrap=ensureWrap('liabilityParamsList','addLiabilityParamBtn'); if(!wrap) throw new Error('Chybí kontejner pro parametry odpovědnosti');
@@ -280,6 +626,15 @@ window.addClientExtraRow=addClientExtraRow;
 window.addInsuredPerson=addInsuredPerson;
 window.addLiabilityParam=addLiabilityParam;
 window.addSpecialClause=addSpecialClause;
+
+function populateDefaultLiabilityAndClauses(){
+  if(!$('liabilityParamsList') || $('liabilityParamsList').children.length===0){
+    DEFAULT_LIABILITY_PARAMS.forEach(addLiabilityParam);
+  }
+  if(!$('specialClausesList') || $('specialClausesList').children.length===0){
+    DEFAULT_SPECIAL_CLAUSES.forEach(addSpecialClause);
+  }
+}
 
 function bindDynamicButtonsHard(){
   const map = {

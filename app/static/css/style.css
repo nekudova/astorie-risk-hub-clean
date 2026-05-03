@@ -167,3 +167,29 @@ body{font-size:15px;}
 .dynamic-row textarea{min-height:64px;}
 .dynamic-row .delRow{align-self:end;}
 @media(max-width:900px){.attachment-professional-grid,.dynamic-row,.dynamic-row.two{grid-template-columns:1fr;}}
+
+/* MVP 0.38 – kompaktní řádky pro další pojištěné osoby */
+.dynamic-row.insured-person-row.compact-person-row {
+  grid-template-columns: minmax(180px,1.2fr) 130px 135px minmax(260px,1.8fr) minmax(160px,1fr) minmax(120px,.8fr) 90px;
+  align-items: end;
+  gap: 8px;
+  padding: 10px;
+}
+.dynamic-row.insured-person-row.compact-person-row label { margin: 0; }
+.dynamic-row.insured-person-row.compact-person-row input { min-height: 38px; padding: 8px 10px; }
+.dynamic-row.insured-person-row.compact-person-row .ipAresBtn,
+.dynamic-row.insured-person-row.compact-person-row .delRow { min-height: 38px; padding: 8px 10px; min-width: auto; }
+.dynamic-row.insured-person-row.compact-person-row .ipAresMsg {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--mut);
+  margin-top: -4px;
+}
+@media(max-width:1100px){
+  .dynamic-row.insured-person-row.compact-person-row { grid-template-columns: 1fr 140px 140px; }
+  .dynamic-row.insured-person-row.compact-person-row .wide { grid-column: 1 / -1; }
+  .dynamic-row.insured-person-row.compact-person-row .ipAresMsg { grid-column: 1 / -1; }
+}
+@media(max-width:720px){
+  .dynamic-row.insured-person-row.compact-person-row { grid-template-columns: 1fr; }
+}
