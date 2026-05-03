@@ -26,6 +26,7 @@ async function init(){
   CATALOG = await api('/api/catalog');
   bindLogin();
   bindUI();
+  bindDynamicButtonsHard();
   const savedUser = JSON.parse(localStorage.getItem('arh_user') || 'null');
   if(savedUser) enterApp(savedUser);
 }
@@ -53,6 +54,7 @@ function enterApp(user){
   renderCatalogs();
   resetInquiry(false);
   renderAdmin();
+  bindDynamicButtonsHard();
   showView('inquiryView');
 }
 
@@ -145,6 +147,7 @@ document.addEventListener('click', (e)=>{
   };
   const fn = map[btn.id];
   if(!fn) return;
+  if(btn.dataset.hardBound === '1') return;
   e.preventDefault();
   e.stopPropagation();
   try {
@@ -310,6 +313,36 @@ window.addClientExtraRow=addClientExtraRow;
 window.addInsuredPerson=addInsuredPerson;
 window.addLiabilityParam=addLiabilityParam;
 window.addSpecialClause=addSpecialClause;
+
+function bindDynamicButtonsHard(){
+  const map = {
+    addQuestionnaireExtraRowBtn: addQuestionnaireExtraRow,
+    addClientExtraRowBtn: addClientExtraRow,
+    addInsuranceExtraRowBtn: addInsuranceExtraRow,
+    addInsuredPersonBtn: addInsuredPerson,
+    addLiabilityParamBtn: addLiabilityParam,
+    addSpecialClauseBtn: addSpecialClause
+  };
+  Object.entries(map).forEach(([id, fn])=>{
+    const btn = document.getElementById(id);
+    if(!btn || btn.dataset.hardBound === '1') return;
+    btn.dataset.hardBound = '1';
+    btn.setAttribute('type','button');
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      try {
+        fn();
+        try { updateAll(); } catch(e) { console.error('ASTORIE updateAll po přidání řádku:', e); }
+        const msg = (btn.textContent || 'Řádek').replace('+','').trim();
+        flashStatus(msg ? (msg + ' přidáno.') : 'Řádek přidán.');
+      } catch(err) {
+        console.error('ASTORIE dynamic add hard error:', err);
+        alert('Nepodařilo se přidat řádek: ' + (err && err.message ? err.message : err));
+      }
+    });
+  });
+}
 
 function collectDynamicBlocks(){
   state.extended_client = {
@@ -1450,3 +1483,7 @@ window.addInsuredPerson = addInsuredPerson;
 window.addLiabilityParam = addLiabilityParam;
 window.addSpecialClause = addSpecialClause;
 window.safeUpdateAll = safeUpdateAll;
+
+
+// MVP 0.36 fallback: dynamická tlačítka se navážou i po případném překreslení části stránky.
+document.addEventListener('DOMContentLoaded', ()=>{ try { bindDynamicButtonsHard(); } catch(e) { console.error('ASTORIE dynamic init fallback:', e); } });

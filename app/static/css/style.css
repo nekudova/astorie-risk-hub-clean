@@ -152,3 +152,18 @@ body{font-size:15px;}
 .attachment-pill input{width:18px;height:18px;accent-color:var(--o);}
 .small{font-size:13px;margin:.25rem 0 0;}
 @media(max-width:900px){.dynamic-row,.dynamic-row.two{grid-template-columns:1fr}.dynamic-row .delRow{width:100%;}}
+
+/* MVP 0.36 – profesionální přílohy */
+.attachment-panel { border-top: 6px solid var(--o); }
+.attachment-professional-grid{display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:12px;margin:14px 0 18px;}
+.check-card{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--border);border-radius:18px;padding:14px 16px;background:#fff;min-height:82px;cursor:pointer;}
+.check-card.required{background:#f7fbfc;border-color:#b8d7dd;}
+.check-card input{width:18px;height:18px;margin-top:3px;accent-color:var(--p);}
+.check-card b{display:block;color:var(--p);font-size:15px;margin-bottom:4px;}
+.check-card small{display:block;color:var(--mut);line-height:1.35;}
+.dynamic-list{margin-top:14px;}
+.dynamic-row{border:1px solid var(--border);border-radius:18px;background:#fbfdfe;padding:14px;margin:12px 0;display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px;align-items:end;}
+.dynamic-row.two{grid-template-columns:minmax(220px,1fr) minmax(320px,2fr) auto;}
+.dynamic-row textarea{min-height:64px;}
+.dynamic-row .delRow{align-self:end;}
+@media(max-width:900px){.attachment-professional-grid,.dynamic-row,.dynamic-row.two{grid-template-columns:1fr;}}
