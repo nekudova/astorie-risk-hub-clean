@@ -72,12 +72,6 @@ function bindUI(){
   $('activitySelect').onchange = ()=>selectActivity($('activitySelect').value);
   $('addRiskBtn').onclick = addCustomRisk;
   $('addRequirementBtn').onclick = ()=>addRequirement();
-  if($('addClientExtraRowBtn')) $('addClientExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addClientExtraRow(); safeUpdateAll(); };
-  if($('addQuestionnaireExtraRowBtn')) $('addQuestionnaireExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addQuestionnaireExtraRow(); safeUpdateAll(); };
-  if($('addInsuranceExtraRowBtn')) $('addInsuranceExtraRowBtn').onclick = (e)=>{ e.preventDefault(); addInsuranceExtraRow(); safeUpdateAll(); };
-  if($('addInsuredPersonBtn')) $('addInsuredPersonBtn').onclick = (e)=>{ e.preventDefault(); addInsuredPerson(); safeUpdateAll(); };
-  if($('addLiabilityParamBtn')) $('addLiabilityParamBtn').onclick = (e)=>{ e.preventDefault(); addLiabilityParam(); safeUpdateAll(); };
-  if($('addSpecialClauseBtn')) $('addSpecialClauseBtn').onclick = (e)=>{ e.preventDefault(); addSpecialClause(); safeUpdateAll(); };
   $('saveInquiryBtn').onclick = saveInquiry;
   $('loadListBtn').onclick = loadInquiries;
   if($('changeInquiryBtn')) $('changeInquiryBtn').onclick = loadInquiries;
@@ -133,33 +127,6 @@ function bindUI(){
   ['turnover'].forEach(id=>$(id).addEventListener('blur', e=>{ normaliseMoneyInput(e.target); updateAll(); }));
 }
 
-
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  const map = {
-    addQuestionnaireExtraRowBtn: addQuestionnaireExtraRow,
-    addClientExtraRowBtn: addClientExtraRow,
-    addInsuranceExtraRowBtn: addInsuranceExtraRow,
-    addInsuredPersonBtn: addInsuredPerson,
-    addLiabilityParamBtn: addLiabilityParam,
-    addSpecialClauseBtn: addSpecialClause
-  };
-  const fn = map[btn.id];
-  if(!fn) return;
-  if(btn.dataset.hardBound === '1') return;
-  e.preventDefault();
-  e.stopPropagation();
-  try {
-    fn();
-    safeUpdateAll();
-    const msg = btn.textContent.replace('+','').trim();
-    flashStatus(msg ? (msg + ' přidáno.') : 'Řádek přidán.');
-  } catch(err) {
-    console.error('ASTORIE dynamic button error:', err);
-    alert('Nepodařilo se přidat řádek. Chyba: ' + (err?.message || err));
-  }
-}, true);
 
 
 function showView(id){
@@ -331,7 +298,11 @@ function bindDynamicButtonsHard(){
     btn.addEventListener('click', function(ev){
       ev.preventDefault();
       ev.stopPropagation();
+      if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
       try {
+        const now = Date.now();
+        if (btn.dataset.lastClick && (now - Number(btn.dataset.lastClick) < 400)) return;
+        btn.dataset.lastClick = String(now);
         fn();
         try { updateAll(); } catch(e) { console.error('ASTORIE updateAll po přidání řádku:', e); }
         const msg = (btn.textContent || 'Řádek').replace('+','').trim();
