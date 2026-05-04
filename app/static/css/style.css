@@ -349,3 +349,19 @@ body{font-size:15px;}
   .insured-person-card .professional-card-head{flex-direction:column!important;}
   .insured-person-card .professional-card-head .delRow{width:100%!important;}
 }
+
+
+/* MVP 0.42 – Odpovědnost jako rozklikávací modul */
+.liability-module-panel{border-top:7px solid var(--o);}
+.liability-module-head{align-items:flex-start;}
+.liability-module-actions{display:flex;flex-direction:column;gap:12px;min-width:260px;align-items:stretch;}
+.liability-include{display:flex;gap:10px;align-items:center;justify-content:center;border:1px solid var(--line);background:#f7fbfc;border-radius:999px;padding:12px 16px;font-weight:900;}
+.liability-include input{width:auto;margin:0;}
+.liability-summary-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin:20px 0 0;}
+.liability-summary-card{border:1px solid var(--line);border-radius:18px;background:#f7fbfc;padding:16px 18px;}
+.liability-summary-card span{display:block;color:var(--mut);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;}
+.liability-summary-card strong{color:var(--p);font-size:20px;}
+.liability-module-body{margin-top:22px;border-top:1px solid var(--line);padding-top:22px;}
+.subpanel{border:1px solid var(--line);border-radius:18px;background:#fbfdfe;padding:20px;margin-top:16px;}
+.subpanel h3{font-size:24px;margin:0 0 4px;}
+@media(max-width:900px){.liability-module-head{flex-direction:column;}.liability-module-actions{min-width:0;width:100%;}.liability-summary-grid{grid-template-columns:1fr;}}

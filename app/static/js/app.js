@@ -339,6 +339,22 @@ const $ = (id)=>document.getElementById(id);
 const text = (v)=> (v ?? "").toString().trim();
 function safeUpdateAll(){ try { updateAll(); } catch(e) { console.error('ASTORIE update error:', e); } }
 function flashStatus(msg){ const el=$('saveStatus')||$('importStatus'); if(el){ el.textContent=msg; setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 2500); } }
+function updateLiabilityModuleSummary(){
+  const include = !!$('includeLiabilityModule')?.checked;
+  const pCount = document.querySelectorAll('.liability-param-row').length;
+  const cCount = document.querySelectorAll('.special-clause-row').length;
+  if($('liabilityParamCount')) $('liabilityParamCount').textContent = String(pCount);
+  if($('specialClauseCount')) $('specialClauseCount').textContent = String(cCount);
+  if($('liabilityModuleStatus')) $('liabilityModuleStatus').textContent = include ? (pCount || cCount ? 'Rozpracováno / připraveno k ověření' : 'Zahrnuto bez doplněných detailů') : 'Nezahrnuto do poptávky';
+}
+function toggleLiabilityModule(){
+  const body=$('liabilityModuleBody');
+  const btn=$('toggleLiabilityModuleBtn');
+  if(!body) return;
+  body.classList.toggle('hidden');
+  if(btn) btn.textContent = body.classList.contains('hidden') ? 'Rozbalit odpovědnost' : 'Sbalit odpovědnost';
+  updateLiabilityModuleSummary();
+}
 
 async function api(path, opts={}){
   const r = await fetch(path, {headers:{"Content-Type":"application/json"}, ...opts});
@@ -404,6 +420,8 @@ function bindUI(){
   if($('refreshMyInquiriesBtn')) $('refreshMyInquiriesBtn').onclick = renderMyInquiries;
   if($('myInquiryStatusFilter')) $('myInquiryStatusFilter').onchange = renderMyInquiries;
   if($('myInquirySearch')) $('myInquirySearch').oninput = renderMyInquiries;
+  if($('toggleLiabilityModuleBtn')) $('toggleLiabilityModuleBtn').onclick = toggleLiabilityModule;
+  if($('includeLiabilityModule')) $('includeLiabilityModule').onchange = ()=>{ updateLiabilityModuleSummary(); safeUpdateAll(); };
   if($('refreshAdminInquiriesBtn')) $('refreshAdminInquiriesBtn').onclick = renderAdminInquiries;
   if($('adminInquiryStatusFilter')) $('adminInquiryStatusFilter').onchange = renderAdminInquiries;
   if($('adminInquirySearch')) $('adminInquirySearch').oninput = renderAdminInquiries;
@@ -487,6 +505,10 @@ function resetInquiry(confirmIt){
   if($('signatureMethod')) $('signatureMethod').value='elektronicky'; if($('currency')) $('currency').value='CZK'; if($('premiumCollection')) $('premiumCollection').value='Ne'; ['attOrExtract','attAstoriePower'].forEach(id=>{ if($(id)) $(id).checked=true; }); ['attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).checked=false; });
   ['clientExtraRows','insuredPersonsList','liabilityParamsList','specialClausesList'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
   populateDefaultLiabilityAndClauses();
+  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = true;
+  if($('liabilityModuleBody')) $('liabilityModuleBody').classList.add('hidden');
+  if($('toggleLiabilityModuleBtn')) $('toggleLiabilityModuleBtn').textContent = 'Rozbalit odpovědnost';
+  updateLiabilityModuleSummary();
   $('insurersList').querySelectorAll('input').forEach(cb=>cb.checked=false);
   $('requirementsList').innerHTML='';
   $('inquiriesList').innerHTML='';
@@ -588,6 +610,7 @@ function bindDynamicRow(div){
     el.addEventListener('input', safeUpdateAll);
     el.addEventListener('change', safeUpdateAll);
   });
+  updateLiabilityModuleSummary();
   div.scrollIntoView({behavior:'smooth', block:'center'});
 }
 function makeExtraRow(wrapId, className, keyClass, valueClass, row={}, buttonId){
@@ -661,13 +684,13 @@ function addLiabilityParam(row={}){
   const wrap=ensureWrap('liabilityParamsList','addLiabilityParamBtn'); if(!wrap) throw new Error('Chybí kontejner pro parametry odpovědnosti');
   const div=document.createElement('div'); div.className='dynamic-row liability-param-row';
   div.innerHTML=`<label>Předmět / parametr<input class="lpSubject" value="${escAttr(row.subject||'')}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label>Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); bindDynamicRow(div); return div;
+  wrap.appendChild(div); bindDynamicRow(div); updateLiabilityModuleSummary(); return div;
 }
 function addSpecialClause(row={}){
   const wrap=ensureWrap('specialClausesList','addSpecialClauseBtn'); if(!wrap) throw new Error('Chybí kontejner pro speciální ujednání');
   const div=document.createElement('div'); div.className='dynamic-row special-clause-row';
   div.innerHTML=`<label>Název<input class="scName" value="${escAttr(row.name||'')}"></label><label>Text ujednání<textarea class="scText">${escTextArea(row.text||'')}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${escTextArea(row.note||'')}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include===false?'':'checked'}> zahrnout do poptávky</label><button type="button" class="secondary delRow">Smazat</button>`;
-  wrap.appendChild(div); bindDynamicRow(div); return div;
+  wrap.appendChild(div); bindDynamicRow(div); updateLiabilityModuleSummary(); return div;
 }
 window.addQuestionnaireExtraRow=addQuestionnaireExtraRow;
 window.addInsuranceExtraRow=addInsuranceExtraRow;
@@ -736,8 +759,10 @@ function collectDynamicBlocks(){
     extra_rows:Array.from(document.querySelectorAll('.insurance-extra-row')).map(r=>({key:r.querySelector('.ieKey').value,value:r.querySelector('.ieValue').value})).filter(x=>text(x.key)||text(x.value))
   };
   state.insured_persons = Array.from(document.querySelectorAll('.insured-person-row')).map(r=>({name:r.querySelector('.ipName')?.value||'',id_number:r.querySelector('.ipId')?.value||'',relation:r.querySelector('.ipRelation')?.value||'',relation_custom:r.querySelector('.ipRelationCustom')?.value||'',address:r.querySelector('.ipAddress')?.value||'',activity:r.querySelector('.ipActivity')?.value||'',turnover:r.querySelector('.ipTurnover')?.value||''})).filter(x=>Object.values(x).some(text));
+  state.liability_included = !!$('includeLiabilityModule')?.checked;
   state.liability_params = Array.from(document.querySelectorAll('.liability-param-row')).map(r=>({subject:r.querySelector('.lpSubject').value,limit:r.querySelector('.lpLimit').value,sublimit:r.querySelector('.lpSublimit').value,deductible:r.querySelector('.lpDeductible').value,note:r.querySelector('.lpNote').value})).filter(x=>Object.values(x).some(text));
   state.special_clauses = Array.from(document.querySelectorAll('.special-clause-row')).map(r=>({name:r.querySelector('.scName').value,text:r.querySelector('.scText').value,note:r.querySelector('.scNote').value,include:r.querySelector('.scInclude').checked})).filter(x=>text(x.name)||text(x.text)||text(x.note));
+  updateLiabilityModuleSummary();
 }
 function renderDynamicBlocksFromState(){
   if(!$('clientExtraRows')) return;
@@ -749,6 +774,8 @@ function renderDynamicBlocksFromState(){
   $('insuredPersonsList').innerHTML=''; (state.insured_persons||[]).forEach(addInsuredPerson);
   $('liabilityParamsList').innerHTML=''; (state.liability_params||[]).forEach(addLiabilityParam);
   $('specialClausesList').innerHTML=''; (state.special_clauses||[]).forEach(addSpecialClause);
+  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = state.liability_included !== false;
+  updateLiabilityModuleSummary();
 }
 
 function formatAttachmentsForReport(e){
