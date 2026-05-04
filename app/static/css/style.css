@@ -365,3 +365,75 @@ body{font-size:15px;}
 .subpanel{border:1px solid var(--line);border-radius:18px;background:#fbfdfe;padding:20px;margin-top:16px;}
 .subpanel h3{font-size:24px;margin:0 0 4px;}
 @media(max-width:900px){.liability-module-head{flex-direction:column;}.liability-module-actions{min-width:0;width:100%;}.liability-summary-grid{grid-template-columns:1fr;}}
+
+
+/* MVP 0.43 – profesionální levé menu + oddělená administrace */
+body{background:linear-gradient(180deg,#f7fbfc,#e9f3f5);}
+.topbar{height:74px;padding:0 28px;}
+.brand .logo{width:44px;height:44px;border-radius:12px;font-size:22px;}
+.brand strong{font-size:22px;letter-spacing:7px;}
+.brand span{font-size:13px;}
+.badge{padding:9px 14px;font-size:13px;}
+main{max-width:none;margin:0;padding:20px;}
+#appView:not(.hidden){display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:start;}
+#appView > :not(.app-nav){grid-column:2;min-width:0;}
+.app-nav{
+  grid-column:1!important;
+  grid-row:1 / span 100!important;
+  position:sticky!important;
+  top:94px!important;
+  height:calc(100vh - 114px)!important;
+  overflow:auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:8px!important;
+  background:var(--p)!important;
+  border:0!important;
+  border-radius:26px!important;
+  padding:18px!important;
+  margin:0!important;
+  box-shadow:0 18px 45px rgba(0,61,76,.18)!important;
+}
+.app-nav::before{
+  content:'Pracovní režim';
+  color:#b9dce2;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:900;
+  padding:4px 10px 8px;
+}
+.nav-btn{
+  width:100%!important;
+  text-align:left!important;
+  border-radius:16px!important;
+  padding:12px 14px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  font-size:14px!important;
+  letter-spacing:.1px;
+}
+.nav-btn:hover{background:rgba(255,255,255,.16)!important;}
+.nav-btn.active{background:#fff!important;color:var(--p)!important;box-shadow:0 10px 24px rgba(0,0,0,.12)!important;}
+.nav-btn.admin-only{margin-top:auto!important;background:rgba(252,76,2,.18)!important;border-color:rgba(252,76,2,.45)!important;color:#fff!important;}
+.nav-btn.admin-only.active{background:var(--o)!important;color:#fff!important;}
+.toolbar{top:94px!important;margin:0 0 14px!important;border-radius:22px!important;box-shadow:0 10px 26px rgba(0,61,76,.08)!important;}
+.active-inquiry-banner{margin:0 0 18px!important;}
+.app-section .hero{margin-top:0;}
+.hero{grid-template-columns:minmax(0,1fr) 310px;gap:20px;}
+.hero h1{font-size:38px;}
+.hero p{font-size:17px;}
+.panel,.card{border-radius:24px;}
+.admin-panel{border-top:0!important;}
+#adminView .hero::before{content:'Admin režim';display:inline-block;color:#fff;background:var(--o);border-radius:999px;padding:8px 14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+@media(max-width:1100px){
+  #appView:not(.hidden){display:block;}
+  .app-nav{position:static!important;height:auto!important;display:flex!important;flex-direction:row!important;overflow:auto!important;border-radius:20px!important;margin-bottom:14px!important;}
+  .app-nav::before{display:none;}
+  .nav-btn{min-width:150px!important;text-align:center!important;}
+  .nav-btn.admin-only{margin-top:0!important;}
+  #appView > :not(.app-nav){grid-column:auto;}
+  .hero{grid-template-columns:1fr;}
+}
