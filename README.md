@@ -1,6 +1,7 @@
-# ASTORIE Business Risk Hub – MVP 0.47
+# ASTORIE Business Risk Hub – MVP 0.48
 
-WOW dashboard poptávky. Zachováno DB, ARES, admin, nabídky, porovnání, zpráva a PDF.
+WOW oprava po 0.47 – stabilní ARES. Zachováno DB, ARES, admin, nabídky, porovnání, zpráva a PDF.
 
 
-MVP 0.47 – pracovní režim poradce: minimalistické workflow, prázdná nová poptávka, jasný aktivní obchodní případ, zachována DB/ARES/Admin/Nabídky/Porovnání/Zpráva/PDF.
+## Oprava 0.48
+Tato verze je bezpečná opravná verze po 0.47. Vrací funkční vazby ARES/DB/JS z poslední stabilní větve a nemění databázovou strukturu.

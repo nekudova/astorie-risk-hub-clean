@@ -411,7 +411,6 @@ function bindUI(){
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=()=>showView(btn.dataset.view));
   document.querySelectorAll('[data-open-view]').forEach(btn=>btn.onclick=()=>showView(btn.dataset.openView));
   if($('dashboardSaveBtn')) $('dashboardSaveBtn').onclick = saveInquiry;
-  if($('dashboardNewInquiryBtn')) $('dashboardNewInquiryBtn').onclick = newInquiry;
   $('aresBtn').onclick = loadAres;
   $('activitySelect').onchange = ()=>selectActivity($('activitySelect').value);
   $('addRiskBtn').onclick = addCustomRisk;
@@ -1868,9 +1867,9 @@ function renderAIProtocol(){
 
 
 function dashboardStatus(label, ok, optional=false){
-  if(ok) return {cls:'ok', text:'Hotovo', hint:label};
+  if(ok) return {cls:'ok', text:'✓ Vyplněno', hint:label};
   if(optional) return {cls:'optional', text:'Volitelné', hint:label};
-  return {cls:'warn', text:'Vyžaduje doplnění', hint:label};
+  return {cls:'warn', text:'⚠ Doplnit', hint:label};
 }
 function renderInquiryDashboard(){
   if(!$('inquiryDashboardGrid')) return;
@@ -1883,18 +1882,19 @@ function renderInquiryDashboard(){
   const hasRisks = activeRisks().length>0;
   const hasInsurers = (state.selected_insurers||[]).length>0;
   const hasAttachments = (state.attachments||[]).some(a=>a.checked) || text(state.attachments_extra);
-  const activeLabel = state._db_id ? `Uložená poptávka #${state._db_id}` : (hasClient ? 'Rozpracovaná poptávka – zatím neuloženo do DB' : 'Nová prázdná poptávka');
-  const steps = [
-    {no:1, title:'Klient', view:'inquiryView', data:dashboardStatus('Identifikace klienta a kontaktní údaje', hasClient), desc: hasClient ? `${state.client?.name||'Klient'}${state.client?.ico?' · IČO '+state.client.ico:''}` : 'Zadejte IČO a načtěte ARES, nebo doplňte klienta ručně.'},
-    {no:2, title:'Činnost a rizika', view:'inquiryView', data:dashboardStatus('Typ klienta, činnost a rizikový profil', hasActivity && hasRisks), desc: hasActivity ? `${state.activity.name} · rizik: ${activeRisks().length}` : 'Vyberte činnost klienta, aby se navrhla relevantní rizika.'},
-    {no:3, title:'Pojištění a odpovědnost', view:'inquiryView', data:dashboardStatus('Pojistné nastavení, parametry odpovědnosti a další osoby', hasInsurance), desc: hasInsurance ? `Pojistné nastavení rozpracováno${liabCount ? ' · odpovědnost: '+liabCount+' položek' : ''}.` : 'Doplňte období, rozsah a pojistné technické údaje.'},
-    {no:4, title:'Pojišťovny', view:'inquiryView', data:dashboardStatus('Výběr pojišťoven pro poptávku', hasInsurers), desc: hasInsurers ? `Vybráno ${(state.selected_insurers||[]).length} pojišťoven.` : 'Vyberte pojišťovny, kterým bude poptávka odeslána.'},
-    {no:5, title:'Nabídky', view:'offersView', data:dashboardStatus('Evidence doručených nabídek', offersCount>0, true), desc: offersCount ? `Zpracováno ${offersCount} nabídek.` : 'Po doručení nabídky vložte údaje nebo použijte AI zpracování.'},
-    {no:6, title:'Porovnání', view:'comparisonView', data:dashboardStatus('Porovnání ceny, spoluúčasti, limitů a výluk', offersCount>1, true), desc: offersCount>1 ? 'Porovnání lze přepočítat a připravit body k ověření.' : 'Pro porovnání jsou potřeba alespoň dvě nabídky.'},
-    {no:7, title:'Zpráva pro klienta', view:'reportView', data:dashboardStatus('Výstup pro jednání s klientem', !!text(state.report?.advisor_note), true), desc: text(state.report?.advisor_note) ? 'Závěr poradce je doplněný.' : 'Po porovnání doplňte vlastní závěr a zvolené řešení.'},
-    {no:8, title:'Přílohy a podklady', view:'inquiryView', data:dashboardStatus('Dokumenty k poptávce', hasAttachments, true), desc: hasAttachments ? 'Přílohy jsou označené nebo doplněné.' : 'Doplňte jen pokud jsou pro poptávku potřebné.'}
+  const cards = [
+    {title:'Klient', view:'inquiryView', data:dashboardStatus('Identifikace klienta a kontakty', hasClient), desc: hasClient ? `${state.client?.name||'Klient'}${state.client?.ico?' · IČO '+state.client.ico:''}` : 'Načtěte klienta z ARES nebo doplňte údaje ručně.'},
+    {title:'Pojištění', view:'inquiryView', data:dashboardStatus('Pojistné období a platební nastavení', hasInsurance), desc: hasInsurance ? 'Základní pojistné nastavení je rozpracované.' : 'Doplňte počátek, pojistnou dobu, měnu, splatnost nebo inkaso.'},
+    {title:'Činnost', view:'inquiryView', data:dashboardStatus('Typ klienta / činnost', hasActivity), desc: hasActivity ? state.activity.name : 'Vyberte činnost pro návrh rizik.'},
+    {title:'Rizika', view:'guideView', data:dashboardStatus('Rizikový profil', hasRisks), desc: hasRisks ? `Vybráno ${activeRisks().length} rizik.` : 'Potvrďte nebo upravte navržená rizika.'},
+    {title:'Odpovědnost', view:'inquiryView', data:dashboardStatus('Parametry a speciální ujednání', liabCount>0, true), desc: liabCount ? `Vyplněno ${liabCount} položek.` : 'Volitelný modul – rozbalte pouze, pokud řešíte odpovědnost.'},
+    {title:'Další osoby', view:'inquiryView', data:dashboardStatus('Další pojištěné osoby', (state.insured_persons||[]).length>0, true), desc: (state.insured_persons||[]).length ? `Osob: ${(state.insured_persons||[]).length}` : 'Volitelné – dceřiné společnosti, další pojištění apod.'},
+    {title:'Přílohy', view:'inquiryView', data:dashboardStatus('Dokumenty k poptávce', hasAttachments, true), desc: hasAttachments ? 'Přílohy jsou označené.' : 'Doporučeno doplnit výpis, plnou moc, škodní průběh nebo smlouvy.'},
+    {title:'Pojišťovny', view:'inquiryView', data:dashboardStatus('Výběr pojišťoven', hasInsurers), desc: hasInsurers ? `Vybráno ${(state.selected_insurers||[]).length} pojišťoven.` : 'Vyberte pojišťovny, kterým půjde poptávka.'},
+    {title:'Nabídky', view:'offersView', data:dashboardStatus('Nabídky pojišťoven', offersCount>0, true), desc: offersCount ? `Nahráno / vyplněno ${offersCount} nabídek.` : 'Po doručení nabídek je vložte nebo zpracujte přes AI prompt.'},
+    {title:'Zpráva', view:'reportView', data:dashboardStatus('Klientský výstup', !!text(state.report?.advisor_note), true), desc: text(state.report?.advisor_note) ? 'Závěr poradce je doplněný.' : 'Po porovnání doplňte závěr poradce a výběr klienta.'}
   ];
-  $('inquiryDashboardGrid').innerHTML = `<div class="workflow-context"><span>Aktivní případ</span><strong>${activeLabel}</strong><em>${hasClient ? (state.client?.name||'Klient') : 'Začněte novou poptávkou nebo načtěte uloženou.'}</em></div>` + steps.map(s=>`<div class="workflow-step ${s.data.cls}" data-open-view="${s.view}"><div class="workflow-no">${s.no}</div><div class="workflow-main"><h3>${s.title}</h3><p>${s.desc}</p></div><div class="workflow-state">${s.data.text}</div><button type="button" class="secondary small-btn">Otevřít</button></div>`).join('');
+  $('inquiryDashboardGrid').innerHTML = cards.map(c=>`<div class="dashboard-card ${c.data.cls}" data-open-view="${c.view}"><h3>${c.title}</h3><p>${c.desc}</p><span class="dash-status">${c.data.text}</span></div>`).join('');
   document.querySelectorAll('#inquiryDashboardGrid [data-open-view]').forEach(el=>el.onclick=()=>showView(el.dataset.openView));
 }
 
