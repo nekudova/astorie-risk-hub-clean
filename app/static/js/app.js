@@ -396,7 +396,7 @@ function enterApp(user){
   resetInquiry(false);
   renderAdmin();
   bindDynamicButtonsHard();
-  showView('inquiryView');
+  showView('dashboardView');
 }
 
 function fillAdviser(){
@@ -409,6 +409,8 @@ function fillAdviser(){
 
 function bindUI(){
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=()=>showView(btn.dataset.view));
+  document.querySelectorAll('[data-open-view]').forEach(btn=>btn.onclick=()=>showView(btn.dataset.openView));
+  if($('dashboardSaveBtn')) $('dashboardSaveBtn').onclick = saveInquiry;
   $('aresBtn').onclick = loadAres;
   $('activitySelect').onchange = ()=>selectActivity($('activitySelect').value);
   $('addRiskBtn').onclick = addCustomRisk;
@@ -518,6 +520,7 @@ function showView(id){
   document.querySelectorAll('.app-section').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+  if(id==='dashboardView') renderInquiryDashboard();
   if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
   if(id==='offersView') renderOffers();
@@ -1860,6 +1863,39 @@ function renderAIProtocol(){
   const items = state.ai_imports || [];
   if(!items.length){ $('aiProtocol').innerHTML='<p class="muted">Zatím nebyl načten žádný AI výstup. Po vložení JSON zde vznikne kontrolní protokol.</p>'; return; }
   $('aiProtocol').innerHTML = `<table><thead><tr><th>Pojišťovna</th><th>Čas importu</th><th>Nabídka</th><th>Body k ověření</th></tr></thead><tbody>${items.map(i=>`<tr><td>${insurerName(i.insurer_id)}</td><td>${i.imported_at||''}</td><td>${i.offer_label||''}</td><td>${(i.warnings||[]).join('<br>')||'—'}</td></tr>`).join('')}</tbody></table>`;
+}
+
+
+function dashboardStatus(label, ok, optional=false){
+  if(ok) return {cls:'ok', text:'✓ Vyplněno', hint:label};
+  if(optional) return {cls:'optional', text:'Volitelné', hint:label};
+  return {cls:'warn', text:'⚠ Doplnit', hint:label};
+}
+function renderInquiryDashboard(){
+  if(!$('inquiryDashboardGrid')) return;
+  collectForm();
+  const offersCount = Object.values(state.offers||{}).filter(o=>text(o.premium)||Object.keys(o.coverages||{}).length).length;
+  const liabCount = (state.liability_params||[]).length + (state.special_clauses||[]).length;
+  const hasClient = !!(text(state.client?.name)||text(state.client?.ico));
+  const hasInsurance = !!(text(state.questionnaire?.insurance_start)||text(state.questionnaire?.insurance_period)||text(state.insurance_settings?.periodicity));
+  const hasActivity = !!(state.activity && state.activity.name);
+  const hasRisks = activeRisks().length>0;
+  const hasInsurers = (state.selected_insurers||[]).length>0;
+  const hasAttachments = (state.attachments||[]).some(a=>a.checked) || text(state.attachments_extra);
+  const cards = [
+    {title:'Klient', view:'inquiryView', data:dashboardStatus('Identifikace klienta a kontakty', hasClient), desc: hasClient ? `${state.client?.name||'Klient'}${state.client?.ico?' · IČO '+state.client.ico:''}` : 'Načtěte klienta z ARES nebo doplňte údaje ručně.'},
+    {title:'Pojištění', view:'inquiryView', data:dashboardStatus('Pojistné období a platební nastavení', hasInsurance), desc: hasInsurance ? 'Základní pojistné nastavení je rozpracované.' : 'Doplňte počátek, pojistnou dobu, měnu, splatnost nebo inkaso.'},
+    {title:'Činnost', view:'inquiryView', data:dashboardStatus('Typ klienta / činnost', hasActivity), desc: hasActivity ? state.activity.name : 'Vyberte činnost pro návrh rizik.'},
+    {title:'Rizika', view:'guideView', data:dashboardStatus('Rizikový profil', hasRisks), desc: hasRisks ? `Vybráno ${activeRisks().length} rizik.` : 'Potvrďte nebo upravte navržená rizika.'},
+    {title:'Odpovědnost', view:'inquiryView', data:dashboardStatus('Parametry a speciální ujednání', liabCount>0, true), desc: liabCount ? `Vyplněno ${liabCount} položek.` : 'Volitelný modul – rozbalte pouze, pokud řešíte odpovědnost.'},
+    {title:'Další osoby', view:'inquiryView', data:dashboardStatus('Další pojištěné osoby', (state.insured_persons||[]).length>0, true), desc: (state.insured_persons||[]).length ? `Osob: ${(state.insured_persons||[]).length}` : 'Volitelné – dceřiné společnosti, další pojištění apod.'},
+    {title:'Přílohy', view:'inquiryView', data:dashboardStatus('Dokumenty k poptávce', hasAttachments, true), desc: hasAttachments ? 'Přílohy jsou označené.' : 'Doporučeno doplnit výpis, plnou moc, škodní průběh nebo smlouvy.'},
+    {title:'Pojišťovny', view:'inquiryView', data:dashboardStatus('Výběr pojišťoven', hasInsurers), desc: hasInsurers ? `Vybráno ${(state.selected_insurers||[]).length} pojišťoven.` : 'Vyberte pojišťovny, kterým půjde poptávka.'},
+    {title:'Nabídky', view:'offersView', data:dashboardStatus('Nabídky pojišťoven', offersCount>0, true), desc: offersCount ? `Nahráno / vyplněno ${offersCount} nabídek.` : 'Po doručení nabídek je vložte nebo zpracujte přes AI prompt.'},
+    {title:'Zpráva', view:'reportView', data:dashboardStatus('Klientský výstup', !!text(state.report?.advisor_note), true), desc: text(state.report?.advisor_note) ? 'Závěr poradce je doplněný.' : 'Po porovnání doplňte závěr poradce a výběr klienta.'}
+  ];
+  $('inquiryDashboardGrid').innerHTML = cards.map(c=>`<div class="dashboard-card ${c.data.cls}" data-open-view="${c.view}"><h3>${c.title}</h3><p>${c.desc}</p><span class="dash-status">${c.data.text}</span></div>`).join('');
+  document.querySelectorAll('#inquiryDashboardGrid [data-open-view]').forEach(el=>el.onclick=()=>showView(el.dataset.openView));
 }
 
 init();
