@@ -1,4 +1,4 @@
-# ASTORIE Business Risk Hub – MVP 0.44
+# ASTORIE Business Risk Hub – MVP 0.45
 
 Bezpečná verze navazující na 0.43.
 

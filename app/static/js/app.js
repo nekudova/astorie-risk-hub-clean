@@ -416,6 +416,7 @@ function bindUI(){
   $('saveInquiryBtn').onclick = saveInquiry;
   $('loadListBtn').onclick = loadInquiries;
   if($('changeInquiryBtn')) $('changeInquiryBtn').onclick = loadInquiries;
+  if($('closeInquiryBtn')) $('closeInquiryBtn').onclick = closeActiveInquiry;
   if($('inquiryStatusSelect')) $('inquiryStatusSelect').onchange = ()=>{ state.status=$('inquiryStatusSelect').value; updateActiveInquiryBanner(); };
   if($('refreshMyInquiriesBtn')) $('refreshMyInquiriesBtn').onclick = renderMyInquiries;
   if($('myInquiryStatusFilter')) $('myInquiryStatusFilter').onchange = renderMyInquiries;
@@ -425,7 +426,7 @@ function bindUI(){
   if($('refreshAdminInquiriesBtn')) $('refreshAdminInquiriesBtn').onclick = renderAdminInquiries;
   if($('adminInquiryStatusFilter')) $('adminInquiryStatusFilter').onchange = renderAdminInquiries;
   if($('adminInquirySearch')) $('adminInquirySearch').oninput = renderAdminInquiries;
-  $('newInquiryBtn').onclick = ()=>resetInquiry(true);
+  $('newInquiryBtn').onclick = startNewInquiry;
   $('refreshOffersBtn').onclick = renderOffers;
   if($('copyAiPromptBtn')) $('copyAiPromptBtn').onclick = copyAIPrompt;
   if($('importAiJsonBtn')) $('importAiJsonBtn').onclick = importAIJson;
@@ -473,8 +474,27 @@ function bindUI(){
 
 
 function hasActiveInquiryContext(){
+  return !!(state._active || state.id);
+}
+function hasUnsavedActiveInquiry(){
   collectForm();
-  return !!(state.id || text(state.client?.name) || text(state.client?.ico) || state.activity || (state.selected_insurers||[]).length || activeRisks().length);
+  return !!(state._active && !state.id && (text(state.client?.name) || text(state.client?.ico) || state.activity || (state.selected_insurers||[]).length || activeRisks().length));
+}
+function startNewInquiry(){
+  if(hasUnsavedActiveInquiry() && !confirm('Máte rozpracovanou neuloženou poptávku. Chcete ji opustit a založit novou?')) return;
+  resetInquiry(false);
+  state._active = true;
+  $('saveStatus').textContent = 'Nová rozpracovaná poptávka – zatím neuloženo do DB.';
+  showView('inquiryView');
+  updateActiveInquiryBanner();
+}
+function closeActiveInquiry(){
+  if(hasUnsavedActiveInquiry() && !confirm('Máte rozpracovanou neuloženou poptávku. Opravdu ji chcete zavřít?')) return;
+  resetInquiry(false);
+  state._active = false;
+  $('saveStatus').textContent = 'Není vybrána žádná aktivní poptávka.';
+  showView('inquiryView');
+  updateActiveInquiryBanner();
 }
 function protectedViewName(id){
   return {aiView:'AI zpracování', offersView:'Nabídky', comparisonView:'Porovnání', reportView:'Zpráva pro klienta'}[id] || '';
@@ -520,7 +540,7 @@ function renderCatalogs(){
 function resetInquiry(confirmIt){
   if(confirmIt && !confirm('Opravdu založit novou poptávku? Neuložené změny se ztratí.')) return;
   const user = state.adviser;
-  state = { id:null, adviser:user, client:{}, questionnaire:{}, activity:null, extended_client:{}, insurance_settings:{}, insured_persons:[], liability_params:[], special_clauses:[], risks:[], selected_insurers:[], additional_requirements:[], offers:{}, ai_imports:[], title:"", status:"rozpracováno", comparison_strategy:"bezpecnost", report:{advisor_note:"", client_selected_offer:"", client_choice_reason:""} };
+  state = { _active:false, id:null, adviser:user, client:{}, questionnaire:{}, activity:null, extended_client:{}, insurance_settings:{}, insured_persons:[], liability_params:[], special_clauses:[], risks:[], selected_insurers:[], additional_requirements:[], offers:{}, ai_imports:[], title:"", status:"rozpracováno", comparison_strategy:"bezpecnost", report:{advisor_note:"", client_selected_offer:"", client_choice_reason:""} };
   $('inquiryId').value = '';
   ['clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','insuranceStart','insurancePeriodCustom','turnover','employees','territoryCustom','exportCustom','clientRepresentedBy','clientSigner','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope'].forEach(id=>{ if($(id)) $(id).value=''; });
   $('insurancePeriodSelect').value='1 rok'; $('territorySelect').value='Česká republika'; $('exportSelect').value='Ne';
@@ -1187,6 +1207,7 @@ async function saveInquiry(){
   try{
     const res = await api('/api/inquiries', {method:'POST', body:JSON.stringify(state)});
     if(res.id){ state.id=res.id; $('inquiryId').value=res.id; }
+    state._active = true;
     backupInquiryLocally(state);
     $('saveStatus').textContent=res.message || 'Uloženo. Poptávka je nyní aktivní a všechny sekce pracují s touto poptávkou.';
     updateActiveInquiryBanner();
@@ -1247,6 +1268,7 @@ async function openInquiry(id, source='db', localKey=''){
 }
 function applyState(s){
   state = {...state, ...s, offers:s.offers||{}};
+  state._active = true;
   if((!state.offers || !Object.keys(state.offers).length) && state.id){
     const local = localInquiryBackups().find(x=>String(x.id||'')===String(state.id) && x.offers && Object.keys(x.offers).length);
     if(local){ state.offers = local.offers; $('saveStatus').textContent='Nabídky byly doplněny z lokální zálohy prohlížeče.'; }
@@ -1281,11 +1303,18 @@ function statusClass(st){
 }
 function updateActiveInquiryBanner(){
   const b=$('activeInquiryBanner'); if(!b) return;
-  const has=!!(state.id || text(state.client?.name) || text(state.client?.ico) || state.activity || (state.selected_insurers||[]).length || activeRisks().length);
-  b.classList.toggle('hidden', !has);
-  if(!has) return;
+  b.classList.remove('hidden');
+  const has=hasActiveInquiryContext();
+  b.classList.toggle('no-active', !has);
+  if(!has){
+    $('activeInquiryTitle').textContent = 'Není vybrána žádná poptávka';
+    $('activeInquiryMeta').innerHTML = '<span class="workflow-badge draft">bez aktivního případu</span>';
+    if($('activeInquiryHint')) $('activeInquiryHint').textContent = 'Založte novou poptávku nebo otevřete uloženou z přehledu. Návazné sekce se aktivují až po výběru poptávky.';
+    if($('inquiryStatusSelect')) $('inquiryStatusSelect').value = 'rozpracováno';
+    return;
+  }
   const offerCount=Object.keys(state.offers||{}).length;
-  const client=state.client?.name || (state.client?.ico ? `IČO ${state.client.ico}` : 'Rozpracovaná poptávka');
+  const client=state.client?.name || (state.client?.ico ? `IČO ${state.client.ico}` : 'Nová rozpracovaná poptávka');
   const activity=state.activity?.name || 'činnost zatím nevybrána';
   const sourceLabel = state.id ? `DB #${state.id}` : 'rozpracováno – dosud neuloženo do DB';
   $('activeInquiryTitle').textContent = state.id ? `#${state.id} – ${client}` : client;

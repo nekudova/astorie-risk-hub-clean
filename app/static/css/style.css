@@ -454,3 +454,17 @@ main{max-width:none;margin:0;padding:20px;}
   float:right;
   width:7px;height:7px;border-radius:50%;background:rgba(252,76,2,.9);margin-top:6px;
 }
+
+/* MVP 0.45 – režimy aktivní poptávky */
+.active-inquiry-banner.no-active {
+  border-style: dashed;
+  background: #f8fafc;
+  opacity: 0.95;
+}
+.active-inquiry-banner.no-active .active-actions select,
+.active-inquiry-banner.no-active .active-actions button.ghost {
+  opacity: .65;
+}
+.nav-btn.locked {
+  opacity: .55;
+}
