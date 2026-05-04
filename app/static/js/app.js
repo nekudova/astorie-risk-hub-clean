@@ -472,8 +472,29 @@ function bindUI(){
 
 
 
+function hasActiveInquiryContext(){
+  collectForm();
+  return !!(state.id || text(state.client?.name) || text(state.client?.ico) || state.activity || (state.selected_insurers||[]).length || activeRisks().length);
+}
+function protectedViewName(id){
+  return {aiView:'AI zpracování', offersView:'Nabídky', comparisonView:'Porovnání', reportView:'Zpráva pro klienta'}[id] || '';
+}
+function requireActiveInquiryForView(id){
+  const name = protectedViewName(id);
+  if(!name) return true;
+  if(hasActiveInquiryContext()) return true;
+  const msg = `Nejprve založte nebo načtěte poptávku. Sekce „${name}“ vždy pracuje s aktivní poptávkou.`;
+  if($('saveStatus')) $('saveStatus').textContent = msg;
+  showView('inquiryView');
+  return false;
+}
 function showView(id){
   collectForm();
+  if(protectedViewName(id) && !hasActiveInquiryContext()){
+    const msg = `Nejprve založte nebo načtěte poptávku. Sekce „${protectedViewName(id)}“ se váže ke konkrétní aktivní poptávce.`;
+    if($('saveStatus')) $('saveStatus').textContent = msg;
+    id='inquiryView';
+  }
   document.querySelectorAll('.app-section').forEach(x=>x.classList.add('hidden'));
   $(id).classList.remove('hidden');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
@@ -485,6 +506,7 @@ function showView(id){
   if(id==='guideView') renderGuide();
   if(id==='suggestionsView') loadSuggestions();
   if(id==='adminView') renderAdmin();
+  updateActiveInquiryBanner();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -825,8 +847,8 @@ function activeRisks(){ return (state.risks||[]).filter(r=>r.enabled); }
 function selectedInsurers(){ return (state.selected_insurers||[]).map(id=>(CATALOG.insurers||[]).find(i=>i.id===id)).filter(Boolean); }
 
 function updateAll(){
-  updateActiveInquiryBanner();
   collectForm();
+  updateActiveInquiryBanner();
   try { updateDocs(); } catch(e) { console.error('Chyba aktualizace dokumentů:', e); }
   try { renderComparison(); } catch(e) { console.error('Chyba aktualizace porovnání:', e); }
   if(document.getElementById('guideView') && !document.getElementById('guideView').classList.contains('hidden')) {
@@ -1166,7 +1188,7 @@ async function saveInquiry(){
     const res = await api('/api/inquiries', {method:'POST', body:JSON.stringify(state)});
     if(res.id){ state.id=res.id; $('inquiryId').value=res.id; }
     backupInquiryLocally(state);
-    $('saveStatus').textContent=res.message || 'Uloženo.';
+    $('saveStatus').textContent=res.message || 'Uloženo. Poptávka je nyní aktivní a všechny sekce pracují s touto poptávkou.';
     updateActiveInquiryBanner();
   }catch(e){
     backupInquiryLocally(state);
@@ -1220,7 +1242,7 @@ async function openInquiry(id, source='db', localKey=''){
   }
   if($('savedInquiryModal')) $('savedInquiryModal').classList.add('hidden');
   showView('inquiryView');
-  $('saveStatus').textContent='Poptávka načtena včetně nabídek a zprávy.';
+  $('saveStatus').textContent='Poptávka načtena. Nabídky, porovnání a zpráva se nyní vztahují k této aktivní poptávce.';
   updateActiveInquiryBanner();
 }
 function applyState(s){
@@ -1259,14 +1281,16 @@ function statusClass(st){
 }
 function updateActiveInquiryBanner(){
   const b=$('activeInquiryBanner'); if(!b) return;
-  const has=!!state.id;
+  const has=!!(state.id || text(state.client?.name) || text(state.client?.ico) || state.activity || (state.selected_insurers||[]).length || activeRisks().length);
   b.classList.toggle('hidden', !has);
   if(!has) return;
   const offerCount=Object.keys(state.offers||{}).length;
-  const client=state.client?.name || 'Bez názvu klienta';
-  const activity=state.activity?.name || 'bez činnosti';
-  $('activeInquiryTitle').textContent = `#${state.id} – ${client}`;
-  $('activeInquiryMeta').innerHTML = `<span class="workflow-badge ${statusClass(state.status)}">${state.status||'rozpracováno'}</span> · ${activity} · Nabídky: ${offerCount} · zdroj: DB`;
+  const client=state.client?.name || (state.client?.ico ? `IČO ${state.client.ico}` : 'Rozpracovaná poptávka');
+  const activity=state.activity?.name || 'činnost zatím nevybrána';
+  const sourceLabel = state.id ? `DB #${state.id}` : 'rozpracováno – dosud neuloženo do DB';
+  $('activeInquiryTitle').textContent = state.id ? `#${state.id} – ${client}` : client;
+  $('activeInquiryMeta').innerHTML = `<span class="workflow-badge ${statusClass(state.status)}">${state.status||'rozpracováno'}</span> · ${activity} · Nabídky: ${offerCount} · ${sourceLabel}`;
+  if($('activeInquiryHint')) $('activeInquiryHint').textContent = 'Menu vlevo vždy pracuje s touto aktivní poptávkou. Pro stabilní práci ji uložte do DB.';
   if($('inquiryStatusSelect')) $('inquiryStatusSelect').value = state.status || 'rozpracováno';
 }
 function inquiryMatchesFilters(i, status, search){

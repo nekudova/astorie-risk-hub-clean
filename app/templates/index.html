@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=43">
+  <link rel="stylesheet" href="/static/css/style.css?v=44">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.43 · levé menu + oddělený admin režim</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.44 · aktivní poptávka + bezpečná navigace</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -46,9 +46,10 @@
 
       <div id="activeInquiryBanner" class="active-inquiry-banner hidden">
         <div>
-          <span class="mini-label">Aktivní poptávka</span>
+          <span class="mini-label">Aktivní poptávka / obchodní případ</span>
           <strong id="activeInquiryTitle">Bez aktivní poptávky</strong>
           <span id="activeInquiryMeta" class="muted"></span>
+          <span id="activeInquiryHint" class="active-inquiry-hint"></span>
         </div>
         <div class="active-actions">
           <label>Stav

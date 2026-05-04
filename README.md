@@ -1,17 +1,23 @@
-MVP 0.43 – Odpovědnost jako rozklikávací modul
+# ASTORIE Business Risk Hub – MVP 0.44
 
-# ASTORIE Business Risk Hub
+Bezpečná verze navazující na 0.43.
 
-MVP 0.43 – profesionální karta dalších pojištěných osob ve stylu sekce Klient, ARES a profesionální texty.
+## Hlavní změna
+- přidán jasný kontext **Aktivní poptávka**,
+- menu Nabídky / Porovnání / Zpráva / AI vždy pracuje s aktuální poptávkou,
+- pokud není poptávka založená nebo načtená, aplikace poradce vrátí do Poptávky,
+- po načtení nebo uložení poptávky je jasně vidět, s čím poradce pracuje.
 
-Zachováno: ARES, DB, Moje poptávky, Admin, Nabídky, Porovnání, Zpráva a PDF.
-Opraveno: dynamická tlačítka pro přidání vlastních údajů/osob/parametrů/ujednání + cache busting JS.
+## Zachováno
+- DB,
+- ARES,
+- Moje poptávky,
+- Admin,
+- Nabídky,
+- Porovnání,
+- Zpráva/PDF,
+- dosavadní datové struktury.
 
-
-MVP 0.43 – oprava vizuálu sekce Další pojištěné osoby, cache-busting CSS/JS.
-
-
-## MVP 0.43
-- Levé fixní pracovní menu poradce.
-- Administrace oddělena jako samostatný režim dole v menu.
-- Backend, DB, ARES a ukládání beze změny.
+Render nastavení:
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`

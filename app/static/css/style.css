@@ -367,7 +367,7 @@ body{font-size:15px;}
 @media(max-width:900px){.liability-module-head{flex-direction:column;}.liability-module-actions{min-width:0;width:100%;}.liability-summary-grid{grid-template-columns:1fr;}}
 
 
-/* MVP 0.43 – profesionální levé menu + oddělená administrace */
+/* MVP 0.43/0.44 – profesionální levé menu + aktivní poptávka */
 body{background:linear-gradient(180deg,#f7fbfc,#e9f3f5);}
 .topbar{height:74px;padding:0 28px;}
 .brand .logo{width:44px;height:44px;border-radius:12px;font-size:22px;}
@@ -436,4 +436,21 @@ main{max-width:none;margin:0;padding:20px;}
   .nav-btn.admin-only{margin-top:0!important;}
   #appView > :not(.app-nav){grid-column:auto;}
   .hero{grid-template-columns:1fr;}
+}
+
+
+/* MVP 0.44 – aktivní poptávka a bezpečná navigace */
+.active-inquiry-banner{
+  border-left:7px solid var(--o)!important;
+  background:linear-gradient(90deg,#ffffff,#f3fbfc)!important;
+}
+.active-inquiry-banner strong{font-size:18px;color:var(--p);display:block;margin:2px 0 4px;}
+.active-inquiry-hint{display:block;color:var(--mut);font-size:12px;font-weight:800;margin-top:4px;}
+.nav-btn[data-view="offersView"]::after,
+.nav-btn[data-view="comparisonView"]::after,
+.nav-btn[data-view="reportView"]::after,
+.nav-btn[data-view="aiView"]::after{
+  content:'';
+  float:right;
+  width:7px;height:7px;border-radius:50%;background:rgba(252,76,2,.9);margin-top:6px;
 }
