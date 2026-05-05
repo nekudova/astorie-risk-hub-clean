@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=46">
+  <link rel="stylesheet" href="/static/css/style.css?v=49">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.48 · oprava po 0.47 – stabilní ARES</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.49 · čistá odpovědnost + rychlejší workflow</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -150,17 +150,17 @@
           <div class="grid3">
             <label>Požadovaný počátek pojištění<input id="insuranceStart" type="date"></label>
             <label>Požadovaná pojistná doba
-              <select id="insurancePeriodSelect"><option>1 rok</option><option>3 roky</option><option>neurčito</option><option value="custom">jiné – doplnit vlastní</option></select>
+              <select id="insurancePeriodSelect"><option value="">Vyberte</option><option>1 rok</option><option>3 roky</option><option>neurčito</option><option value="custom">jiné – doplnit vlastní</option></select>
             </label>
             <label>Vlastní pojistná doba<input id="insurancePeriodCustom" placeholder="např. od 1.7.2026 do 31.12.2027"></label>
             <label>Roční obrat<input id="turnover" placeholder="např. 25 000 000 Kč"></label>
             <label>Počet zaměstnanců<input id="employees" placeholder="např. 25"></label>
             <label>Územní rozsah
-              <select id="territorySelect"><option>Česká republika</option><option>Česká republika + EU</option><option>Evropa</option><option>Svět bez USA/Kanady</option><option value="custom">jiný – doplnit vlastní</option></select>
+              <select id="territorySelect"><option value="">Vyberte</option><option>Česká republika</option><option>Česká republika + EU</option><option>Evropa</option><option>Svět bez USA/Kanady</option><option value="custom">jiný – doplnit vlastní</option></select>
             </label>
             <label>Vlastní územní rozsah<input id="territoryCustom"></label>
             <label>Export / zahraničí
-              <select id="exportSelect"><option>Ne</option><option>Ano – EU</option><option>Ano – mimo EU</option><option>Ano – USA/Kanada</option><option value="custom">jiné – doplnit vlastní</option></select>
+              <select id="exportSelect"><option value="">Vyberte</option><option>Ne</option><option>Ano – EU</option><option>Ano – mimo EU</option><option>Ano – USA/Kanada</option><option value="custom">jiné – doplnit vlastní</option></select>
             </label>
             <label>Vlastní export<input id="exportCustom"></label>
           </div>
@@ -173,7 +173,7 @@
           <div class="grid3">
             <label>Osoba zastupující klienta<input id="clientRepresentedBy" placeholder="jméno, funkce"></label>
             <label>Osoba podepisující smlouvu<input id="clientSigner" placeholder="jméno, funkce"></label>
-            <label>Způsob podpisu<select id="signatureMethod"><option>elektronicky</option><option>papírově</option><option>kombinovaně</option><option value="custom">jiné – doplnit vlastní</option></select></label>
+            <label>Způsob podpisu<select id="signatureMethod"><option value="">Vyberte</option><option>elektronicky</option><option>papírově</option><option>kombinovaně</option><option value="custom">jiné – doplnit vlastní</option></select></label>
             <label>Vlastní způsob podpisu<input id="signatureMethodCustom"></label>
             <label>Zápis v OR / evidence<input id="commercialRegister" placeholder="např. KS, oddíl, vložka"></label>
             <label>Účetní rok od<input id="fiscalYearFrom" placeholder="např. 1.1."></label>
@@ -194,8 +194,8 @@
             </div>
           </div>
           <div class="attachment-professional-grid">
-            <label class="check-card required"><input type="checkbox" id="attOrExtract" checked><span><b>Výpis z OR / evidence</b><small>Identifikace a ověření klienta</small></span></label>
-            <label class="check-card required"><input type="checkbox" id="attAstoriePower" checked><span><b>Plná moc ASTORIE</b><small>Pro zastupování v poptávkovém řízení</small></span></label>
+            <label class="check-card required"><input type="checkbox" id="attOrExtract"><span><b>Výpis z OR / evidence</b><small>Identifikace a ověření klienta</small></span></label>
+            <label class="check-card required"><input type="checkbox" id="attAstoriePower"><span><b>Plná moc ASTORIE</b><small>Pro zastupování v poptávkovém řízení</small></span></label>
             <label class="check-card"><input type="checkbox" id="attInsuranceDocs"><span><b>Dosavadní pojistné smlouvy / pojistky</b><small>Pro kontrolu návaznosti a rozsahu krytí</small></span></label>
             <label class="check-card"><input type="checkbox" id="attClaimsHistory"><span><b>Škodní průběh</b><small>Podklad pro nacenění a posouzení rizika</small></span></label>
             <label class="check-card"><input type="checkbox" id="attContracts"><span><b>Smlouvy / obchodní podmínky klienta</b><small>Kontrola odpovědnostních závazků</small></span></label>
@@ -207,9 +207,9 @@
           <div class="section-head"><div><h2>6. Pojistné nastavení</h2><p>Pojistné technické údaje. Poradce může doplnit vlastní údaj, pokud v předvolbě chybí.</p></div><button id="addInsuranceExtraRowBtn" class="secondary" type="button" data-dynamic-action="insuranceExtra">+ Přidat údaj</button></div>
           <div class="grid3">
             <label>Pojistné období<input id="policyPeriod" placeholder="např. roční"></label>
-            <label>Splatnost pojistného<input id="premiumDue" placeholder="např. ročně / pololetně"></label>
-            <label>Měna<input id="currency" value="CZK"></label>
-            <label>Inkaso pojistného<select id="premiumCollection"><option>Ne</option><option>Ano</option><option>Inkasní makléř ASTORIE</option><option value="custom">jiné – doplnit vlastní</option></select></label>
+            <label>Frekvence placení<select id="premiumDue"><option value="">Vyberte</option><option>Měsíčně</option><option>Čtvrtletně</option><option>Pololetně</option><option>Ročně</option><option>Jednorázově</option><option value="custom">jiné – doplnit vlastní</option></select></label>
+            <label>Vlastní frekvence placení<input id="premiumDueCustom" placeholder="např. dle dohody s klientem"></label><label>Měna<select id="currency"><option value="">Vyberte</option><option>CZK</option><option>EUR</option><option>USD</option></select></label>
+            <label>Inkaso pojistného<select id="premiumCollection"><option value="">Vyberte</option><option>Ne</option><option>Ano</option><option>Inkasní makléř ASTORIE</option><option value="custom">jiné – doplnit vlastní</option></select></label>
             <label>Vlastní inkaso<input id="premiumCollectionCustom"></label>
             <label>Číslo účtu pro inkasního makléře<input id="brokerAccount" placeholder="např. 123456789/0100"></label>
             <label>Variabilní symbol / poznámka k platbě<input id="brokerPaymentNote" placeholder="VS, specifický symbol nebo poznámka"></label>
@@ -233,7 +233,7 @@
               <p>Parametry odpovědnostního pojištění a speciální ujednání jsou sbalené v samostatném modulu. Poradce je rozbalí pouze tehdy, pokud má být odpovědnost součástí poptávky.</p>
             </div>
             <div class="liability-module-actions">
-              <label class="liability-include"><input id="includeLiabilityModule" type="checkbox" checked> Zahrnout do poptávky</label>
+              <label class="liability-include"><input id="includeLiabilityModule" type="checkbox"> Zahrnout odpovědnost do poptávky</label>
               <button id="toggleLiabilityModuleBtn" class="secondary" type="button">Rozbalit odpovědnost</button>
             </div>
           </div>
@@ -518,6 +518,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=48"></script>
+  <script src="/static/js/app.js?v=49"></script>
 </body>
 </html>

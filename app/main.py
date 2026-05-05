@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="0.30")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="0.49")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -107,6 +107,8 @@ def init_db() -> bool:
                 "ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS full_payload JSONB NOT NULL DEFAULT '{}'::jsonb;",
                 "ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();",
                 "ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();",
+                "ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;",
+                "ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS deleted_by TEXT;",
             ]
             for stmt in inquiry_migrations:
                 cur.execute(stmt)
@@ -451,6 +453,7 @@ def list_inquiries():
                     COALESCE(i.full_payload->'report'->>'client_selected_offer', '') AS client_selected_offer
                 FROM inquiries i
                 LEFT JOIN clients c ON c.id = i.client_id
+                WHERE i.deleted_at IS NULL
                 ORDER BY i.updated_at DESC NULLS LAST, i.id DESC
                 LIMIT 500;
                 """
@@ -515,7 +518,7 @@ def get_inquiry(inquiry_id: int):
                        c.contact_person, c.contact_email, c.contact_phone, c.website
                 FROM inquiries i
                 LEFT JOIN clients c ON c.id = i.client_id
-                WHERE i.id=%s
+                WHERE i.id=%s AND i.deleted_at IS NULL
             """, (inquiry_id,))
             row = cur.fetchone()
             if not row:
@@ -539,6 +542,34 @@ def get_inquiry(inquiry_id: int):
             return {"ok": True, "item": item}
     finally:
         conn.close()
+
+@app.post("/api/inquiries/{inquiry_id}/delete")
+async def delete_inquiry(inquiry_id: int, request: Request):
+    payload = await request.json()
+    actor_email = (payload.get("actor_email") or "").strip().lower()
+    actor_role = (payload.get("actor_role") or "").strip().lower()
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "message": "Databáze není připojena. Poptávku lze odstranit jen lokálně v prohlížeči."}
+    try:
+        init_db()
+        with conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id, adviser_email, title FROM inquiries WHERE id=%s AND deleted_at IS NULL", (inquiry_id,))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Poptávka nebyla nalezena nebo už byla odstraněna.")
+            owner_email = (row.get("adviser_email") or "").strip().lower()
+            if actor_role != "admin" and actor_email and owner_email and actor_email != owner_email:
+                raise HTTPException(status_code=403, detail="Poradce může odstranit pouze vlastní poptávku.")
+            cur.execute("UPDATE inquiries SET deleted_at=NOW(), deleted_by=%s, updated_at=NOW() WHERE id=%s", (actor_email, inquiry_id))
+            cur.execute(
+                "INSERT INTO audit_log (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)",
+                ("inquiry", inquiry_id, "soft_delete", actor_email, json.dumps({"title": row.get("title") or ""})),
+            )
+        return {"ok": True, "db": True, "message": "Poptávka byla odstraněna z aktivního přehledu."}
+    finally:
+        conn.close()
+
 
 @app.post("/api/suggestions")
 async def save_suggestion(request: Request):

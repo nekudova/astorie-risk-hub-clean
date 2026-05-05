@@ -341,8 +341,8 @@ function safeUpdateAll(){ try { updateAll(); } catch(e) { console.error('ASTORIE
 function flashStatus(msg){ const el=$('saveStatus')||$('importStatus'); if(el){ el.textContent=msg; setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 2500); } }
 function updateLiabilityModuleSummary(){
   const include = !!$('includeLiabilityModule')?.checked;
-  const pCount = document.querySelectorAll('.liability-param-row').length;
-  const cCount = document.querySelectorAll('.special-clause-row').length;
+  const pCount = document.querySelectorAll('.liability-param-row .lpInclude:checked').length;
+  const cCount = document.querySelectorAll('.special-clause-row .scInclude:checked').length;
   if($('liabilityParamCount')) $('liabilityParamCount').textContent = String(pCount);
   if($('specialClauseCount')) $('specialClauseCount').textContent = String(cCount);
   if($('liabilityModuleStatus')) $('liabilityModuleStatus').textContent = include ? (pCount || cCount ? 'Rozpracováno / připraveno k ověření' : 'Zahrnuto bez doplněných detailů') : 'Nezahrnuto do poptávky';
@@ -469,7 +469,7 @@ function bindUI(){
   if($('saveSuggestionBtn')) $('saveSuggestionBtn').onclick = saveSuggestion;
   if($('loadSuggestionsBtn')) $('loadSuggestionsBtn').onclick = loadSuggestions;
   document.querySelectorAll('input[name=advisorMode]').forEach(r=>r.onchange=renderGuide);
-  ['insuranceStart','insurancePeriodSelect','insurancePeriodCustom','turnover','employees','territorySelect','territoryCustom','exportSelect','exportCustom','clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','adviserName','adviserEmail','adviserCompany','adviserRegistration','clientRepresentedBy','clientSigner','signatureMethod','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','currency','premiumCollection','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope','attOrExtract','attAstoriePower','attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).addEventListener('input', updateAll); if($(id)) $(id).addEventListener('change', updateAll); });
+  ['insuranceStart','insurancePeriodSelect','insurancePeriodCustom','turnover','employees','territorySelect','territoryCustom','exportSelect','exportCustom','clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','adviserName','adviserEmail','adviserCompany','adviserRegistration','clientRepresentedBy','clientSigner','signatureMethod','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','premiumDueCustom','currency','premiumCollection','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope','attOrExtract','attAstoriePower','attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).addEventListener('input', updateAll); if($(id)) $(id).addEventListener('change', updateAll); });
   ['turnover'].forEach(id=>$(id).addEventListener('blur', e=>{ normaliseMoneyInput(e.target); updateAll(); }));
 }
 
@@ -534,7 +534,7 @@ function showView(id){
 }
 
 function renderCatalogs(){
-  $('activitySelect').innerHTML = (CATALOG.activities||[]).map(a=>`<option value="${a.code}">${a.name}</option>`).join('');
+  $('activitySelect').innerHTML = '<option value="">Vyberte činnost klienta</option>' + (CATALOG.activities||[]).map(a=>`<option value="${a.code}">${a.name}</option>`).join('');
   $('insurersList').innerHTML = (CATALOG.insurers||[]).filter(i=>i.active).map(i=>`<label class="check"><input type="checkbox" value="${i.id}"> <b>${i.short||''}</b> ${i.name||''}</label>`).join('');
   if($('aiInsurerSelect')) $('aiInsurerSelect').innerHTML = (CATALOG.insurers||[]).filter(i=>i.active).map(i=>`<option value="${i.id}">${i.short||''} – ${i.name||''}</option>`).join('');
   $('insurersList').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{ syncSelectedInsurers(); renderOffers(); updateAll(); });
@@ -546,11 +546,11 @@ function resetInquiry(confirmIt){
   state = { _active:false, id:null, adviser:user, client:{}, questionnaire:{}, activity:null, extended_client:{}, insurance_settings:{}, insured_persons:[], liability_params:[], special_clauses:[], risks:[], selected_insurers:[], additional_requirements:[], offers:{}, ai_imports:[], title:"", status:"rozpracováno", comparison_strategy:"bezpecnost", report:{advisor_note:"", client_selected_offer:"", client_choice_reason:""} };
   $('inquiryId').value = '';
   ['clientIco','clientName','clientLegal','clientAddress','clientDataBox','clientContact','clientEmail','clientPhone','clientWeb','insuranceStart','insurancePeriodCustom','turnover','employees','territoryCustom','exportCustom','clientRepresentedBy','clientSigner','signatureMethodCustom','commercialRegister','fiscalYearFrom','fiscalYearTo','mainBusinessActivity','additionalBusinessActivities','clientAttachments','clientExtraNotes','policyPeriod','premiumDue','premiumCollectionCustom','brokerAccount','brokerPaymentNote','jurisdiction','retroactivity','timeScope'].forEach(id=>{ if($(id)) $(id).value=''; });
-  $('insurancePeriodSelect').value='1 rok'; $('territorySelect').value='Česká republika'; $('exportSelect').value='Ne';
-  if($('signatureMethod')) $('signatureMethod').value='elektronicky'; if($('currency')) $('currency').value='CZK'; if($('premiumCollection')) $('premiumCollection').value='Ne'; ['attOrExtract','attAstoriePower'].forEach(id=>{ if($(id)) $(id).checked=true; }); ['attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).checked=false; });
+  $('insurancePeriodSelect').value=''; $('territorySelect').value=''; $('exportSelect').value='';
+  if($('signatureMethod')) $('signatureMethod').value=''; if($('currency')) $('currency').value=''; if($('premiumCollection')) $('premiumCollection').value=''; if($('premiumDue')) $('premiumDue').value=''; if($('premiumDueCustom')) $('premiumDueCustom').value=''; ['attOrExtract','attAstoriePower','attInsuranceDocs','attClaimsHistory','attContracts'].forEach(id=>{ if($(id)) $(id).checked=false; });
   ['clientExtraRows','insuredPersonsList','liabilityParamsList','specialClausesList'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
   populateDefaultLiabilityAndClauses();
-  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = true;
+  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = false;
   if($('liabilityModuleBody')) $('liabilityModuleBody').classList.add('hidden');
   if($('toggleLiabilityModuleBtn')) $('toggleLiabilityModuleBtn').textContent = 'Rozbalit odpovědnost';
   updateLiabilityModuleSummary();
@@ -558,7 +558,9 @@ function resetInquiry(confirmIt){
   $('requirementsList').innerHTML='';
   $('inquiriesList').innerHTML='';
   fillAdviser();
-  selectActivity((CATALOG.activities&&CATALOG.activities[0]?.code) || 'construction');
+  if($('activitySelect')) $('activitySelect').value='';
+  if($('activityProfile')) $('activityProfile').innerHTML='<p class="muted">Vyberte typ klienta / činnost. Teprve potom aplikace navrhne relevantní rizika.</p>';
+  renderRisks();
   updateActiveInquiryBanner();
   updateAll();
 }
@@ -595,12 +597,13 @@ async function loadAresForInsuredRow(row){
 }
 
 function selectActivity(code){
-  const activity = (CATALOG.activities||[]).find(a=>a.code===code) || (CATALOG.activities||[])[0];
+  if(!code){ state.activity=null; state.risks=[]; if($('activityProfile')) $('activityProfile').innerHTML='<p class="muted">Vyberte typ klienta / činnost. Teprve potom aplikace navrhne relevantní rizika.</p>'; renderRisks(); updateAll(); return; }
+  const activity = (CATALOG.activities||[]).find(a=>a.code===code);
   if(!activity) return;
   state.activity = activity;
   $('activitySelect').value = activity.code;
   $('activityProfile').innerHTML = `<h3>${activity.name}</h3><p>${activity.description||''}</p><p><b>Rizikovost:</b> ${activity.risk_level||''}</p><p><b>Orientační limit:</b> ${activity.limit_hint||''}</p>`;
-  state.risks = JSON.parse(JSON.stringify((CATALOG.risks||{})[activity.code] || [])).map(r=>({...r, enabled: r.default_on !== false, note:''}));
+  state.risks = JSON.parse(JSON.stringify((CATALOG.risks||{})[activity.code] || [])).map(r=>({...r, enabled: false, note:''}));
   renderRisks(); updateAll();
 }
 
@@ -728,13 +731,13 @@ function addInsuredPerson(row={}){
 function addLiabilityParam(row={}){
   const wrap=ensureWrap('liabilityParamsList','addLiabilityParamBtn'); if(!wrap) throw new Error('Chybí kontejner pro parametry odpovědnosti');
   const div=document.createElement('div'); div.className='dynamic-row liability-param-row';
-  div.innerHTML=`<label>Předmět / parametr<input class="lpSubject" value="${escAttr(row.subject||'')}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label>Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label><button type="button" class="secondary delRow">Smazat</button>`;
+  div.innerHTML=`<label class="checkline liability-pick"><input type="checkbox" class="lpInclude" ${row.include?'checked':''}> zahrnout</label><label>Předmět / parametr<input class="lpSubject" value="${escAttr(row.subject||'')}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label>Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label>${row.catalog?'<span class="muted catalog-note">katalog</span>':'<button type="button" class="secondary delRow">Smazat</button>'}`;
   wrap.appendChild(div); bindDynamicRow(div); updateLiabilityModuleSummary(); return div;
 }
 function addSpecialClause(row={}){
   const wrap=ensureWrap('specialClausesList','addSpecialClauseBtn'); if(!wrap) throw new Error('Chybí kontejner pro speciální ujednání');
   const div=document.createElement('div'); div.className='dynamic-row special-clause-row';
-  div.innerHTML=`<label>Název<input class="scName" value="${escAttr(row.name||'')}"></label><label>Text ujednání<textarea class="scText">${escTextArea(row.text||'')}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${escTextArea(row.note||'')}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include===false?'':'checked'}> zahrnout do poptávky</label><button type="button" class="secondary delRow">Smazat</button>`;
+  div.innerHTML=`<label>Název<input class="scName" value="${escAttr(row.name||'')}"></label><label>Text ujednání<textarea class="scText">${escTextArea(row.text||'')}</textarea></label><label>Poznámka / vazba<textarea class="scNote">${escTextArea(row.note||'')}</textarea></label><label class="checkline"><input type="checkbox" class="scInclude" ${row.include?'checked':''}> zahrnout do poptávky</label>${row.catalog?'<span class="muted catalog-note">katalog</span>':'<button type="button" class="secondary delRow">Smazat</button>'}`;
   wrap.appendChild(div); bindDynamicRow(div); updateLiabilityModuleSummary(); return div;
 }
 window.addQuestionnaireExtraRow=addQuestionnaireExtraRow;
@@ -746,10 +749,10 @@ window.addSpecialClause=addSpecialClause;
 
 function populateDefaultLiabilityAndClauses(){
   if(!$('liabilityParamsList') || $('liabilityParamsList').children.length===0){
-    DEFAULT_LIABILITY_PARAMS.forEach(addLiabilityParam);
+    DEFAULT_LIABILITY_PARAMS.forEach(r=>addLiabilityParam({...r, include:false, catalog:true}));
   }
   if(!$('specialClausesList') || $('specialClausesList').children.length===0){
-    DEFAULT_SPECIAL_CLAUSES.forEach(addSpecialClause);
+    DEFAULT_SPECIAL_CLAUSES.forEach(r=>addSpecialClause({...r, include:false, catalog:true}));
   }
 }
 
@@ -797,7 +800,7 @@ function collectDynamicBlocks(){
     extra_rows:Array.from(document.querySelectorAll('.client-extra-row')).map(r=>({key:r.querySelector('.extraKey').value,value:r.querySelector('.extraValue').value})).filter(x=>text(x.key)||text(x.value))
   };
   state.insurance_settings = {
-    policy_period:$('policyPeriod')?.value||'', premium_due:$('premiumDue')?.value||'', currency:$('currency')?.value||'CZK',
+    policy_period:$('policyPeriod')?.value||'', premium_due:($('premiumDue')?.value==='custom' ? $('premiumDueCustom')?.value : $('premiumDue')?.value)||'', currency:$('currency')?.value||'',
     premium_collection:($('premiumCollection')?.value==='custom' ? $('premiumCollectionCustom')?.value : $('premiumCollection')?.value)||'',
     broker_account:$('brokerAccount')?.value||'', broker_payment_note:$('brokerPaymentNote')?.value||'',
     jurisdiction:$('jurisdiction')?.value||'', retroactivity:$('retroactivity')?.value||'', time_scope:$('timeScope')?.value||'',
@@ -805,29 +808,34 @@ function collectDynamicBlocks(){
   };
   state.insured_persons = Array.from(document.querySelectorAll('.insured-person-row')).map(r=>({name:r.querySelector('.ipName')?.value||'',id_number:r.querySelector('.ipId')?.value||'',relation:r.querySelector('.ipRelation')?.value||'',relation_custom:r.querySelector('.ipRelationCustom')?.value||'',address:r.querySelector('.ipAddress')?.value||'',activity:r.querySelector('.ipActivity')?.value||'',turnover:r.querySelector('.ipTurnover')?.value||''})).filter(x=>Object.values(x).some(text));
   state.liability_included = !!$('includeLiabilityModule')?.checked;
-  state.liability_params = Array.from(document.querySelectorAll('.liability-param-row')).map(r=>({subject:r.querySelector('.lpSubject').value,limit:r.querySelector('.lpLimit').value,sublimit:r.querySelector('.lpSublimit').value,deductible:r.querySelector('.lpDeductible').value,note:r.querySelector('.lpNote').value})).filter(x=>Object.values(x).some(text));
-  state.special_clauses = Array.from(document.querySelectorAll('.special-clause-row')).map(r=>({name:r.querySelector('.scName').value,text:r.querySelector('.scText').value,note:r.querySelector('.scNote').value,include:r.querySelector('.scInclude').checked})).filter(x=>text(x.name)||text(x.text)||text(x.note));
+  if(state.liability_included){
+    state.liability_params = Array.from(document.querySelectorAll('.liability-param-row')).map(r=>({include:!!r.querySelector('.lpInclude')?.checked, subject:r.querySelector('.lpSubject').value,limit:r.querySelector('.lpLimit').value,sublimit:r.querySelector('.lpSublimit').value,deductible:r.querySelector('.lpDeductible').value,note:r.querySelector('.lpNote').value})).filter(x=>x.include && Object.values(x).some(text));
+    state.special_clauses = Array.from(document.querySelectorAll('.special-clause-row')).map(r=>({name:r.querySelector('.scName').value,text:r.querySelector('.scText').value,note:r.querySelector('.scNote').value,include:r.querySelector('.scInclude').checked})).filter(x=>x.include && (text(x.name)||text(x.text)||text(x.note)));
+  } else {
+    state.liability_params = [];
+    state.special_clauses = [];
+  }
   updateLiabilityModuleSummary();
 }
 function renderDynamicBlocksFromState(){
   if(!$('clientExtraRows')) return;
-  $('clientRepresentedBy').value=state.extended_client?.represented_by||''; $('clientSigner').value=state.extended_client?.signer||''; setSelectOrCustom('signatureMethod','signatureMethodCustom',state.extended_client?.signature_method||'elektronicky'); $('commercialRegister').value=state.extended_client?.commercial_register||''; $('fiscalYearFrom').value=state.extended_client?.fiscal_year_from||''; $('fiscalYearTo').value=state.extended_client?.fiscal_year_to||''; $('mainBusinessActivity').value=state.extended_client?.main_business_activity||''; $('additionalBusinessActivities').value=state.extended_client?.additional_business_activities||''; $('clientAttachments').value=state.extended_client?.attachments||''; $('clientExtraNotes').value=state.extended_client?.notes||''; const ap=state.extended_client?.attachment_presets||{}; if($('attOrExtract')) $('attOrExtract').checked = ap.or_extract !== false; if($('attAstoriePower')) $('attAstoriePower').checked = ap.astorie_power !== false; if($('attInsuranceDocs')) $('attInsuranceDocs').checked=!!ap.insurance_docs; if($('attClaimsHistory')) $('attClaimsHistory').checked=!!ap.claims_history; if($('attContracts')) $('attContracts').checked=!!ap.contracts;
-  $('policyPeriod').value=state.insurance_settings?.policy_period||''; $('premiumDue').value=state.insurance_settings?.premium_due||''; $('currency').value=state.insurance_settings?.currency||'CZK'; setSelectOrCustom('premiumCollection','premiumCollectionCustom',state.insurance_settings?.premium_collection||'Ne'); if($('brokerAccount')) $('brokerAccount').value=state.insurance_settings?.broker_account||''; if($('brokerPaymentNote')) $('brokerPaymentNote').value=state.insurance_settings?.broker_payment_note||''; $('jurisdiction').value=state.insurance_settings?.jurisdiction||''; $('retroactivity').value=state.insurance_settings?.retroactivity||''; $('timeScope').value=state.insurance_settings?.time_scope||'';
+  $('clientRepresentedBy').value=state.extended_client?.represented_by||''; $('clientSigner').value=state.extended_client?.signer||''; setSelectOrCustom('signatureMethod','signatureMethodCustom',state.extended_client?.signature_method||''); $('commercialRegister').value=state.extended_client?.commercial_register||''; $('fiscalYearFrom').value=state.extended_client?.fiscal_year_from||''; $('fiscalYearTo').value=state.extended_client?.fiscal_year_to||''; $('mainBusinessActivity').value=state.extended_client?.main_business_activity||''; $('additionalBusinessActivities').value=state.extended_client?.additional_business_activities||''; $('clientAttachments').value=state.extended_client?.attachments||''; $('clientExtraNotes').value=state.extended_client?.notes||''; const ap=state.extended_client?.attachment_presets||{}; if($('attOrExtract')) $('attOrExtract').checked = !!ap.or_extract; if($('attAstoriePower')) $('attAstoriePower').checked = !!ap.astorie_power; if($('attInsuranceDocs')) $('attInsuranceDocs').checked=!!ap.insurance_docs; if($('attClaimsHistory')) $('attClaimsHistory').checked=!!ap.claims_history; if($('attContracts')) $('attContracts').checked=!!ap.contracts;
+  $('policyPeriod').value=state.insurance_settings?.policy_period||''; setSelectOrCustom('premiumDue','premiumDueCustom',state.insurance_settings?.premium_due||''); $('currency').value=state.insurance_settings?.currency||''; setSelectOrCustom('premiumCollection','premiumCollectionCustom',state.insurance_settings?.premium_collection||''); if($('brokerAccount')) $('brokerAccount').value=state.insurance_settings?.broker_account||''; if($('brokerPaymentNote')) $('brokerPaymentNote').value=state.insurance_settings?.broker_payment_note||''; $('jurisdiction').value=state.insurance_settings?.jurisdiction||''; $('retroactivity').value=state.insurance_settings?.retroactivity||''; $('timeScope').value=state.insurance_settings?.time_scope||'';
   if($('questionnaireExtraRows')) { $('questionnaireExtraRows').innerHTML=''; (state.questionnaire?.extra_rows||[]).forEach(addQuestionnaireExtraRow); }
   if($('insuranceExtraRows')) { $('insuranceExtraRows').innerHTML=''; (state.insurance_settings?.extra_rows||[]).forEach(addInsuranceExtraRow); }
   $('clientExtraRows').innerHTML=''; (state.extended_client?.extra_rows||[]).forEach(addClientExtraRow);
   $('insuredPersonsList').innerHTML=''; (state.insured_persons||[]).forEach(addInsuredPerson);
-  $('liabilityParamsList').innerHTML=''; (state.liability_params||[]).forEach(addLiabilityParam);
-  $('specialClausesList').innerHTML=''; (state.special_clauses||[]).forEach(addSpecialClause);
-  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = state.liability_included !== false;
+  $('liabilityParamsList').innerHTML=''; (state.liability_params&&state.liability_params.length?state.liability_params:DEFAULT_LIABILITY_PARAMS.map(r=>({...r, include:false, catalog:true}))).forEach(addLiabilityParam);
+  $('specialClausesList').innerHTML=''; (state.special_clauses&&state.special_clauses.length?state.special_clauses:DEFAULT_SPECIAL_CLAUSES.map(r=>({...r, include:false, catalog:true}))).forEach(addSpecialClause);
+  if($('includeLiabilityModule')) $('includeLiabilityModule').checked = !!state.liability_included;
   updateLiabilityModuleSummary();
 }
 
 function formatAttachmentsForReport(e){
   const ap=e?.attachment_presets||{};
   const arr=[];
-  if(ap.or_extract!==false) arr.push('Výpis z OR / evidence');
-  if(ap.astorie_power!==false) arr.push('Plná moc ASTORIE');
+  if(ap.or_extract) arr.push('Výpis z OR / evidence');
+  if(ap.astorie_power) arr.push('Plná moc ASTORIE');
   if(ap.insurance_docs) arr.push('Dosavadní pojistné smlouvy / pojistky');
   if(ap.claims_history) arr.push('Škodní průběh');
   if(ap.contracts) arr.push('Smlouvy / obchodní podmínky klienta');
@@ -1250,11 +1258,29 @@ async function loadInquiries(){
   }
 }
 function renderInquiryList(items, container, append=false){
-  const html = items.length ? items.map(i=>`<div class="item"><div><b>${i.source==='db'?'#'+i.id:'Lokální záloha'} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${formatDateTimeCz(i.updated_at)||i.updated_at||''}</span><br><small>Stav: <b>${i.status||'rozpracováno'}</b> · Nabídek: <b>${i.offer_count ?? countOffersFromLocal(i)}</b></small></div><div class="item-actions"><span class="pill">${i.source==='db'?'DB':'lokálně'}</span><button class="secondary" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Otevřít</button></div></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
+  const html = items.length ? items.map(i=>`<div class="item"><div><b>${i.source==='db'?'#'+i.id:'Lokální záloha'} ${i.title||''}</b><br><span class="muted">${i.client_name||''} · ${i.activity_name||''} · ${formatDateTimeCz(i.updated_at)||i.updated_at||''}</span><br><small>Stav: <b>${i.status||'rozpracováno'}</b> · Nabídek: <b>${i.offer_count ?? countOffersFromLocal(i)}</b></small></div><div class="item-actions"><span class="pill">${i.source==='db'?'DB':'lokálně'}</span><button class="secondary" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Otevřít</button><button class="ghost delete-inquiry-btn" data-del-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source}">Smazat</button></div></div>`).join('') : '<p class="muted">Zatím nejsou uložené poptávky.</p>';
   if(append) container.innerHTML += html; else container.innerHTML = html;
-  container.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  container.querySelectorAll('button[data-source]:not(.delete-inquiry-btn)').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  container.querySelectorAll('.delete-inquiry-btn').forEach(b=>b.onclick=()=>deleteInquiry(b.dataset.delId,b.dataset.source,b.dataset.local));
 }
 function countOffersFromLocal(i){ try{return Object.keys(i.offers||{}).length}catch(e){return 0} }
+async function deleteInquiry(id, source='db', localKey=''){
+  if(!confirm('Opravdu chcete smazat tuto poptávku z aktivního přehledu? Tato akce ji nevratně neodstraňuje z auditní historie.')) return;
+  try{
+    if(source==='local'){
+      const backups=localInquiryBackups().filter(x=>x.local_key!==localKey && String(x.id||'')!==String(id||''));
+      localStorage.setItem('arh_inquiry_backups', JSON.stringify(backups));
+      flashStatus('Lokální poptávka byla odstraněna z tohoto prohlížeče.');
+    } else {
+      await api('/api/inquiries/'+id+'/delete', {method:'POST', body:JSON.stringify({actor_email:currentUser?.email||'', actor_role:currentUser?.role||''})});
+      flashStatus('Poptávka byla odstraněna z aktivního přehledu.');
+      if(String(state.id||'')===String(id||'')) closeActiveInquiry();
+    }
+    renderMyInquiries();
+    if(currentUser?.role==='admin') renderAdminInquiries();
+    if($('savedInquiryModal') && !$('savedInquiryModal').classList.contains('hidden')) loadInquiries();
+  }catch(e){ alert('Poptávku se nepodařilo smazat: '+(e.message||e)); }
+}
 async function openInquiry(id, source='db', localKey=''){
   if(source==='local'){
     const item=localInquiryBackups().find(x=>x.local_key===localKey || String(x.id||'')===String(id));
@@ -1281,7 +1307,7 @@ function applyState(s){
   fillAdviser();
   $('clientIco').value=state.client?.ico||''; $('clientName').value=state.client?.name||''; $('clientLegal').value=state.client?.legal_form||''; $('clientAddress').value=state.client?.address||''; $('clientDataBox').value=state.client?.data_box||''; $('clientContact').value=state.client?.contact_person||''; $('clientEmail').value=state.client?.contact_email||''; $('clientPhone').value=state.client?.contact_phone||''; $('clientWeb').value=state.client?.website||'';
   $('insuranceStart').value=state.questionnaire?.insurance_start||''; $('turnover').value=state.questionnaire?.turnover||''; $('employees').value=state.questionnaire?.employees||'';
-  setSelectOrCustom('insurancePeriodSelect','insurancePeriodCustom',state.questionnaire?.insurance_period||'1 rok'); setSelectOrCustom('territorySelect','territoryCustom',state.questionnaire?.territory||'Česká republika'); setSelectOrCustom('exportSelect','exportCustom',state.questionnaire?.export_info||'Ne');
+  setSelectOrCustom('insurancePeriodSelect','insurancePeriodCustom',state.questionnaire?.insurance_period||''); setSelectOrCustom('territorySelect','territoryCustom',state.questionnaire?.territory||''); setSelectOrCustom('exportSelect','exportCustom',state.questionnaire?.export_info||'');
   renderDynamicBlocksFromState();
   const act=state.activity?.code || (CATALOG.activities||[])[0]?.code; if(act) { $('activitySelect').value=act; $('activityProfile').innerHTML=`<h3>${state.activity?.name||''}</h3><p>${state.activity?.description||''}</p>`; }
   renderRisks();
@@ -1343,7 +1369,7 @@ function workflowTilesHtml(items){
 }
 function workflowTableHtml(items, showAdvisor){
   if(!items.length) return '<div class="admin-empty">Žádná poptávka neodpovídá filtru.</div>';
-  return `<table><thead><tr><th>ID</th><th>Klient</th><th>Činnost</th>${showAdvisor?'<th>Poradce</th>':''}<th>Stav</th><th>Nabídky</th><th>Poslední změna</th><th>Akce</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.source==='db'?'#'+i.id:'lokální'}</td><td><b>${i.client_name||i.title||'Bez názvu'}</b><br><small>${i.ico||''}</small></td><td>${i.activity_name||'—'}</td>${showAdvisor?`<td>${i.adviser_name||'—'}<br><small>${i.adviser_email||''}</small></td>`:''}<td><span class="workflow-badge ${statusClass(i.status)}">${i.status||'rozpracováno'}</span></td><td>${i.offer_count ?? 0}</td><td>${formatDateTimeCz(i.updated_at)||'—'}</td><td><button class="secondary small-open" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source||'db'}">Otevřít</button></td></tr>`).join('')}</tbody></table>`;
+  return `<table><thead><tr><th>ID</th><th>Klient</th><th>Činnost</th>${showAdvisor?'<th>Poradce</th>':''}<th>Stav</th><th>Nabídky</th><th>Poslední změna</th><th>Akce</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.source==='db'?'#'+i.id:'lokální'}</td><td><b>${i.client_name||i.title||'Bez názvu'}</b><br><small>${i.ico||''}</small></td><td>${i.activity_name||'—'}</td>${showAdvisor?`<td>${i.adviser_name||'—'}<br><small>${i.adviser_email||''}</small></td>`:''}<td><span class="workflow-badge ${statusClass(i.status)}">${i.status||'rozpracováno'}</span></td><td>${i.offer_count ?? 0}</td><td>${formatDateTimeCz(i.updated_at)||'—'}</td><td><button class="secondary small-open" data-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source||'db'}">Otevřít</button><button class="ghost delete-inquiry-btn" data-del-id="${i.id||''}" data-local="${i.local_key||''}" data-source="${i.source||'db'}">Smazat</button></td></tr>`).join('')}</tbody></table>`;
 }
 async function renderMyInquiries(){
   const el=$('myInquiriesTable'); if(!el) return;
@@ -1353,7 +1379,8 @@ async function renderMyInquiries(){
   const filtered=items.filter(i=>inquiryMatchesFilters(i,status,search));
   if($('myInquiryTiles')) $('myInquiryTiles').innerHTML=workflowTilesHtml(items);
   el.innerHTML=workflowTableHtml(filtered,false);
-  el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  el.querySelectorAll('button[data-source]:not(.delete-inquiry-btn)').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  el.querySelectorAll('.delete-inquiry-btn').forEach(b=>b.onclick=()=>deleteInquiry(b.dataset.delId,b.dataset.source,b.dataset.local));
 }
 async function renderAdminInquiries(){
   const el=$('adminInquiriesTable'); if(!el) return;
@@ -1363,7 +1390,8 @@ async function renderAdminInquiries(){
   if($('adminInquiryTiles')) $('adminInquiryTiles').innerHTML=workflowTilesHtml(items);
   if($('adminInquiryCount')) $('adminInquiryCount').textContent=`Zobrazeno ${items.length} poptávek`;
   el.innerHTML=workflowTableHtml(items,true);
-  el.querySelectorAll('button[data-source]').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  el.querySelectorAll('button[data-source]:not(.delete-inquiry-btn)').forEach(b=>b.onclick=()=>openInquiry(b.dataset.id,b.dataset.source,b.dataset.local));
+  el.querySelectorAll('.delete-inquiry-btn').forEach(b=>b.onclick=()=>deleteInquiry(b.dataset.delId,b.dataset.source,b.dataset.local));
 }
 
 function showAdminTab(id){
@@ -1875,28 +1903,24 @@ function renderInquiryDashboard(){
   if(!$('inquiryDashboardGrid')) return;
   collectForm();
   const offersCount = Object.values(state.offers||{}).filter(o=>text(o.premium)||Object.keys(o.coverages||{}).length).length;
-  const liabCount = (state.liability_params||[]).length + (state.special_clauses||[]).length;
   const hasClient = !!(text(state.client?.name)||text(state.client?.ico));
-  const hasInsurance = !!(text(state.questionnaire?.insurance_start)||text(state.questionnaire?.insurance_period)||text(state.insurance_settings?.periodicity));
+  const hasInsurance = !!(text(state.questionnaire?.insurance_start)||text(state.questionnaire?.insurance_period)||text(state.insurance_settings?.premium_due)||text(state.insurance_settings?.premium_collection));
   const hasActivity = !!(state.activity && state.activity.name);
   const hasRisks = activeRisks().length>0;
   const hasInsurers = (state.selected_insurers||[]).length>0;
-  const hasAttachments = (state.attachments||[]).some(a=>a.checked) || text(state.attachments_extra);
-  const cards = [
-    {title:'Klient', view:'inquiryView', data:dashboardStatus('Identifikace klienta a kontakty', hasClient), desc: hasClient ? `${state.client?.name||'Klient'}${state.client?.ico?' · IČO '+state.client.ico:''}` : 'Načtěte klienta z ARES nebo doplňte údaje ručně.'},
-    {title:'Pojištění', view:'inquiryView', data:dashboardStatus('Pojistné období a platební nastavení', hasInsurance), desc: hasInsurance ? 'Základní pojistné nastavení je rozpracované.' : 'Doplňte počátek, pojistnou dobu, měnu, splatnost nebo inkaso.'},
-    {title:'Činnost', view:'inquiryView', data:dashboardStatus('Typ klienta / činnost', hasActivity), desc: hasActivity ? state.activity.name : 'Vyberte činnost pro návrh rizik.'},
-    {title:'Rizika', view:'guideView', data:dashboardStatus('Rizikový profil', hasRisks), desc: hasRisks ? `Vybráno ${activeRisks().length} rizik.` : 'Potvrďte nebo upravte navržená rizika.'},
-    {title:'Odpovědnost', view:'inquiryView', data:dashboardStatus('Parametry a speciální ujednání', liabCount>0, true), desc: liabCount ? `Vyplněno ${liabCount} položek.` : 'Volitelný modul – rozbalte pouze, pokud řešíte odpovědnost.'},
-    {title:'Další osoby', view:'inquiryView', data:dashboardStatus('Další pojištěné osoby', (state.insured_persons||[]).length>0, true), desc: (state.insured_persons||[]).length ? `Osob: ${(state.insured_persons||[]).length}` : 'Volitelné – dceřiné společnosti, další pojištění apod.'},
-    {title:'Přílohy', view:'inquiryView', data:dashboardStatus('Dokumenty k poptávce', hasAttachments, true), desc: hasAttachments ? 'Přílohy jsou označené.' : 'Doporučeno doplnit výpis, plnou moc, škodní průběh nebo smlouvy.'},
-    {title:'Pojišťovny', view:'inquiryView', data:dashboardStatus('Výběr pojišťoven', hasInsurers), desc: hasInsurers ? `Vybráno ${(state.selected_insurers||[]).length} pojišťoven.` : 'Vyberte pojišťovny, kterým půjde poptávka.'},
-    {title:'Nabídky', view:'offersView', data:dashboardStatus('Nabídky pojišťoven', offersCount>0, true), desc: offersCount ? `Nahráno / vyplněno ${offersCount} nabídek.` : 'Po doručení nabídek je vložte nebo zpracujte přes AI prompt.'},
-    {title:'Zpráva', view:'reportView', data:dashboardStatus('Klientský výstup', !!text(state.report?.advisor_note), true), desc: text(state.report?.advisor_note) ? 'Závěr poradce je doplněný.' : 'Po porovnání doplňte závěr poradce a výběr klienta.'}
+  const steps = [
+    {no:1,title:'Klient', view:'inquiryView', ok:hasClient, hint:hasClient ? `${state.client?.name||''}${state.client?.ico?' · IČO '+state.client.ico:''}` : 'Doplňte IČO a načtěte ARES nebo vyplňte klienta ručně.'},
+    {no:2,title:'Činnost / rizika', view:'inquiryView', ok:hasActivity && hasRisks, hint:hasActivity ? `Činnost: ${state.activity.name}. Vybraná rizika: ${activeRisks().length}.` : 'Vyberte činnost klienta a potvrďte jen rizika, která mají být zahrnuta.'},
+    {no:3,title:'Pojištění', view:'inquiryView', ok:hasInsurance && hasInsurers, hint:hasInsurance ? `Pojištění je rozpracované. Pojišťovny: ${(state.selected_insurers||[]).length}.` : 'Doplňte pojistné nastavení, územní rozsah, frekvenci placení a pojišťovny.'},
+    {no:4,title:'Nabídky', view:'offersView', ok:offersCount>0, hint:offersCount ? `Nabídek: ${offersCount}.` : 'Po doručení vložte nabídky pojišťoven nebo použijte AI zpracování.'},
+    {no:5,title:'Porovnání', view:'comparisonView', ok:offersCount>1, hint:offersCount>1 ? 'Porovnání je možné zpracovat.' : 'Pro porovnání jsou potřeba alespoň dvě nabídky.'},
+    {no:6,title:'Zpráva', view:'reportView', ok:!!text(state.report?.advisor_note), hint:text(state.report?.advisor_note) ? 'Závěr poradce je doplněný.' : 'Po porovnání doplňte závěr poradce a výběr klienta.'}
   ];
-  $('inquiryDashboardGrid').innerHTML = cards.map(c=>`<div class="dashboard-card ${c.data.cls}" data-open-view="${c.view}"><h3>${c.title}</h3><p>${c.desc}</p><span class="dash-status">${c.data.text}</span></div>`).join('');
+  const activeTitle = hasActiveInquiryContext() ? (state.client?.name || (state.id ? 'Poptávka #'+state.id : 'Nová rozpracovaná poptávka')) : 'Není vybrána žádná poptávka';
+  $('inquiryDashboardGrid').innerHTML = `<div class="workflow-overview"><div class="workflow-active"><span>Aktivní poptávka</span><strong>${activeTitle}</strong><small>${hasActiveInquiryContext() ? (state.status||'rozpracováno') : 'Založte novou nebo otevřete uloženou poptávku.'}</small></div>${steps.map(s=>`<button type="button" class="workflow-step ${s.ok?'ok':'todo'}" data-open-view="${s.view}"><span class="step-no">${s.no}</span><span><b>${s.title}</b><small>${s.hint}</small></span><em>${s.ok?'Hotovo':'Doplnit'}</em></button>`).join('')}</div>`;
   document.querySelectorAll('#inquiryDashboardGrid [data-open-view]').forEach(el=>el.onclick=()=>showView(el.dataset.openView));
 }
+
 
 init();
 
