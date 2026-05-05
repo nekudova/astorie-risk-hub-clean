@@ -485,3 +485,70 @@ main{max-width:none;margin:0;padding:20px;}
 
 /* MVP 0.49 – rychlejší workflow, čistá odpovědnost, mazání poptávek */
 .workflow-overview{display:grid;gap:14px;margin-top:10px}.workflow-active{background:linear-gradient(135deg,#003D4C,#005C66);color:#fff;border-radius:20px;padding:20px 24px;box-shadow:0 14px 34px rgba(0,61,76,.18)}.workflow-active span{display:block;text-transform:uppercase;letter-spacing:2px;font-size:12px;opacity:.86;font-weight:900}.workflow-active strong{display:block;font-size:25px;margin:5px 0}.workflow-active small{opacity:.92}.workflow-step{width:100%;display:grid;grid-template-columns:54px 1fr 110px;gap:14px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 10px 25px rgba(0,61,76,.07);cursor:pointer}.workflow-step:hover{border-color:var(--p2);transform:translateY(-1px)}.workflow-step .step-no{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#edf6f7;color:var(--p);font-weight:900}.workflow-step b{display:block;color:var(--p);font-size:18px}.workflow-step small{display:block;color:var(--mut);margin-top:3px}.workflow-step em{font-style:normal;text-align:center;border-radius:999px;padding:7px 10px;font-weight:900}.workflow-step.ok em{background:#ddf7e7;color:#12693a}.workflow-step.todo em{background:#fff0db;color:#a55300}.liability-pick{background:#f4fafb;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex!important;align-items:center;gap:8px}.liability-pick input{width:auto}.catalog-note{align-self:center;border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:#f7fbfc}.delete-inquiry-btn{margin-left:6px;color:#9a1d16;border-color:#f1c4c1}.delete-inquiry-btn:hover{background:#fde2e1}
+
+
+/* MVP 0.51 – čitelná odpovědnost + kompaktnější práce s parametry */
+.liability-param-row{
+  grid-template-columns:minmax(160px,.8fr) minmax(320px,2.2fr) minmax(140px,.8fr) minmax(140px,.8fr) minmax(140px,.8fr);
+  align-items:start;
+  gap:12px;
+  padding:16px;
+}
+.liability-param-row .liability-subject-label{min-width:0;}
+.param-readable{
+  min-height:42px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#f7fbfc;
+  color:var(--text);
+  font-weight:700;
+  line-height:1.35;
+  white-space:normal;
+  word-break:break-word;
+  overflow:visible;
+}
+.liability-param-row .subject-edit{
+  min-height:54px;
+  line-height:1.35;
+  resize:vertical;
+  white-space:normal;
+}
+.liability-param-row .liability-note{
+  grid-column:2 / 5;
+}
+.liability-param-row .liability-row-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  grid-column:5 / 6;
+}
+.liability-param-row .catalog-note{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#eef7f8;
+  color:var(--muted);
+  font-size:13px;
+}
+.liability-param-row .dupRow,
+.liability-param-row .delRow{
+  min-height:36px;
+  padding:8px 12px;
+  white-space:nowrap;
+}
+@media(max-width:1200px){
+  .liability-param-row{grid-template-columns:1fr 1fr;}
+  .liability-param-row .liability-note,
+  .liability-param-row .liability-row-actions{grid-column:1 / -1;}
+  .liability-param-row .liability-row-actions{justify-content:flex-start;}
+}
+@media(max-width:760px){
+  .liability-param-row{grid-template-columns:1fr;}
+}

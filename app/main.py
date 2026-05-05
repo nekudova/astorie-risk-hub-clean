@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="0.49")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="0.51")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -654,6 +654,31 @@ function ensureWrap(wrapId, buttonId){
 function bindDynamicRow(div){
   const del=div.querySelector('.delRow');
   if(del) del.addEventListener('click',(e)=>{ e.preventDefault(); div.remove(); safeUpdateAll(); });
+  const dup=div.querySelector('.dupRow');
+  if(dup) dup.addEventListener('click',(e)=>{
+    e.preventDefault();
+    if(div.classList.contains('liability-param-row')){
+      addLiabilityParam({
+        include: !!div.querySelector('.lpInclude')?.checked,
+        subject: div.querySelector('.lpSubject')?.value || '',
+        limit: div.querySelector('.lpLimit')?.value || '',
+        sublimit: div.querySelector('.lpSublimit')?.value || '',
+        deductible: div.querySelector('.lpDeductible')?.value || '',
+        note: div.querySelector('.lpNote')?.value || '',
+        catalog: false
+      });
+    }
+    if(div.classList.contains('special-clause-row')){
+      addSpecialClause({
+        include: !!div.querySelector('.scInclude')?.checked,
+        name: div.querySelector('.scName')?.value || '',
+        text: div.querySelector('.scText')?.value || '',
+        note: div.querySelector('.scNote')?.value || '',
+        catalog: false
+      });
+    }
+    safeUpdateAll();
+  });
   div.querySelectorAll('input,textarea,select').forEach(el=>{
     el.addEventListener('input', safeUpdateAll);
     el.addEventListener('change', safeUpdateAll);
@@ -731,7 +756,11 @@ function addInsuredPerson(row={}){
 function addLiabilityParam(row={}){
   const wrap=ensureWrap('liabilityParamsList','addLiabilityParamBtn'); if(!wrap) throw new Error('Chybí kontejner pro parametry odpovědnosti');
   const div=document.createElement('div'); div.className='dynamic-row liability-param-row';
-  div.innerHTML=`<label class="checkline liability-pick"><input type="checkbox" class="lpInclude" ${row.include?'checked':''}> zahrnout</label><label>Předmět / parametr<input class="lpSubject" value="${escAttr(row.subject||'')}" placeholder="např. provozní odpovědnost"></label><label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label>Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label>${row.catalog?'<span class="muted catalog-note">katalog</span>':'<button type="button" class="secondary delRow">Smazat</button>'}`;
+  const subject = row.subject || '';
+  const subjectField = row.catalog
+    ? `<label class="liability-subject-label">Předmět / parametr<input type="hidden" class="lpSubject" value="${escAttr(subject)}"><div class="param-readable" title="${escAttr(subject)}">${escTextArea(subject)}</div></label>`
+    : `<label class="liability-subject-label">Předmět / parametr<textarea class="lpSubject subject-edit" placeholder="Doplňte vlastní parametr odpovědnosti">${escTextArea(subject)}</textarea></label>`;
+  div.innerHTML=`<label class="checkline liability-pick"><input type="checkbox" class="lpInclude" ${row.include?'checked':''}> Zahrnout do poptávky</label>${subjectField}<label>Limit<input class="lpLimit" value="${escAttr(row.limit||'')}"></label><label>Sublimit<input class="lpSublimit" value="${escAttr(row.sublimit||'')}"></label><label>Spoluúčast<input class="lpDeductible" value="${escAttr(row.deductible||'')}"></label><label class="liability-note">Poznámka<textarea class="lpNote">${escTextArea(row.note||'')}</textarea></label><div class="liability-row-actions">${row.catalog?'<span class="muted catalog-note">Katalogová položka</span>':'<button type="button" class="secondary delRow">Smazat</button>'}<button type="button" class="secondary dupRow">Duplikovat</button></div>`;
   wrap.appendChild(div); bindDynamicRow(div); updateLiabilityModuleSummary(); return div;
 }
 function addSpecialClause(row={}){
