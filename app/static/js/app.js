@@ -1946,98 +1946,78 @@ function renderInquiryDashboard(){
   const hasReport = !!text(state.report?.advisor_note);
   const active = hasActiveInquiryContext();
 
-  const clientName = text(state.client?.name) || 'Nový obchodní případ';
-  const activityName = state.activity?.name || 'Činnost zatím není vybrána';
-  const caseId = state.id ? `DB #${state.id}` : (active ? 'rozpracováno lokálně' : 'bez aktivního případu');
+  const clientName = text(state.client?.name) || 'Nová poptávka';
+  const activityName = state.activity?.name || 'činnost není vybrána';
+  const caseId = state.id ? `DB #${state.id}` : (active ? 'zatím neuloženo' : 'bez aktivní poptávky');
   const caseStatus = state.status || (active ? 'rozpracováno' : 'není vybráno');
 
   const steps = [
-    {no:1,key:'client',title:'Klient', view:'inquiryView', ok:hasClient, hint:hasClient ? clientName : 'Zadejte IČO a načtěte ARES, případně klienta doplňte ručně.', action:'Doplnit klienta', next:!hasClient},
-    {no:2,key:'risks',title:'Rizika a činnost', view:'inquiryView', ok:hasActivity && hasRisks, hint:hasActivity ? `${activityName} · ${risksCount} rizik` : 'Vyberte činnost klienta a potvrďte rizika pro poptávku.', action:'Vybrat rizika', next:hasClient && !(hasActivity && hasRisks)},
-    {no:3,key:'request',title:'Poptávka pojišťovnám', view:'inquiryView', ok:hasInsurance && hasInsurers, hint:hasInsurers ? `${insurersCount} pojišťoven k oslovení` : 'Doplňte pojistné nastavení a vyberte pojišťovny.', action:'Připravit poptávku', next:hasActivity && hasRisks && !(hasInsurance && hasInsurers)},
-    {no:4,key:'offers',title:'Přijaté nabídky', view:'offersView', ok:offersCount>0, hint:offersCount ? `${offersCount} nabídek vloženo` : 'Po doručení vložte nabídky k aktivní poptávce.', action:'Zapsat nabídky', next:hasInsurance && hasInsurers && offersCount===0},
-    {no:5,key:'compare',title:'Porovnání', view:'comparisonView', ok:hasComparison, hint:hasComparison ? 'Porovnání je připravené k práci.' : 'Pro plné porovnání vložte alespoň dvě nabídky.', action:'Porovnat nabídky', next:offersCount>0 && !hasComparison},
-    {no:6,key:'report',title:'Zpráva klientovi', view:'reportView', ok:hasReport, hint:hasReport ? 'Závěr poradce je rozpracovaný.' : 'Připravte klientsky srozumitelný výstup.', action:'Připravit zprávu', next:hasComparison && !hasReport}
+    {no:1,key:'client',title:'Klient', view:'inquiryView', ok:hasClient, hint:hasClient ? clientName : 'Doplnit klienta / načíst ARES', action:'Otevřít klienta', next:!hasClient},
+    {no:2,key:'risks',title:'Rizika', view:'inquiryView', ok:hasActivity && hasRisks, hint:hasActivity ? `${activityName} · ${risksCount} rizik` : 'Vybrat činnost a rizika', action:'Otevřít rizika', next:hasClient && !(hasActivity && hasRisks)},
+    {no:3,key:'request',title:'Poptávka', view:'inquiryView', ok:hasInsurance && hasInsurers, hint:hasInsurers ? `${insurersCount} pojišťoven` : 'Nastavení a pojišťovny', action:'Připravit poptávku', next:hasActivity && hasRisks && !(hasInsurance && hasInsurers)},
+    {no:4,key:'offers',title:'Nabídky', view:'offersView', ok:offersCount>0, hint:offersCount ? `${offersCount} nabídek` : 'Doplnit přijaté nabídky', action:'Zapsat nabídky', next:hasInsurance && hasInsurers && offersCount===0},
+    {no:5,key:'compare',title:'Porovnání', view:'comparisonView', ok:hasComparison, hint:hasComparison ? 'připraveno' : 'min. 2 nabídky', action:'Porovnat', next:offersCount>0 && !hasComparison},
+    {no:6,key:'report',title:'Zpráva', view:'reportView', ok:hasReport, hint:hasReport ? 'rozpracována' : 'připravit pro klienta', action:'Připravit zprávu', next:hasComparison && !hasReport}
   ];
   const nextStep = steps.find(s=>s.next) || (active ? steps.find(s=>!s.ok) : steps[0]) || steps[5];
-  const completion = Math.round((steps.filter(s=>s.ok).length / steps.length) * 100);
-  const caseReadyClass = active ? 'case-active' : 'case-empty';
+  const completedCount = steps.filter(s=>s.ok).length;
+  const completion = Math.round((completedCount / steps.length) * 100);
+
+  const blockers = [];
+  if(!hasClient) blockers.push('chybí klient');
+  if(hasClient && !(hasActivity && hasRisks)) blockers.push('chybí činnost/rizika');
+  if(hasActivity && hasRisks && !hasInsurers) blockers.push('nejsou vybrané pojišťovny');
+  if(hasInsurers && offersCount===0) blockers.push('čekáme na nabídky');
 
   $('inquiryDashboardGrid').innerHTML = `
-    <div class="advisor-command-center ${caseReadyClass}">
-      <div class="case-identity">
-        <span class="mini-label">Aktivní obchodní případ</span>
+    <div class="case-workpanel ${active ? 'active' : 'empty'}">
+      <div class="case-main">
+        <span class="mini-label">Obchodní případ</span>
         <h2>${active ? clientName : 'Není vybrána žádná poptávka'}</h2>
-        <p>${active ? `${activityName} · ${caseId} · stav: ${caseStatus}` : 'Začněte novou poptávkou nebo otevřete uloženou. Nabídky, porovnání a zpráva se vždy vážou k jednomu konkrétnímu případu.'}</p>
+        <p>${active ? `${activityName} · ${caseId} · stav: ${caseStatus}` : 'Začněte novou poptávkou nebo otevřete uloženou. Nabídky, porovnání a zpráva se vždy vážou ke konkrétnímu případu.'}</p>
       </div>
-      <div class="case-metrics">
-        <span><b>${risksCount}</b><small>rizik</small></span>
-        <span><b>${insurersCount}</b><small>pojišťoven</small></span>
-        <span><b>${offersCount}</b><small>nabídek</small></span>
-        <span><b>${completion}%</b><small>postup</small></span>
+      <div class="case-progress-compact">
+        <b>${completion}%</b>
+        <span>připravenost</span>
       </div>
-      <div class="case-actions-row">
+      <div class="case-actions-row compact">
         <button type="button" class="secondary" id="dashNewCaseBtn">+ Nová poptávka</button>
         <button type="button" class="secondary" data-open-view="myInquiriesView">Otevřít uloženou</button>
         <button type="button" class="primary" id="dashSaveCaseBtn">Uložit</button>
-        <button type="button" class="ghost" id="clientPresentationModeBtn">Režim pro klienta</button>
       </div>
     </div>
 
-    <div class="next-step-pro">
+    <div class="advisor-next-line">
       <div>
         <span class="mini-label">Doporučený další krok</span>
-        <h3>${nextStep.no}. ${nextStep.title}</h3>
-        <p>${nextStep.hint}</p>
+        <strong>${nextStep.no}. ${nextStep.title}</strong>
+        <small>${nextStep.hint}</small>
       </div>
       <button type="button" class="primary" data-open-view="${nextStep.view}">${nextStep.action}</button>
     </div>
 
-    <div class="workflow-ribbon" aria-label="Pracovní tok poradce">
+    <div class="workflow-compact" aria-label="Pracovní tok poradce">
       ${steps.map(s=>`
-        <button type="button" class="workflow-chip ${s.ok?'done':'waiting'} ${s.next?'current':''}" data-open-view="${s.view}">
-          <span class="step-number">${s.no}</span>
-          <span class="step-title">${s.title}</span>
-          <small>${s.ok?'Hotovo':(s.next?'Teď řešit':'Čeká')}</small>
+        <button type="button" class="workflow-step-compact ${s.ok?'done':'waiting'} ${s.next?'current':''}" data-open-view="${s.view}">
+          <span>${s.ok?'✓':s.no}</span>
+          <b>${s.title}</b>
+          <small>${s.hint}</small>
         </button>
       `).join('')}
     </div>
 
-    <div class="workbench-grid">
-      <button type="button" class="workbench-card primary-card" data-open-view="inquiryView">
-        <span>Poptávkový systém</span>
-        <b>Klient, rizika a požadavky</b>
-        <small>Jednotná poptávka pro pojišťovny. Katalogová rizika se zapínají, vlastní řádky lze doplnit.</small>
-      </button>
-      <button type="button" class="workbench-card" data-open-view="offersView">
-        <span>Nabídkový systém</span>
-        <b>${offersCount ? offersCount+' nabídek k vyhodnocení' : 'Vložit přijaté nabídky'}</b>
-        <small>Každá nabídka patří k aktivnímu obchodnímu případu.</small>
-      </button>
-      <button type="button" class="workbench-card" data-open-view="comparisonView">
-        <span>Analýza nabídek</span>
-        <b>${hasComparison ? 'Porovnání připraveno' : 'Čeká na nabídky'}</b>
-        <small>Limity, výluky, spoluúčasti, cena a rozdíly proti požadavkům klienta.</small>
-      </button>
-      <button type="button" class="workbench-card" data-open-view="reportView">
-        <span>Výstup pro klienta</span>
-        <b>${hasReport ? 'Zpráva rozpracována' : 'Připravit zprávu'}</b>
-        <small>Čistý klientský výstup bez interních poznámek.</small>
-      </button>
-    </div>
-
-    <div class="advisor-insights">
-      <div class="insight-card">
-        <b>Poradce se nesmí ztratit</b>
-        <p>Všechny návazné sekce pracují vždy jen s aktivní poptávkou. Bez aktivního případu systém poradce navede k založení nebo otevření poptávky.</p>
+    <div class="work-alerts">
+      <div class="work-alert ${blockers.length ? 'warn' : 'ok'}">
+        <b>${blockers.length ? 'Co brání dokončení' : 'Případ je připravený k dalšímu kroku'}</b>
+        <span>${blockers.length ? blockers.join(' · ') : 'Pokračujte podle workflow nebo připravte klientský výstup.'}</span>
       </div>
-      <div class="insight-card">
-        <b>Připraveno na moduly</b>
-        <p>Odpovědnost zůstává zachovaná. Další moduly jako drony, FVE nebo větrné elektrárny budou přidány stejným principem.</p>
+      <div class="work-alert neutral">
+        <b>Nabídky a porovnání</b>
+        <span>${offersCount ? `${offersCount} nabídek je uloženo u této poptávky.` : 'Jakmile dorazí nabídky, vložte je do modulu Nabídky.'}</span>
       </div>
-      <div class="insight-card">
-        <b>Dokumenty a textace</b>
-        <p>Připravený prostor pro knihovnu textací, speciálních ujednání a vazby riziko → VPP/ZPP/DPP.</p>
+      <div class="work-alert neutral">
+        <b>Režim pro klienta</b>
+        <span>Pro jednání použijte klientský pohled ve Zprávě/PDF. Interní kontroly zůstávají skryté.</span>
       </div>
     </div>
   `;
@@ -2047,8 +2027,6 @@ function renderInquiryDashboard(){
   if(newBtn) newBtn.onclick = () => $('newInquiryBtn')?.click();
   const saveBtn = $('dashSaveCaseBtn');
   if(saveBtn) saveBtn.onclick = saveInquiry;
-  const clientBtn = $('clientPresentationModeBtn');
-  if(clientBtn) clientBtn.onclick = () => document.body.classList.toggle('client-mode');
   updateAdvisorNavState();
 }
 

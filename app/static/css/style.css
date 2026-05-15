@@ -733,3 +733,30 @@ main{max-width:none;margin:0;padding:20px;}
 .client-mode .admin-only,.client-mode #adminView,.client-mode .hint,.client-mode .mini-label:not(.keep-label){display:none!important}.client-mode .topbar{box-shadow:0 8px 26px rgba(0,61,76,.18)}
 @media(max-width:1200px){.advisor-command-center{grid-template-columns:1fr}.case-metrics{grid-template-columns:repeat(4,1fr)}.workflow-ribbon{grid-template-columns:repeat(3,1fr)}.workbench-grid{grid-template-columns:repeat(2,1fr)}.advisor-insights{grid-template-columns:1fr}}
 @media(max-width:760px){.workflow-ribbon,.workbench-grid{grid-template-columns:1fr}.case-metrics{grid-template-columns:repeat(2,1fr)}.next-step-pro{flex-direction:column;align-items:flex-start}.case-actions-row button{width:100%}}
+
+
+/* MVP 0.56 – UX cleanup: jeden pracovní panel bez duplicit */
+.advisor-cockpit-hero{display:none!important}
+.cockpit-panel{box-shadow:none;background:transparent;border:0;padding:0}
+.cockpit-panel .section-head{display:none!important}
+.case-workpanel{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:center;background:#fff;border:1px solid #dbe8eb;border-left:8px solid #005C66;border-radius:18px;padding:18px 20px;box-shadow:0 10px 26px rgba(0,61,76,.07);margin-bottom:12px}
+.case-workpanel.empty{border-left-color:#9aaeb6;background:#fbfdfd}
+.case-main h2{margin:4px 0 6px;color:#003D4C;font-size:28px;line-height:1.15}
+.case-main p{margin:0;color:#536b75;font-weight:700}
+.case-progress-compact{justify-self:end;text-align:center;border-radius:16px;background:#eff7f8;padding:14px 18px;min-width:112px}
+.case-progress-compact b{display:block;color:#003D4C;font-size:30px;line-height:1}.case-progress-compact span{font-size:12px;color:#607781;font-weight:900;text-transform:uppercase}
+.case-actions-row.compact{grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap}.case-actions-row.compact button{min-width:auto}
+.advisor-next-line{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff7f3;border:1px solid #ffd6c6;border-left:6px solid #FC4C02;border-radius:16px;padding:14px 16px;margin:10px 0 12px}
+.advisor-next-line strong{display:block;font-size:22px;color:#003D4C;margin:2px 0}.advisor-next-line small{display:block;color:#5f737b;font-weight:800}
+.workflow-compact{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:8px;margin:10px 0 12px}
+.workflow-step-compact{display:grid;grid-template-columns:28px 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid #dbe8eb;border-radius:14px;padding:10px;min-height:74px;cursor:pointer;color:#003D4C;box-shadow:0 5px 14px rgba(0,61,76,.04)}
+.workflow-step-compact:hover{border-color:#93c6cf;box-shadow:0 9px 20px rgba(0,61,76,.08)}
+.workflow-step-compact span{grid-row:1/3;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e8f3f5;font-weight:900}
+.workflow-step-compact b{font-size:14px;line-height:1.15}.workflow-step-compact small{font-size:11px;color:#607781;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workflow-step-compact.done{background:#f4fbf6;border-color:#c7ecd4}.workflow-step-compact.done span{background:#ccefd8;color:#126532}
+.workflow-step-compact.current{border-color:#FC4C02;box-shadow:0 0 0 2px rgba(252,76,2,.12)}.workflow-step-compact.current span{background:#FFE3D8;color:#B33400}
+.work-alerts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.work-alert{background:#fff;border:1px solid #dbe8eb;border-radius:14px;padding:12px 14px;min-height:76px}.work-alert b{display:block;color:#003D4C;margin-bottom:5px}.work-alert span{display:block;color:#607781;font-weight:700;line-height:1.35}.work-alert.warn{border-left:5px solid #FC4C02}.work-alert.ok{border-left:5px solid #19a15f}.work-alert.neutral{border-left:5px solid #005C66}
+.advisor-insights,.workbench-grid,.workflow-ribbon,.next-step-pro,.advisor-command-center{display:none!important}
+@media(max-width:1200px){.workflow-compact{grid-template-columns:repeat(3,1fr)}.work-alerts{grid-template-columns:1fr}.case-workpanel{grid-template-columns:1fr}.case-progress-compact{justify-self:start}}
+@media(max-width:760px){.workflow-compact{grid-template-columns:1fr}.advisor-next-line{flex-direction:column;align-items:flex-start}}
