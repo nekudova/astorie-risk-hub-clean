@@ -1,0 +1,3 @@
+ASTORIE Business Risk Hub – MVP 0.59
+Rizikový model + underwriting intelligence
+Postaveno nad 0.58.1 REAL FULL, zachována DB a funkční moduly.

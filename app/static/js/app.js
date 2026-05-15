@@ -530,6 +530,7 @@ function showView(id){
   if(id==='documentsView') renderDocumentsWorkspace();
   if(id==='textationsView') renderTextationsWorkspace();
   if(id==='checklistView') renderUnderwritingChecklist();
+  if(id==='riskModelView') renderRiskModelWorkspace();
   if(id==='suggestionsView') loadSuggestions();
   if(id==='adminView') renderAdmin();
   updateActiveInquiryBanner();
@@ -2164,4 +2165,15 @@ function renderTextationsWorkspace(){
 }
 function renderUnderwritingChecklist(){
   updateActiveInquiryBanner();
+}
+
+
+// MVP 0.59 – risk model workspace
+function renderRiskModelWorkspace(){
+  updateActiveInquiryBanner();
+  const active = state.activeInquiry || {};
+  const typeEl = $('rmClientType');
+  if(typeEl){
+    typeEl.textContent = active.clientActivity || active.businessType || active.clientName || 'dle aktivní poptávky';
+  }
 }

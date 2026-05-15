@@ -804,3 +804,58 @@ main{max-width:none;margin:0;padding:20px;}
   font-weight:700;
 }
 .uw-checklist input{ margin-top:3px; }
+
+
+/* MVP 0.59 – risk model */
+.risk-model-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
+  margin:16px 0 8px;
+}
+.risk-model-card{
+  border:1px solid var(--line,#d7e5e9);
+  border-radius:18px;
+  background:#fff;
+  padding:18px;
+  box-shadow:0 10px 28px rgba(0,61,76,.06);
+}
+.risk-model-card.primary{
+  border-left:7px solid var(--orange,#FC4C02);
+}
+.risk-label{
+  display:block;
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--orange,#FC4C02);
+  font-weight:800;
+  margin-bottom:8px;
+}
+.risk-model-card strong{
+  display:block;
+  color:var(--petrol,#003D4C);
+  font-size:22px;
+  margin-bottom:6px;
+}
+.risk-model-card small{
+  color:var(--muted,#607882);
+  line-height:1.35;
+}
+.model-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.model-links button{
+  border:1px solid var(--line,#d7e5e9);
+  background:#eef8fa;
+  color:var(--petrol,#003D4C);
+  border-radius:999px;
+  padding:12px 18px;
+  font-weight:800;
+  cursor:pointer;
+}
+.model-links button:hover{
+  border-color:var(--orange,#FC4C02);
+}

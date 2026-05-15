@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=581">
+  <link rel="stylesheet" href="/static/css/style.css?v=590">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.58.1 · Dokumenty + Textace + Underwriting checklist</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.59 · Rizikový model + underwriting intelligence</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -37,6 +37,7 @@
         <button class="nav-btn" data-view="documentsView">Dokumenty</button>
         <button class="nav-btn" data-view="textationsView">Textace</button>
         <button class="nav-btn" data-view="checklistView">Kontrola případu</button>
+        <button class="nav-btn" data-view="riskModelView">Rizikový model</button>
         <button class="nav-btn" data-view="suggestionsView">Náměty</button>
         <button class="nav-btn admin-only hidden" data-view="adminView">Admin</button>
       </nav>
@@ -514,6 +515,81 @@
         </section>
       </section>
 
+
+      <section id="riskModelView" class="app-section hidden">
+        <div class="hero compact">
+          <div>
+            <p class="eyebrow">Underwriting intelligence</p>
+            <h1>Rizikový model obchodního případu</h1>
+            <p>První pracovní vrstva pro vyhodnocení typu klienta, doporučených limitů, kritických rizik, podkladů a textací. Model je pomůcka pro poradce, ne automatické rozhodnutí.</p>
+          </div>
+          <div class="card small"><b>Princip</b><br>Rizikový model spojuje činnost klienta, katalog rizik, dokumenty, checklist a knihovnu textací.</div>
+        </div>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Model pro aktivní poptávku</h2>
+              <p class="muted">V této verzi se rizikový model zobrazí jako pracovní doporučení podle zvolené činnosti klienta. V dalších verzích bude napojen na pravidla BO a články VPP/ZPP/DPP.</p>
+            </div>
+            <button class="secondary" type="button" onclick="showView('checklistView')">Otevřít kontrolu případu</button>
+          </div>
+
+          <div class="risk-model-summary">
+            <div class="risk-model-card primary">
+              <span class="risk-label">Typ klienta</span>
+              <strong id="rmClientType">dle aktivní poptávky</strong>
+              <small>Například bezpečnostní agentura, stavební firma, výroba, doprava.</small>
+            </div>
+            <div class="risk-model-card">
+              <span class="risk-label">Rizikovost</span>
+              <strong>střední / vysoká</strong>
+              <small>Orientace pro kontrolu limitů, výluk a podkladů.</small>
+            </div>
+            <div class="risk-model-card">
+              <span class="risk-label">Doporučený limit</span>
+              <strong>ověřit dle činnosti</strong>
+              <small>Limit se bude později načítat z admin pravidel.</small>
+            </div>
+          </div>
+
+          <div class="uw-grid">
+            <div class="uw-card">
+              <b>Kritická rizika</b>
+              <span>Provozní odpovědnost, škody na převzatých věcech, škody způsobené zaměstnanci, vadná práce / výrobek, čisté finanční škody.</span>
+            </div>
+            <div class="uw-card">
+              <b>Doporučené podklady</b>
+              <span>Škodní průběh, smluvní požadavky odběratelů, výpis z OR/evidence, interní postupy, revize nebo fotodokumentace dle typu rizika.</span>
+            </div>
+            <div class="uw-card">
+              <b>Co ověřit v nabídce</b>
+              <span>Limity, sublimity, spoluúčasti, územní rozsah, časovou působnost, výluky a speciální podmínky pojišťovny.</span>
+            </div>
+            <div class="uw-card">
+              <b>Textace k použití</b>
+              <span>Speciální ujednání, požadavky na potvrzení krytí, formulace do klientské zprávy a interní poznámky k rozhodnutí.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Vazby modelu</h2>
+              <p class="muted">Tady bude postupně vznikat mapa: riziko → dokument → článek VPP/ZPP/DPP → výluka → doporučená textace.</p>
+            </div>
+          </div>
+          <div class="model-links">
+            <button type="button" onclick="showView('documentsView')">Dokumenty / VPP</button>
+            <button type="button" onclick="showView('textationsView')">Textace</button>
+            <button type="button" onclick="showView('checklistView')">Checklist</button>
+            <button type="button" onclick="showView('offersView')">Nabídky</button>
+            <button type="button" onclick="showView('comparisonView')">Porovnání</button>
+          </div>
+        </section>
+      </section>
+
       <section id="suggestionsView" class="app-section hidden">
         <div class="hero compact">
           <div><p class="eyebrow">Společný vývoj nástroje</p><h1>Náměty od poradců</h1><p>Stávající poradci mohou posílat návrhy na chybějící rizika, otázky, pojišťovny, výluky nebo UX. Admin z toho později udělá číselník.</p></div>
@@ -633,6 +709,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=581"></script>
+  <script src="/static/js/app.js?v=590"></script>
 </body>
 </html>

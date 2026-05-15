@@ -54,3 +54,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Přidané admin základy pro správu dokumentů, textací a checklistů.
 - Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, zpráva/PDF.
 - Bez změny databázové struktury.
+
+
+## MVP 0.59 – Rizikový model + underwriting intelligence
+- Přidána viditelná sekce Rizikový model.
+- Přidán admin základ pro správu rizikových modelů.
+- Připraveny vazby: riziko → dokument → článek VPP/ZPP/DPP → textace → checklist.
+- Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.
+- Bez změny databázové struktury.
