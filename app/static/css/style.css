@@ -552,3 +552,5 @@ main{max-width:none;margin:0;padding:20px;}
 @media(max-width:760px){
   .liability-param-row{grid-template-columns:1fr;}
 }
+
+.active-inquiry-banner{position:sticky;top:0;z-index:20}
