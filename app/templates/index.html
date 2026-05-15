@@ -4,28 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=49">
+  <link rel="stylesheet" href="/static/css/style.css?v=53">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.52 · pracovní kokpit poradce + workflow obchodního případu</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.53 · poradenský kokpit + jasný tok poptávka → nabídky</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
-
-<section class="panel">
-  <h2>Pracovní workflow obchodního případu</h2>
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px">
-    <div class="badge">1. Klient</div>
-    <div class="badge">2. Rizika</div>
-    <div class="badge">3. Poptávka</div>
-    <div class="badge">4. Nabídky</div>
-    <div class="badge">5. Porovnání</div>
-    <div class="badge">6. Zpráva</div>
-  </div>
-</section>
-
     <section id="loginView" class="panel narrow">
       <h1>Přihlášení</h1>
       <p class="muted">Interní vývojová verze. Přihlášení používá uživatele z číselníku poradců.</p>
@@ -84,26 +71,30 @@
 
 
       <section id="dashboardView" class="app-section">
-        <div class="hero compact">
+        <div class="hero compact advisor-cockpit-hero">
           <div>
-            <p class="eyebrow">Řídicí panel</p>
-            <h1>Dashboard poptávky</h1>
-            <p>Rychlý přehled aktivního obchodního případu. Každá karta otevře příslušnou pracovní část.</p>
+            <p class="eyebrow">Poradenský kokpit</p>
+            <h1>Obchodní případ bez chaosu</h1>
+            <p>Jedno místo pro orientaci poradce: aktivní poptávka, další krok a návaznost Poptávka → Nabídky → Porovnání → Zpráva.</p>
           </div>
-          <div class="card small"><b>Práce poradce</b><br>klient → rizika → nabídky → zpráva</div>
+          <div class="card small client-mode-card">
+            <b>Režim pro klienta</b><br>
+            čistý pohled bez interních poznámek pro schůzku a prezentaci.
+          </div>
         </div>
-        <section class="panel dashboard-panel">
+        <section class="panel dashboard-panel cockpit-panel">
           <div class="section-head">
             <div>
-              <h2>Stav poptávky</h2>
-              <p class="muted">Dashboard slouží pro rychlou orientaci. Návazné části Nabídky, Porovnání, Zpráva a AI pracují vždy s aktivní poptávkou.</p>
+              <h2>Pracovní tok poradce</h2>
+              <p class="muted">Aplikace vždy pracuje s aktivním obchodním případem. Pokud není vybraný, založte novou poptávku nebo otevřete uloženou.</p>
             </div>
             <div class="dashboard-actions">
-              <button class="secondary" data-open-view="inquiryView">Otevřít formulář</button>
+              <button class="secondary" data-open-view="inquiryView">Otevřít poptávku</button>
+              <button class="secondary" data-open-view="myInquiriesView">Moje poptávky</button>
               <button class="primary" id="dashboardSaveBtn" type="button">Uložit</button>
             </div>
           </div>
-          <div id="inquiryDashboardGrid" class="inquiry-dashboard-grid"></div>
+          <div id="inquiryDashboardGrid" class="inquiry-dashboard-grid cockpit-grid"></div>
         </section>
       </section>
 
