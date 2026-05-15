@@ -43,7 +43,3 @@ Tato verze je bezpečná opravná verze po 0.47. Vrací funkční vazby ARES/DB/
 - jasný doporučený další krok
 - klientský režim (vizuální přepnutí)
 - zachován funkční základ 0.51/0.54: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF
-
-
-## MVP 0.56
-UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, odstranění duplicitních dashboard bloků. Backend/DB beze změny.
