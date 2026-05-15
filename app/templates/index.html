@@ -9,10 +9,23 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.51 · čitelná odpovědnost + rychlejší workflow</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.52 · pracovní kokpit poradce + workflow obchodního případu</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
+
+<section class="panel">
+  <h2>Pracovní workflow obchodního případu</h2>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px">
+    <div class="badge">1. Klient</div>
+    <div class="badge">2. Rizika</div>
+    <div class="badge">3. Poptávka</div>
+    <div class="badge">4. Nabídky</div>
+    <div class="badge">5. Porovnání</div>
+    <div class="badge">6. Zpráva</div>
+  </div>
+</section>
+
     <section id="loginView" class="panel narrow">
       <h1>Přihlášení</h1>
       <p class="muted">Interní vývojová verze. Přihlášení používá uživatele z číselníku poradců.</p>
@@ -74,10 +87,10 @@
         <div class="hero compact">
           <div>
             <p class="eyebrow">Řídicí panel</p>
-            <h1>Pracovní kokpit poradce</h1>
-            <p>Rychlý přehled aktivního obchodního případu. Aplikace vás vede krok za krokem od klienta až po finální zprávu.</p>
+            <h1>Dashboard poptávky</h1>
+            <p>Rychlý přehled aktivního obchodního případu. Každá karta otevře příslušnou pracovní část.</p>
           </div>
-          <div class="card small"><b>Workflow</b><br>1. Klient → 2. Rizika → 3. Nabídky → 4. Porovnání → 5. Zpráva</div>
+          <div class="card small"><b>Práce poradce</b><br>klient → rizika → nabídky → zpráva</div>
         </div>
         <section class="panel dashboard-panel">
           <div class="section-head">

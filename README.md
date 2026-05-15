@@ -21,3 +21,9 @@ Tato verze je bezpečná opravná verze po 0.47. Vrací funkční vazby ARES/DB/
 - Katalogové položky nejsou editovatelné názvem, poradce je pouze zahrnuje/nezařazuje.
 - Ručně přidané položky lze smazat nebo duplikovat.
 - Zachováno: ARES, DB, Admin, Nabídky, Porovnání, Zpráva a PDF.
+
+
+## MVP 0.52
+- pracovní kokpit poradce
+- workflow obchodního případu
+- zachován ARES/DB/Admin
