@@ -28,3 +28,18 @@ Tato verze je bezpečná opravná verze po 0.47. Vrací funkční vazby ARES/DB/
 - jasný doporučený další krok
 - přehled Poptávka → Nabídky → Porovnání → Zpráva
 - zachován stabilní základ 0.51 (ARES, DB, Admin, nabídky, porovnání, PDF, odpovědnost)
+
+
+## MVP 0.54
+- obchodní případ jako řídicí centrum práce poradce
+- přehlednější vazba Poptávka → Nabídky → Porovnání → Zpráva
+- stavové počty v levém menu
+- zachován ARES, DB, Admin, odpovědnost, nabídky, porovnání a PDF
+
+
+## MVP 0.55
+- profesionální kokpit poradce
+- kompaktní workflow obchodního případu
+- jasný doporučený další krok
+- klientský režim (vizuální přepnutí)
+- zachován funkční základ 0.51/0.54: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF
