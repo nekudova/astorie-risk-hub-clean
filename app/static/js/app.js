@@ -527,6 +527,9 @@ function showView(id){
   if(id==='comparisonView') renderComparison();
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
+  if(id==='documentsView') renderDocumentsWorkspace();
+  if(id==='textationsView') renderTextationsWorkspace();
+  if(id==='checklistView') renderUnderwritingChecklist();
   if(id==='suggestionsView') loadSuggestions();
   if(id==='adminView') renderAdmin();
   updateActiveInquiryBanner();
@@ -2141,3 +2144,24 @@ window.safeUpdateAll = safeUpdateAll;
 
 // MVP 0.36 fallback: dynamická tlačítka se navážou i po případném překreslení části stránky.
 document.addEventListener('DOMContentLoaded', ()=>{ try { bindDynamicButtonsHard(); } catch(e) { console.error('ASTORIE dynamic init fallback:', e); } });
+
+
+// MVP 0.58.1 – underwriting foundation workspaces
+function renderDocumentsWorkspace(){
+  updateActiveInquiryBanner();
+}
+function renderTextationsWorkspace(){
+  const search = $('textationSearch');
+  const cat = $('textationCategory');
+  if(search && !search.dataset.bound){
+    search.dataset.bound = '1';
+    search.addEventListener('input', ()=>{});
+  }
+  if(cat && !cat.dataset.bound){
+    cat.dataset.bound = '1';
+    cat.addEventListener('change', ()=>{});
+  }
+}
+function renderUnderwritingChecklist(){
+  updateActiveInquiryBanner();
+}

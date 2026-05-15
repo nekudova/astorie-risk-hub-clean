@@ -760,3 +760,47 @@ main{max-width:none;margin:0;padding:20px;}
 .advisor-insights,.workbench-grid,.workflow-ribbon,.next-step-pro,.advisor-command-center{display:none!important}
 @media(max-width:1200px){.workflow-compact{grid-template-columns:repeat(3,1fr)}.work-alerts{grid-template-columns:1fr}.case-workpanel{grid-template-columns:1fr}.case-progress-compact{justify-self:start}}
 @media(max-width:760px){.workflow-compact{grid-template-columns:1fr}.advisor-next-line{flex-direction:column;align-items:flex-start}}
+
+
+/* MVP 0.58.1 – underwriting foundation */
+.uw-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
+  margin-top:14px;
+}
+.uw-card{
+  border:1px solid var(--line, #d7e5e9);
+  border-radius:18px;
+  background:#fff;
+  padding:18px;
+  box-shadow:0 10px 28px rgba(0,61,76,.06);
+}
+.uw-card b{
+  display:block;
+  color:var(--petrol, #003D4C);
+  font-size:18px;
+  margin-bottom:8px;
+}
+.uw-card span{
+  display:block;
+  color:var(--muted, #607882);
+  line-height:1.35;
+}
+.uw-checklist{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.uw-checklist label{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px;
+  border:1px solid var(--line, #d7e5e9);
+  border-radius:14px;
+  background:#f8fcfd;
+  font-weight:700;
+}
+.uw-checklist input{ margin-top:3px; }

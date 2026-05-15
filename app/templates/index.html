@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=56">
+  <link rel="stylesheet" href="/static/css/style.css?v=581">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.57 · CRM workflow + UX cleanup II</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.58.1 · Dokumenty + Textace + Underwriting checklist</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -34,6 +34,9 @@
         <button class="nav-btn" data-view="comparisonView">Porovnání</button>
         <button class="nav-btn" data-view="reportView">Zpráva</button>
         <button class="nav-btn" data-view="guideView">Průvodce</button>
+        <button class="nav-btn" data-view="documentsView">Dokumenty</button>
+        <button class="nav-btn" data-view="textationsView">Textace</button>
+        <button class="nav-btn" data-view="checklistView">Kontrola případu</button>
         <button class="nav-btn" data-view="suggestionsView">Náměty</button>
         <button class="nav-btn admin-only hidden" data-view="adminView">Admin</button>
       </nav>
@@ -420,6 +423,97 @@
         <section class="panel"><h2>4. Upozornění pro doporučení a ZZJ</h2><div id="guideWarnings" class="warning-list"></div></section>
       </section>
 
+
+      <section id="documentsView" class="app-section hidden">
+        <div class="hero compact">
+          <div>
+            <p class="eyebrow">Dokumentový modul</p>
+            <h1>Dokumenty k obchodnímu případu</h1>
+            <p>Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady. Dokumenty se vztahují k aktivní poptávce.</p>
+          </div>
+          <div class="card small"><b>Smysl modulu</b><br>Poradce nemusí dohledávat přílohy v e-mailech. Všechny podklady jsou evidované u konkrétního obchodního případu.</div>
+        </div>
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Archiv dokumentů</h2>
+              <p class="muted">MVP 0.58 zakládá pracovní strukturu. Nahrávání souborů a vazby na články VPP/ZPP budeme rozšiřovat v dalších verzích.</p>
+            </div>
+            <button class="secondary" type="button" onclick="alert('Upload dokumentů bude doplněn v další verzi. Zatím je připravena struktura archivu.')">+ Přidat dokument</button>
+          </div>
+          <div class="uw-grid">
+            <div class="uw-card"><b>VPP / DPP / ZPP</b><span>pojistné podmínky, doložky, zvláštní podmínky</span></div>
+            <div class="uw-card"><b>Nabídky pojišťoven</b><span>PDF, e-maily, přílohy k nabídce</span></div>
+            <div class="uw-card"><b>Škodní průběh</b><span>historie škod, potvrzení, tabulky</span></div>
+            <div class="uw-card"><b>Revize / technické podklady</b><span>revize elektro, BOZP, zabezpečení, technika</span></div>
+            <div class="uw-card"><b>Fotodokumentace</b><span>fotky provozu, zařízení, objektů</span></div>
+            <div class="uw-card"><b>Dotazníky a ostatní</b><span>vyplněné dotazníky, komunikace, poznámky</span></div>
+          </div>
+        </section>
+      </section>
+
+      <section id="textationsView" class="app-section hidden">
+        <div class="hero compact">
+          <div>
+            <p class="eyebrow">Knihovna know-how</p>
+            <h1>Textace a speciální ujednání</h1>
+            <p>Knihovna opakovaně používaných formulací, doložek, požadavků na pojišťovny a poznámek pro klientské zprávy.</p>
+          </div>
+          <div class="card small"><b>Cíl</b><br>Poradce nemusí hledat staré Wordy a e-maily. Vybere textaci, upraví ji a použije v poptávce nebo zprávě.</div>
+        </div>
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Pracovní knihovna textací</h2>
+              <p class="muted">Základ pro budoucí centrální správu textací BO a rychlé vložení do poptávky/nabídky/zprávy.</p>
+            </div>
+            <button class="secondary" type="button" onclick="alert('Ukládání vlastních textací bude doplněno v navazující verzi.')">+ Přidat textaci</button>
+          </div>
+          <div class="workflow-filters">
+            <label>Hledat<input id="textationSearch" placeholder="např. odpovědnost, výluka, drony, FVE..."></label>
+            <label>Kategorie<select id="textationCategory"><option>Vše</option><option>Zvláštní ujednání</option><option>Výluky</option><option>Doložky</option><option>Požadavky na pojišťovnu</option><option>Underwriting poznámky</option><option>Klientská zpráva</option></select></label>
+          </div>
+          <div class="uw-grid">
+            <div class="uw-card"><b>Zvláštní ujednání</b><span>formulace pro odchylky, rozšíření a nestandardní krytí</span></div>
+            <div class="uw-card"><b>Požadavky na pojišťovnu</b><span>co má pojišťovna výslovně potvrdit v nabídce</span></div>
+            <div class="uw-card"><b>Výluky a omezení</b><span>body, které má poradce prověřit a vysvětlit klientovi</span></div>
+            <div class="uw-card"><b>Odpovědnost</b><span>vadná práce, výrobek, převzaté věci, finanční škody</span></div>
+            <div class="uw-card"><b>Drony / FVE / speciální rizika</b><span>připraveno pro další budoucí moduly</span></div>
+            <div class="uw-card"><b>Klientská zpráva</b><span>profesionální formulace doporučení a upozornění</span></div>
+          </div>
+        </section>
+      </section>
+
+      <section id="checklistView" class="app-section hidden">
+        <div class="hero compact">
+          <div>
+            <p class="eyebrow">Underwriting kontrola</p>
+            <h1>Kontrola připravenosti případu</h1>
+            <p>Pracovní checklist upozorní poradce, co chybí před odesláním poptávky pojišťovnám nebo před přípravou zprávy klientovi.</p>
+          </div>
+          <div class="card small"><b>Princip</b><br>Aplikace poradce vede, ale konečné odborné rozhodnutí zůstává na poradci.</div>
+        </div>
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Checklist podkladů a krytí</h2>
+              <p class="muted">Základní kontrolní body pro podnikatelská rizika. Postupně budou navázané na typ činnosti, rizikový model a dokumenty.</p>
+            </div>
+            <button class="secondary" type="button" onclick="showView('documentsView')">Otevřít dokumenty</button>
+          </div>
+          <div class="uw-checklist">
+            <label><input type="checkbox"> Identifikace klienta a kontaktní osoby</label>
+            <label><input type="checkbox"> Hlavní činnost a doplňkové činnosti</label>
+            <label><input type="checkbox"> Škodní průběh / informace o škodách</label>
+            <label><input type="checkbox"> Požadované limity, sublimity a spoluúčasti</label>
+            <label><input type="checkbox"> Výpis z OR / evidence, plná moc, smluvní požadavky</label>
+            <label><input type="checkbox"> Kritická rizika odpovědnosti ověřena v nabídce</label>
+            <label><input type="checkbox"> Výluky a omezení vysvětlené pro klientskou zprávu</label>
+            <label><input type="checkbox"> Nabídky připravené pro porovnání</label>
+          </div>
+        </section>
+      </section>
+
       <section id="suggestionsView" class="app-section hidden">
         <div class="hero compact">
           <div><p class="eyebrow">Společný vývoj nástroje</p><h1>Náměty od poradců</h1><p>Stávající poradci mohou posílat návrhy na chybějící rizika, otázky, pojišťovny, výluky nebo UX. Admin z toho později udělá číselník.</p></div>
@@ -460,6 +554,9 @@
             <button class="admin-tab" data-admin-tab="policyRefsAdmin">VPP/DPP zdroje</button>
             <button class="admin-tab" data-admin-tab="riskModelAdmin">Rizikový model</button>
             <button class="admin-tab" data-admin-tab="importAdmin">Import / export</button>
+            <button class="admin-tab" data-admin-tab="documentsAdmin">Dokumenty</button>
+            <button class="admin-tab" data-admin-tab="textationsAdmin">Textace</button>
+            <button class="admin-tab" data-admin-tab="checklistAdmin">Checklist</button>
           </div>
           <div id="inquiriesAdmin" class="admin-section hidden">
             <div class="section-head"><div><h3>Přehled všech poptávek BO</h3><p class="muted">Evidence celého workflow: komu byla poptávka odeslána, kolik je nabídek, stav zpracování a poslední změna.</p></div><button id="refreshAdminInquiriesBtn" class="secondary">Aktualizovat</button></div>
@@ -511,6 +608,20 @@
             <div id="importStatus" class="status"></div>
             <div class="admin-note"><b>Doporučené hlavičky pro rizika:</b> activity_code, id, name, priority, description, limit, question, reason, default_on<br><b>Doporučené hlavičky pro činnosti:</b> code, name, description, risk_level, limit_hint</div>
           </div>
+
+          <div id="documentsAdmin" class="admin-section hidden">
+            <div class="section-head"><div><h2>Správa dokumentů a zdrojů</h2><p class="muted">Budoucí evidence VPP/DPP/ZPP, článků, odstavců, odkazů a vazeb na rizika.</p></div><button class="secondary" type="button">+ Přidat dokument</button></div>
+            <div class="admin-note">MVP 0.58 připravuje datovou a UX strukturu. V další verzi bude možné ukládat dokumenty, odkazy a vazby na konkrétní rizika.</div>
+          </div>
+          <div id="textationsAdmin" class="admin-section hidden">
+            <div class="section-head"><div><h2>Správa knihovny textací</h2><p class="muted">Centrální knihovna doložek, zvláštních ujednání a formulací pro poradce.</p></div><button class="secondary" type="button">+ Přidat textaci</button></div>
+            <div class="admin-note">MVP 0.58 zakládá pracovní oblast. Následně doplníme ukládání, tagy, kategorie, schvalování BO a rychlé vložení do poptávky/zprávy.</div>
+          </div>
+          <div id="checklistAdmin" class="admin-section hidden">
+            <div class="section-head"><div><h2>Správa underwriting checklistů</h2><p class="muted">Checklisty podle typu klienta, rizika nebo budoucího modulu.</p></div><button class="secondary" type="button">+ Přidat kontrolní bod</button></div>
+            <div class="admin-note">MVP 0.58 připravuje prostor pro pravidla. Další verze naváže kontrolní body na činnost, rizika, dokumenty a nabídky.</div>
+          </div>
+
           <div class="admin-actions"><button id="saveAdminCatalogs" class="primary">Uložit admin číselníky do DB</button></div>
         </section>
       </section>
@@ -522,6 +633,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=49"></script>
+  <script src="/static/js/app.js?v=581"></script>
 </body>
 </html>
