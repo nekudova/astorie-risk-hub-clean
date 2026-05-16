@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=680">
+  <link rel="stylesheet" href="/static/css/style.css?v=690">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.68 · Moje textace + centrální databáze</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.69 · Přehlednější knihovna textací</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -610,7 +610,14 @@
           <div id="textationSaveStatus" class="textation-save-status hidden"></div>
           
           
-          <section class="saved-textations-panel textation-split-panel">
+          
+          <div class="textation-view-tabs">
+            <button type="button" class="active" data-textation-tab="mine" onclick="setTextationTab('mine')">Moje textace</button>
+            <button type="button" data-textation-tab="central" onclick="setTextationTab('central')">Centrální databáze</button>
+            <button type="button" data-textation-tab="suggested" onclick="setTextationTab('suggested')">Návrhy ke schválení</button>
+          </div>
+
+          <section class="saved-textations-panel textation-split-panel textation-tab-panel" data-panel="mine">
             <div class="section-head">
               <div>
                 <h2>Moje textace</h2>
@@ -621,7 +628,7 @@
             <div id="myTextationList" class="saved-textation-list"></div>
           </section>
 
-          <section class="saved-textations-panel central-textations-panel">
+          <section class="saved-textations-panel central-textations-panel textation-tab-panel hidden" data-panel="central">
             <div class="section-head">
               <div>
                 <h2>Centrální databáze textací</h2>
@@ -632,6 +639,17 @@
             <div id="centralTextationList" class="saved-textation-list"></div>
           </section>
 
+
+          
+          <section class="saved-textations-panel suggested-textations-panel textation-tab-panel hidden" data-panel="suggested">
+            <div class="section-head">
+              <div>
+                <h2>Návrhy ke schválení</h2>
+                <p class="muted">Textace, které poradce navrhl pro zařazení do centrální databáze. V další DB verzi je bude schvalovat BO/Admin.</p>
+              </div>
+            </div>
+            <div id="suggestedTextationList" class="saved-textation-list"></div>
+          </section>
 
           <div class="textation-layout">
             <div class="textation-list" id="textationList"></div>
@@ -926,6 +944,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=680"></script>
+  <script src="/static/js/app.js?v=690"></script>
 </body>
 </html>

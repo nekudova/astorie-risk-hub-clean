@@ -3397,3 +3397,122 @@ function renderTextationsWorkspace(){
 }
 
 setTimeout(()=>{ if($('myTextationList') || $('centralTextationList')) renderSavedTextations(); }, 300);
+
+
+// MVP 0.69 - UX tabs for textations
+window.currentTextationTab = window.currentTextationTab || 'mine';
+
+function setTextationTab(tab){
+  window.currentTextationTab = tab || 'mine';
+  document.querySelectorAll('[data-textation-tab]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.textationTab === window.currentTextationTab);
+  });
+  document.querySelectorAll('.textation-tab-panel').forEach(panel => {
+    panel.classList.toggle('hidden', panel.dataset.panel !== window.currentTextationTab);
+  });
+  renderSavedTextations();
+}
+
+function renderTextationCardV68(item, mode, selectedId){
+  const suggested = isSuggestedTextationV68(item) ? '<em class="proposal-chip">navrženo ke schválení</em>' : '';
+  const source = isCustomTextationV68(item) ? 'Moje' : 'Centrální';
+  return `
+    <button type="button" class="saved-textation-item ${selectedId === item.id ? 'active' : ''}" data-saved-textation-id="${escapeHtml(item.id)}" onclick="showTextationDetailStable('${escapeHtml(item.id)}')">
+      <span class="textation-source">${source}</span>
+      <b>${escapeHtml(item.title)}</b>
+      <span>${escapeHtml(item.category)}</span>
+      <small>${escapeHtml(item.usage || '')}${(item.tags||[]).length ? ' · ' + escapeHtml((item.tags||[]).join(' · ')) : ''}</small>
+      ${suggested}
+    </button>
+  `;
+}
+
+function renderSavedTextations(selectedId){
+  const myBox = $('myTextationList');
+  const centralBox = $('centralTextationList');
+  const suggestedBox = $('suggestedTextationList');
+
+  const items = getFilteredTextationsV68();
+  const mine = items.filter(isCustomTextationV68);
+  const central = items.filter(i => !isCustomTextationV68(i));
+  const suggested = items.filter(isSuggestedTextationV68);
+
+  if(myBox){
+    myBox.innerHTML = mine.length
+      ? mine.map(i => renderTextationCardV68(i, 'mine', selectedId)).join('')
+      : '<div class="textation-empty">Zatím nemáte žádnou vlastní textaci. Klikněte na „+ Přidat textaci“.</div>';
+  }
+
+  if(centralBox){
+    centralBox.innerHTML = central.length
+      ? central.map(i => renderTextationCardV68(i, 'central', selectedId)).join('')
+      : '<div class="textation-empty">Ve filtru není žádná centrální textace.</div>';
+  }
+
+  if(suggestedBox){
+    suggestedBox.innerHTML = suggested.length
+      ? suggested.map(i => renderTextationCardV68(i, 'suggested', selectedId)).join('')
+      : '<div class="textation-empty">Zatím není žádná textace navržená ke schválení.</div>';
+  }
+}
+
+function saveTextationFromEditor(){
+  const title = ($('textationEditTitle')?.value || '').trim();
+  const category = ($('textationEditCategory')?.value || '').trim();
+  const usage = ($('textationEditUsage')?.value || '').trim();
+  const tagsRaw = ($('textationEditTags')?.value || '').trim();
+  const text = ($('textationEditText')?.value || '').trim();
+  const id = ($('textationEditId')?.value || '').trim();
+
+  if(!title){ alert('Doplňte název textace.'); $('textationEditTitle')?.focus(); return; }
+  if(!text){ alert('Doplňte textaci.'); $('textationEditText')?.focus(); return; }
+
+  const items = stableReadTextations();
+  const payload = stableNormalizeTextation({
+    id: id || ('custom-' + Date.now()),
+    title, category, usage,
+    tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),
+    text
+  });
+
+  const idx = items.findIndex(i => i.id === payload.id);
+  if(idx >= 0) items[idx] = {...items[idx], ...payload};
+  else items.unshift(payload);
+
+  stableWriteTextations(items);
+
+  if($('textationSearch')) $('textationSearch').value = '';
+  if($('textationCategory')) $('textationCategory').value = '';
+  if($('textationTag')) $('textationTag').value = '';
+
+  closeTextationEditor();
+  setTextationTab('mine');
+  renderSavedTextations(payload.id);
+  showTextationDetail(payload.id);
+
+  const status = $('textationSaveStatus');
+  if(status){
+    status.className = 'textation-save-status ok';
+    status.textContent = 'Textace byla uložena do záložky „Moje textace“.';
+    status.classList.remove('hidden');
+  }
+}
+
+function proposeTextationToCentral(id){
+  const items = stableReadTextations();
+  const idx = items.findIndex(i => i.id === id);
+  if(idx < 0) return;
+  items[idx].suggestedToCentral = true;
+  items[idx].suggestedAt = new Date().toISOString();
+  stableWriteTextations(items);
+  setTextationTab('suggested');
+  renderSavedTextations(id);
+  showTextationDetail(id);
+  alert('Textace byla přesunuta do záložky „Návrhy ke schválení“.');
+}
+
+function renderTextationsWorkspace(){
+  stableReadTextations();
+  setTextationTab(window.currentTextationTab || 'mine');
+  if(typeof loadCaseTextationNotesLocal === 'function') loadCaseTextationNotesLocal();
+}

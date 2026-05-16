@@ -127,3 +127,10 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Vlastní textace lze upravit, smazat a navrhnout do centrální databáze.
 - Odstraněn duplicitní spodní seznam textací.
 - Filtry pracují nad oběma seznamy.
+
+
+## MVP 0.69 – Přehlednější knihovna textací
+- Přidán přepínač Moje textace / Centrální databáze / Návrhy ke schválení.
+- Odstraněn pocit dlouhých bloků pod sebou.
+- Nová textace se ukládá do záložky Moje textace.
+- Návrh do centrální databáze se zobrazí v samostatné záložce.

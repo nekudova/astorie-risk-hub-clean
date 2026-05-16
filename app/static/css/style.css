@@ -1307,3 +1307,52 @@ main{max-width:none;margin:0;padding:20px;}
 .proposal-note{border:1px solid #bde9c8;background:#eefbf2;color:#146b2e;border-radius:12px;padding:10px 12px;font-weight:900;margin:10px 0}
 .textation-layout{grid-template-columns:1fr !important}
 .textation-layout .textation-list{display:none !important}
+
+/* MVP 0.69 - friendlier textation UX */
+.textation-view-tabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0;
+  padding:8px;
+  border:1px solid var(--line,#d7e5e9);
+  border-radius:18px;
+  background:#eef8fa;
+}
+.textation-view-tabs button{
+  border:1px solid transparent;
+  border-radius:999px;
+  padding:12px 18px;
+  background:transparent;
+  color:var(--petrol,#003D4C);
+  font-weight:900;
+  cursor:pointer;
+}
+.textation-view-tabs button.active{
+  background:#fff;
+  border-color:var(--orange,#FC4C02);
+  box-shadow:0 6px 18px rgba(252,76,2,.12);
+}
+.saved-textations-panel{
+  margin-top:10px;
+}
+.saved-textation-list{
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+}
+.saved-textation-item{
+  min-height:118px;
+}
+.textation-source{
+  float:right;
+  background:#eef8fa;
+  border:1px solid var(--line,#d7e5e9);
+  color:var(--petrol,#003D4C) !important;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:11px !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+}
+.suggested-textations-panel{
+  border-left-color:#E6B15D;
+}
