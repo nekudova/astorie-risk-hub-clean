@@ -3189,3 +3189,40 @@ function renderTextationsWorkspace(){
 
 // render list when page is ready, if user is already on Textace
 setTimeout(()=>{ if($('savedTextationList')) renderSavedTextations(); }, 300);
+
+
+// MVP 0.67 HOTFIX - escapeHtml + safe render
+if (typeof escapeHtml === 'undefined') {
+  function escapeHtml(value){
+    return String(value ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/\"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  }
+}
+
+window.addEventListener('error', function(e){
+  console.error('ASTORIE RENDER ERROR:', e.message);
+});
+
+function safeRenderTextations(){
+  try{
+    if(typeof renderSavedTextations === 'function'){
+      renderSavedTextations();
+    }
+    if(typeof renderTextationLibrary === 'function'){
+      renderTextationLibrary();
+    }
+  }catch(err){
+    console.error('TEXTATION RENDER FAILED', err);
+    const box = document.getElementById('savedTextationList');
+    if(box){
+      box.innerHTML = '<div class="textation-empty">Došlo k chybě rendereru textací. Obnovte stránku a zkuste textaci uložit znovu.</div>';
+    }
+  }
+}
+
+setTimeout(()=>safeRenderTextations(),200);
+
