@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub – MVP 0.65
+Oprava viditelnosti textací + funkční filtr

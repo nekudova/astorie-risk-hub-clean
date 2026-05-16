@@ -103,3 +103,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Admin tlačítko „+ Přidat textaci“ otevírá profesionální editor.
 - Beze změny databázové struktury; ukládání textací zůstává lokální v prohlížeči jako bezpečný mezikrok.
 - Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.
+
+
+## MVP 0.65 – Oprava viditelnosti textací + funkční filtr
+- Sjednocení localStorage klíčů textací.
+- Nová textace se po uložení okamžitě zobrazí a otevře v detailu.
+- Filtry se po uložení vyčistí, aby textace nebyla skrytá.
+- Knihovna migruje starší lokální textace z předchozích verzí.
+- Beze změny DB.
