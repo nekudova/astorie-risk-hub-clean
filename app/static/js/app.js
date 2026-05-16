@@ -2953,3 +2953,239 @@ function renderTextationsWorkspace(){
   renderTextationLibrary();
   loadCaseTextationNotesLocal();
 }
+
+
+// MVP 0.66 - stable saved textations list
+const TEXTATION_STORAGE_KEY_V66 = 'astorie_textations_stable_v66';
+const TEXTATION_ALL_KEYS_V66 = [
+  'astorie_textations_stable_v66',
+  'astorie_textations_v65',
+  'astorie_textations_v64',
+  'astorie_textations_v63',
+  'astorie_textations_v62'
+];
+
+function stableNormalizeTextation(item){
+  const tags = Array.isArray(item.tags)
+    ? item.tags
+    : String(item.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+  return {
+    id: item.id || ('custom-' + Date.now() + '-' + Math.random().toString(16).slice(2)),
+    title: item.title || item.name || 'Bez názvu',
+    category: item.category || 'Zvláštní ujednání',
+    usage: item.usage || item.type || 'Poptávka pojišťovně',
+    tags: tags,
+    text: item.text || item.fullText || item.body || ''
+  };
+}
+
+function stableUniqueTextations(items){
+  const map = new Map();
+  (items || []).forEach(raw => {
+    const item = stableNormalizeTextation(raw || {});
+    if(!item.title && !item.text) return;
+    // pokud je vlastní uložená textace bez stabilního ID, zachovej jako položku dle id
+    map.set(item.id, item);
+  });
+  return Array.from(map.values());
+}
+
+function stableReadTextations(){
+  let merged = [];
+  TEXTATION_ALL_KEYS_V66.forEach(key => {
+    try{
+      const raw = localStorage.getItem(key);
+      if(raw){
+        const arr = JSON.parse(raw);
+        if(Array.isArray(arr)) merged = merged.concat(arr);
+      }
+    }catch(e){}
+  });
+  if(typeof DEFAULT_TEXTATIONS !== 'undefined' && Array.isArray(DEFAULT_TEXTATIONS)){
+    merged = merged.concat(DEFAULT_TEXTATIONS);
+  }
+  const clean = stableUniqueTextations(merged);
+  stableWriteTextations(clean);
+  return clean;
+}
+
+function stableWriteTextations(items){
+  const clean = stableUniqueTextations(items || []);
+  const data = JSON.stringify(clean);
+  TEXTATION_ALL_KEYS_V66.forEach(key => {
+    try{ localStorage.setItem(key, data); }catch(e){}
+  });
+}
+
+// Override library accessors definitively
+function getTextationLibrary(){
+  return stableReadTextations();
+}
+
+function saveTextationLibrary(items){
+  stableWriteTextations(items || []);
+}
+
+function forceRenderSavedTextations(){
+  renderSavedTextations();
+  renderTextationLibrary();
+}
+
+function renderSavedTextations(selectedId){
+  const box = $('savedTextationList');
+  if(!box) return;
+  const items = stableReadTextations()
+    .filter(i => String(i.id || '').indexOf('odp-') !== 0 || i.title)  // keep defaults too
+    .sort((a,b) => {
+      const ac = String(a.id || '').startsWith('custom-') ? 0 : 1;
+      const bc = String(b.id || '').startsWith('custom-') ? 0 : 1;
+      return ac - bc || String(a.title).localeCompare(String(b.title), 'cs');
+    });
+
+  if(!items.length){
+    box.innerHTML = '<div class="textation-empty">Zatím není uložená žádná textace.</div>';
+    return;
+  }
+
+  box.innerHTML = items.map(i => `
+    <button type="button" class="saved-textation-item ${selectedId === i.id ? 'active' : ''}" data-saved-textation-id="${escapeHtml(i.id)}" onclick="showTextationDetailStable('${escapeHtml(i.id)}')">
+      <b>${escapeHtml(i.title)}</b>
+      <span>${escapeHtml(i.category)} · ${escapeHtml(i.usage || '')}</span>
+      <small>${(i.tags||[]).map(t=>escapeHtml(t)).join(' · ')}</small>
+    </button>
+  `).join('');
+
+  if(selectedId && window.CSS && CSS.escape){
+    const el = box.querySelector(`[data-saved-textation-id="${CSS.escape(selectedId)}"]`);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
+function renderTextationLibrary(selectedId){
+  const list = $('textationList');
+  if(!list) return;
+  let items = stableReadTextations();
+
+  const q = ($('textationSearch')?.value || '').toLowerCase().trim();
+  const cat = $('textationCategory')?.value || '';
+  const tag = $('textationTag')?.value || '';
+
+  if(cat) items = items.filter(i => i.category === cat);
+  if(tag) items = items.filter(i => (i.tags || []).includes(tag));
+  if(q){
+    items = items.filter(i =>
+      [i.title, i.category, i.usage, i.text, (i.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)
+    );
+  }
+
+  if(!items.length){
+    list.innerHTML = '<div class="textation-empty">Podle filtru není nalezena žádná textace. Všechny uložené textace najdete výše v bloku „Moje uložené textace“.</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(i => `
+    <button type="button" class="textation-item ${selectedId === i.id ? 'active' : ''}" data-textation-id="${escapeHtml(i.id)}" onclick="showTextationDetailStable('${escapeHtml(i.id)}')">
+      <span>${escapeHtml(i.category)}</span>
+      <b>${escapeHtml(i.title)}</b>
+      <small>${escapeHtml(i.usage || '')}${(i.tags||[]).length ? ' · ' + escapeHtml((i.tags||[]).join(' · ')) : ''}</small>
+    </button>
+  `).join('');
+}
+
+function findTextation(id){
+  return stableReadTextations().find(i => i.id === id);
+}
+
+function showTextationDetailStable(id){
+  showTextationDetail(id);
+  document.querySelectorAll('.saved-textation-item').forEach(btn => btn.classList.remove('active'));
+  if(window.CSS && CSS.escape){
+    const active = document.querySelector(`[data-saved-textation-id="${CSS.escape(id)}"]`);
+    if(active) active.classList.add('active');
+  }
+}
+
+function saveTextationFromEditor(){
+  const title = ($('textationEditTitle')?.value || '').trim();
+  const category = ($('textationEditCategory')?.value || '').trim();
+  const usage = ($('textationEditUsage')?.value || '').trim();
+  const tagsRaw = ($('textationEditTags')?.value || '').trim();
+  const text = ($('textationEditText')?.value || '').trim();
+  const id = ($('textationEditId')?.value || '').trim();
+
+  if(!title){
+    alert('Doplňte název textace.');
+    $('textationEditTitle')?.focus();
+    return;
+  }
+  if(!text){
+    alert('Doplňte textaci.');
+    $('textationEditText')?.focus();
+    return;
+  }
+
+  const items = stableReadTextations();
+  const payload = stableNormalizeTextation({
+    id: id || ('custom-' + Date.now()),
+    title, category, usage,
+    tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),
+    text
+  });
+
+  const idx = items.findIndex(i => i.id === payload.id);
+  if(idx >= 0) items[idx] = payload;
+  else items.unshift(payload);
+
+  stableWriteTextations(items);
+
+  if($('textationSearch')) $('textationSearch').value = '';
+  if($('textationCategory')) $('textationCategory').value = '';
+  if($('textationTag')) $('textationTag').value = '';
+
+  closeTextationEditor();
+
+  renderSavedTextations(payload.id);
+  renderTextationLibrary(payload.id);
+  showTextationDetailStable(payload.id);
+  renderAdminTextations();
+
+  const status = $('textationSaveStatus');
+  if(status){
+    status.className = 'textation-save-status ok';
+    status.textContent = 'Textace byla uložena. Najdete ji v bloku „Moje uložené textace“.';
+    status.classList.remove('hidden');
+  } else {
+    alert('Textace byla uložena. Najdete ji v bloku Moje uložené textace.');
+  }
+}
+
+function deleteTextation(id){
+  const item = findTextation(id);
+  if(!item) return;
+  if(!confirm('Opravdu smazat textaci: ' + item.title + '?')) return;
+  stableWriteTextations(stableReadTextations().filter(i => i.id !== id));
+  renderSavedTextations();
+  renderTextationLibrary();
+  renderAdminTextations();
+  const box = $('textationDetail');
+  if(box) box.innerHTML = '<p class="eyebrow">Detail textace</p><h3>Vyberte textaci</h3><p>Po kliknutí na textaci se zobrazí celý text, možnost kopírování, vložení do pracovních poznámek a úprava.</p>';
+}
+
+function resetTextationLibrary(){
+  if(!confirm('Obnovit vzorové textace? Vlastní lokální úpravy v prohlížeči budou nahrazeny.')) return;
+  const defaults = (typeof DEFAULT_TEXTATIONS !== 'undefined' && Array.isArray(DEFAULT_TEXTATIONS)) ? DEFAULT_TEXTATIONS : [];
+  stableWriteTextations(defaults);
+  renderSavedTextations();
+  renderTextationLibrary();
+  renderAdminTextations();
+}
+
+function renderTextationsWorkspace(){
+  stableReadTextations();
+  renderSavedTextations();
+  renderTextationLibrary();
+  if(typeof loadCaseTextationNotesLocal === 'function') loadCaseTextationNotesLocal();
+}
+
+// render list when page is ready, if user is already on Textace
+setTimeout(()=>{ if($('savedTextationList')) renderSavedTextations(); }, 300);

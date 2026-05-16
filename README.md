@@ -111,3 +111,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Filtry se po uložení vyčistí, aby textace nebyla skrytá.
 - Knihovna migruje starší lokální textace z předchozích verzí.
 - Beze změny DB.
+
+
+## MVP 0.66 – Stabilní uložené textace + pevný seznam
+- Přidán samostatný blok Moje uložené textace.
+- Uložená textace se zobrazuje bez ohledu na filtry.
+- Sjednocené úložiště napříč staršími verzemi.
+- Po uložení se textace otevře v detailu a zvýrazní v seznamu.
+- Beze změny DB.
