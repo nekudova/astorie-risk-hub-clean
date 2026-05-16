@@ -1,0 +1,3 @@
+ASTORIE Business Risk Hub – MVP 0.64
+Funkční admin textací + okamžité zobrazení
+Postaveno nad 0.63 REAL FULL. Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.

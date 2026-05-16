@@ -2545,3 +2545,146 @@ function loadCaseTextationNotesLocal(){
   notes.value = localStorage.getItem('astorie_case_textation_notes_v63') || notes.value || '';
   if(!notes.dataset.bound){ notes.dataset.bound='1'; notes.addEventListener('input', saveCaseTextationNotesLocal); }
 }
+
+
+// MVP 0.64 – reliable textation save/render/admin functions
+function clearTextationFilters(){
+  if($('textationSearch')) $('textationSearch').value = '';
+  if($('textationCategory')) $('textationCategory').value = '';
+  if($('textationTag')) $('textationTag').value = '';
+}
+
+function normalizeTextationItem(item){
+  return {
+    id: item.id || ('custom-' + Date.now()),
+    title: item.title || '',
+    category: item.category || 'Zvláštní ujednání',
+    usage: item.usage || 'Poptávka pojišťovně',
+    tags: Array.isArray(item.tags) ? item.tags : String(item.tags || '').split(',').map(t=>t.trim()).filter(Boolean),
+    text: item.text || ''
+  };
+}
+
+// override save with reliable behavior
+function saveTextationFromEditor(){
+  const title = ($('textationEditTitle')?.value || '').trim();
+  const category = ($('textationEditCategory')?.value || '').trim();
+  const usage = ($('textationEditUsage')?.value || '').trim();
+  const tagsRaw = ($('textationEditTags')?.value || '').trim();
+  const text = ($('textationEditText')?.value || '').trim();
+  const id = ($('textationEditId')?.value || '').trim();
+
+  if(!title){
+    alert('Doplňte název textace.');
+    $('textationEditTitle')?.focus();
+    return;
+  }
+  if(!text){
+    alert('Doplňte textaci.');
+    $('textationEditText')?.focus();
+    return;
+  }
+
+  const items = getTextationLibrary().map(normalizeTextationItem);
+  const payload = normalizeTextationItem({
+    id: id || ('custom-' + Date.now()),
+    title,
+    category,
+    usage,
+    tags: tagsRaw.split(',').map(t => t.trim()).filter(Boolean),
+    text
+  });
+
+  const idx = items.findIndex(i => i.id === payload.id);
+  if(idx >= 0) items[idx] = payload;
+  else items.unshift(payload);
+
+  saveTextationLibrary(items);
+
+  // důležité: po uložení vyčistit filtry, aby nová textace nebyla skrytá
+  clearTextationFilters();
+  closeTextationEditor();
+
+  // zobrazit v poradenské knihovně
+  renderTextationLibrary();
+  showTextationDetail(payload.id);
+
+  // zobrazit v adminu, pokud je admin otevřený
+  renderAdminTextations();
+
+  alert('Textace byla uložena a je viditelná v knihovně.');
+}
+
+function openAdminTextationEditor(){
+  showView('textationsView');
+  setTimeout(openTextationEditor, 80);
+}
+
+function renderAdminTextations(){
+  const list = $('adminTextationList');
+  if(!list) return;
+
+  let items = getTextationLibrary().map(normalizeTextationItem);
+  const q = ($('adminTextationSearch')?.value || '').toLowerCase().trim();
+  const cat = $('adminTextationCategory')?.value || '';
+
+  if(cat) items = items.filter(i => i.category === cat);
+  if(q){
+    items = items.filter(i =>
+      [i.title, i.category, i.usage, i.text, (i.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)
+    );
+  }
+
+  if(!items.length){
+    list.innerHTML = '<div class="admin-note">Nenalezena žádná textace. Použijte tlačítko „+ Přidat textaci“.</div>';
+    return;
+  }
+
+  list.innerHTML = `
+    <table class="admin-textation-table">
+      <thead>
+        <tr>
+          <th>Název</th>
+          <th>Kategorie</th>
+          <th>Použití</th>
+          <th>Tagy</th>
+          <th>Akce</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(i => `
+          <tr>
+            <td><b>${escapeHtml(i.title)}</b><br><small>${escapeHtml((i.text || '').slice(0, 140))}${(i.text||'').length > 140 ? '…' : ''}</small></td>
+            <td>${escapeHtml(i.category)}</td>
+            <td>${escapeHtml(i.usage)}</td>
+            <td>${(i.tags||[]).map(t=>'<span class="mini-tag">'+escapeHtml(t)+'</span>').join('')}</td>
+            <td>
+              <button class="secondary small-btn" type="button" onclick="showView('textationsView'); setTimeout(()=>showTextationDetail('${escapeHtml(i.id)}'),80)">Detail</button>
+              <button class="secondary small-btn" type="button" onclick="showView('textationsView'); setTimeout(()=>editTextation('${escapeHtml(i.id)}'),80)">Upravit</button>
+              <button class="danger-light small-btn" type="button" onclick="deleteTextation('${escapeHtml(i.id)}'); renderAdminTextations();">Smazat</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// doplnění renderu při otevření adminu
+(function(){
+  const originalShowAdminTab = window.showAdminTab;
+  if(typeof originalShowAdminTab === 'function' && !window.__adminTextationPatchApplied){
+    window.__adminTextationPatchApplied = true;
+    window.showAdminTab = function(tab){
+      originalShowAdminTab(tab);
+      if(tab === 'textationsAdmin') renderAdminTextations();
+    }
+  }
+})();
+
+
+// adminTextationClickBinding64
+document.addEventListener('click', function(e){
+  const btn = e.target && e.target.closest ? e.target.closest('[data-admin-tab="textationsAdmin"]') : null;
+  if(btn) setTimeout(renderAdminTextations, 80);
+});

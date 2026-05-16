@@ -94,3 +94,12 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Textace lze přidat, upravit, smazat, zkopírovat a vložit do poznámek.
 - Pracovní poznámky se lokálně ukládají v prohlížeči.
 - Beze změny DB.
+
+
+## MVP 0.64 – Funkční admin textací + okamžité zobrazení
+- Opraveno: nová textace se po uložení okamžitě zobrazí v knihovně.
+- Opraveno: po uložení se vyčistí filtry, aby textace nebyla skrytá.
+- Doplněna funkční admin správa textací: seznam, hledání, filtrování, detail, úprava, smazání.
+- Admin tlačítko „+ Přidat textaci“ otevírá profesionální editor.
+- Beze změny databázové struktury; ukládání textací zůstává lokální v prohlížeči jako bezpečný mezikrok.
+- Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.

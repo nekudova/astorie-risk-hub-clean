@@ -1166,3 +1166,80 @@ main{max-width:none;margin:0;padding:20px;}
 .textation-editor-text{min-height:150px;resize:vertical;line-height:1.5}
 .textation-editor-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 @media(max-width:1100px){.textation-editor-grid{grid-template-columns:1fr}}
+
+
+/* MVP 0.64 – admin textations */
+.admin-textation-toolbar{
+  display:grid;
+  grid-template-columns:1fr 300px auto;
+  gap:12px;
+  margin:16px 0;
+  align-items:center;
+}
+.admin-textation-toolbar input,
+.admin-textation-toolbar select{
+  border:1px solid var(--line,#d7e5e9);
+  border-radius:14px;
+  padding:13px 14px;
+  font:inherit;
+  color:var(--petrol,#003D4C);
+  background:#fff;
+}
+.admin-textation-list{
+  margin-top:12px;
+}
+.admin-textation-table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border:1px solid var(--line,#d7e5e9);
+  border-radius:18px;
+  overflow:hidden;
+}
+.admin-textation-table th{
+  background:#eef8fa;
+  color:var(--petrol,#003D4C);
+  text-align:left;
+  padding:12px;
+  font-size:12px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.admin-textation-table td{
+  border-top:1px solid var(--line,#d7e5e9);
+  padding:12px;
+  vertical-align:top;
+  color:var(--petrol,#003D4C);
+}
+.admin-textation-table small{
+  color:var(--muted,#607882);
+  font-weight:700;
+  line-height:1.35;
+}
+.mini-tag{
+  display:inline-block;
+  margin:2px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#eef8fa;
+  border:1px solid var(--line,#d7e5e9);
+  font-size:11px;
+  font-weight:900;
+}
+.small-btn{
+  padding:8px 10px !important;
+  margin:2px;
+  border-radius:10px !important;
+  font-size:12px !important;
+}
+@media(max-width:1100px){
+  .admin-textation-toolbar{
+    grid-template-columns:1fr;
+  }
+  .admin-textation-table{
+    min-width:900px;
+  }
+  .admin-textation-list{
+    overflow:auto;
+  }
+}
