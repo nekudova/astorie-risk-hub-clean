@@ -78,3 +78,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Přidán helper panel pro porovnání.
 - Zachováno: ARES, DB, Admin, odpovědnost, původní nabídky, porovnání, PDF.
 - Bez změny databázové struktury.
+
+
+## MVP 0.62 – Funkční knihovna textací + pilotní režim poradce
+- Knihovna textací je nyní skutečně použitelná: vyhledávání, kategorie, tagy, detail, kopírování, vložení do poznámek.
+- Přidána první vzorová sada textací pro odpovědnost, převzaté věci, výrobek, čisté finanční škody, FVE a drony.
+- Přidán pilotní checklist pro předání vybranému poradci.
+- Beze změny databázové struktury; lokální úpravy textací jsou dočasně ukládány v prohlížeči.
+- Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.

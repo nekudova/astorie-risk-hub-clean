@@ -528,7 +528,7 @@ function showView(id){
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
   if(id==='documentsView') renderDocumentsWorkspace();
-  if(id==='textationsView') renderTextationsWorkspace();
+  if(id==='textationsView') renderTextationLibrary();
   if(id==='checklistView') renderUnderwritingChecklist();
   if(id==='riskModelView') renderRiskModelWorkspace();
   if(id==='suggestionsView') loadSuggestions();
@@ -2292,4 +2292,181 @@ function renderOfferWorkspaceStats(){
     if(!alerts.length) alerts.push('Nabídkový workspace je připravený pro porovnání.');
     $('offerWsAlerts').innerHTML = alerts.map(a=>'<li>'+escapeHtml(a)+'</li>').join('');
   }
+}
+
+
+// MVP 0.62 – functional textation library
+const DEFAULT_TEXTATIONS = [
+  {
+    id:'odp-provoz',
+    title:'Odpovědnost z provozní činnosti – potvrzení rozsahu',
+    category:'Požadavky na pojišťovnu',
+    tags:['odpovědnost','pojišťovna'],
+    usage:'Poptávka pojišťovně',
+    text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce, včetně uvedení případných výluk, sublimitu nebo zvláštních podmínek.'
+  },
+  {
+    id:'prevzate-veci',
+    title:'Věci převzaté / užívané – požadavek na krytí',
+    category:'Zvláštní ujednání',
+    tags:['odpovědnost','převzaté věci'],
+    usage:'Poptávka / nabídka',
+    text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v dispozici klienta při výkonu jeho činnosti. Prosíme o uvedení limitu, sublimitu, spoluúčasti a případných omezení.'
+  },
+  {
+    id:'vadny-vyrobek',
+    title:'Odpovědnost za výrobek / vadnou práci',
+    category:'Odpovědnost',
+    tags:['odpovědnost','výrobek'],
+    usage:'Rizika / porovnání',
+    text:'U nabídky je nutné ověřit, zda a v jakém rozsahu kryje odpovědnost za škodu způsobenou vadou výrobku nebo vadně provedenou prací po předání. Zvláštní pozornost je třeba věnovat výlukám, sériové škodě, čistým finančním škodám a nákladům na stažení výrobku.'
+  },
+  {
+    id:'cista-financni-skoda',
+    title:'Čistá finanční škoda – upozornění pro klienta',
+    category:'Klientská zpráva',
+    tags:['odpovědnost','finanční škoda','klient'],
+    usage:'Zpráva klientovi',
+    text:'U čistých finančních škod doporučujeme ověřit, zda jsou v nabídce kryty samostatně, nebo pouze jako doplňkové krytí se sublimitem. Pokud je krytí omezené nebo zcela vyloučené, je vhodné klienta na tuto skutečnost výslovně upozornit.'
+  },
+  {
+    id:'vyluky',
+    title:'Výluky – obecné upozornění do zprávy',
+    category:'Výluky a omezení',
+    tags:['výluky','klient'],
+    usage:'Zpráva klientovi',
+    text:'Před uzavřením pojištění doporučujeme věnovat pozornost výlukám a omezením uvedeným v pojistných podmínkách a nabídce. Rozsah pojištění není dán pouze limitem a cenou, ale zejména konkrétními podmínkami krytí.'
+  },
+  {
+    id:'fve',
+    title:'FVE – technické podklady a revize',
+    category:'Drony / FVE / speciální rizika',
+    tags:['FVE','podklady'],
+    usage:'Poptávka pojišťovně',
+    text:'Pro posouzení rizika FVE doporučujeme doložit technickou specifikaci, instalovaný výkon, umístění technologie, způsob zabezpečení, revizní zprávy a informaci o provozovateli. Pojišťovna může požadovat doplňující podklady podle rozsahu a typu instalace.'
+  },
+  {
+    id:'drony',
+    title:'Drony – odpovědnost provozovatele',
+    category:'Drony / FVE / speciální rizika',
+    tags:['drony','odpovědnost'],
+    usage:'Poptávka / rizikový model',
+    text:'U provozu dronů doporučujeme ověřit zejména účel použití, typ a hmotnost zařízení, územní rozsah provozu, oprávnění pilota, historii škod a požadovaný limit odpovědnosti za újmu způsobenou třetím osobám.'
+  }
+];
+
+function getTextationLibrary(){
+  try{
+    const saved = localStorage.getItem('astorie_textations_v62');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return DEFAULT_TEXTATIONS.slice();
+}
+function saveTextationLibrary(items){
+  localStorage.setItem('astorie_textations_v62', JSON.stringify(items || []));
+}
+function resetTextationLibrary(){
+  if(confirm('Obnovit vzorové textace? Vlastní lokální úpravy v prohlížeči budou nahrazeny.')){
+    saveTextationLibrary(DEFAULT_TEXTATIONS.slice());
+    renderTextationLibrary();
+  }
+}
+function renderTextationsWorkspace(){
+  renderTextationLibrary();
+}
+function renderTextationLibrary(){
+  const list = $('textationList');
+  if(!list) return;
+  let items = getTextationLibrary();
+  const q = ($('textationSearch')?.value || '').toLowerCase().trim();
+  const cat = $('textationCategory')?.value || '';
+  const tag = $('textationTag')?.value || '';
+  if(cat) items = items.filter(i => i.category === cat);
+  if(tag) items = items.filter(i => (i.tags || []).includes(tag));
+  if(q){
+    items = items.filter(i => [i.title, i.category, i.usage, i.text, (i.tags||[]).join(' ')].join(' ').toLowerCase().includes(q));
+  }
+  if(!items.length){
+    list.innerHTML = '<div class="textation-empty">Nenalezena žádná textace. Zkuste jiný filtr nebo přidejte vlastní textaci.</div>';
+    return;
+  }
+  list.innerHTML = items.map(i => `
+    <button type="button" class="textation-item" onclick="showTextationDetail('${escapeHtml(i.id)}')">
+      <span>${escapeHtml(i.category)}</span>
+      <b>${escapeHtml(i.title)}</b>
+      <small>${escapeHtml((i.tags||[]).join(' · '))}</small>
+    </button>
+  `).join('');
+}
+function findTextation(id){
+  return getTextationLibrary().find(i => i.id === id);
+}
+function showTextationDetail(id){
+  const item = findTextation(id);
+  const box = $('textationDetail');
+  if(!item || !box) return;
+  box.innerHTML = `
+    <p class="eyebrow">${escapeHtml(item.category)}</p>
+    <h3>${escapeHtml(item.title)}</h3>
+    <p class="textation-usage"><b>Použití:</b> ${escapeHtml(item.usage || 'obecně')}</p>
+    <div class="textation-fulltext">${escapeHtml(item.text).replace(/\\n/g,'<br>')}</div>
+    <div class="textation-tags">${(item.tags||[]).map(t=>'<span>'+escapeHtml(t)+'</span>').join('')}</div>
+    <div class="textation-detail-actions">
+      <button class="primary" type="button" onclick="insertTextationToNotes('${escapeHtml(item.id)}')">Vložit do poznámek</button>
+      <button class="secondary" type="button" onclick="copyTextation('${escapeHtml(item.id)}')">Zkopírovat</button>
+      <button class="secondary" type="button" onclick="editTextation('${escapeHtml(item.id)}')">Upravit</button>
+    </div>
+  `;
+}
+function insertTextationToNotes(id){
+  const item = findTextation(id);
+  const notes = $('caseTextationNotes');
+  if(!item || !notes) return;
+  const prefix = notes.value.trim() ? '\\n\\n---\\n' : '';
+  notes.value += prefix + item.title + '\\n' + item.text;
+  notes.focus();
+}
+function copyTextation(id){
+  const item = findTextation(id);
+  if(!item) return;
+  navigator.clipboard?.writeText(item.text);
+  alert('Textace zkopírována.');
+}
+function copyTextationNotes(){
+  const notes = $('caseTextationNotes');
+  if(!notes) return;
+  navigator.clipboard?.writeText(notes.value || '');
+  alert('Pracovní poznámky zkopírovány.');
+}
+function openTextationEditor(){
+  const title = prompt('Název textace:');
+  if(!title) return;
+  const category = prompt('Kategorie:', 'Zvláštní ujednání') || 'Zvláštní ujednání';
+  const tagsRaw = prompt('Tagy oddělené čárkou:', 'odpovědnost') || '';
+  const text = prompt('Textace:');
+  if(!text) return;
+  const items = getTextationLibrary();
+  const id = 'custom-' + Date.now();
+  items.unshift({id, title, category, tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean), usage:'vlastní textace', text});
+  saveTextationLibrary(items);
+  renderTextationLibrary();
+  showTextationDetail(id);
+}
+function editTextation(id){
+  const items = getTextationLibrary();
+  const item = items.find(i => i.id === id);
+  if(!item) return;
+  const title = prompt('Název textace:', item.title);
+  if(!title) return;
+  const category = prompt('Kategorie:', item.category) || item.category;
+  const tagsRaw = prompt('Tagy oddělené čárkou:', (item.tags||[]).join(', ')) || '';
+  const text = prompt('Textace:', item.text);
+  if(!text) return;
+  item.title = title;
+  item.category = category;
+  item.tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+  item.text = text;
+  saveTextationLibrary(items);
+  renderTextationLibrary();
+  showTextationDetail(id);
 }

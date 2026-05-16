@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=610">
+  <link rel="stylesheet" href="/static/css/style.css?v=620">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.61 · Nabídkový workspace + rychlé porovnání</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.62 · Funkční knihovna textací + pilotní režim poradce</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -34,6 +34,7 @@
         <button class="nav-btn" data-view="comparisonView">Porovnání</button>
         <button class="nav-btn" data-view="reportView">Zpráva</button>
         <button class="nav-btn" data-view="guideView">Průvodce</button>
+        <button class="nav-btn" data-view="pilotView">Pilot poradce</button>
         <button class="nav-btn" data-view="documentsView">Dokumenty</button>
         <button class="nav-btn" data-view="textationsView">Textace</button>
         <button class="nav-btn" data-view="checklistView">Kontrola případu</button>
@@ -527,35 +528,80 @@
         </section>
       </section>
 
+      
       <section id="textationsView" class="app-section hidden">
         <div class="hero compact">
           <div>
             <p class="eyebrow">Knihovna know-how</p>
             <h1>Textace a speciální ujednání</h1>
-            <p>Knihovna opakovaně používaných formulací, doložek, požadavků na pojišťovny a poznámek pro klientské zprávy.</p>
+            <p>Pracovní knihovna formulací, doložek, požadavků na pojišťovny a poznámek pro klientskou zprávu. Textaci lze vyhledat, zkopírovat, upravit a použít u aktivního obchodního případu.</p>
           </div>
-          <div class="card small"><b>Cíl</b><br>Poradce nemusí hledat staré Wordy a e-maily. Vybere textaci, upraví ji a použije v poptávce nebo zprávě.</div>
+          <div class="card small"><b>Praktické použití</b><br>Poradce už nemusí hledat staré Wordy a e-maily. Vybere textaci, upraví ji a vloží do poptávky, nabídky nebo zprávy klientovi.</div>
         </div>
-        <section class="panel">
+
+        <section class="panel textation-workspace">
           <div class="section-head">
             <div>
-              <h2>Pracovní knihovna textací</h2>
-              <p class="muted">Základ pro budoucí centrální správu textací BO a rychlé vložení do poptávky/nabídky/zprávy.</p>
+              <p class="eyebrow">Pracovní režim</p>
+              <h2>Knihovna textací</h2>
+              <p class="muted">MVP 0.62 obsahuje první předvyplněnou knihovnu. Textace jsou zatím uloženy ve frontendu / prohlížeči, bez změny databázové struktury. V další verzi je napojíme do DB a admin správy.</p>
             </div>
-            <button class="secondary" type="button" onclick="alert('Ukládání vlastních textací bude doplněno v navazující verzi.')">+ Přidat textaci</button>
+            <div class="textation-actions">
+              <button class="secondary" type="button" onclick="resetTextationLibrary()">Obnovit vzorové textace</button>
+              <button class="primary" type="button" onclick="openTextationEditor()">+ Přidat textaci</button>
+            </div>
           </div>
-          <div class="workflow-filters">
-            <label>Hledat<input id="textationSearch" placeholder="např. odpovědnost, výluka, drony, FVE..."></label>
-            <label>Kategorie<select id="textationCategory"><option>Vše</option><option>Zvláštní ujednání</option><option>Výluky</option><option>Doložky</option><option>Požadavky na pojišťovnu</option><option>Underwriting poznámky</option><option>Klientská zpráva</option></select></label>
+
+          <div class="textation-toolbar">
+            <label>Hledat
+              <input id="textationSearch" placeholder="např. odpovědnost, výluka, drony, FVE, výrobek..." oninput="renderTextationLibrary()">
+            </label>
+            <label>Kategorie
+              <select id="textationCategory" onchange="renderTextationLibrary()">
+                <option value="">Všechny kategorie</option>
+                <option>Zvláštní ujednání</option>
+                <option>Požadavky na pojišťovnu</option>
+                <option>Výluky a omezení</option>
+                <option>Odpovědnost</option>
+                <option>Drony / FVE / speciální rizika</option>
+                <option>Klientská zpráva</option>
+                <option>Underwriting poznámky</option>
+              </select>
+            </label>
+            <label>Tag
+              <select id="textationTag" onchange="renderTextationLibrary()">
+                <option value="">Všechny tagy</option>
+                <option>odpovědnost</option>
+                <option>výrobek</option>
+                <option>převzaté věci</option>
+                <option>finanční škoda</option>
+                <option>FVE</option>
+                <option>drony</option>
+                <option>klient</option>
+                <option>pojišťovna</option>
+              </select>
+            </label>
           </div>
-          <div class="uw-grid">
-            <div class="uw-card"><b>Zvláštní ujednání</b><span>formulace pro odchylky, rozšíření a nestandardní krytí</span></div>
-            <div class="uw-card"><b>Požadavky na pojišťovnu</b><span>co má pojišťovna výslovně potvrdit v nabídce</span></div>
-            <div class="uw-card"><b>Výluky a omezení</b><span>body, které má poradce prověřit a vysvětlit klientovi</span></div>
-            <div class="uw-card"><b>Odpovědnost</b><span>vadná práce, výrobek, převzaté věci, finanční škody</span></div>
-            <div class="uw-card"><b>Drony / FVE / speciální rizika</b><span>připraveno pro další budoucí moduly</span></div>
-            <div class="uw-card"><b>Klientská zpráva</b><span>profesionální formulace doporučení a upozornění</span></div>
+
+          <div class="textation-layout">
+            <div class="textation-list" id="textationList"></div>
+            <aside class="textation-detail" id="textationDetail">
+              <p class="eyebrow">Detail textace</p>
+              <h3>Vyberte textaci</h3>
+              <p>Po kliknutí na textaci se zobrazí celý text, možnost kopírování, vložení do pracovních poznámek a úprava.</p>
+            </aside>
           </div>
+        </section>
+
+        <section class="panel textation-notes-panel">
+          <div class="section-head">
+            <div>
+              <h2>Pracovní poznámky k aktivnímu případu</h2>
+              <p class="muted">Sem si poradce může vkládat použité formulace. V další verzi se tento blok naváže přímo na uloženou poptávku v DB.</p>
+            </div>
+            <button class="secondary" type="button" onclick="copyTextationNotes()">Zkopírovat poznámky</button>
+          </div>
+          <textarea id="caseTextationNotes" class="case-textation-notes" placeholder="Zde se budou skládat vybrané textace pro poptávku, nabídku nebo zprávu klientovi..."></textarea>
         </section>
       </section>
 
@@ -660,6 +706,29 @@
             <button type="button" onclick="showView('checklistView')">Checklist</button>
             <button type="button" onclick="showView('offersView')">Nabídky</button>
             <button type="button" onclick="showView('comparisonView')">Porovnání</button>
+          </div>
+        </section>
+      </section>
+
+
+      <section id="pilotView" class="app-section hidden">
+        <div class="hero compact">
+          <div>
+            <p class="eyebrow">Pilotní provoz</p>
+            <h1>Předání poradci k používání</h1>
+            <p>Tato sekce shrnuje minimální režim, ve kterém už lze aplikaci ukázat vybranému poradci pro řízený pilot.</p>
+          </div>
+          <div class="card small"><b>Doporučení</b><br>Nejdříve otestovat na 1–2 poradci a 2–3 reálných případech. Neslibovat automatické rozhodování, ale pracovní podporu makléře.</div>
+        </div>
+        <section class="panel">
+          <h2>Pilotní checklist</h2>
+          <div class="uw-checklist">
+            <label><input type="checkbox"> Poradce umí založit novou poptávku</label>
+            <label><input type="checkbox"> Poradce umí načíst klienta z ARES</label>
+            <label><input type="checkbox"> Poradce umí vybrat rizika a odpovědnost</label>
+            <label><input type="checkbox"> Poradce umí vložit nabídku</label>
+            <label><input type="checkbox"> Poradce umí použít textaci</label>
+            <label><input type="checkbox"> Poradce umí připravit zprávu/PDF</label>
           </div>
         </section>
       </section>
@@ -783,6 +852,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=610"></script>
+  <script src="/static/js/app.js?v=620"></script>
 </body>
 </html>
