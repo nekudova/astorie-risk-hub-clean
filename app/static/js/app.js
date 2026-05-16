@@ -528,7 +528,7 @@ function showView(id){
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
   if(id==='documentsView') renderDocumentsWorkspace();
-  if(id==='textationsView') renderTextationLibrary();
+  if(id==='textationsView') { renderTextationLibrary(); loadCaseTextationNotesLocal(); }
   if(id==='checklistView') renderUnderwritingChecklist();
   if(id==='riskModelView') renderRiskModelWorkspace();
   if(id==='suggestionsView') loadSuggestions();
@@ -2415,6 +2415,7 @@ function showTextationDetail(id){
       <button class="primary" type="button" onclick="insertTextationToNotes('${escapeHtml(item.id)}')">Vložit do poznámek</button>
       <button class="secondary" type="button" onclick="copyTextation('${escapeHtml(item.id)}')">Zkopírovat</button>
       <button class="secondary" type="button" onclick="editTextation('${escapeHtml(item.id)}')">Upravit</button>
+      <button class="danger-light" type="button" onclick="deleteTextation('${escapeHtml(item.id)}')">Smazat</button>
     </div>
   `;
 }
@@ -2469,4 +2470,78 @@ function editTextation(id){
   saveTextationLibrary(items);
   renderTextationLibrary();
   showTextationDetail(id);
+}
+
+
+// MVP 0.63 – professional textation editor and local persistence
+function openTextationEditor(){
+  const panel = $('textationEditorPanel');
+  if(!panel) return;
+  $('textationEditId').value = '';
+  $('textationEditorTitle').textContent = 'Nová textace';
+  $('textationEditTitle').value = '';
+  $('textationEditCategory').value = 'Zvláštní ujednání';
+  $('textationEditUsage').value = 'Poptávka pojišťovně';
+  $('textationEditTags').value = '';
+  $('textationEditText').value = '';
+  panel.classList.remove('hidden');
+  $('textationEditTitle').focus();
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function closeTextationEditor(){
+  const panel = $('textationEditorPanel');
+  if(panel) panel.classList.add('hidden');
+}
+function editTextation(id){
+  const item = findTextation(id);
+  const panel = $('textationEditorPanel');
+  if(!item || !panel) return;
+  $('textationEditId').value = item.id;
+  $('textationEditorTitle').textContent = 'Upravit textaci';
+  $('textationEditTitle').value = item.title || '';
+  $('textationEditCategory').value = item.category || 'Zvláštní ujednání';
+  $('textationEditUsage').value = item.usage || 'Poptávka pojišťovně';
+  $('textationEditTags').value = (item.tags || []).join(', ');
+  $('textationEditText').value = item.text || '';
+  panel.classList.remove('hidden');
+  $('textationEditTitle').focus();
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function saveTextationFromEditor(){
+  const title = ($('textationEditTitle')?.value || '').trim();
+  const category = ($('textationEditCategory')?.value || '').trim();
+  const usage = ($('textationEditUsage')?.value || '').trim();
+  const tagsRaw = ($('textationEditTags')?.value || '').trim();
+  const text = ($('textationEditText')?.value || '').trim();
+  const id = ($('textationEditId')?.value || '').trim();
+  if(!title){ alert('Doplňte název textace.'); $('textationEditTitle')?.focus(); return; }
+  if(!text){ alert('Doplňte textaci.'); $('textationEditText')?.focus(); return; }
+  const items = getTextationLibrary();
+  const payload = { id: id || ('custom-' + Date.now()), title, category: category || 'Zvláštní ujednání', usage: usage || 'Poptávka pojišťovně', tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean), text };
+  const idx = items.findIndex(i => i.id === payload.id);
+  if(idx >= 0) items[idx] = payload; else items.unshift(payload);
+  saveTextationLibrary(items);
+  closeTextationEditor();
+  renderTextationLibrary();
+  showTextationDetail(payload.id);
+  alert('Textace byla uložena do pracovní knihovny.');
+}
+function deleteTextation(id){
+  const item = findTextation(id);
+  if(!item) return;
+  if(!confirm('Opravdu smazat textaci: ' + item.title + '?')) return;
+  saveTextationLibrary(getTextationLibrary().filter(i => i.id !== id));
+  renderTextationLibrary();
+  const box = $('textationDetail');
+  if(box) box.innerHTML = '<p class="eyebrow">Detail textace</p><h3>Vyberte textaci</h3><p>Po kliknutí na textaci se zobrazí celý text, možnost kopírování, vložení do pracovních poznámek a úprava.</p>';
+}
+function saveCaseTextationNotesLocal(){
+  const notes = $('caseTextationNotes');
+  if(notes) localStorage.setItem('astorie_case_textation_notes_v63', notes.value || '');
+}
+function loadCaseTextationNotesLocal(){
+  const notes = $('caseTextationNotes');
+  if(!notes) return;
+  notes.value = localStorage.getItem('astorie_case_textation_notes_v63') || notes.value || '';
+  if(!notes.dataset.bound){ notes.dataset.bound='1'; notes.addEventListener('input', saveCaseTextationNotesLocal); }
 }

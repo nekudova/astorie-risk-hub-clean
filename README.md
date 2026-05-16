@@ -86,3 +86,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Přidán pilotní checklist pro předání vybranému poradci.
 - Beze změny databázové struktury; lokální úpravy textací jsou dočasně ukládány v prohlížeči.
 - Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.
+
+
+## MVP 0.63 – Profesionální editor textací + ukládání
+- Nahrazeno prompt okno profesionálním editorem přímo v aplikaci.
+- Textace má název, kategorii, typ použití, tagy a vlastní text.
+- Textace lze přidat, upravit, smazat, zkopírovat a vložit do poznámek.
+- Pracovní poznámky se lokálně ukládají v prohlížeči.
+- Beze změny DB.
