@@ -62,3 +62,10 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Připraveny vazby: riziko → dokument → článek VPP/ZPP/DPP → textace → checklist.
 - Zachováno: ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.
 - Bez změny databázové struktury.
+
+
+## MVP 0.60 – Professional Underwriting Workspace
+- Sticky underwriting cockpit.
+- Pravý underwriting panel.
+- Kompaktní workflow timeline.
+- Zachováno ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.

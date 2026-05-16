@@ -2177,3 +2177,32 @@ function renderRiskModelWorkspace(){
     typeEl.textContent = active.clientActivity || active.businessType || active.clientName || 'dle aktivní poptávky';
   }
 }
+
+function renderProfessionalUnderwritingWorkspace(){
+  const active = state.activeInquiry || {};
+  const offers = Array.isArray(state.offers) ? state.offers.length : 0;
+  const risks = Array.isArray(state.selectedRisks) ? state.selectedRisks.length : 0;
+  const title = active.clientName || state.form?.clientName || $('clientName')?.value || 'Není vybrána žádná poptávka';
+  const ready = Math.min(100, ((title && title !== 'Není vybrána žádná poptávka') ? 20 : 0) + (risks ? 20 : 0) + (offers ? 25 : 0) + (offers >= 2 ? 20 : 0));
+  if($('uwCaseTitle')) $('uwCaseTitle').textContent = title;
+  if($('uwCaseMeta')) $('uwCaseMeta').textContent = [(active.businessType || active.clientActivity || 'typ činnosti není vyplněn'), active.id ? ('DB #' + active.id) : 'bez aktivního případu', offers + ' nabídek'].join(' · ');
+  if($('uwOffersCount')) $('uwOffersCount').textContent = offers;
+  if($('uwReadyPercent')) $('uwReadyPercent').textContent = ready + '%';
+  if($('uwRiskLevel')) $('uwRiskLevel').textContent = risks >= 5 ? 'ZVÝŠENÉ' : (ready ? 'STANDARD' : 'NEURČENO');
+  let nextTitle = 'Začněte klientem a načtením ARES', nextText = 'Bez klienta nemá smysl připravovat nabídky, porovnání ani zprávu.', nextView = 'inquiryView';
+  if(ready >= 20 && !risks){ nextTitle = 'Doplňte rizika a činnost'; nextText = 'Vyberte hlavní činnost, potvrďte katalogová rizika a doplňte vlastní požadavky.'; }
+  else if(risks && !offers){ nextTitle = 'Vložte přijaté nabídky'; nextText = 'Pojišťovny a nabídky musí být navázané na tento obchodní případ.'; nextView = 'offersView'; }
+  else if(offers >= 2){ nextTitle = 'Připravte porovnání a klientskou zprávu'; nextText = 'Zkontrolujte rozdíly v limitech, výlukách, spoluúčastech a ceně.'; nextView = 'comparisonView'; }
+  if($('uwNextStepTitle')) $('uwNextStepTitle').textContent = nextTitle;
+  if($('uwNextStepText')) $('uwNextStepText').textContent = nextText;
+  if($('uwNextStepBtn')) $('uwNextStepBtn').onclick = () => showView(nextView);
+  if($('uwAlerts')){
+    const alerts = [];
+    if(!ready) alerts.push('Chybí klient / IČO / ARES.');
+    if(ready >= 20 && !risks) alerts.push('Chybí potvrzená rizika a činnost.');
+    if(risks && !offers) alerts.push('Čeká se na vložení nabídek pojišťoven.');
+    if(offers === 1) alerts.push('Pro porovnání je potřeba doplnit další nabídku.');
+    if(offers >= 2) alerts.push('Zkontrolujte rozdíly a připravte zprávu klientovi.');
+    $('uwAlerts').innerHTML = (alerts.length ? alerts : ['Případ je připravený k dalšímu zpracování.']).map(a=>'<li>'+escapeHtml(a)+'</li>').join('');
+  }
+}
