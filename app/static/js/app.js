@@ -523,7 +523,7 @@ function showView(id){
   if(id==='dashboardView') renderInquiryDashboard();
   if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
-  if(id==='offersView') renderOffers();
+  if(id==='offersView') { renderOffers(); renderOfferWorkspace(); }
   if(id==='comparisonView') renderComparison();
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
@@ -2204,5 +2204,92 @@ function renderProfessionalUnderwritingWorkspace(){
     if(offers === 1) alerts.push('Pro porovnání je potřeba doplnit další nabídku.');
     if(offers >= 2) alerts.push('Zkontrolujte rozdíly a připravte zprávu klientovi.');
     $('uwAlerts').innerHTML = (alerts.length ? alerts : ['Případ je připravený k dalšímu zpracování.']).map(a=>'<li>'+escapeHtml(a)+'</li>').join('');
+  }
+}
+
+
+// MVP 0.61 – functional offer workspace
+if(!window.quickOfferWorkspaceRows){ window.quickOfferWorkspaceRows = []; }
+
+function moneyCz(value){
+  const n = Number(String(value || '').replace(/[^\d.,-]/g,'').replace(',', '.'));
+  if(!isFinite(n) || n <= 0) return '–';
+  return n.toLocaleString('cs-CZ') + ' Kč';
+}
+
+function addQuickOfferRow(){
+  const row = {
+    insurer: '',
+    premium: '',
+    limit: '',
+    deductible: '',
+    exclusions: '',
+    rating: 'k ověření',
+    note: ''
+  };
+  window.quickOfferWorkspaceRows.push(row);
+  renderOfferWorkspace();
+}
+
+function deleteQuickOfferRow(index){
+  window.quickOfferWorkspaceRows.splice(index, 1);
+  renderOfferWorkspace();
+}
+
+function updateQuickOfferRow(index, field, value){
+  if(!window.quickOfferWorkspaceRows[index]) return;
+  window.quickOfferWorkspaceRows[index][field] = value;
+  renderOfferWorkspaceStats();
+}
+
+function renderOfferWorkspace(){
+  const body = $('offerWorkspaceRows');
+  if(!body) return;
+  const rows = window.quickOfferWorkspaceRows || [];
+  if(!rows.length){
+    body.innerHTML = '<tr class="empty-row"><td colspan="8">Zatím nejsou vložené nabídky. Použijte „+ Rychlá nabídka“ nebo vložte nabídku standardním formulářem níže.</td></tr>';
+    renderOfferWorkspaceStats();
+    return;
+  }
+  body.innerHTML = rows.map((r,i)=>`
+    <tr>
+      <td><input value="${escapeHtml(r.insurer||'')}" placeholder="např. Kooperativa" oninput="updateQuickOfferRow(${i},'insurer',this.value)"></td>
+      <td><input value="${escapeHtml(r.premium||'')}" placeholder="např. 25 000 Kč" oninput="updateQuickOfferRow(${i},'premium',this.value)"></td>
+      <td><input value="${escapeHtml(r.limit||'')}" placeholder="např. 10 mil. Kč" oninput="updateQuickOfferRow(${i},'limit',this.value)"></td>
+      <td><input value="${escapeHtml(r.deductible||'')}" placeholder="např. 10 000 Kč" oninput="updateQuickOfferRow(${i},'deductible',this.value)"></td>
+      <td><textarea placeholder="výluky / omezení" oninput="updateQuickOfferRow(${i},'exclusions',this.value)">${escapeHtml(r.exclusions||'')}</textarea></td>
+      <td>
+        <select onchange="updateQuickOfferRow(${i},'rating',this.value)">
+          <option ${r.rating==='k ověření'?'selected':''}>k ověření</option>
+          <option ${r.rating==='vhodná'?'selected':''}>vhodná</option>
+          <option ${r.rating==='omezená'?'selected':''}>omezená</option>
+          <option ${r.rating==='nedoporučit'?'selected':''}>nedoporučit</option>
+        </select>
+      </td>
+      <td><textarea placeholder="poznámka poradce" oninput="updateQuickOfferRow(${i},'note',this.value)">${escapeHtml(r.note||'')}</textarea></td>
+      <td><button class="danger-light" type="button" onclick="deleteQuickOfferRow(${i})">Smazat</button></td>
+    </tr>
+  `).join('');
+  renderOfferWorkspaceStats();
+}
+
+function renderOfferWorkspaceStats(){
+  const rows = window.quickOfferWorkspaceRows || [];
+  const appOffers = Array.isArray(state.offers) ? state.offers.length : 0;
+  const total = rows.length + appOffers;
+  if($('offerWsCount')) $('offerWsCount').textContent = total;
+  const premiums = rows.map(r => Number(String(r.premium||'').replace(/[^\d.,-]/g,'').replace(',', '.'))).filter(n => isFinite(n) && n > 0);
+  if($('offerWsBestPrice')) $('offerWsBestPrice').textContent = premiums.length ? moneyCz(Math.min(...premiums)) : '–';
+  const missing = rows.filter(r => !r.insurer || !r.premium || !r.limit).length;
+  if($('offerWsMissing')) $('offerWsMissing').textContent = missing ? String(missing) : '0';
+  if($('offerWsReady')) $('offerWsReady').textContent = total >= 2 ? 'připraveno' : 'čeká';
+  if($('offerWsNext')) $('offerWsNext').textContent = total >= 2 ? 'Otevřete Porovnání a zkontrolujte rozdíly v krytí, ceně a výlukách.' : 'Doplňte alespoň dvě nabídky pro plnohodnotné porovnání.';
+  if($('offerWsAlerts')){
+    const alerts = [];
+    if(total < 2) alerts.push('Pro porovnání jsou potřeba alespoň dvě nabídky.');
+    if(missing) alerts.push('Některé pracovní nabídky nemají doplněnou pojišťovnu, cenu nebo limit.');
+    if(rows.some(r => r.rating === 'omezená' || r.rating === 'nedoporučit')) alerts.push('Některá nabídka má omezené nebo nedoporučené hodnocení.');
+    if(!alerts.length) alerts.push('Nabídkový workspace je připravený pro porovnání.');
+    $('offerWsAlerts').innerHTML = alerts.map(a=>'<li>'+escapeHtml(a)+'</li>').join('');
   }
 }

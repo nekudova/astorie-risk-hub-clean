@@ -69,3 +69,12 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Pravý underwriting panel.
 - Kompaktní workflow timeline.
 - Zachováno ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF.
+
+
+## MVP 0.61 – Nabídkový workspace + rychlé porovnání
+- Přidán pracovní nabídkový workspace.
+- Rychlé vložení nabídek v tabulkovém režimu.
+- Pracovní kontrola: cena, limit, spoluúčast, výluky, hodnocení, poznámka.
+- Přidán helper panel pro porovnání.
+- Zachováno: ARES, DB, Admin, odpovědnost, původní nabídky, porovnání, PDF.
+- Bez změny databázové struktury.
