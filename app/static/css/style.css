@@ -1299,3 +1299,11 @@ main{max-width:none;margin:0;padding:20px;}
   color:var(--muted,#607882);
   font-weight:800;
 }
+
+/* MVP 0.68 - split textation database */
+.textation-split-panel{background:#fff}
+.central-textations-panel{background:#f8fcfd;border-left-color:var(--petrol,#003D4C)}
+.proposal-chip{display:block;margin-top:8px;color:#146b2e;font-style:normal;font-weight:900;font-size:12px}
+.proposal-note{border:1px solid #bde9c8;background:#eefbf2;color:#146b2e;border-radius:12px;padding:10px 12px;font-weight:900;margin:10px 0}
+.textation-layout{grid-template-columns:1fr !important}
+.textation-layout .textation-list{display:none !important}

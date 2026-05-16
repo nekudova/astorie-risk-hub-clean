@@ -3226,3 +3226,174 @@ function safeRenderTextations(){
 
 setTimeout(()=>safeRenderTextations(),200);
 
+
+
+// MVP 0.68 - split My Textations / Central Database
+function isCustomTextationV68(item){
+  return String(item && item.id || '').startsWith('custom-');
+}
+function isSuggestedTextationV68(item){
+  return !!(item && item.suggestedToCentral);
+}
+function getFilteredTextationsV68(){
+  let items = (typeof stableReadTextations === 'function') ? stableReadTextations() : getTextationLibrary();
+  const q = ($('textationSearch')?.value || '').toLowerCase().trim();
+  const cat = $('textationCategory')?.value || '';
+  const tag = $('textationTag')?.value || '';
+
+  if(cat) items = items.filter(i => i.category === cat);
+  if(tag) items = items.filter(i => (i.tags || []).includes(tag));
+  if(q){
+    items = items.filter(i =>
+      [i.title, i.category, i.usage, i.text, (i.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
+
+function renderTextationCardV68(item, mode, selectedId){
+  const suggested = isSuggestedTextationV68(item) ? '<em class="proposal-chip">navrženo do centrální databáze</em>' : '';
+  return `
+    <button type="button" class="saved-textation-item ${selectedId === item.id ? 'active' : ''}" data-saved-textation-id="${escapeHtml(item.id)}" onclick="showTextationDetailStable('${escapeHtml(item.id)}')">
+      <b>${escapeHtml(item.title)}</b>
+      <span>${escapeHtml(item.category)} · ${escapeHtml(item.usage || '')}</span>
+      <small>${(item.tags||[]).map(t=>escapeHtml(t)).join(' · ')}</small>
+      ${suggested}
+    </button>
+  `;
+}
+
+function renderSavedTextations(selectedId){
+  const myBox = $('myTextationList');
+  const centralBox = $('centralTextationList');
+  const legacyBox = $('savedTextationList');
+
+  const items = getFilteredTextationsV68();
+  const mine = items.filter(isCustomTextationV68);
+  const central = items.filter(i => !isCustomTextationV68(i));
+
+  if(myBox){
+    myBox.innerHTML = mine.length
+      ? mine.map(i => renderTextationCardV68(i, 'mine', selectedId)).join('')
+      : '<div class="textation-empty">Zatím nemáte žádnou vlastní textaci. Klikněte na „+ Přidat textaci“.</div>';
+  }
+
+  if(centralBox){
+    centralBox.innerHTML = central.length
+      ? central.map(i => renderTextationCardV68(i, 'central', selectedId)).join('')
+      : '<div class="textation-empty">Ve filtru není žádná centrální textace.</div>';
+  }
+
+  if(legacyBox && !myBox && !centralBox){
+    legacyBox.innerHTML = items.length
+      ? items.map(i => renderTextationCardV68(i, 'legacy', selectedId)).join('')
+      : '<div class="textation-empty">Zatím není uložená žádná textace.</div>';
+  }
+}
+
+function renderTextationLibrary(selectedId){
+  // Duplicitní spodní seznam už nevykreslujeme. Filtry se promítají do Moje textace + Centrální databáze.
+  renderSavedTextations(selectedId);
+}
+
+function showTextationDetail(id){
+  const item = findTextation(id);
+  const box = $('textationDetail');
+  if(!item || !box) return;
+
+  document.querySelectorAll('.saved-textation-item,.textation-item').forEach(btn => btn.classList.remove('active'));
+  if(window.CSS && CSS.escape){
+    document.querySelectorAll(`[data-saved-textation-id="${CSS.escape(id)}"],[data-textation-id="${CSS.escape(id)}"]`).forEach(el => el.classList.add('active'));
+  }
+
+  const custom = isCustomTextationV68(item);
+  const actionButtons = custom
+    ? `
+      <button class="primary" type="button" onclick="insertTextationToNotes('${escapeHtml(item.id)}')">Vložit do poznámek</button>
+      <button class="secondary" type="button" onclick="copyTextation('${escapeHtml(item.id)}')">Zkopírovat</button>
+      <button class="secondary" type="button" onclick="editTextation('${escapeHtml(item.id)}')">Upravit</button>
+      <button class="secondary" type="button" onclick="proposeTextationToCentral('${escapeHtml(item.id)}')">Navrhnout do centrální databáze</button>
+      <button class="danger-light" type="button" onclick="deleteTextation('${escapeHtml(item.id)}')">Smazat</button>
+    `
+    : `
+      <button class="primary" type="button" onclick="insertTextationToNotes('${escapeHtml(item.id)}')">Vložit do poznámek</button>
+      <button class="secondary" type="button" onclick="copyTextation('${escapeHtml(item.id)}')">Zkopírovat</button>
+    `;
+
+  box.innerHTML = `
+    <p class="eyebrow">${custom ? 'Moje textace' : 'Centrální databáze'} · ${escapeHtml(item.category)}</p>
+    <h3>${escapeHtml(item.title)}</h3>
+    <p class="textation-usage"><b>Použití:</b> ${escapeHtml(item.usage || 'obecně')}</p>
+    ${isSuggestedTextationV68(item) ? '<div class="proposal-note">Tato textace byla odeslána jako návrh pro zařazení do centrální databáze.</div>' : ''}
+    <div class="textation-fulltext">${escapeHtml(item.text || '').replace(/\n/g,'<br>')}</div>
+    <div class="textation-tags">${(item.tags||[]).map(t=>'<span>'+escapeHtml(t)+'</span>').join('')}</div>
+    <div class="textation-detail-actions">${actionButtons}</div>
+  `;
+}
+
+function proposeTextationToCentral(id){
+  const items = stableReadTextations();
+  const idx = items.findIndex(i => i.id === id);
+  if(idx < 0) return;
+  items[idx].suggestedToCentral = true;
+  items[idx].suggestedAt = new Date().toISOString();
+  stableWriteTextations(items);
+  renderSavedTextations(id);
+  showTextationDetail(id);
+  alert('Textace byla označena jako návrh pro zařazení do centrální databáze.');
+}
+
+function saveTextationFromEditor(){
+  const title = ($('textationEditTitle')?.value || '').trim();
+  const category = ($('textationEditCategory')?.value || '').trim();
+  const usage = ($('textationEditUsage')?.value || '').trim();
+  const tagsRaw = ($('textationEditTags')?.value || '').trim();
+  const text = ($('textationEditText')?.value || '').trim();
+  const id = ($('textationEditId')?.value || '').trim();
+
+  if(!title){ alert('Doplňte název textace.'); $('textationEditTitle')?.focus(); return; }
+  if(!text){ alert('Doplňte textaci.'); $('textationEditText')?.focus(); return; }
+
+  const items = stableReadTextations();
+  const payload = stableNormalizeTextation({
+    id: id || ('custom-' + Date.now()),
+    title, category, usage,
+    tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),
+    text
+  });
+
+  const idx = items.findIndex(i => i.id === payload.id);
+  if(idx >= 0) items[idx] = {...items[idx], ...payload};
+  else items.unshift(payload);
+
+  stableWriteTextations(items);
+
+  if($('textationSearch')) $('textationSearch').value = '';
+  if($('textationCategory')) $('textationCategory').value = '';
+  if($('textationTag')) $('textationTag').value = '';
+
+  closeTextationEditor();
+  renderSavedTextations(payload.id);
+  showTextationDetail(payload.id);
+  renderAdminTextations();
+
+  const status = $('textationSaveStatus');
+  if(status){
+    status.className = 'textation-save-status ok';
+    status.textContent = 'Textace byla uložena do sekce „Moje textace“.';
+    status.classList.remove('hidden');
+  }
+}
+
+function forceRenderSavedTextations(){
+  renderSavedTextations();
+  renderAdminTextations();
+}
+
+function renderTextationsWorkspace(){
+  stableReadTextations();
+  renderSavedTextations();
+  if(typeof loadCaseTextationNotesLocal === 'function') loadCaseTextationNotesLocal();
+}
+
+setTimeout(()=>{ if($('myTextationList') || $('centralTextationList')) renderSavedTextations(); }, 300);
