@@ -527,9 +527,9 @@ function showView(id){
   if(id==='comparisonView') renderComparison();
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
-  if(id==='documentsView') renderDocumentsWorkspace();
+  if(id==='documentsView') { renderDocumentsWorkspace(); renderCaseDocuments(); renderCaseCommandCenter(); }
   if(id==='textationsView') renderTextationsWorkspace();
-  if(id==='checklistView') renderUnderwritingChecklist();
+  if(id==='checklistView') { renderUnderwritingChecklist(); bindChecklistV70(); renderCaseCommandCenter(); }
   if(id==='riskModelView') renderRiskModelWorkspace();
   if(id==='suggestionsView') loadSuggestions();
   if(id==='adminView') renderAdmin();
@@ -3516,3 +3516,156 @@ function renderTextationsWorkspace(){
   setTextationTab(window.currentTextationTab || 'mine');
   if(typeof loadCaseTextationNotesLocal === 'function') loadCaseTextationNotesLocal();
 }
+
+// MVP 0.70 - Active case workflow engine
+const CASE_STAGE_KEY_V70 = 'astorie_case_stage_v70';
+const CASE_DOCS_KEY_V70 = 'astorie_case_documents_v70';
+const CASE_CHECKLIST_KEY_V70 = 'astorie_case_checklist_v70';
+
+function getActiveCaseV70(){
+  const active = state.activeInquiry || {};
+  const clientName = active.clientName || state.form?.clientName || (document.getElementById('clientName')?.value || '');
+  const businessType = active.businessType || active.clientActivity || state.form?.clientActivity || '';
+  return { id: active.id || active.dbId || '', clientName, businessType, status: active.status || 'rozpracováno' };
+}
+function getCaseStage(){ return localStorage.getItem(CASE_STAGE_KEY_V70) || 'draft'; }
+function setCaseStage(stage){ localStorage.setItem(CASE_STAGE_KEY_V70, stage || 'draft'); renderCaseCommandCenter(); }
+function getCaseDocuments(){ try{ return JSON.parse(localStorage.getItem(CASE_DOCS_KEY_V70) || '[]'); }catch(e){ return []; } }
+function saveCaseDocuments(items){ localStorage.setItem(CASE_DOCS_KEY_V70, JSON.stringify(items || [])); }
+function openCaseDocumentEditor(){ document.getElementById('caseDocumentEditor')?.classList.remove('hidden'); document.getElementById('docTitle')?.focus(); }
+function closeCaseDocumentEditor(){ document.getElementById('caseDocumentEditor')?.classList.add('hidden'); }
+function saveCaseDocument(){
+  const title = (document.getElementById('docTitle')?.value || '').trim();
+  if(!title){ alert('Doplňte název dokumentu.'); document.getElementById('docTitle')?.focus(); return; }
+  const item = { id:'doc-' + Date.now(), title, type:document.getElementById('docType')?.value || 'Ostatní', source:(document.getElementById('docSource')?.value || '').trim(), status:document.getElementById('docStatus')?.value || 'k ověření', note:(document.getElementById('docNote')?.value || '').trim(), createdAt:new Date().toISOString() };
+  const docs = getCaseDocuments(); docs.unshift(item); saveCaseDocuments(docs);
+  ['docTitle','docSource','docNote'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  closeCaseDocumentEditor(); renderCaseDocuments(); renderCaseCommandCenter();
+}
+function deleteCaseDocument(id){ if(!confirm('Smazat dokument z evidence případu?')) return; saveCaseDocuments(getCaseDocuments().filter(d => d.id !== id)); renderCaseDocuments(); renderCaseCommandCenter(); }
+function renderCaseDocuments(){
+  const box = document.getElementById('caseDocumentList'); if(!box) return;
+  const docs = getCaseDocuments();
+  if(!docs.length){ box.innerHTML = '<div class="textation-empty">Zatím není evidovaný žádný dokument k aktivnímu případu.</div>'; return; }
+  box.innerHTML = docs.map(d => `
+    <div class="case-document-item">
+      <div><b>${escapeHtml(d.title)}</b><span>${escapeHtml(d.type)}${d.source ? ' · ' + escapeHtml(d.source) : ''}</span>${d.note ? '<small>'+escapeHtml(d.note)+'</small>' : ''}</div>
+      <em class="doc-status">${escapeHtml(d.status)}</em>
+      <button class="danger-light small-btn" type="button" onclick="deleteCaseDocument('${escapeHtml(d.id)}')">Smazat</button>
+    </div>`).join('');
+}
+function getChecklistState(){ try{ return JSON.parse(localStorage.getItem(CASE_CHECKLIST_KEY_V70) || '{}'); }catch(e){ return {}; } }
+function saveChecklistState(data){ localStorage.setItem(CASE_CHECKLIST_KEY_V70, JSON.stringify(data || {})); }
+function bindChecklistV70(){
+  const boxes = document.querySelectorAll('#checklistView .uw-checklist input[type="checkbox"]'); if(!boxes.length) return;
+  const stateData = getChecklistState();
+  boxes.forEach((cb, idx) => { const key='check-'+idx; cb.checked=!!stateData[key]; if(!cb.dataset.v70bound){ cb.dataset.v70bound='1'; cb.addEventListener('change',()=>{ const current=getChecklistState(); current[key]=cb.checked; saveChecklistState(current); renderChecklistSummaryV70(); renderCaseCommandCenter(); }); } });
+  renderChecklistSummaryV70();
+}
+function renderChecklistSummaryV70(){
+  const boxes = Array.from(document.querySelectorAll('#checklistView .uw-checklist input[type="checkbox"]'));
+  const done = boxes.filter(b=>b.checked).length; const total = boxes.length || 8;
+  if(document.getElementById('checklistDoneCount')) document.getElementById('checklistDoneCount').textContent = done + '/' + total;
+  const docs = getCaseDocuments().length; const offers = Array.isArray(state.offers) ? state.offers.length : 0;
+  let critical = 0; if(!docs) critical++; if(offers < 2) critical++; if(done < Math.ceil(total/2)) critical++;
+  if(document.getElementById('checklistCriticalCount')) document.getElementById('checklistCriticalCount').textContent = critical;
+  if(document.getElementById('checklistCaseState')) document.getElementById('checklistCaseState').textContent = critical ? 'doplnit' : 'připraveno';
+}
+function calculateCaseReadiness(){
+  const active=getActiveCaseV70(); const docs=getCaseDocuments().length; const offers=Array.isArray(state.offers)?state.offers.length:0; const checklist=getChecklistState(); const checkedCount=Object.values(checklist).filter(Boolean).length;
+  let score=0; if(active.clientName) score+=20; if(active.businessType) score+=10; if(docs>0) score+=20; if(offers>0) score+=15; if(offers>=2) score+=15; score+=Math.min(20, checkedCount*3); return Math.min(100, score);
+}
+function getMissingParts(){ const active=getActiveCaseV70(); const docs=getCaseDocuments().length; const offers=Array.isArray(state.offers)?state.offers.length:0; const checkedCount=Object.values(getChecklistState()).filter(Boolean).length; const missing=[]; if(!active.clientName) missing.push('klient'); if(!active.businessType) missing.push('činnost'); if(!docs) missing.push('dokumenty'); if(offers<2) missing.push('min. 2 nabídky'); if(checkedCount<4) missing.push('checklist'); return missing; }
+function stageLabelV70(stage){ return ({draft:'rozpracování',documents:'sběr podkladů',inquiry:'poptávka',offers:'nabídky',comparison:'porovnání',report:'zpráva',closed:'uzavřeno'}[stage] || 'rozpracování'); }
+function getRecommendedStepV70(){ const active=getActiveCaseV70(); const docs=getCaseDocuments().length; const offers=Array.isArray(state.offers)?state.offers.length:0; if(!active.clientName) return {title:'Doplňte klienta',text:'Začněte identifikací klienta a načtením ARES.',view:'inquiryView'}; if(!docs) return {title:'Doplňte dokumenty',text:'Přidejte škodní průběh, nabídky, VPP/ZPP nebo jiné podklady.',view:'documentsView'}; if(offers<2) return {title:'Doplňte nabídky',text:'Pro kvalitní porovnání jsou potřeba alespoň dvě nabídky.',view:'offersView'}; return {title:'Připravte porovnání a zprávu',text:'Zkontrolujte rozdíly v limitech, výlukách a ceně.',view:'comparisonView'}; }
+function goToRecommendedStep(){ const next=getRecommendedStepV70(); showView(next.view || 'inquiryView'); }
+function renderCaseCommandCenter(){
+  const active=getActiveCaseV70(); const docs=getCaseDocuments().length; const offers=Array.isArray(state.offers)?state.offers.length:0; const readiness=calculateCaseReadiness(); const missing=getMissingParts();
+  const title=active.clientName || 'Není vybrána žádná poptávka';
+  if(document.getElementById('caseCCClient')) document.getElementById('caseCCClient').textContent=title;
+  if(document.getElementById('caseCCMeta')) document.getElementById('caseCCMeta').textContent=[active.businessType||'typ činnosti není vyplněn', active.id?('DB #'+active.id):'bez DB ID', active.status||'rozpracováno', 'stav workflow: '+stageLabelV70(getCaseStage())].join(' · ');
+  if(document.getElementById('caseCCReady')) document.getElementById('caseCCReady').textContent=readiness+'%';
+  if(document.getElementById('caseCCDocs')) document.getElementById('caseCCDocs').textContent=docs;
+  if(document.getElementById('caseCCOffers')) document.getElementById('caseCCOffers').textContent=offers;
+  if(document.getElementById('caseCCMissing')) document.getElementById('caseCCMissing').textContent=missing.length?missing.length:'0';
+  document.querySelectorAll('[data-case-step]').forEach(btn=>btn.classList.toggle('active', btn.dataset.caseStep===getCaseStage()));
+  const next=getRecommendedStepV70();
+  if(document.getElementById('nextActionTitle')) document.getElementById('nextActionTitle').textContent=next.title;
+  if(document.getElementById('nextActionText')) document.getElementById('nextActionText').textContent=next.text;
+  if(document.getElementById('riskSummaryText')) document.getElementById('riskSummaryText').textContent=readiness>=70?'Případ je pracovně připravený k porovnání / zprávě.':'Případ je rozpracovaný a vyžaduje doplnění podkladů.';
+  if(document.getElementById('missingSummaryText')) document.getElementById('missingSummaryText').textContent=missing.length?('Chybí: '+missing.join(', ')):'Nejsou evidované zásadní chybějící části.';
+}
+function renderWorkflowEverywhereV70(){ renderCaseDocuments(); bindChecklistV70(); renderChecklistSummaryV70(); renderCaseCommandCenter(); }
+setTimeout(renderWorkflowEverywhereV70,300);
+document.addEventListener('click',function(e){ if(e.target && e.target.closest && e.target.closest('[data-view="documentsView"],[data-view="checklistView"],[data-view="dashboardView"]')) setTimeout(renderWorkflowEverywhereV70,120); });
+
+// MVP 0.71 - client output and advisor recommendation
+const CLIENT_REC_KEY_V71 = 'astorie_client_recommendation_v71';
+const CLIENT_WARN_KEY_V71 = 'astorie_client_warnings_v71';
+
+function loadClientOutputDraft(){
+  const rec = document.getElementById('clientRecommendation');
+  const warn = document.getElementById('clientWarnings');
+  if(rec && !rec.dataset.bound){
+    rec.value = localStorage.getItem(CLIENT_REC_KEY_V71) || '';
+    rec.dataset.bound = '1';
+    rec.addEventListener('input', () => localStorage.setItem(CLIENT_REC_KEY_V71, rec.value || ''));
+  }
+  if(warn && !warn.dataset.bound){
+    warn.value = localStorage.getItem(CLIENT_WARN_KEY_V71) || '';
+    warn.dataset.bound = '1';
+    warn.addEventListener('input', () => localStorage.setItem(CLIENT_WARN_KEY_V71, warn.value || ''));
+  }
+}
+function getClientCaseSummaryV71(){
+  const active = typeof getActiveCaseV70 === 'function' ? getActiveCaseV70() : (state.activeInquiry || {});
+  const docs = typeof getCaseDocuments === 'function' ? getCaseDocuments() : [];
+  const offers = Array.isArray(state.offers) ? state.offers : [];
+  const readiness = typeof calculateCaseReadiness === 'function' ? calculateCaseReadiness() : 0;
+  const missing = typeof getMissingParts === 'function' ? getMissingParts() : [];
+  return {active, docs, offers, readiness, missing};
+}
+function renderClientOutputStats(){
+  const data = getClientCaseSummaryV71();
+  if(document.getElementById('clientOutClient')) document.getElementById('clientOutClient').textContent = data.active.clientName || 'Klient není vybrán';
+  if(document.getElementById('clientOutReadiness')) document.getElementById('clientOutReadiness').textContent = data.readiness + '%';
+  if(document.getElementById('clientOutOffers')) document.getElementById('clientOutOffers').textContent = data.offers.length;
+  if(document.getElementById('clientOutDocs')) document.getElementById('clientOutDocs').textContent = data.docs.length;
+}
+function buildClientPresentation(){
+  loadClientOutputDraft();
+  renderClientOutputStats();
+  const data = getClientCaseSummaryV71();
+  const rec = (document.getElementById('clientRecommendation')?.value || '').trim();
+  const warn = (document.getElementById('clientWarnings')?.value || '').trim();
+  const client = data.active.clientName || 'klienta';
+  const activity = data.active.businessType || 'podnikatelská činnost není doplněna';
+  const docsText = data.docs.length ? data.docs.map(d => `<li>${escapeHtml(d.type)} – ${escapeHtml(d.title)}${d.status ? ' ('+escapeHtml(d.status)+')' : ''}</li>`).join('') : '<li>Dokumenty zatím nejsou evidovány.</li>';
+  const missingText = data.missing.length ? data.missing.map(m => `<li>${escapeHtml(m)}</li>`).join('') : '<li>Nejsou evidované zásadní chybějící části.</li>';
+  let quality = 'Případ je rozpracovaný a je vhodné doplnit podklady před finálním doporučením.';
+  if(data.readiness >= 70) quality = 'Případ je pracovně připravený pro porovnání nabídek a přípravu klientského doporučení.';
+  if(data.readiness >= 90) quality = 'Případ je velmi dobře připravený pro projednání s klientem.';
+  const html = `
+    <div class="client-preview-header">
+      <div><p>ASTORIE a.s. · S lehkostí světem financí</p><h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2></div>
+      <strong>${escapeHtml(data.readiness)} % připravenost</strong>
+    </div>
+    <div class="client-preview-body">
+      <section><h3>1. Klient a účel posouzení</h3><p>Pro klienta <b>${escapeHtml(client)}</b> bylo připraveno pracovní posouzení podnikatelských rizik. Evidovaná činnost: <b>${escapeHtml(activity)}</b>.</p></section>
+      <section><h3>2. Stav případu</h3><p>${escapeHtml(quality)}</p><ul>${missingText}</ul></section>
+      <section><h3>3. Podklady a dokumenty</h3><ul>${docsText}</ul></section>
+      <section><h3>4. Doporučení poradce</h3><p>${rec ? escapeHtml(rec) : 'Doporučení poradce zatím není doplněno. Doplňte hlavní závěr před předáním klientovi.'}</p></section>
+      <section><h3>5. Důležitá upozornění</h3><p>${warn ? escapeHtml(warn) : 'Upozornění zatím nejsou doplněna. Doporučujeme ověřit limity, sublimity, spoluúčasti, výluky a územní rozsah.'}</p></section>
+      <section class="client-preview-footer"><p>Tento výstup je poradenským shrnutím pro jednání s klientem. Finální doporučení, vysvětlení a volba řešení jsou vždy součástí odborného jednání poradce s klientem.</p></section>
+    </div>`;
+  const preview = document.getElementById('clientPresentationPreview');
+  if(preview) preview.innerHTML = html;
+}
+function copyClientOutput(){
+  buildClientPresentation();
+  const preview = document.getElementById('clientPresentationPreview');
+  if(!preview) return;
+  navigator.clipboard?.writeText(preview.innerText || preview.textContent || '');
+  alert('Klientský výstup byl zkopírován.');
+}
+setTimeout(()=>{ loadClientOutputDraft(); renderClientOutputStats(); }, 300);

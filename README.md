@@ -134,3 +134,20 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Odstraněn pocit dlouhých bloků pod sebou.
 - Nová textace se ukládá do záložky Moje textace.
 - Návrh do centrální databáze se zobrazí v samostatné záložce.
+
+
+## MVP 0.70 – Aktivní obchodní případ + profi workflow
+- Sticky pracovní panel aktivního obchodního případu.
+- Workflow stav: rozpracování, sběr podkladů, poptávka, nabídky, porovnání, zpráva, uzavřeno.
+- Dokumentový workspace: evidence dokumentů aktivního případu.
+- Živý checklist: ukládání zaškrtnutí a přepočet připravenosti.
+- Dashboard doporučuje další krok podle stavu případu.
+- Beze změny DB; zachováno ARES, Admin, odpovědnost, nabídky, porovnání, PDF.
+
+
+## MVP 0.71 – Klientský výstup + doporučení poradce
+- Přidán profesionální klientský výstup v sekci Zpráva.
+- Poradce doplní doporučení a upozornění, systém připraví čistý klientský náhled.
+- Dashboard obsahuje režim pro klienta.
+- Výstup lze zkopírovat pro e-mail/dokument.
+- Zachováno ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF a workflow 0.70.

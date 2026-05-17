@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=690">
+  <link rel="stylesheet" href="/static/css/style.css?v=710">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.69 · Přehlednější knihovna textací</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.71 · Klientský výstup + doporučení poradce</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -74,6 +74,30 @@
       </div>
 
 
+
+      
+      <section id="caseCommandCenter" class="case-command-center">
+        <div class="case-main">
+          <p class="eyebrow">Aktivní obchodní případ</p>
+          <h2 id="caseCCClient">Není vybrána žádná poptávka</h2>
+          <p id="caseCCMeta">Založte novou poptávku nebo otevřete uloženou. Všechny moduly se budou vztahovat k aktivnímu případu.</p>
+        </div>
+        <div class="case-metrics">
+          <div><b id="caseCCReady">0%</b><span>připravenost</span></div>
+          <div><b id="caseCCDocs">0</b><span>dokumentů</span></div>
+          <div><b id="caseCCOffers">0</b><span>nabídek</span></div>
+          <div><b id="caseCCMissing">–</b><span>chybí</span></div>
+        </div>
+        <div class="case-workflow-line">
+          <button type="button" data-case-step="draft" onclick="setCaseStage('draft')">Rozpracování</button>
+          <button type="button" data-case-step="documents" onclick="setCaseStage('documents')">Sběr podkladů</button>
+          <button type="button" data-case-step="inquiry" onclick="setCaseStage('inquiry')">Poptávka</button>
+          <button type="button" data-case-step="offers" onclick="setCaseStage('offers')">Nabídky</button>
+          <button type="button" data-case-step="comparison" onclick="setCaseStage('comparison')">Porovnání</button>
+          <button type="button" data-case-step="report" onclick="setCaseStage('report')">Zpráva</button>
+          <button type="button" data-case-step="closed" onclick="setCaseStage('closed')">Uzavřeno</button>
+        </div>
+      </section>
 
       <section id="dashboardView" class="app-section">
         <div class="hero compact advisor-cockpit-hero">
@@ -447,6 +471,40 @@
 
 
       <section id="reportView" class="app-section hidden">
+
+        <section class="panel client-output-workspace">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Klientský výstup ASTORIE</p>
+              <h2>Profesionální doporučení pro klienta</h2>
+              <p class="muted">Čistý výstup bez interních poznámek. Poradce doplní závěr, systém připraví přehled pro jednání s klientem.</p>
+            </div>
+            <div class="client-output-actions">
+              <button class="secondary" type="button" onclick="buildClientPresentation()">Vygenerovat náhled</button>
+              <button class="primary" type="button" onclick="copyClientOutput()">Zkopírovat klientský výstup</button>
+            </div>
+          </div>
+          <div class="client-output-grid">
+            <label>Hlavní doporučení poradce<textarea id="clientRecommendation" placeholder="Doporučení poradce pro klienta..."></textarea></label>
+            <label>Důležitá upozornění pro klienta<textarea id="clientWarnings" placeholder="Limity, výluky, sublimity, spoluúčasti, co musí klient vědět..."></textarea></label>
+          </div>
+          <div class="client-output-cards">
+            <div><b id="clientOutClient">Klient není vybrán</b><span>klient</span></div>
+            <div><b id="clientOutReadiness">0%</b><span>připravenost</span></div>
+            <div><b id="clientOutOffers">0</b><span>nabídky</span></div>
+            <div><b id="clientOutDocs">0</b><span>dokumenty</span></div>
+          </div>
+          <div id="clientPresentationPreview" class="client-presentation-preview">
+            <div class="client-preview-header">
+              <div><p>ASTORIE a.s.</p><h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2></div>
+              <strong>Pracovní náhled</strong>
+            </div>
+            <div class="client-preview-body">
+              <p>Nejprve klikněte na „Vygenerovat náhled“. Výstup se připraví z aktivního obchodního případu, dokumentů, nabídek a doporučení poradce.</p>
+            </div>
+          </div>
+        </section>
+
         <div class="hero compact">
           <div>
             <p class="eyebrow">Výstup pro jednání s klientem</p>
@@ -690,6 +748,13 @@
             </div>
             <button class="secondary" type="button" onclick="showView('documentsView')">Otevřít dokumenty</button>
           </div>
+          
+          <div class="checklist-status-row">
+            <div><b id="checklistDoneCount">0/8</b><span>splněno</span></div>
+            <div><b id="checklistCriticalCount">0</b><span>kritické body</span></div>
+            <div><b id="checklistCaseState">čeká</b><span>stav případu</span></div>
+          </div>
+
           <div class="uw-checklist">
             <label><input type="checkbox"> Identifikace klienta a kontaktní osoby</label>
             <label><input type="checkbox"> Hlavní činnost a doplňkové činnosti</label>
@@ -944,6 +1009,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=690"></script>
+  <script src="/static/js/app.js?v=710"></script>
 </body>
 </html>
