@@ -161,3 +161,12 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Makléřská porovnávací matice v sekci Porovnání.
 - Bez duplicity starého nabídkového workspace.
 - Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.
+
+## MVP 0.73 – Unified Offer Workflow
+- Stabilizační release nabídkového workflow.
+- Sjednocen jeden zdroj pravdy pro nabídky.
+- Potlačeny staré demo/legacy porovnávací bloky.
+- Porovnání používá pouze aktuální nabídky z unified store.
+- Počítadla v aktivním případu se berou ze stejného zdroje.
+- Klientský výstup bere nabídky ze stejného unified store.
+- Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF a klientský výstup.

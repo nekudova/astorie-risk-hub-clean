@@ -523,8 +523,8 @@ function showView(id){
   if(id==='dashboardView') renderInquiryDashboard();
   if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
-  if(id==='offersView') { renderOffers(); renderOffersWorkspaceV72(); }
-  if(id==='comparisonView') { renderComparison(); renderOfferComparisonV72(); }
+  if(id==='offersView') { renderOffers(); renderUnifiedOfferWorkspaceV73(); }
+  if(id==='comparisonView') { renderOfferComparisonV72(); suppressDuplicateComparisonV73(); }
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
   if(id==='documentsView') { renderDocumentsWorkspace(); renderCaseDocuments(); renderCaseCommandCenter(); }
@@ -3741,3 +3741,244 @@ function renderOfferComparisonV72(){
 function comparisonHintV72(param, offers){ if(param==='Pojistné') return 'Porovnat cenu proti rozsahu krytí, ne samostatně.'; if(param==='Výluky / omezení') return 'Zásadní výluky vždy vysvětlit klientovi.'; if(param==='Slabá místa') return 'Slabá místa promítnout do doporučení poradce.'; return 'Zkontrolovat rozdíly mezi nabídkami.'; }
 function renderOffersWorkspaceV72(){ renderOffersV72(); renderOfferComparisonV72(); }
 setTimeout(renderOffersWorkspaceV72,300);
+
+// MVP 0.73 - Unified Offer Workflow stabilizer
+const OFFERS_UNIFIED_KEY_V73 = 'astorie_unified_offers_v73';
+const OFFERS_LEGACY_KEYS_V73 = ['astorie_case_offers_v72', 'astorie_case_offers_v71', 'astorie_offers'];
+
+function normalizeOfferV73(o){
+  o = o || {};
+  return {
+    id: o.id || ('offer-' + Date.now() + '-' + Math.random().toString(16).slice(2)),
+    insurer: o.insurer || o.company || o.pojistovna || '',
+    product: o.product || o.produkt || '',
+    premium: o.premium || o.price || o.pojistne || '',
+    limit: o.limit || o.mainLimit || '',
+    deductible: o.deductible || o.spoluucast || '',
+    territory: o.territory || o.uzemi || '',
+    frequency: o.frequency || o.frekvence || '',
+    rating: o.rating || o.verdict || 'k ověření',
+    sublimits: o.sublimits || '',
+    exclusions: o.exclusions || o.vyluky || '',
+    strengths: o.strengths || '',
+    weaknesses: o.weaknesses || '',
+    note: o.note || o.poznamka || '',
+    recommended: !!o.recommended,
+    updatedAt: o.updatedAt || new Date().toISOString()
+  };
+}
+
+function readUnifiedOffersV73(){
+  let merged = [];
+  try {
+    const raw = localStorage.getItem(OFFERS_UNIFIED_KEY_V73);
+    if(raw) merged = JSON.parse(raw) || [];
+  } catch(e) {}
+
+  OFFERS_LEGACY_KEYS_V73.forEach(k => {
+    try {
+      const raw = localStorage.getItem(k);
+      if(raw){
+        const arr = JSON.parse(raw);
+        if(Array.isArray(arr)) merged = merged.concat(arr);
+      }
+    } catch(e) {}
+  });
+
+  const map = new Map();
+  merged.map(normalizeOfferV73).forEach(o => {
+    if(!o.insurer && !o.product) return;
+    map.set(o.id, o);
+  });
+  const clean = Array.from(map.values());
+  writeUnifiedOffersV73(clean);
+  return clean;
+}
+
+function writeUnifiedOffersV73(items){
+  const clean = (items || []).map(normalizeOfferV73);
+  const data = JSON.stringify(clean);
+  localStorage.setItem(OFFERS_UNIFIED_KEY_V73, data);
+  localStorage.setItem('astorie_case_offers_v72', data);
+}
+
+function getOffersV72(){ return readUnifiedOffersV73(); }
+function saveOffersV72(items){ writeUnifiedOffersV73(items); }
+
+function suppressDuplicateComparisonV73(){
+  const comparison = document.getElementById('comparisonView');
+  if(!comparison) return;
+
+  const unifiedPanel = comparison.querySelector('.offer-comparison-v72');
+  if(!unifiedPanel) return;
+
+  Array.from(comparison.children).forEach(child => {
+    if(child === unifiedPanel) return;
+    if(child.id === 'caseCommandCenter') return;
+    if(child.classList && child.classList.contains('case-command-center')) return;
+
+    const text = (child.innerText || '').toLowerCase();
+    const isOldComparison =
+      text.includes('krytí rizik + zdroje') ||
+      text.includes('pracovní analytické upozornění') ||
+      text.includes('základní parametry') ||
+      text.includes('makléřské porovnání') ||
+      text.includes('verdikt') ||
+      text.includes('koop') ||
+      text.includes('uniqa') ||
+      text.includes('direct');
+
+    if(isOldComparison && !child.querySelector('#offerComparisonMatrixV72')){
+      child.classList.add('v73-hidden-legacy-comparison');
+      child.style.display = 'none';
+    }
+  });
+}
+
+function renderUnifiedOfferSummaryV73(){
+  const offers = readUnifiedOffersV73();
+  const count = offers.length;
+  const rec = offers.find(o => o.recommended);
+  const warnings = offers.reduce((sum, o) => sum + (typeof offerWarningsV72 === 'function' ? offerWarningsV72(o).length : 0), 0);
+
+  if(document.getElementById('caseCCOffers')) document.getElementById('caseCCOffers').textContent = count;
+  if(document.getElementById('offerProCount')) document.getElementById('offerProCount').textContent = count;
+  if(document.getElementById('offerProRecommended')) document.getElementById('offerProRecommended').textContent = rec ? rec.insurer : '–';
+  if(document.getElementById('offerProWarnings')) document.getElementById('offerProWarnings').textContent = warnings;
+}
+
+function renderUnifiedOfferWorkspaceV73(selectedId){
+  if(typeof renderOffersV72 === 'function') renderOffersV72(selectedId);
+  if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
+  renderUnifiedOfferSummaryV73();
+  suppressDuplicateComparisonV73();
+  if(typeof renderCaseCommandCenter === 'function') renderCaseCommandCenter();
+}
+
+function saveOfferV72(){
+  const insurer = (document.getElementById('offerInsurerV72')?.value || '').trim();
+  if(!insurer){
+    alert('Doplňte pojišťovnu.');
+    document.getElementById('offerInsurerV72')?.focus();
+    return;
+  }
+  const id = document.getElementById('offerEditIdV72')?.value || '';
+  const payload = normalizeOfferV73({
+    id: id || ('offer-' + Date.now()),
+    insurer,
+    product: (document.getElementById('offerProductV72')?.value || '').trim(),
+    premium: (document.getElementById('offerPremiumV72')?.value || '').trim(),
+    limit: (document.getElementById('offerLimitV72')?.value || '').trim(),
+    deductible: (document.getElementById('offerDeductibleV72')?.value || '').trim(),
+    territory: document.getElementById('offerTerritoryV72')?.value || '',
+    frequency: document.getElementById('offerFrequencyV72')?.value || '',
+    rating: document.getElementById('offerRatingV72')?.value || 'k ověření',
+    sublimits: (document.getElementById('offerSublimitsV72')?.value || '').trim(),
+    exclusions: (document.getElementById('offerExclusionsV72')?.value || '').trim(),
+    strengths: (document.getElementById('offerStrengthsV72')?.value || '').trim(),
+    weaknesses: (document.getElementById('offerWeaknessesV72')?.value || '').trim(),
+    note: (document.getElementById('offerNoteV72')?.value || '').trim()
+  });
+
+  const offers = readUnifiedOffersV73();
+  const idx = offers.findIndex(o => o.id === payload.id);
+  if(idx >= 0) offers[idx] = {...offers[idx], ...payload};
+  else offers.unshift(payload);
+
+  writeUnifiedOffersV73(offers);
+  if(typeof closeOfferEditorV72 === 'function') closeOfferEditorV72();
+  renderUnifiedOfferWorkspaceV73(payload.id);
+}
+
+function deleteOfferV72(id){
+  if(!confirm('Smazat nabídku?')) return;
+  writeUnifiedOffersV73(readUnifiedOffersV73().filter(o => o.id !== id));
+  renderUnifiedOfferWorkspaceV73();
+}
+
+function duplicateOfferV72(id){
+  const offer = readUnifiedOffersV73().find(o => o.id === id);
+  if(!offer) return;
+  const copy = {...offer, id:'offer-' + Date.now(), insurer: offer.insurer + ' – kopie', rating:'k ověření', recommended:false};
+  const offers = readUnifiedOffersV73();
+  offers.unshift(copy);
+  writeUnifiedOffersV73(offers);
+  renderUnifiedOfferWorkspaceV73(copy.id);
+}
+
+function recommendOfferV72(id){
+  writeUnifiedOffersV73(readUnifiedOffersV73().map(o => ({...o, recommended:o.id === id})));
+  renderUnifiedOfferWorkspaceV73(id);
+}
+
+function renderOfferComparisonV72(){
+  const box = document.getElementById('offerComparisonMatrixV72');
+  if(!box) return;
+  const offers = readUnifiedOffersV73();
+
+  if(!offers.length){
+    box.innerHTML = '<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>';
+    suppressDuplicateComparisonV73();
+    return;
+  }
+
+  const rec = offers.find(o => o.recommended);
+  const rows = [
+    ['Pojistné', o => o.premium || '–'],
+    ['Limit', o => o.limit || '–'],
+    ['Spoluúčast', o => o.deductible || '–'],
+    ['Území', o => o.territory || '–'],
+    ['Frekvence', o => o.frequency || '–'],
+    ['Hodnocení', o => o.rating || '–'],
+    ['Výluky / omezení', o => o.exclusions || 'nevyplněno'],
+    ['Silné stránky', o => o.strengths || 'nevyplněno'],
+    ['Slabá místa', o => o.weaknesses || 'nevyplněno']
+  ];
+
+  const warningCount = offers.reduce((sum, o) => sum + (typeof offerWarningsV72 === 'function' ? offerWarningsV72(o).length : 0), 0);
+
+  box.innerHTML = `
+    <div class="unified-analysis-v73">
+      <div>
+        <p class="eyebrow">Makléřská analytika</p>
+        <h3>${rec ? 'Doporučená varianta: ' + escapeHtml(rec.insurer) : 'Doporučená varianta zatím není vybraná'}</h3>
+        <p>${rec ? 'Doporučení musí poradce vždy obhájit podle rozsahu krytí, výluk, ceny a potřeb klienta.' : 'Označte jednu nabídku jako doporučenou v sekci Nabídky.'}</p>
+      </div>
+      <div class="analysis-metrics-v73">
+        <div><b>${offers.length}</b><span>nabídky</span></div>
+        <div><b>${warningCount}</b><span>upozornění</span></div>
+        <div><b>${rec ? 'ano' : 'ne'}</b><span>doporučení</span></div>
+      </div>
+    </div>
+    <div class="comparison-table-wrap-v72">
+      <table class="comparison-table-v72">
+        <thead><tr><th>Parametr</th>${offers.map(o=>`<th>${escapeHtml(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td><b>${escapeHtml(r[0])}</b></td>${offers.map(o=>`<td>${escapeHtml(r[1](o))}</td>`).join('')}<td>${comparisonHintV72(r[0], offers)}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+  suppressDuplicateComparisonV73();
+}
+
+function renderOffersWorkspaceV72(){
+  renderUnifiedOfferWorkspaceV73();
+}
+
+function getClientCaseSummaryV71(){
+  const active = typeof getActiveCaseV70 === 'function' ? getActiveCaseV70() : (state.activeInquiry || {});
+  const docs = typeof getCaseDocuments === 'function' ? getCaseDocuments() : [];
+  const offers = readUnifiedOffersV73();
+  const readiness = typeof calculateCaseReadiness === 'function' ? calculateCaseReadiness() : 0;
+  const missing = typeof getMissingParts === 'function' ? getMissingParts() : [];
+  return {active, docs, offers, readiness, missing};
+}
+
+setTimeout(() => {
+  renderUnifiedOfferWorkspaceV73();
+  suppressDuplicateComparisonV73();
+}, 400);
+
+document.addEventListener('click', function(e){
+  const viewBtn = e.target && e.target.closest ? e.target.closest('[data-view="comparisonView"],[data-view="offersView"]') : null;
+  if(viewBtn) setTimeout(() => renderUnifiedOfferWorkspaceV73(), 150);
+});
