@@ -523,8 +523,8 @@ function showView(id){
   if(id==='dashboardView') renderInquiryDashboard();
   if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
-  if(id==='offersView') { renderOffers(); renderOfferWorkspace(); }
-  if(id==='comparisonView') renderComparison();
+  if(id==='offersView') { renderOffers(); renderOffersWorkspaceV72(); }
+  if(id==='comparisonView') { renderComparison(); renderOfferComparisonV72(); }
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
   if(id==='documentsView') { renderDocumentsWorkspace(); renderCaseDocuments(); renderCaseCommandCenter(); }
@@ -3669,3 +3669,75 @@ function copyClientOutput(){
   alert('Klientský výstup byl zkopírován.');
 }
 setTimeout(()=>{ loadClientOutputDraft(); renderClientOutputStats(); }, 300);
+
+// MVP 0.72 - Professional offer workspace
+const OFFERS_V72_KEY = 'astorie_case_offers_v72';
+function normalizeMoneyV72(value){ const n = Number(String(value || '').replace(/[^\d,.-]/g,'').replace(',', '.')); return isFinite(n) ? n : 0; }
+function getOffersV72(){ try{ return JSON.parse(localStorage.getItem(OFFERS_V72_KEY) || '[]'); }catch(e){ return []; } }
+function saveOffersV72(items){ localStorage.setItem(OFFERS_V72_KEY, JSON.stringify(items || [])); }
+function openOfferEditorV72(id){
+  const box = document.getElementById('offerEditorV72'); if(!box) return;
+  const offer = id ? getOffersV72().find(o => o.id === id) : null;
+  document.getElementById('offerEditorTitleV72').textContent = offer ? 'Upravit nabídku' : 'Nová nabídka';
+  document.getElementById('offerEditIdV72').value = offer?.id || '';
+  ['Insurer','Product','Premium','Limit','Deductible','Territory','Frequency','Rating','Sublimits','Exclusions','Strengths','Weaknesses','Note'].forEach(k=>{
+    const el = document.getElementById('offer'+k+'V72');
+    if(el){ const prop = k.charAt(0).toLowerCase()+k.slice(1); el.value = offer?.[prop] || (k==='Rating' ? 'k ověření' : ''); }
+  });
+  box.classList.remove('hidden'); document.getElementById('offerInsurerV72')?.focus(); box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function closeOfferEditorV72(){ document.getElementById('offerEditorV72')?.classList.add('hidden'); }
+function saveOfferV72(){
+  const insurer = (document.getElementById('offerInsurerV72')?.value || '').trim();
+  if(!insurer){ alert('Doplňte pojišťovnu.'); document.getElementById('offerInsurerV72')?.focus(); return; }
+  const id = document.getElementById('offerEditIdV72')?.value || '';
+  const payload = {
+    id: id || ('offer-' + Date.now()),
+    insurer,
+    product: (document.getElementById('offerProductV72')?.value || '').trim(),
+    premium: (document.getElementById('offerPremiumV72')?.value || '').trim(),
+    limit: (document.getElementById('offerLimitV72')?.value || '').trim(),
+    deductible: (document.getElementById('offerDeductibleV72')?.value || '').trim(),
+    territory: document.getElementById('offerTerritoryV72')?.value || '',
+    frequency: document.getElementById('offerFrequencyV72')?.value || '',
+    rating: document.getElementById('offerRatingV72')?.value || 'k ověření',
+    sublimits: (document.getElementById('offerSublimitsV72')?.value || '').trim(),
+    exclusions: (document.getElementById('offerExclusionsV72')?.value || '').trim(),
+    strengths: (document.getElementById('offerStrengthsV72')?.value || '').trim(),
+    weaknesses: (document.getElementById('offerWeaknessesV72')?.value || '').trim(),
+    note: (document.getElementById('offerNoteV72')?.value || '').trim(),
+    updatedAt: new Date().toISOString()
+  };
+  const offers = getOffersV72(); const idx = offers.findIndex(o => o.id === payload.id);
+  if(idx >= 0) offers[idx] = {...offers[idx], ...payload}; else offers.unshift(payload);
+  saveOffersV72(offers); closeOfferEditorV72(); renderOffersV72(payload.id); renderOfferComparisonV72(); if(typeof renderCaseCommandCenter === 'function') renderCaseCommandCenter();
+}
+function deleteOfferV72(id){ if(!confirm('Smazat nabídku?')) return; saveOffersV72(getOffersV72().filter(o => o.id !== id)); renderOffersV72(); renderOfferComparisonV72(); if(typeof renderCaseCommandCenter === 'function') renderCaseCommandCenter(); }
+function duplicateOfferV72(id){ const offer = getOffersV72().find(o => o.id === id); if(!offer) return; const copy = {...offer, id:'offer-' + Date.now(), insurer: offer.insurer + ' – kopie', rating:'k ověření', recommended:false}; const offers=getOffersV72(); offers.unshift(copy); saveOffersV72(offers); renderOffersV72(copy.id); }
+function recommendOfferV72(id){ const offers = getOffersV72().map(o => ({...o, recommended: o.id === id})); saveOffersV72(offers); renderOffersV72(id); renderOfferComparisonV72(); }
+function offerWarningsV72(o){ const w=[]; if(!o.premium) w.push('chybí cena'); if(!o.limit) w.push('chybí limit'); if(!o.exclusions) w.push('neověřené výluky'); if(o.rating==='omezené krytí'||o.rating==='nedoporučit') w.push('slabé hodnocení'); return w; }
+function renderOffersV72(selectedId){
+  const box=document.getElementById('offerCardsV72'); if(!box) return; const offers=getOffersV72();
+  if(document.getElementById('offerProCount')) document.getElementById('offerProCount').textContent=offers.length;
+  const rec=offers.find(o=>o.recommended); if(document.getElementById('offerProRecommended')) document.getElementById('offerProRecommended').textContent=rec?rec.insurer:'–';
+  const premiums=offers.map(o=>normalizeMoneyV72(o.premium)).filter(Boolean); if(document.getElementById('offerProBestPrice')) document.getElementById('offerProBestPrice').textContent=premiums.length?Math.min(...premiums).toLocaleString('cs-CZ')+' Kč':'–';
+  if(document.getElementById('offerProWarnings')) document.getElementById('offerProWarnings').textContent=offers.reduce((s,o)=>s+offerWarningsV72(o).length,0);
+  if(!offers.length){ box.innerHTML='<div class="textation-empty">Zatím není vložená žádná nabídka. Klikněte na „+ Přidat nabídku“.</div>'; return; }
+  box.innerHTML=offers.map(o=>{ const warnings=offerWarningsV72(o); return `
+    <article class="offer-card-v72 ${selectedId===o.id?'active':''} ${o.recommended?'recommended':''}">
+      <div class="offer-card-head"><div><span class="offer-rating">${escapeHtml(o.rating||'k ověření')}</span><h3>${escapeHtml(o.insurer)}</h3><p>${escapeHtml(o.product||'produkt není doplněn')}</p></div>${o.recommended?'<strong class="recommended-badge">Doporučeno</strong>':''}</div>
+      <div class="offer-card-metrics"><div><b>${escapeHtml(o.premium||'–')}</b><span>pojistné</span></div><div><b>${escapeHtml(o.limit||'–')}</b><span>limit</span></div><div><b>${escapeHtml(o.deductible||'–')}</b><span>spoluúčast</span></div></div>
+      <div class="offer-card-details"><p><b>Území:</b> ${escapeHtml(o.territory||'není uvedeno')}</p><p><b>Frekvence:</b> ${escapeHtml(o.frequency||'není uvedena')}</p>${warnings.length?'<p class="offer-warnings"><b>Upozornění:</b> '+warnings.map(escapeHtml).join(', ')+'</p>':'<p class="offer-ok">Základní údaje jsou doplněné.</p>'}</div>
+      <details><summary>Expert detail</summary><p><b>Sublimity:</b><br>${escapeHtml(o.sublimits||'není doplněno')}</p><p><b>Výluky:</b><br>${escapeHtml(o.exclusions||'není doplněno')}</p><p><b>Silné stránky:</b><br>${escapeHtml(o.strengths||'není doplněno')}</p><p><b>Slabá místa:</b><br>${escapeHtml(o.weaknesses||'není doplněno')}</p><p><b>Poznámka poradce:</b><br>${escapeHtml(o.note||'není doplněno')}</p></details>
+      <div class="offer-card-actions"><button class="primary small-btn" type="button" onclick="recommendOfferV72('${escapeHtml(o.id)}')">Doporučit</button><button class="secondary small-btn" type="button" onclick="openOfferEditorV72('${escapeHtml(o.id)}')">Upravit</button><button class="secondary small-btn" type="button" onclick="duplicateOfferV72('${escapeHtml(o.id)}')">Kopie</button><button class="danger-light small-btn" type="button" onclick="deleteOfferV72('${escapeHtml(o.id)}')">Smazat</button></div>
+    </article>`}).join('');
+}
+function renderOfferComparisonV72(){
+  const box=document.getElementById('offerComparisonMatrixV72'); if(!box) return; const offers=getOffersV72();
+  if(!offers.length){ box.innerHTML='<div class="textation-empty">Nejsou vložené nabídky pro porovnání.</div>'; return; }
+  const rows=[['Pojistné',o=>o.premium||'–'],['Limit',o=>o.limit||'–'],['Spoluúčast',o=>o.deductible||'–'],['Území',o=>o.territory||'–'],['Frekvence',o=>o.frequency||'–'],['Hodnocení',o=>o.rating||'–'],['Výluky / omezení',o=>o.exclusions||'nevyplněno'],['Slabá místa',o=>o.weaknesses||'nevyplněno']];
+  box.innerHTML=`<div class="comparison-table-wrap-v72"><table class="comparison-table-v72"><thead><tr><th>Parametr</th>${offers.map(o=>`<th>${escapeHtml(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${escapeHtml(r[0])}</b></td>${offers.map(o=>`<td>${escapeHtml(r[1](o))}</td>`).join('')}<td>${comparisonHintV72(r[0],offers)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function comparisonHintV72(param, offers){ if(param==='Pojistné') return 'Porovnat cenu proti rozsahu krytí, ne samostatně.'; if(param==='Výluky / omezení') return 'Zásadní výluky vždy vysvětlit klientovi.'; if(param==='Slabá místa') return 'Slabá místa promítnout do doporučení poradce.'; return 'Zkontrolovat rozdíly mezi nabídkami.'; }
+function renderOffersWorkspaceV72(){ renderOffersV72(); renderOfferComparisonV72(); }
+setTimeout(renderOffersWorkspaceV72,300);

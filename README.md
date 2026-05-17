@@ -151,3 +151,13 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Dashboard obsahuje režim pro klienta.
 - Výstup lze zkopírovat pro e-mail/dokument.
 - Zachováno ARES, DB, Admin, odpovědnost, nabídky, porovnání, PDF a workflow 0.70.
+
+
+## MVP 0.72 – Profesionální nabídkový workspace
+- Nový intuitivní editor nabídky: quick mode + expert mode.
+- Nabídky jako profesionální karty pojišťoven.
+- Možnost upravit, kopírovat, smazat a označit doporučenou nabídku.
+- Souhrn nabídek a upozornění na chybějící cenu/limit/výluky.
+- Makléřská porovnávací matice v sekci Porovnání.
+- Bez duplicity starého nabídkového workspace.
+- Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.
