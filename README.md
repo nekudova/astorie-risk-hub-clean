@@ -170,3 +170,14 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Počítadla v aktivním případu se berou ze stejného zdroje.
 - Klientský výstup bere nabídky ze stejného unified store.
 - Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF a klientský výstup.
+
+
+## MVP 0.74 – Case Engine Refactor
+- Zaveden centrální Case Store pro aktivní obchodní případ.
+- Nabídky jsou ukládány do case.offers[].
+- Dokumenty jsou ukládány do case.documents[].
+- Porovnání se počítá výhradně z case.offers[].
+- Dashboard/command center používá stejný zdroj dat.
+- Klientský výstup používá stejný zdroj dat.
+- Přidána migrace historických nabídek z legacy localStorage klíčů.
+- Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.

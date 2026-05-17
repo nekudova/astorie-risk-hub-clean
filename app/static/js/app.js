@@ -523,8 +523,8 @@ function showView(id){
   if(id==='dashboardView') renderInquiryDashboard();
   if(id==='myInquiriesView') renderMyInquiries();
   if(id==='aiView') renderAIWorkflow();
-  if(id==='offersView') { renderOffers(); renderUnifiedOfferWorkspaceV73(); }
-  if(id==='comparisonView') { renderOfferComparisonV72(); suppressDuplicateComparisonV73(); }
+  if(id==='offersView') { migrateLegacyDataToActiveCaseV74(false); renderOffers(); renderUnifiedOfferWorkspaceV73(); renderCaseCommandCenter(); }
+  if(id==='comparisonView') { migrateLegacyDataToActiveCaseV74(false); renderOfferComparisonV72(); suppressDuplicateComparisonV73(); renderCaseCommandCenter(); }
   if(id==='reportView') renderClientReport();
   if(id==='guideView') renderGuide();
   if(id==='documentsView') { renderDocumentsWorkspace(); renderCaseDocuments(); renderCaseCommandCenter(); }
@@ -3982,3 +3982,172 @@ document.addEventListener('click', function(e){
   const viewBtn = e.target && e.target.closest ? e.target.closest('[data-view="comparisonView"],[data-view="offersView"]') : null;
   if(viewBtn) setTimeout(() => renderUnifiedOfferWorkspaceV73(), 150);
 });
+
+// MVP 0.74 - Case Engine Refactor
+const CASE_STORE_KEY_V74 = 'astorie_case_engine_v74';
+const CASE_ACTIVE_KEY_V74 = 'astorie_active_case_id_v74';
+const CASE_MIGRATION_FLAG_V74 = 'astorie_case_engine_migrated_v74';
+const CASE_LEGACY_OFFER_KEYS_V74 = ['astorie_unified_offers_v73','astorie_case_offers_v72','astorie_case_offers_v71','astorie_offers','offers','riskhub_offers'];
+const CASE_LEGACY_DOC_KEYS_V74 = ['astorie_case_documents_v70','astorie_documents','riskhub_documents'];
+
+function safeJsonParseV74(raw, fallback){ try { return raw ? JSON.parse(raw) : fallback; } catch(e) { return fallback; } }
+function normalizeCaseIdV74(value){ const s = String(value || '').trim(); return s || 'local-active-case'; }
+
+function getActiveCaseIdentityV74(){
+  const active = (typeof state !== 'undefined' && state.activeInquiry) ? state.activeInquiry : {};
+  const form = (typeof state !== 'undefined' && state.form) ? state.form : {};
+  const id = normalizeCaseIdV74(active.id || active.dbId || active.caseId || document.getElementById('inquiryId')?.value || localStorage.getItem(CASE_ACTIVE_KEY_V74) || 'local-active-case');
+  const clientName = active.clientName || active.client || form.clientName || document.getElementById('clientName')?.value || 'Není vybrána žádná poptávka';
+  const businessType = active.businessType || active.clientActivity || form.clientActivity || document.getElementById('clientActivity')?.value || '';
+  const status = active.status || form.status || 'rozpracováno';
+  return {id, clientName, businessType, status};
+}
+
+function normalizeOfferV74(o){
+  o = o || {};
+  return {
+    id: o.id || ('offer-' + Date.now() + '-' + Math.random().toString(16).slice(2)),
+    insurer: o.insurer || o.company || o.pojistovna || o.insuranceCompany || '',
+    product: o.product || o.produkt || '',
+    premium: o.premium || o.price || o.pojistne || o.annualPremium || '',
+    limit: o.limit || o.mainLimit || o.coverageLimit || '',
+    deductible: o.deductible || o.spoluucast || '',
+    territory: o.territory || o.uzemi || '',
+    frequency: o.frequency || o.frekvence || '',
+    rating: o.rating || o.verdict || o.status || 'k ověření',
+    sublimits: o.sublimits || o.subLimits || '',
+    exclusions: o.exclusions || o.vyluky || '',
+    strengths: o.strengths || '',
+    weaknesses: o.weaknesses || '',
+    note: o.note || o.poznamka || '',
+    recommended: !!o.recommended,
+    updatedAt: o.updatedAt || new Date().toISOString()
+  };
+}
+function normalizeDocumentV74(d){
+  d = d || {};
+  return {id:d.id || ('doc-' + Date.now() + '-' + Math.random().toString(16).slice(2)), title:d.title || d.name || d.filename || 'Dokument', type:d.type || d.category || 'Ostatní', source:d.source || '', status:d.status || 'k ověření', note:d.note || '', createdAt:d.createdAt || new Date().toISOString()};
+}
+function emptyCaseV74(identity){
+  identity = identity || getActiveCaseIdentityV74();
+  return {id:identity.id, clientName:identity.clientName, businessType:identity.businessType, status:identity.status, workflowStage:localStorage.getItem('astorie_case_stage_v70') || 'draft', offers:[], documents:[], checklist:safeJsonParseV74(localStorage.getItem('astorie_case_checklist_v70'), {}), notes:[], report:{recommendation:localStorage.getItem('astorie_client_recommendation_v71') || '', warnings:localStorage.getItem('astorie_client_warnings_v71') || ''}, updatedAt:new Date().toISOString()};
+}
+function readCaseStoreV74(){
+  const store = safeJsonParseV74(localStorage.getItem(CASE_STORE_KEY_V74), null);
+  return (store && Array.isArray(store.cases)) ? store : {activeCaseId:null, cases:[]};
+}
+function writeCaseStoreV74(store){ localStorage.setItem(CASE_STORE_KEY_V74, JSON.stringify(store || {activeCaseId:null, cases:[]})); }
+
+function getOrCreateActiveCaseV74(){
+  const identity = getActiveCaseIdentityV74();
+  const store = readCaseStoreV74();
+  const caseId = normalizeCaseIdV74(identity.id || store.activeCaseId);
+  let c = store.cases.find(x => x.id === caseId);
+  if(!c){ c = emptyCaseV74({...identity, id:caseId}); store.cases.unshift(c); }
+  c.clientName = identity.clientName || c.clientName;
+  c.businessType = identity.businessType || c.businessType;
+  c.status = identity.status || c.status;
+  c.workflowStage = localStorage.getItem('astorie_case_stage_v70') || c.workflowStage || 'draft';
+  c.checklist = safeJsonParseV74(localStorage.getItem('astorie_case_checklist_v70'), c.checklist || {});
+  c.report = c.report || {};
+  c.report.recommendation = localStorage.getItem('astorie_client_recommendation_v71') || c.report.recommendation || '';
+  c.report.warnings = localStorage.getItem('astorie_client_warnings_v71') || c.report.warnings || '';
+  c.offers = Array.isArray(c.offers) ? c.offers.map(normalizeOfferV74) : [];
+  c.documents = Array.isArray(c.documents) ? c.documents.map(normalizeDocumentV74) : [];
+  c.updatedAt = new Date().toISOString();
+  store.activeCaseId = caseId;
+  localStorage.setItem(CASE_ACTIVE_KEY_V74, caseId);
+  writeCaseStoreV74(store);
+  return c;
+}
+function saveActiveCaseV74(c){
+  const store = readCaseStoreV74();
+  const caseId = normalizeCaseIdV74(c.id);
+  const idx = store.cases.findIndex(x => x.id === caseId);
+  c.updatedAt = new Date().toISOString();
+  if(idx >= 0) store.cases[idx] = c; else store.cases.unshift(c);
+  store.activeCaseId = caseId;
+  localStorage.setItem(CASE_ACTIVE_KEY_V74, caseId);
+  writeCaseStoreV74(store);
+}
+function collectLegacyOffersV74(){
+  let all = [];
+  CASE_LEGACY_OFFER_KEYS_V74.forEach(key => { const arr = safeJsonParseV74(localStorage.getItem(key), []); if(Array.isArray(arr)) all = all.concat(arr); });
+  if(typeof state !== 'undefined' && Array.isArray(state.offers)) all = all.concat(state.offers);
+  const map = new Map();
+  all.map(normalizeOfferV74).forEach(o => { if(!o.insurer && !o.product) return; map.set(o.id, o); });
+  return Array.from(map.values());
+}
+function collectLegacyDocumentsV74(){
+  let all = [];
+  CASE_LEGACY_DOC_KEYS_V74.forEach(key => { const arr = safeJsonParseV74(localStorage.getItem(key), []); if(Array.isArray(arr)) all = all.concat(arr); });
+  const map = new Map();
+  all.map(normalizeDocumentV74).forEach(d => { if(!d.title) return; map.set(d.id, d); });
+  return Array.from(map.values());
+}
+function syncLegacyStoresFromCaseV74(c){
+  c = c || getOrCreateActiveCaseV74();
+  const offers = JSON.stringify(c.offers || []);
+  localStorage.setItem('astorie_unified_offers_v73', offers);
+  localStorage.setItem('astorie_case_offers_v72', offers);
+  localStorage.setItem('astorie_case_offers_v71', offers);
+  localStorage.setItem('astorie_case_documents_v70', JSON.stringify(c.documents || []));
+  if(typeof state !== 'undefined') state.offers = c.offers || [];
+}
+function migrateLegacyDataToActiveCaseV74(force){
+  const c = getOrCreateActiveCaseV74();
+  if(localStorage.getItem(CASE_MIGRATION_FLAG_V74) && !force) return c;
+  const offerIds = new Set((c.offers || []).map(o => o.id));
+  collectLegacyOffersV74().forEach(o => { if(!offerIds.has(o.id)){ c.offers.push(o); offerIds.add(o.id); } });
+  const docIds = new Set((c.documents || []).map(d => d.id));
+  collectLegacyDocumentsV74().forEach(d => { if(!docIds.has(d.id)){ c.documents.push(d); docIds.add(d.id); } });
+  saveActiveCaseV74(c);
+  syncLegacyStoresFromCaseV74(c);
+  localStorage.setItem(CASE_MIGRATION_FLAG_V74, new Date().toISOString());
+  return c;
+}
+function getOffersV72(){ return migrateLegacyDataToActiveCaseV74(false).offers || []; }
+function saveOffersV72(items){ const c=getOrCreateActiveCaseV74(); c.offers=(items||[]).map(normalizeOfferV74); saveActiveCaseV74(c); syncLegacyStoresFromCaseV74(c); renderCaseEngineStatusV74(); }
+function getCaseDocuments(){ return migrateLegacyDataToActiveCaseV74(false).documents || []; }
+function saveCaseDocuments(items){ const c=getOrCreateActiveCaseV74(); c.documents=(items||[]).map(normalizeDocumentV74); saveActiveCaseV74(c); syncLegacyStoresFromCaseV74(c); renderCaseEngineStatusV74(); }
+function getActiveCaseV70(){ const c=migrateLegacyDataToActiveCaseV74(false); return {id:c.id, dbId:c.id, clientName:c.clientName, businessType:c.businessType, clientActivity:c.businessType, status:c.status}; }
+function calculateCaseReadiness(){
+  const c=migrateLegacyDataToActiveCaseV74(false);
+  const checked=Object.values(c.checklist || {}).filter(Boolean).length;
+  let score=0; if(c.clientName && c.clientName !== 'Není vybrána žádná poptávka') score+=20; if(c.businessType) score+=10; if((c.documents||[]).length>0) score+=20; if((c.offers||[]).length>0) score+=15; if((c.offers||[]).length>=2) score+=15; score+=Math.min(20, checked*3); return Math.min(100, score);
+}
+function getMissingParts(){ const c=migrateLegacyDataToActiveCaseV74(false); const missing=[]; if(!c.clientName || c.clientName==='Není vybrána žádná poptávka') missing.push('klient'); if(!c.businessType) missing.push('činnost'); if(!(c.documents||[]).length) missing.push('dokumenty'); if((c.offers||[]).length<2) missing.push('min. 2 nabídky'); if(Object.values(c.checklist||{}).filter(Boolean).length<4) missing.push('checklist'); return missing; }
+
+function renderCaseEngineStatusV74(){
+  const c=migrateLegacyDataToActiveCaseV74(false);
+  if(document.getElementById('caseEngineCaseIdV74')) document.getElementById('caseEngineCaseIdV74').textContent = c.id || 'local';
+  if(document.getElementById('caseEngineOffersV74')) document.getElementById('caseEngineOffersV74').textContent = (c.offers||[]).length;
+  if(document.getElementById('caseEngineDocsV74')) document.getElementById('caseEngineDocsV74').textContent = (c.documents||[]).length;
+  if(document.getElementById('caseEngineIntegrityV74')) document.getElementById('caseEngineIntegrityV74').textContent = 'OK';
+  if(document.getElementById('offerCaseBindingV74')) document.getElementById('offerCaseBindingV74').innerHTML = `<div class="case-binding-card-v74"><b>Všechny nabídky jsou navázané na aktivní obchodní případ:</b><span>${escapeHtml(c.clientName || 'bez klienta')} · ${escapeHtml(c.id || 'local')} · ${(c.offers||[]).length} nabídek</span></div>`;
+}
+function renderCaseCommandCenter(){
+  const c=migrateLegacyDataToActiveCaseV74(false); const readiness=calculateCaseReadiness(); const missing=getMissingParts();
+  if(document.getElementById('caseCCClient')) document.getElementById('caseCCClient').textContent=c.clientName || 'Není vybrána žádná poptávka';
+  if(document.getElementById('caseCCMeta')) document.getElementById('caseCCMeta').textContent=[c.businessType||'typ činnosti není vyplněn', c.id?('DB #'+c.id):'bez DB ID', c.status||'rozpracováno', 'stav workflow: '+(typeof stageLabelV70==='function'?stageLabelV70(localStorage.getItem('astorie_case_stage_v70')||c.workflowStage||'draft'):(c.workflowStage||'draft'))].join(' · ');
+  if(document.getElementById('caseCCReady')) document.getElementById('caseCCReady').textContent=readiness+'%';
+  if(document.getElementById('caseCCDocs')) document.getElementById('caseCCDocs').textContent=(c.documents||[]).length;
+  if(document.getElementById('caseCCOffers')) document.getElementById('caseCCOffers').textContent=(c.offers||[]).length;
+  if(document.getElementById('caseCCMissing')) document.getElementById('caseCCMissing').textContent=missing.length?missing.length:'0';
+  document.querySelectorAll('[data-case-step]').forEach(btn=>btn.classList.toggle('active', btn.dataset.caseStep === (localStorage.getItem('astorie_case_stage_v70')||c.workflowStage||'draft')));
+  renderCaseEngineStatusV74();
+}
+
+function renderOfferComparisonV72(){
+  const box=document.getElementById('offerComparisonMatrixV72'); if(!box) return;
+  const offers=getOffersV72();
+  if(!offers.length){ box.innerHTML='<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>'; if(typeof suppressDuplicateComparisonV73==='function') suppressDuplicateComparisonV73(); return; }
+  const rec=offers.find(o=>o.recommended);
+  const rows=[['Pojistné',o=>o.premium||'–'],['Limit',o=>o.limit||'–'],['Spoluúčast',o=>o.deductible||'–'],['Území',o=>o.territory||'–'],['Frekvence',o=>o.frequency||'–'],['Hodnocení',o=>o.rating||'–'],['Sublimity',o=>o.sublimits||'nevyplněno'],['Výluky / omezení',o=>o.exclusions||'nevyplněno'],['Silné stránky',o=>o.strengths||'nevyplněno'],['Slabá místa',o=>o.weaknesses||'nevyplněno']];
+  const warningCount=offers.reduce((sum,o)=>sum+(typeof offerWarningsV72==='function'?offerWarningsV72(o).length:0),0);
+  box.innerHTML=`<div class="unified-analysis-v73 case-analysis-v74"><div><p class="eyebrow">Makléřská analytika z aktivního případu</p><h3>${rec?'Doporučená varianta: '+escapeHtml(rec.insurer):'Doporučená varianta zatím není vybraná'}</h3><p>${rec?'Doporučení je navázané na aktivní obchodní případ a použije se i v klientském výstupu.':'V sekci Nabídky označte jednu variantu jako doporučenou.'}</p></div><div class="analysis-metrics-v73"><div><b>${offers.length}</b><span>nabídky</span></div><div><b>${warningCount}</b><span>upozornění</span></div><div><b>${rec?'ano':'ne'}</b><span>doporučení</span></div></div></div><div class="comparison-table-wrap-v72"><table class="comparison-table-v72"><thead><tr><th>Parametr</th>${offers.map(o=>`<th>${escapeHtml(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${escapeHtml(r[0])}</b></td>${offers.map(o=>`<td>${escapeHtml(r[1](o))}</td>`).join('')}<td>${typeof comparisonHintV72==='function'?comparisonHintV72(r[0],offers):'Ověřit rozdíly v nabídce.'}</td></tr>`).join('')}</tbody></table></div>`;
+  if(typeof suppressDuplicateComparisonV73==='function') suppressDuplicateComparisonV73();
+}
+function getClientCaseSummaryV71(){ const c=migrateLegacyDataToActiveCaseV74(false); return {active:{id:c.id, dbId:c.id, clientName:c.clientName, businessType:c.businessType, clientActivity:c.businessType, status:c.status}, docs:c.documents||[], offers:c.offers||[], readiness:calculateCaseReadiness(), missing:getMissingParts()}; }
+function forceCaseMigrationV74(){ const c=migrateLegacyDataToActiveCaseV74(true); syncLegacyStoresFromCaseV74(c); renderCaseCommandCenter(); if(typeof renderCaseDocuments==='function') renderCaseDocuments(); if(typeof renderOffersWorkspaceV72==='function') renderOffersWorkspaceV72(); renderOfferComparisonV72(); if(typeof renderClientOutputStats==='function') renderClientOutputStats(); alert('Migrace a kontrola aktivního obchodního případu dokončena. Nabídky: '+(c.offers||[]).length+', dokumenty: '+(c.documents||[]).length+'.'); }
+setTimeout(()=>{ migrateLegacyDataToActiveCaseV74(false); renderCaseCommandCenter(); renderCaseEngineStatusV74(); if(typeof renderOffersWorkspaceV72==='function') renderOffersWorkspaceV72(); if(typeof renderOfferComparisonV72==='function') renderOfferComparisonV72(); },500);
