@@ -181,3 +181,11 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Klientský výstup používá stejný zdroj dat.
 - Přidána migrace historických nabídek z legacy localStorage klíčů.
 - Zachováno ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.
+
+
+## MVP 0.75 – DB-first Case Bridge
+- Opraveno načítání historických nabídek z DB/state.offers.
+- Nový Case Engine umí převést původní objekt nabídek podle pojišťoven do case.offers[] bez zničení DB dat.
+- Souhrn, počítadla, porovnání a klientský výstup čtou stejné nabídky jako původní modul Nabídky.
+- state.offers už není destruktivně přepisován polem.
+- Technický Case Engine panel je skrytý v běžném poradenském UX.

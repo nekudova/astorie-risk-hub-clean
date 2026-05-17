@@ -1473,3 +1473,20 @@ main{max-width:none;margin:0;padding:20px;}
 .case-binding-card-v74 span{color:#214f5a;font-weight:800}
 .case-analysis-v74{border-left-color:var(--petrol,#003D4C)}
 @media(max-width:1100px){.case-engine-metrics-v74{grid-template-columns:1fr}}
+
+/* MVP 0.75 - DB-first Case Bridge / pilot UX cleanup */
+.case-engine-status-v74{
+  display:none !important;
+}
+.case-command-center{
+  position:relative !important;
+  top:auto !important;
+  margin-top:12px !important;
+}
+.case-command-center .case-metrics div{
+  min-height:auto !important;
+}
+.offer-case-binding-v74 .case-binding-card-v74{
+  background:#f8fcfd;
+  border-left-color:var(--petrol,#003D4C);
+}

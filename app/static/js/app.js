@@ -4151,3 +4151,272 @@ function renderOfferComparisonV72(){
 function getClientCaseSummaryV71(){ const c=migrateLegacyDataToActiveCaseV74(false); return {active:{id:c.id, dbId:c.id, clientName:c.clientName, businessType:c.businessType, clientActivity:c.businessType, status:c.status}, docs:c.documents||[], offers:c.offers||[], readiness:calculateCaseReadiness(), missing:getMissingParts()}; }
 function forceCaseMigrationV74(){ const c=migrateLegacyDataToActiveCaseV74(true); syncLegacyStoresFromCaseV74(c); renderCaseCommandCenter(); if(typeof renderCaseDocuments==='function') renderCaseDocuments(); if(typeof renderOffersWorkspaceV72==='function') renderOffersWorkspaceV72(); renderOfferComparisonV72(); if(typeof renderClientOutputStats==='function') renderClientOutputStats(); alert('Migrace a kontrola aktivního obchodního případu dokončena. Nabídky: '+(c.offers||[]).length+', dokumenty: '+(c.documents||[]).length+'.'); }
 setTimeout(()=>{ migrateLegacyDataToActiveCaseV74(false); renderCaseCommandCenter(); renderCaseEngineStatusV74(); if(typeof renderOffersWorkspaceV72==='function') renderOffersWorkspaceV72(); if(typeof renderOfferComparisonV72==='function') renderOfferComparisonV72(); },500);
+
+// MVP 0.75 - DB-first Case Bridge
+// Cíl: historické nabídky z DB/state.offers zůstanou zachované a nový Case Engine je pouze načte jako pracovní pohled.
+
+function isOfferObjectMapV75(value){
+  return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function insurerByIdV75(id){
+  const list = (typeof CATALOG !== 'undefined' && CATALOG && Array.isArray(CATALOG.insurers)) ? CATALOG.insurers : [];
+  return list.find(i => String(i.id) === String(id) || String(i.code || '') === String(id) || String(i.short || '') === String(id)) || null;
+}
+
+function activeDbOfferMapV75(){
+  if(typeof state === 'undefined') return {};
+  if(isOfferObjectMapV75(state.offers)) return state.offers || {};
+  return {};
+}
+
+function coverageValuesV75(offerObj){
+  const cov = offerObj && offerObj.coverages && typeof offerObj.coverages === 'object' ? offerObj.coverages : {};
+  return Object.values(cov || {});
+}
+
+function summarizeCoveragesV75(offerObj, type){
+  const covs = coverageValuesV75(offerObj);
+  if(!covs.length) return '';
+  if(type === 'limits'){
+    return covs.map(c => c.limit).filter(Boolean).slice(0,5).join(', ');
+  }
+  if(type === 'exclusions'){
+    return covs.filter(c => String(c.state || '').toLowerCase().includes('výluka') || String(c.state || '').toLowerCase().includes('nesplněno'))
+      .map(c => [c.original, c.note, c.source].filter(Boolean).join(' · '))
+      .filter(Boolean)
+      .slice(0,5)
+      .join('\n');
+  }
+  if(type === 'weaknesses'){
+    return covs.filter(c => ['částečně','výluka','nesplněno','nevyhodnoceno'].includes(String(c.state || '').toLowerCase()))
+      .map(c => [c.state, c.limit, c.note].filter(Boolean).join(' · '))
+      .filter(Boolean)
+      .slice(0,6)
+      .join('\n');
+  }
+  if(type === 'strengths'){
+    return covs.filter(c => String(c.state || '').toLowerCase() === 'splněno')
+      .map(c => [c.limit, c.source].filter(Boolean).join(' · '))
+      .filter(Boolean)
+      .slice(0,6)
+      .join('\n');
+  }
+  return '';
+}
+
+function convertDbOfferMapToArrayV75(map){
+  if(!isOfferObjectMapV75(map)) return [];
+  return Object.entries(map).map(([insurerId, o]) => {
+    o = o || {};
+    const insurer = insurerByIdV75(insurerId);
+    const insurerName = insurer ? ((insurer.short ? insurer.short + ' – ' : '') + insurer.name) : String(insurerId);
+    const warnings = summarizeCoveragesV75(o, 'weaknesses');
+    const exclusions = summarizeCoveragesV75(o, 'exclusions');
+    return normalizeOfferV74({
+      id: 'db-offer-' + insurerId,
+      insurer: insurerName,
+      product: o.product || o.product_name || 'nabídka pojišťovny',
+      premium: o.premium || '',
+      limit: summarizeCoveragesV75(o, 'limits') || '',
+      deductible: o.deductible || '',
+      territory: o.territory || '',
+      frequency: o.frequency || '',
+      rating: o.status || 'doručeno',
+      sublimits: summarizeCoveragesV75(o, 'limits') || '',
+      exclusions: exclusions || '',
+      strengths: summarizeCoveragesV75(o, 'strengths') || '',
+      weaknesses: warnings || '',
+      note: o.note || '',
+      recommended: !!o.recommended,
+      updatedAt: o.updatedAt || new Date().toISOString()
+    });
+  }).filter(o => o.insurer && o.insurer !== '[object Object]');
+}
+
+function getDbOffersForActiveInquiryV75(){
+  const direct = convertDbOfferMapToArrayV75(activeDbOfferMapV75());
+  if(direct.length) return direct;
+
+  // Fallback: lokální záloha stejného DB případu může obsahovat původní state.offers objekt.
+  try{
+    const currentId = String((typeof state !== 'undefined' && state.id) ? state.id : '');
+    const backups = typeof localInquiryBackups === 'function' ? localInquiryBackups() : [];
+    const local = backups.find(x => String(x.id || '') === currentId && isOfferObjectMapV75(x.offers));
+    if(local) return convertDbOfferMapToArrayV75(local.offers);
+  }catch(e){}
+  return [];
+}
+
+function mergeOffersByIdV75(a,b){
+  const map = new Map();
+  (a || []).concat(b || []).map(normalizeOfferV74).forEach(o => {
+    if(!o.insurer && !o.product) return;
+    map.set(o.id, o);
+  });
+  return Array.from(map.values());
+}
+
+function collectLegacyOffersV74(){
+  let all = [];
+  // DB/state offers mají nejvyšší prioritu, protože uživatel právě otevřel konkrétní poptávku.
+  all = all.concat(getDbOffersForActiveInquiryV75());
+
+  CASE_LEGACY_OFFER_KEYS_V74.forEach(key => {
+    const raw = localStorage.getItem(key);
+    const arr = safeJsonParseV74(raw, []);
+    if(Array.isArray(arr)) all = all.concat(arr);
+    else if(isOfferObjectMapV75(arr)) all = all.concat(convertDbOfferMapToArrayV75(arr));
+  });
+
+  const map = new Map();
+  all.map(normalizeOfferV74).forEach(o => {
+    if(!o.insurer && !o.product) return;
+    map.set(o.id, o);
+  });
+  return Array.from(map.values());
+}
+
+function migrateLegacyDataToActiveCaseV74(force){
+  const c = getOrCreateActiveCaseV74();
+  const dbOffers = getDbOffersForActiveInquiryV75();
+
+  // Při otevření DB případu vždy preferujeme skutečné nabídky z načtené poptávky.
+  if(dbOffers.length){
+    c.offers = mergeOffersByIdV75(dbOffers, c.offers || []);
+  } else if(force || !localStorage.getItem(CASE_MIGRATION_FLAG_V74)){
+    c.offers = mergeOffersByIdV75(c.offers || [], collectLegacyOffersV74());
+  }
+
+  const docIds = new Set((c.documents || []).map(d => d.id));
+  collectLegacyDocumentsV74().forEach(d => {
+    if(!docIds.has(d.id)){
+      c.documents.push(d);
+      docIds.add(d.id);
+    }
+  });
+
+  saveActiveCaseV74(c);
+  syncLegacyStoresFromCaseV74(c);
+  localStorage.setItem(CASE_MIGRATION_FLAG_V74, new Date().toISOString());
+  return c;
+}
+
+function syncLegacyStoresFromCaseV74(c){
+  // Nesaháme destruktivně na state.offers, protože původní DB modul používá objekt podle pojišťoven.
+  c = c || getOrCreateActiveCaseV74();
+  const offers = JSON.stringify(c.offers || []);
+  localStorage.setItem('astorie_unified_offers_v73', offers);
+  localStorage.setItem('astorie_case_offers_v72', offers);
+  localStorage.setItem('astorie_case_offers_v71', offers);
+  localStorage.setItem('astorie_case_documents_v70', JSON.stringify(c.documents || []));
+}
+
+function getOffersV72(){
+  const c = migrateLegacyDataToActiveCaseV74(false);
+  return c.offers || [];
+}
+
+function renderCaseCommandCenter(){
+  const c = migrateLegacyDataToActiveCaseV74(false);
+  const offers = getOffersV72();
+  const readiness = calculateCaseReadiness();
+  const missing = getMissingParts();
+
+  if(document.getElementById('caseCCClient')) document.getElementById('caseCCClient').textContent = c.clientName || 'Není vybrána žádná poptávka';
+  if(document.getElementById('caseCCMeta')) document.getElementById('caseCCMeta').textContent = [
+    c.businessType || 'typ činnosti není vyplněn',
+    c.id ? ('DB #' + c.id) : 'bez DB ID',
+    c.status || 'rozpracováno',
+    'stav workflow: ' + (typeof stageLabelV70 === 'function' ? stageLabelV70(localStorage.getItem('astorie_case_stage_v70') || c.workflowStage || 'draft') : (c.workflowStage || 'draft'))
+  ].join(' · ');
+
+  if(document.getElementById('caseCCReady')) document.getElementById('caseCCReady').textContent = readiness + '%';
+  if(document.getElementById('caseCCDocs')) document.getElementById('caseCCDocs').textContent = (c.documents || []).length;
+  if(document.getElementById('caseCCOffers')) document.getElementById('caseCCOffers').textContent = offers.length;
+  if(document.getElementById('caseCCMissing')) document.getElementById('caseCCMissing').textContent = missing.length ? missing.length : '0';
+
+  document.querySelectorAll('[data-case-step]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.caseStep === (localStorage.getItem('astorie_case_stage_v70') || c.workflowStage || 'draft'));
+  });
+  renderCaseEngineStatusV74();
+}
+
+function renderCaseEngineStatusV74(){
+  const c = migrateLegacyDataToActiveCaseV74(false);
+  const offers = getOffersV72();
+  if(document.getElementById('caseEngineCaseIdV74')) document.getElementById('caseEngineCaseIdV74').textContent = c.id || 'local';
+  if(document.getElementById('caseEngineOffersV74')) document.getElementById('caseEngineOffersV74').textContent = offers.length;
+  if(document.getElementById('caseEngineDocsV74')) document.getElementById('caseEngineDocsV74').textContent = (c.documents || []).length;
+  if(document.getElementById('caseEngineIntegrityV74')) document.getElementById('caseEngineIntegrityV74').textContent = 'OK';
+  if(document.getElementById('offerCaseBindingV74')){
+    document.getElementById('offerCaseBindingV74').innerHTML = `<div class="case-binding-card-v74"><b>Nabídky jsou načtené z aktivního obchodního případu:</b><span>${escapeHtml(c.clientName || 'bez klienta')} · ${escapeHtml(c.id || 'local')} · ${offers.length} nabídek</span></div>`;
+  }
+}
+
+function countOffersFromLocal(i){
+  try{
+    if(Array.isArray(i.offers)) return i.offers.length;
+    if(i.offers && typeof i.offers === 'object') return Object.keys(i.offers).length;
+    return 0;
+  }catch(e){ return 0; }
+}
+
+function getMissingParts(){
+  const c = migrateLegacyDataToActiveCaseV74(false);
+  const offers = getOffersV72();
+  const missing = [];
+  if(!c.clientName || c.clientName === 'Není vybrána žádná poptávka') missing.push('klient');
+  if(!c.businessType) missing.push('činnost');
+  if(!(c.documents || []).length) missing.push('dokumenty');
+  if(offers.length < 2) missing.push('min. 2 nabídky');
+  if(Object.values(c.checklist || {}).filter(Boolean).length < 4) missing.push('checklist');
+  return missing;
+}
+
+function calculateCaseReadiness(){
+  const c = migrateLegacyDataToActiveCaseV74(false);
+  const offers = getOffersV72();
+  const checkedCount = Object.values(c.checklist || {}).filter(Boolean).length;
+  let score = 0;
+  if(c.clientName && c.clientName !== 'Není vybrána žádná poptávka') score += 20;
+  if(c.businessType) score += 10;
+  if((c.documents || []).length > 0) score += 20;
+  if(offers.length > 0) score += 15;
+  if(offers.length >= 2) score += 15;
+  score += Math.min(20, checkedCount * 3);
+  return Math.min(100, score);
+}
+
+// Bezpečné napojení po načtení poptávky z DB.
+if(typeof applyState === 'function' && !window.__applyStateV75Wrapped){
+  window.__applyStateV75Wrapped = true;
+  const originalApplyStateV75 = applyState;
+  applyState = function(s){
+    originalApplyStateV75(s);
+    setTimeout(() => {
+      migrateLegacyDataToActiveCaseV74(true);
+      renderCaseCommandCenter();
+      if(typeof renderOffersWorkspaceV72 === 'function') renderOffersWorkspaceV72();
+      if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
+      if(typeof renderClientOutputStats === 'function') renderClientOutputStats();
+    }, 250);
+  };
+}
+
+function forceCaseMigrationV74(){
+  const c = migrateLegacyDataToActiveCaseV74(true);
+  renderCaseCommandCenter();
+  if(typeof renderCaseDocuments === 'function') renderCaseDocuments();
+  if(typeof renderOffersWorkspaceV72 === 'function') renderOffersWorkspaceV72();
+  if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
+  if(typeof renderClientOutputStats === 'function') renderClientOutputStats();
+  alert('Kontrola dokončena. V aktivním obchodním případu je načteno: ' + getOffersV72().length + ' nabídek.');
+}
+
+setTimeout(() => {
+  migrateLegacyDataToActiveCaseV74(true);
+  renderCaseCommandCenter();
+  if(typeof renderOffersWorkspaceV72 === 'function') renderOffersWorkspaceV72();
+  if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
+}, 700);
