@@ -4805,3 +4805,242 @@ if(typeof showView === 'function' && !window.__showViewV76Wrapped){
 }
 setTimeout(refreshProfessionalWorkflowV76, 500);
 setTimeout(refreshProfessionalWorkflowV76, 1500);
+
+// MVP 0.77 - Active Case Data Fix
+const ACTIVE_CASE_OFFERS_KEY_V77 = 'astorie_active_case_offers_v77';
+
+function isPlainObjectV77(v){ return v && typeof v === 'object' && !Array.isArray(v); }
+function getActiveCaseIdV77(){
+  try{
+    if(typeof state !== 'undefined'){
+      if(state.id) return String(state.id);
+      if(state.activeInquiry && (state.activeInquiry.id || state.activeInquiry.dbId)) return String(state.activeInquiry.id || state.activeInquiry.dbId);
+    }
+    const txt = document.body.innerText || '';
+    const m = txt.match(/DB\s*#?(\d+)/i);
+    if(m) return String(m[1]);
+  }catch(e){}
+  return localStorage.getItem('astorie_active_case_id_v77') || 'local';
+}
+function getActiveClientNameV77(){
+  try{
+    if(typeof state !== 'undefined'){
+      if(state.activeInquiry && state.activeInquiry.clientName) return state.activeInquiry.clientName;
+      if(state.form && state.form.clientName) return state.form.clientName;
+      if(state.clientName) return state.clientName;
+    }
+    const el = document.querySelector('#caseCCClient, #activeInquiryBanner h2, .active-inquiry-banner h2');
+    if(el && el.textContent.trim()) return el.textContent.trim().replace(/^#\d+\s*[–-]\s*/,'');
+  }catch(e){}
+  return 'Není vybrána žádná poptávka';
+}
+function getActiveActivityV77(){
+  try{
+    if(typeof state !== 'undefined'){
+      if(state.activeInquiry && (state.activeInquiry.businessType || state.activeInquiry.clientActivity)) return state.activeInquiry.businessType || state.activeInquiry.clientActivity;
+      if(state.form && state.form.clientActivity) return state.form.clientActivity;
+    }
+  }catch(e){}
+  return '';
+}
+function insurerDisplayNameV77(id){
+  try{
+    const list = (typeof CATALOG !== 'undefined' && CATALOG && Array.isArray(CATALOG.insurers)) ? CATALOG.insurers : [];
+    const item = list.find(i => String(i.id) === String(id) || String(i.code || '') === String(id) || String(i.short || '') === String(id));
+    if(item) return (item.short ? item.short + ' – ' : '') + item.name;
+  }catch(e){}
+  return String(id || '').toUpperCase();
+}
+function normalizeOfferV77(o, fallbackId){
+  o = o || {};
+  return {
+    id: o.id || fallbackId || ('offer-' + Date.now()),
+    insurer: o.insurer || o.company || o.pojistovna || o.insuranceCompany || o.name || '',
+    product: o.product || o.produkt || o.product_name || '',
+    premium: o.premium || o.price || o.pojistne || o.annualPremium || '',
+    limit: o.limit || o.mainLimit || o.coverageLimit || '',
+    deductible: o.deductible || o.spoluucast || '',
+    territory: o.territory || o.uzemi || '',
+    frequency: o.frequency || o.frekvence || '',
+    rating: o.rating || o.verdict || o.status || 'k ověření',
+    sublimits: o.sublimits || o.subLimits || '',
+    exclusions: o.exclusions || o.vyluky || '',
+    strengths: o.strengths || '',
+    weaknesses: o.weaknesses || '',
+    note: o.note || o.poznamka || '',
+    recommended: !!o.recommended,
+    updatedAt: o.updatedAt || new Date().toISOString()
+  };
+}
+function offerFromDbMapEntryV77(insurerId, dbOffer){
+  dbOffer = dbOffer || {};
+  const cov = isPlainObjectV77(dbOffer.coverages) ? Object.values(dbOffer.coverages) : [];
+  const limits = cov.map(c => c && c.limit).filter(Boolean).slice(0,5).join(', ');
+  const exclusions = cov.filter(c => String((c && c.state) || '').toLowerCase().includes('výluka') || String((c && c.state) || '').toLowerCase().includes('nesplněno'))
+    .map(c => [c.original, c.limit, c.note].filter(Boolean).join(' · ')).filter(Boolean).slice(0,8).join('\n');
+  const weaknesses = cov.filter(c => ['částečně','výluka','nesplněno','nevyhodnoceno'].includes(String((c && c.state) || '').toLowerCase()))
+    .map(c => [c.state, c.limit, c.note].filter(Boolean).join(' · ')).filter(Boolean).slice(0,8).join('\n');
+  const strengths = cov.filter(c => String((c && c.state) || '').toLowerCase() === 'splněno')
+    .map(c => [c.limit, c.source].filter(Boolean).join(' · ')).filter(Boolean).slice(0,8).join('\n');
+  return normalizeOfferV77({
+    id: 'db-' + getActiveCaseIdV77() + '-' + insurerId,
+    insurer: insurerDisplayNameV77(insurerId),
+    product: dbOffer.product || dbOffer.product_name || 'nabídka pojišťovny',
+    premium: dbOffer.premium || '',
+    limit: limits || '',
+    deductible: dbOffer.deductible || '',
+    territory: dbOffer.territory || '',
+    frequency: dbOffer.frequency || '',
+    rating: dbOffer.status || 'doručeno',
+    sublimits: limits || '',
+    exclusions: exclusions || '',
+    strengths: strengths || '',
+    weaknesses: weaknesses || '',
+    note: dbOffer.note || '',
+    recommended: !!dbOffer.recommended
+  }, 'db-' + getActiveCaseIdV77() + '-' + insurerId);
+}
+function getDbOffersActiveOnlyV77(){
+  try{
+    if(typeof state !== 'undefined' && isPlainObjectV77(state.offers)){
+      return Object.entries(state.offers).map(([id, val]) => offerFromDbMapEntryV77(id, val)).filter(o => o.insurer || o.product);
+    }
+    if(typeof state !== 'undefined' && Array.isArray(state.offers)){
+      return state.offers.map((o,i)=>normalizeOfferV77(o, o.id || ('state-' + getActiveCaseIdV77() + '-' + i))).filter(o => o.insurer || o.product);
+    }
+  }catch(e){}
+  return [];
+}
+function getEditedOffersForActiveCaseV77(){
+  const activeId = getActiveCaseIdV77() || 'local';
+  try{
+    const all = JSON.parse(localStorage.getItem(ACTIVE_CASE_OFFERS_KEY_V77) || '{}');
+    return Array.isArray(all[activeId]) ? all[activeId] : [];
+  }catch(e){ return []; }
+}
+function saveEditedOffersForActiveCaseV77(items){
+  const activeId = getActiveCaseIdV77() || 'local';
+  let all = {};
+  try{ all = JSON.parse(localStorage.getItem(ACTIVE_CASE_OFFERS_KEY_V77) || '{}') || {}; }catch(e){ all = {}; }
+  all[activeId] = (items || []).map(o => normalizeOfferV77(o, o.id));
+  localStorage.setItem(ACTIVE_CASE_OFFERS_KEY_V77, JSON.stringify(all));
+}
+function getOffersV72(){
+  const db = getDbOffersActiveOnlyV77();
+  const edited = getEditedOffersForActiveCaseV77();
+  const map = new Map();
+  db.forEach(o => map.set(o.id, o));
+  edited.forEach(o => { o = normalizeOfferV77(o, o.id); if(o.insurer || o.product) map.set(o.id, o); });
+  return Array.from(map.values());
+}
+function saveOffersV72(items){ saveEditedOffersForActiveCaseV77(items || []); refreshActiveCaseWorkflowV77(); }
+function openOfferEditorV72(id){
+  const box = document.getElementById('offerEditorV72'); if(!box) return;
+  const offer = id ? getOffersV72().find(o => o.id === id) : null;
+  const set = (suffix, value) => { const el = document.getElementById('offer' + suffix + 'V72'); if(el) el.value = value || ''; };
+  const title = document.getElementById('offerEditorTitleV72'); if(title) title.textContent = offer ? 'Upravit nabídku' : 'Nová nabídka';
+  const idEl = document.getElementById('offerEditIdV72'); if(idEl) idEl.value = offer ? offer.id : '';
+  set('Insurer', offer ? offer.insurer : ''); set('Product', offer ? offer.product : ''); set('Premium', offer ? offer.premium : '');
+  set('Limit', offer ? offer.limit : ''); set('Deductible', offer ? offer.deductible : ''); set('Territory', offer ? offer.territory : '');
+  set('Frequency', offer ? offer.frequency : ''); set('Rating', offer ? offer.rating : 'k ověření'); set('Sublimits', offer ? offer.sublimits : '');
+  set('Exclusions', offer ? offer.exclusions : ''); set('Strengths', offer ? offer.strengths : ''); set('Weaknesses', offer ? offer.weaknesses : '');
+  set('Note', offer ? offer.note : '');
+  box.classList.remove('hidden'); box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function saveOfferV72(){
+  const insurer = (document.getElementById('offerInsurerV72')?.value || '').trim();
+  if(!insurer){ alert('Doplňte pojišťovnu.'); document.getElementById('offerInsurerV72')?.focus(); return; }
+  const id = document.getElementById('offerEditIdV72')?.value || ('manual-' + getActiveCaseIdV77() + '-' + Date.now());
+  const current = getOffersV72();
+  const payload = normalizeOfferV77({
+    id, insurer,
+    product:(document.getElementById('offerProductV72')?.value || '').trim(),
+    premium:(document.getElementById('offerPremiumV72')?.value || '').trim(),
+    limit:(document.getElementById('offerLimitV72')?.value || '').trim(),
+    deductible:(document.getElementById('offerDeductibleV72')?.value || '').trim(),
+    territory:document.getElementById('offerTerritoryV72')?.value || '',
+    frequency:document.getElementById('offerFrequencyV72')?.value || '',
+    rating:document.getElementById('offerRatingV72')?.value || 'k ověření',
+    sublimits:(document.getElementById('offerSublimitsV72')?.value || '').trim(),
+    exclusions:(document.getElementById('offerExclusionsV72')?.value || '').trim(),
+    strengths:(document.getElementById('offerStrengthsV72')?.value || '').trim(),
+    weaknesses:(document.getElementById('offerWeaknessesV72')?.value || '').trim(),
+    note:(document.getElementById('offerNoteV72')?.value || '').trim()
+  }, id);
+  const idx = current.findIndex(o => o.id === id);
+  if(idx >= 0) current[idx] = payload; else current.unshift(payload);
+  saveEditedOffersForActiveCaseV77(current);
+  if(typeof closeOfferEditorV72 === 'function') closeOfferEditorV72();
+  refreshActiveCaseWorkflowV77();
+  alert('Nabídka byla uložena.');
+}
+function deleteOfferV72(id){ if(!confirm('Smazat nabídku z aktivního případu?')) return; saveEditedOffersForActiveCaseV77(getOffersV72().filter(o => o.id !== id)); refreshActiveCaseWorkflowV77(); }
+function recommendOfferV72(id){ saveEditedOffersForActiveCaseV77(getOffersV72().map(o => Object.assign({}, o, {recommended:o.id === id}))); refreshActiveCaseWorkflowV77(); }
+function duplicateOfferV72(id){
+  const offer = getOffersV72().find(o => o.id === id); if(!offer) return;
+  const copy = Object.assign({}, offer, {id:'manual-' + getActiveCaseIdV77() + '-' + Date.now(), insurer:offer.insurer + ' – kopie', recommended:false});
+  const items = getOffersV72(); items.unshift(copy); saveEditedOffersForActiveCaseV77(items); refreshActiveCaseWorkflowV77();
+}
+function calculateCaseReadiness(){
+  const offers = getOffersV72(); let score = 0;
+  if(getActiveClientNameV77() && getActiveClientNameV77() !== 'Není vybrána žádná poptávka') score += 25;
+  if(getActiveActivityV77()) score += 15;
+  if(offers.length > 0) score += 20;
+  if(offers.length >= 2) score += 25;
+  if(offers.some(o => o.recommended)) score += 15;
+  return Math.min(100, score);
+}
+function getMissingParts(){
+  const offers = getOffersV72(); const missing = [];
+  if(!getActiveClientNameV77() || getActiveClientNameV77() === 'Není vybrána žádná poptávka') missing.push('klient');
+  if(!getActiveActivityV77()) missing.push('činnost');
+  if(offers.length < 2) missing.push('min. 2 nabídky');
+  if(!offers.some(o => o.recommended)) missing.push('doporučená varianta');
+  return missing;
+}
+function renderCaseCommandCenter(){
+  const offers = getOffersV72(); const readiness = calculateCaseReadiness(); const missing = getMissingParts();
+  const set = (id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
+  set('caseCCClient', getActiveClientNameV77());
+  set('caseCCMeta', [getActiveActivityV77() || 'typ činnosti není vyplněn', getActiveCaseIdV77() ? ('DB #' + getActiveCaseIdV77()) : 'bez DB ID', 'rozpracováno', 'stav workflow: aktivní'].join(' · '));
+  set('caseCCReady', readiness + '%'); set('caseCCOffers', String(offers.length)); set('caseCCMissing', String(missing.length));
+}
+function professionalOfferWarningsV77(offer){
+  const w=[]; if(!offer.premium) w.push('chybí cena'); if(!offer.limit && !offer.sublimits) w.push('chybí limit'); if(!offer.exclusions) w.push('neověřené výluky'); return w;
+}
+function renderOfferComparisonV72(){
+  const box=document.getElementById('offerComparisonMatrixV72'); if(!box) return;
+  const offers=getOffersV72();
+  if(!offers.length){ box.innerHTML='<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>'; return; }
+  const rec=offers.find(o=>o.recommended); const warningCount=offers.reduce((s,o)=>s+professionalOfferWarningsV77(o).length,0);
+  const rows=[['Pojistné',o=>o.premium||'–'],['Limit / sublimity',o=>o.limit||o.sublimits||'–'],['Spoluúčast',o=>o.deductible||'–'],['Území',o=>o.territory||'–'],['Frekvence',o=>o.frequency||'–'],['Hodnocení',o=>o.rating||'–'],['Výluky / omezení',o=>o.exclusions||'nevyplněno'],['Silné stránky',o=>o.strengths||'nevyplněno'],['Slabá místa',o=>o.weaknesses||'nevyplněno']];
+  box.innerHTML = `<div class="unified-analysis-v73 case-analysis-v74"><div><p class="eyebrow">Makléřská analytika aktivní poptávky</p><h3>${rec?'Doporučená varianta: '+escapeHtml(rec.insurer):'Doporučená varianta zatím není vybraná'}</h3><p>${rec?'Doporučení se použije v klientském výstupu.':'V Nabídkách označte jednu variantu jako doporučenou.'}</p></div><div class="analysis-metrics-v73"><div><b>${offers.length}</b><span>nabídky</span></div><div><b>${warningCount}</b><span>upozornění</span></div><div><b>${rec?'ano':'ne'}</b><span>doporučení</span></div></div></div><div class="comparison-table-wrap-v72"><table class="comparison-table-v72"><thead><tr><th>Parametr</th>${offers.map(o=>`<th>${escapeHtml(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${escapeHtml(r[0])}</b></td>${offers.map(o=>`<td>${escapeHtml(r[1](o))}</td>`).join('')}<td>Ověřit proti potřebám klienta a pojistným podmínkám.</td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderOffersWorkspaceV72(){
+  if(typeof renderOffersV72 === 'function') renderOffersV72();
+  renderCaseCommandCenter();
+  const set=(id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
+  const offers=getOffersV72();
+  set('offerProCount', String(offers.length)); const rec=offers.find(o=>o.recommended); set('offerProRecommended', rec?rec.insurer:'–');
+  set('offerProWarnings', String(offers.reduce((s,o)=>s+professionalOfferWarningsV77(o).length,0)));
+  const bind=document.getElementById('offerCaseBindingV74');
+  if(bind) bind.innerHTML=`<div class="case-binding-card-v74"><b>Nabídky aktivní poptávky:</b><span>${escapeHtml(getActiveClientNameV77())} · DB #${escapeHtml(getActiveCaseIdV77() || 'bez DB')} · ${offers.length} nabídek</span></div>`;
+}
+function getClientCaseSummaryV71(){ const offers=getOffersV72(); return {active:{clientName:getActiveClientNameV77(),businessType:getActiveActivityV77(),clientActivity:getActiveActivityV77(),status:'rozpracováno'},docs:[],offers,readiness:calculateCaseReadiness(),missing:getMissingParts()}; }
+function renderAdvisorCockpitV76(){
+  const offers=getOffersV72(); const readiness=calculateCaseReadiness(); const missing=getMissingParts(); const set=(id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
+  set('cockpitClientV76', getActiveClientNameV77()); set('cockpitMetaV76', [(getActiveActivityV77() || 'typ činnosti není vyplněn'), offers.length + ' nabídek'].join(' · '));
+  set('cockpitReadinessV76', readiness + '%'); set('cockpitOffersV76', offers.length + ' nabídek'); set('cockpitComparisonV76', offers.length >= 2 ? 'připraveno' : 'čeká'); set('cockpitReportV76', offers.length >= 2 ? 'lze připravit' : 'čeká');
+  set('advisorNextTitleV76', offers.length >= 2 ? 'Připravte porovnání a doporučení' : 'Doplňte nabídky k aktivní poptávce');
+  set('advisorNextTextV76', offers.length >= 2 ? 'Vyberte doporučenou variantu a připravte klientský výstup.' : 'Pro porovnání jsou potřeba alespoň dvě nabídky.');
+  const warningsBox=document.getElementById('advisorWarningsV76'); if(warningsBox) warningsBox.innerHTML = missing.map(x=>`<span>⚠ ${escapeHtml(x)}</span>`).join('') || '<span class="ok">✓ Bez zásadních blokací</span>';
+}
+function buildClientPresentation(){
+  const data=getClientCaseSummaryV71(); const recText=(document.getElementById('clientRecommendation')?.value || '').trim(); const warnText=(document.getElementById('clientWarnings')?.value || '').trim(); const recOffer=(data.offers || []).find(o=>o.recommended); const preview=document.getElementById('clientPresentationPreview'); if(!preview) return;
+  preview.innerHTML = `<div class="client-preview-header"><div><p>ASTORIE a.s. · S lehkostí světem financí</p><h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2></div><strong>${escapeHtml(data.readiness)} % připravenost</strong></div><div class="client-preview-body"><section><h3>1. Klient</h3><p><b>${escapeHtml(data.active.clientName || '')}</b><br>${escapeHtml(data.active.businessType || 'typ činnosti není doplněn')}</p></section><section><h3>2. Nabídky</h3><p>Do porovnání jsou zahrnuty ${data.offers.length} nabídky.</p></section><section><h3>3. Doporučená varianta</h3><p>${recOffer ? escapeHtml(recOffer.insurer) : 'Doporučená varianta zatím není označena.'}</p></section><section><h3>4. Doporučení poradce</h3><p>${recText ? escapeHtml(recText) : 'Doplňte doporučení poradce.'}</p></section><section><h3>5. Upozornění pro klienta</h3><p>${warnText ? escapeHtml(warnText) : 'Doplňte upozornění na limity, výluky, sublimity a spoluúčasti.'}</p></section></div>`;
+}
+function copyClientOutput(){ buildClientPresentation(); const preview=document.getElementById('clientPresentationPreview'); if(!preview) return; navigator.clipboard?.writeText(preview.innerText || preview.textContent || ''); alert('Klientský výstup byl zkopírován.'); }
+function refreshActiveCaseWorkflowV77(){ renderCaseCommandCenter(); if(typeof renderOffersWorkspaceV72==='function') renderOffersWorkspaceV72(); if(typeof renderOfferComparisonV72==='function') renderOfferComparisonV72(); if(typeof renderAdvisorCockpitV76==='function') renderAdvisorCockpitV76(); if(typeof renderClientOutputStats==='function') renderClientOutputStats(); }
+if(typeof applyState === 'function' && !window.__applyStateV77Wrapped){ window.__applyStateV77Wrapped=true; const oldApplyStateV77=applyState; applyState=function(s){ oldApplyStateV77(s); localStorage.setItem('astorie_active_case_id_v77', getActiveCaseIdV77() || ''); setTimeout(refreshActiveCaseWorkflowV77,250); }; }
+if(typeof showView === 'function' && !window.__showViewV77Wrapped){ window.__showViewV77Wrapped=true; const oldShowViewV77=showView; showView=function(id){ oldShowViewV77(id); setTimeout(refreshActiveCaseWorkflowV77,180); }; }
+setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkflowV77,1400);

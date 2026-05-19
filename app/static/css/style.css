@@ -1508,3 +1508,8 @@ main{max-width:none;margin:0;padding:20px;}
 .case-engine-status-v74{display:none!important}.v73-hidden-legacy-comparison{display:none!important}
 @media(max-width:1200px){.cockpit-grid-v76{grid-template-columns:1fr 1fr}.advisor-next-v76{grid-template-columns:1fr}}
 @media(max-width:760px){.cockpit-hero-v76{flex-direction:column;align-items:stretch}.cockpit-grid-v76{grid-template-columns:1fr}}
+
+/* MVP 0.77 - Active Case Data Fix */
+.offer-cards-v72{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important}
+.comparison-table-wrap-v72{max-width:100%;overflow:auto}
+.client-output-workspace button,.offer-pro-workspace button{pointer-events:auto!important}

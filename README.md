@@ -198,3 +198,9 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Porovnání a klientský výstup používají stejný profesionální offer reader.
 - Potlačení technických/duplicitních bloků v poradenském UX.
 - Zachováno: ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.
+
+
+## MVP 0.77 – Active Case Data Fix
+- Opraveno falešné násobení nabídek: zrušeno přimíchávání všech starých localStorage dat a DOM fallbacku.
+- Nabídky se čtou pouze z aktivně načtené DB poptávky + ručních úprav uložených pod konkrétním DB ID.
+- Opraveno uložení úprav nabídky, doporučená varianta a tlačítka klientského výstupu.
