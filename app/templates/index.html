@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=750">
+  <link rel="stylesheet" href="/static/css/style.css?v=760">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">MVP 0.75 · DB-first Case Bridge</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">MVP 0.76 · Professional Advisor Cockpit</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
@@ -100,6 +100,47 @@
       </section>
 
       <section id="dashboardView" class="app-section">
+
+        <section class="panel advisor-cockpit-v76" id="advisorCockpitV76">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Pracovní kokpit poradce</p>
+              <h2>Co má poradce udělat teď</h2>
+              <p class="muted">Jedno místo pro orientaci: aktivní případ, nabídky, podklady, porovnání a klientský výstup.</p>
+            </div>
+            <button class="primary" type="button" onclick="goNextAdvisorStepV76()">Pokračovat v práci</button>
+          </div>
+
+          <div class="cockpit-hero-v76">
+            <div>
+              <span class="cockpit-label-v76">Aktivní klient</span>
+              <strong id="cockpitClientV76">Není vybrána žádná poptávka</strong>
+              <small id="cockpitMetaV76">Otevřete uloženou poptávku nebo založte novou.</small>
+            </div>
+            <div class="cockpit-score-v76">
+              <b id="cockpitReadinessV76">0%</b>
+              <span>připravenost</span>
+            </div>
+          </div>
+
+          <div class="cockpit-grid-v76">
+            <button type="button" onclick="showView('inquiryView')"><b>1. Poptávka</b><span id="cockpitDemandV76">klient a rizika</span></button>
+            <button type="button" onclick="showView('documentsView')"><b>2. Podklady</b><span id="cockpitDocsV76">0 dokumentů</span></button>
+            <button type="button" onclick="showView('offersView')"><b>3. Nabídky</b><span id="cockpitOffersV76">0 nabídek</span></button>
+            <button type="button" onclick="showView('comparisonView')"><b>4. Porovnání</b><span id="cockpitComparisonV76">čeká</span></button>
+            <button type="button" onclick="showView('reportView')"><b>5. Klientský výstup</b><span id="cockpitReportV76">připravit</span></button>
+          </div>
+
+          <div class="advisor-next-v76">
+            <div>
+              <p class="eyebrow">Doporučený další krok</p>
+              <h3 id="advisorNextTitleV76">Otevřete obchodní případ</h3>
+              <p id="advisorNextTextV76">Bez aktivního případu není možné správně připravit nabídky, porovnání ani klientský výstup.</p>
+            </div>
+            <div id="advisorWarningsV76" class="advisor-warnings-v76"></div>
+          </div>
+        </section>
+
 
         <section class="panel case-engine-status-v74">
           <div class="section-head">
@@ -1050,6 +1091,6 @@
 
   <div id="riskModal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><h2 id="modalTitle"></h2><div class="grid2"><label>Stav<select id="modalEnabled"><option value="true">Zahrnout do poptávky</option><option value="false">Vyřadit z poptávky</option></select></label><label>Limit<input id="modalLimit"></label></div><label>Otázka pro klienta<textarea id="modalQuestion"></textarea></label><label>Vysvětlení / popis<textarea id="modalDescription"></textarea></label><label>Důvod doporučení<textarea id="modalReason"></textarea></label><label>Poznámka pro klienta<textarea id="modalNote"></textarea></label><button id="saveRiskDetail" class="primary">Uložit detail rizika</button></div></div>
 
-  <script src="/static/js/app.js?v=750"></script>
+  <script src="/static/js/app.js?v=760"></script>
 </body>
 </html>

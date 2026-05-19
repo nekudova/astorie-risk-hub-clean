@@ -1490,3 +1490,21 @@ main{max-width:none;margin:0;padding:20px;}
   background:#f8fcfd;
   border-left-color:var(--petrol,#003D4C);
 }
+
+/* MVP 0.76 - Professional Advisor Cockpit */
+.advisor-cockpit-v76{border-left:7px solid var(--orange,#FC4C02);background:linear-gradient(180deg,#ffffff,#f8fcfd)}
+.cockpit-hero-v76{display:flex;justify-content:space-between;gap:20px;align-items:center;border:1px solid var(--line,#d7e5e9);border-radius:22px;background:linear-gradient(135deg,var(--petrol,#003D4C),#005C66);color:#fff;padding:24px;margin:14px 0}
+.cockpit-label-v76{display:block;color:#fff;opacity:.82;text-transform:uppercase;letter-spacing:.14em;font-weight:900;font-size:12px;margin-bottom:8px}
+.cockpit-hero-v76 strong{display:block;font-size:34px;line-height:1.05;color:#fff}.cockpit-hero-v76 small{display:block;margin-top:8px;color:#fff;opacity:.88;font-weight:800}
+.cockpit-score-v76{min-width:140px;text-align:center;border:1px solid rgba(255,255,255,.35);border-radius:18px;padding:16px;background:rgba(255,255,255,.12)}
+.cockpit-score-v76 b{display:block;font-size:34px;color:#fff}.cockpit-score-v76 span{color:#fff;opacity:.9;font-size:12px;text-transform:uppercase;font-weight:900}
+.cockpit-grid-v76{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.cockpit-grid-v76 button{border:1px solid var(--line,#d7e5e9);border-radius:18px;background:#fff;padding:16px;text-align:left;cursor:pointer;transition:.15s ease}
+.cockpit-grid-v76 button:hover{border-color:var(--orange,#FC4C02);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,61,76,.08)}
+.cockpit-grid-v76 b{display:block;color:var(--petrol,#003D4C);font-size:17px;margin-bottom:6px}.cockpit-grid-v76 span{display:block;color:var(--muted,#607882);font-weight:800;font-size:13px}
+.advisor-next-v76{display:grid;grid-template-columns:1.4fr .8fr;gap:14px;border:1px solid rgba(252,76,2,.22);border-left:6px solid var(--orange,#FC4C02);border-radius:18px;background:#fff8f5;padding:18px}
+.advisor-next-v76 h3{margin:4px 0 8px;color:var(--petrol,#003D4C);font-size:24px}.advisor-next-v76 p{margin:0;color:#214f5a;font-weight:800}
+.advisor-warnings-v76{display:flex;flex-direction:column;gap:8px}.advisor-warnings-v76 span{display:block;border:1px solid rgba(252,76,2,.2);border-radius:999px;background:#fff;color:#8d3c00;padding:8px 12px;font-weight:900}.advisor-warnings-v76 span.ok{color:#146b2e;border-color:#bde9c8}
+.case-engine-status-v74{display:none!important}.v73-hidden-legacy-comparison{display:none!important}
+@media(max-width:1200px){.cockpit-grid-v76{grid-template-columns:1fr 1fr}.advisor-next-v76{grid-template-columns:1fr}}
+@media(max-width:760px){.cockpit-hero-v76{flex-direction:column;align-items:stretch}.cockpit-grid-v76{grid-template-columns:1fr}}

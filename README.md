@@ -189,3 +189,12 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Souhrn, počítadla, porovnání a klientský výstup čtou stejné nabídky jako původní modul Nabídky.
 - state.offers už není destruktivně přepisován polem.
 - Technický Case Engine panel je skrytý v běžném poradenském UX.
+
+## MVP 0.76 – Professional Advisor Cockpit
+- Hloubková stabilizace workflow bez destruktivního zásahu do DB.
+- Přidán pracovní kokpit poradce: co má udělat teď, stav klienta, nabídky, podklady, připravenost.
+- Silnější bridge mezi DB nabídkami, Case Engine a localStorage.
+- Nabídky se načítají z více zdrojů: DB state.offers objekt, case store, legacy stores a nouzově i aktuálně vykreslené DB karty.
+- Porovnání a klientský výstup používají stejný profesionální offer reader.
+- Potlačení technických/duplicitních bloků v poradenském UX.
+- Zachováno: ARES, DB, Admin, odpovědnost, textace, dokumenty, PDF, klientský výstup.

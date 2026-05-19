@@ -4420,3 +4420,388 @@ setTimeout(() => {
   if(typeof renderOffersWorkspaceV72 === 'function') renderOffersWorkspaceV72();
   if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
 }, 700);
+
+// MVP 0.76 - Professional Advisor Cockpit + workflow stabilization
+const ASTORIE_VERSION_V76 = '0.76';
+
+function isPlainObjectV76(v){ return v && typeof v === 'object' && !Array.isArray(v); }
+function safeArrayV76(v){ return Array.isArray(v) ? v : []; }
+function normalizeMoneyNumberV76(value){
+  const s = String(value || '').replace(/\s/g,'').replace(/[^\d,.-]/g,'').replace(',', '.');
+  const n = Number(s);
+  return isFinite(n) ? n : 0;
+}
+function insurerDisplayNameV76(id){
+  try{
+    const list = (typeof CATALOG !== 'undefined' && CATALOG && Array.isArray(CATALOG.insurers)) ? CATALOG.insurers : [];
+    const item = list.find(i => String(i.id) === String(id) || String(i.code || '') === String(id) || String(i.short || '') === String(id));
+    if(item) return (item.short ? item.short + ' – ' : '') + item.name;
+  }catch(e){}
+  return String(id || '').toUpperCase();
+}
+function normalizeOfferAnyV76(o, fallbackId){
+  if(typeof normalizeOfferV74 === 'function'){
+    return normalizeOfferV74({
+      id: (o && o.id) || fallbackId,
+      insurer: (o && (o.insurer || o.company || o.pojistovna || o.insuranceCompany || o.name)) || '',
+      product: (o && (o.product || o.produkt || o.product_name)) || '',
+      premium: (o && (o.premium || o.price || o.pojistne || o.annualPremium)) || '',
+      limit: (o && (o.limit || o.mainLimit || o.coverageLimit)) || '',
+      deductible: (o && (o.deductible || o.spoluucast)) || '',
+      territory: (o && (o.territory || o.uzemi)) || '',
+      frequency: (o && (o.frequency || o.frekvence)) || '',
+      rating: (o && (o.rating || o.verdict || o.status)) || 'k ověření',
+      sublimits: (o && (o.sublimits || o.subLimits)) || '',
+      exclusions: (o && (o.exclusions || o.vyluky)) || '',
+      strengths: (o && o.strengths) || '',
+      weaknesses: (o && o.weaknesses) || '',
+      note: (o && (o.note || o.poznamka)) || '',
+      recommended: !!(o && o.recommended)
+    });
+  }
+  return {
+    id: (o && o.id) || fallbackId || ('offer-' + Date.now()),
+    insurer: (o && o.insurer) || '',
+    product: (o && o.product) || '',
+    premium: (o && o.premium) || '',
+    limit: (o && o.limit) || '',
+    deductible: (o && o.deductible) || '',
+    rating: (o && o.rating) || 'k ověření',
+    recommended: !!(o && o.recommended)
+  };
+}
+function offerFromDbMapEntryV76(insurerId, dbOffer){
+  dbOffer = dbOffer || {};
+  const cov = isPlainObjectV76(dbOffer.coverages) ? Object.values(dbOffer.coverages) : [];
+  const limits = cov.map(c => c && c.limit).filter(Boolean).slice(0,5).join(', ');
+  const exclusions = cov.filter(c => String((c && c.state) || '').toLowerCase().includes('výluka') || String((c && c.state) || '').toLowerCase().includes('nesplněno'))
+    .map(c => [c.original, c.limit, c.note].filter(Boolean).join(' · ')).filter(Boolean).join('\n');
+  const weaknesses = cov.filter(c => ['částečně','výluka','nesplněno','nevyhodnoceno'].includes(String((c && c.state) || '').toLowerCase()))
+    .map(c => [c.state, c.limit, c.note].filter(Boolean).join(' · ')).filter(Boolean).join('\n');
+  const strengths = cov.filter(c => String((c && c.state) || '').toLowerCase() === 'splněno')
+    .map(c => [c.limit, c.source].filter(Boolean).join(' · ')).filter(Boolean).join('\n');
+  return normalizeOfferAnyV76({
+    id: 'db-offer-' + insurerId,
+    insurer: insurerDisplayNameV76(insurerId),
+    product: dbOffer.product || dbOffer.product_name || 'nabídka pojišťovny',
+    premium: dbOffer.premium || '',
+    limit: limits || '',
+    deductible: dbOffer.deductible || '',
+    territory: dbOffer.territory || '',
+    frequency: dbOffer.frequency || '',
+    rating: dbOffer.status || 'doručeno',
+    sublimits: limits || '',
+    exclusions: exclusions || '',
+    strengths: strengths || '',
+    weaknesses: weaknesses || '',
+    note: dbOffer.note || '',
+    recommended: !!dbOffer.recommended
+  }, 'db-offer-' + insurerId);
+}
+function collectDbOffersV76(){
+  let out = [];
+  try{
+    if(typeof state !== 'undefined' && isPlainObjectV76(state.offers)){
+      Object.entries(state.offers).forEach(([id, val]) => out.push(offerFromDbMapEntryV76(id, val)));
+    }
+    if(typeof state !== 'undefined' && Array.isArray(state.offers)){
+      out = out.concat(state.offers.map((o,i)=>normalizeOfferAnyV76(o, (o && o.id) || 'state-offer-' + i)));
+    }
+  }catch(e){}
+  return out.filter(o => o.insurer || o.product);
+}
+function collectLocalOffersV76(){
+  const keys = ['astorie_case_engine_v74','astorie_unified_offers_v73','astorie_case_offers_v72','astorie_case_offers_v71','astorie_offers','offers','riskhub_offers'];
+  let out = [];
+  keys.forEach(k => {
+    try{
+      const raw = localStorage.getItem(k);
+      if(!raw) return;
+      const parsed = JSON.parse(raw);
+      if(k === 'astorie_case_engine_v74' && parsed && Array.isArray(parsed.cases)){
+        const activeId = parsed.activeCaseId;
+        const c = parsed.cases.find(x => String(x.id) === String(activeId)) || parsed.cases[0];
+        if(c && Array.isArray(c.offers)) out = out.concat(c.offers.map((o,i)=>normalizeOfferAnyV76(o, (o && o.id) || 'case-offer-' + i)));
+      }else if(Array.isArray(parsed)){
+        out = out.concat(parsed.map((o,i)=>normalizeOfferAnyV76(o, (o && o.id) || k + '-' + i)));
+      }else if(isPlainObjectV76(parsed)){
+        Object.entries(parsed).forEach(([id,val]) => out.push(offerFromDbMapEntryV76(id, val)));
+      }
+    }catch(e){}
+  });
+  return out.filter(o => o.insurer || o.product);
+}
+function collectDomOffersV76(){
+  const out = [];
+  try{
+    const offersView = document.getElementById('offersView') || document.body;
+    const candidates = offersView.querySelectorAll('h2,h3');
+    candidates.forEach((h, idx) => {
+      const txt = (h.textContent || '').trim();
+      if(!txt || !txt.includes('–')) return;
+      const lower = txt.toLowerCase();
+      if(lower.includes('nabídkový workspace') || lower.includes('aktivní')) return;
+      const card = h.closest('section, article, div') || h.parentElement;
+      const body = card ? (card.innerText || '') : txt;
+      const premiumMatch = body.match(/(\d[\d\s]{2,}\s*Kč)/);
+      out.push(normalizeOfferAnyV76({
+        id: 'dom-offer-' + idx + '-' + txt.slice(0,10),
+        insurer: txt,
+        premium: premiumMatch ? premiumMatch[1] : '',
+        rating: body.includes('doručeno') ? 'doručeno' : 'k ověření',
+        note: 'Načteno z aktuálně zobrazené DB nabídky.'
+      }, 'dom-offer-' + idx));
+    });
+  }catch(e){}
+  return out;
+}
+function getProfessionalOffersV76(){
+  const all = [].concat(collectDbOffersV76()).concat(collectLocalOffersV76()).concat(collectDomOffersV76());
+  const map = new Map();
+  all.forEach(o => {
+    o = normalizeOfferAnyV76(o, o.id);
+    if(!o.insurer && !o.product) return;
+    const key = o.id || (o.insurer + '|' + o.product + '|' + o.premium);
+    if(!map.has(key)) map.set(key, o);
+    else {
+      const prev = map.get(key);
+      map.set(key, Object.assign({}, prev, o, {recommended: prev.recommended || o.recommended}));
+    }
+  });
+  return Array.from(map.values());
+}
+function writeProfessionalOffersToCaseV76(){
+  const offers = getProfessionalOffersV76();
+  try{
+    if(typeof getOrCreateActiveCaseV74 === 'function' && typeof saveActiveCaseV74 === 'function'){
+      const c = getOrCreateActiveCaseV74();
+      const byId = new Map();
+      (c.offers || []).concat(offers).forEach(o => {
+        o = normalizeOfferAnyV76(o, o.id);
+        if(o.insurer || o.product) byId.set(o.id, o);
+      });
+      c.offers = Array.from(byId.values());
+      saveActiveCaseV74(c);
+      if(typeof syncLegacyStoresFromCaseV74 === 'function') syncLegacyStoresFromCaseV74(c);
+    }
+  }catch(e){
+    console.warn('V76 case sync failed', e);
+  }
+  return offers;
+}
+function getOffersV72(){
+  const offers = getProfessionalOffersV76();
+  if(offers.length) return offers;
+  try{
+    const c = typeof migrateLegacyDataToActiveCaseV74 === 'function' ? migrateLegacyDataToActiveCaseV74(false) : null;
+    return c && Array.isArray(c.offers) ? c.offers : [];
+  }catch(e){ return []; }
+}
+function getActiveClientNameV76(){
+  try{
+    if(typeof state !== 'undefined' && state.activeInquiry && state.activeInquiry.clientName) return state.activeInquiry.clientName;
+    if(typeof state !== 'undefined' && state.form && state.form.clientName) return state.form.clientName;
+    if(typeof state !== 'undefined' && state.clientName) return state.clientName;
+    const h = document.querySelector('#activeInquiryBanner h2, #caseCCClient');
+    if(h && h.textContent.trim()) return h.textContent.trim().replace(/^#\d+\s*[–-]\s*/,'');
+  }catch(e){}
+  return 'Není vybrána žádná poptávka';
+}
+function getActiveActivityV76(){
+  try{
+    if(typeof state !== 'undefined' && state.activeInquiry && (state.activeInquiry.businessType || state.activeInquiry.clientActivity)) return state.activeInquiry.businessType || state.activeInquiry.clientActivity;
+    if(typeof state !== 'undefined' && state.form && state.form.clientActivity) return state.form.clientActivity;
+  }catch(e){}
+  return '';
+}
+function calculateCaseReadiness(){
+  const offers = getOffersV72();
+  let docs = [];
+  let checklist = {};
+  try{
+    const c = typeof getOrCreateActiveCaseV74 === 'function' ? getOrCreateActiveCaseV74() : {};
+    docs = Array.isArray(c.documents) ? c.documents : [];
+    checklist = c.checklist || {};
+  }catch(e){}
+  let score = 0;
+  const client = getActiveClientNameV76();
+  const activity = getActiveActivityV76();
+  if(client && client !== 'Není vybrána žádná poptávka') score += 20;
+  if(activity) score += 10;
+  if(docs.length) score += 15;
+  if(offers.length) score += 20;
+  if(offers.length >= 2) score += 20;
+  score += Math.min(15, Object.values(checklist).filter(Boolean).length * 3);
+  return Math.min(100, score);
+}
+function getMissingParts(){
+  const offers = getOffersV72();
+  let docs = [];
+  let checklist = {};
+  try{
+    const c = typeof getOrCreateActiveCaseV74 === 'function' ? getOrCreateActiveCaseV74() : {};
+    docs = Array.isArray(c.documents) ? c.documents : [];
+    checklist = c.checklist || {};
+  }catch(e){}
+  const missing = [];
+  if(!getActiveClientNameV76() || getActiveClientNameV76() === 'Není vybrána žádná poptávka') missing.push('klient');
+  if(!getActiveActivityV76()) missing.push('činnost');
+  if(!docs.length) missing.push('dokumenty');
+  if(offers.length < 2) missing.push('min. 2 nabídky');
+  if(Object.values(checklist).filter(Boolean).length < 4) missing.push('checklist');
+  return missing;
+}
+function professionalOfferWarningsV76(offer){
+  const w = [];
+  if(!offer.premium) w.push('chybí cena');
+  if(!offer.limit && !offer.sublimits) w.push('chybí limit/sublimit');
+  if(!offer.exclusions) w.push('ověřit výluky');
+  if(String(offer.rating || '').toLowerCase().includes('nedoporu')) w.push('nedoporučená varianta');
+  return w;
+}
+function renderAdvisorCockpitV76(){
+  const offers = getOffersV72();
+  const readiness = calculateCaseReadiness();
+  const missing = getMissingParts();
+  const client = getActiveClientNameV76();
+  const activity = getActiveActivityV76();
+  let docs = [];
+  try{
+    const c = typeof getOrCreateActiveCaseV74 === 'function' ? getOrCreateActiveCaseV74() : {};
+    docs = Array.isArray(c.documents) ? c.documents : [];
+  }catch(e){}
+  const setText = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+  setText('cockpitClientV76', client || 'Není vybrána žádná poptávka');
+  setText('cockpitMetaV76', [activity || 'typ činnosti není vyplněn', offers.length + ' nabídek', docs.length + ' dokumentů'].join(' · '));
+  setText('cockpitReadinessV76', readiness + '%');
+  setText('cockpitDocsV76', docs.length + ' dokumentů');
+  setText('cockpitOffersV76', offers.length + ' nabídek');
+  setText('cockpitComparisonV76', offers.length >= 2 ? 'připraveno' : 'čeká na nabídky');
+  setText('cockpitReportV76', readiness >= 70 ? 'lze připravit' : 'doplnit podklady');
+  setText('cockpitDemandV76', client && client !== 'Není vybrána žádná poptávka' ? 'klient načten' : 'doplnit klienta');
+
+  let title = 'Pokračujte v práci na případu';
+  let text = 'Zkontrolujte podklady, nabídky a připravte porovnání.';
+  if(!client || client === 'Není vybrána žádná poptávka'){
+    title = 'Otevřete nebo založte obchodní případ';
+    text = 'Bez aktivního případu se nemají kam ukládat nabídky ani klientský výstup.';
+  }else if(offers.length < 1){
+    title = 'Doplňte nabídky pojišťoven';
+    text = 'Přejděte do Nabídek a vložte nebo zkontrolujte nabídky pojišťoven.';
+  }else if(offers.length < 2){
+    title = 'Doplňte alespoň druhou nabídku';
+    text = 'Pro kvalitní makléřské porovnání jsou vhodné alespoň dvě varianty.';
+  }else if(readiness < 70){
+    title = 'Zkontrolujte podklady a checklist';
+    text = 'Nabídky existují, ale případ ještě není dostatečně připravený pro klientský výstup.';
+  }else{
+    title = 'Připravte klientský výstup';
+    text = 'Případ má dost podkladů pro porovnání a profesionální doporučení klientovi.';
+  }
+  setText('advisorNextTitleV76', title);
+  setText('advisorNextTextV76', text);
+
+  const warningsBox = document.getElementById('advisorWarningsV76');
+  if(warningsBox){
+    const warningList = missing.slice(0,5).map(x => `<span>⚠ ${escapeHtml(x)}</span>`).join('');
+    warningsBox.innerHTML = warningList || '<span class="ok">✓ Bez zásadních blokací</span>';
+  }
+
+  setText('caseCCOffers', String(offers.length));
+  setText('caseCCReady', readiness + '%');
+  setText('caseCCMissing', String(missing.length));
+  setText('offerProCount', String(offers.length));
+  const rec = offers.find(o => o.recommended);
+  setText('offerProRecommended', rec ? rec.insurer : '–');
+  const premiums = offers.map(o => normalizeMoneyNumberV76(o.premium)).filter(Boolean);
+  setText('offerProBestPrice', premiums.length ? Math.min(...premiums).toLocaleString('cs-CZ') + ' Kč' : '–');
+  setText('offerProWarnings', String(offers.reduce((s,o)=>s+professionalOfferWarningsV76(o).length,0)));
+}
+function goNextAdvisorStepV76(){
+  const offers = getOffersV72();
+  const readiness = calculateCaseReadiness();
+  if(!getActiveClientNameV76() || getActiveClientNameV76() === 'Není vybrána žádná poptávka') return showView('inquiryView');
+  if(offers.length < 2) return showView('offersView');
+  if(readiness < 70) return showView('checklistView');
+  return showView('reportView');
+}
+function renderOfferComparisonV72(){
+  const box = document.getElementById('offerComparisonMatrixV72');
+  if(!box) return;
+  const offers = getOffersV72();
+  if(!offers.length){
+    box.innerHTML = '<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>';
+    return;
+  }
+  const rec = offers.find(o => o.recommended);
+  const rows = [
+    ['Pojistné', o => o.premium || '–'],
+    ['Limit / sublimity', o => o.limit || o.sublimits || '–'],
+    ['Spoluúčast', o => o.deductible || '–'],
+    ['Území', o => o.territory || '–'],
+    ['Frekvence', o => o.frequency || '–'],
+    ['Hodnocení', o => o.rating || '–'],
+    ['Výluky / omezení', o => o.exclusions || 'nevyplněno'],
+    ['Silné stránky', o => o.strengths || 'nevyplněno'],
+    ['Slabá místa', o => o.weaknesses || 'nevyplněno']
+  ];
+  const warningCount = offers.reduce((sum,o)=>sum+professionalOfferWarningsV76(o).length,0);
+  box.innerHTML = `
+    <div class="unified-analysis-v73 case-analysis-v74">
+      <div>
+        <p class="eyebrow">Makléřská analytika z aktivního případu</p>
+        <h3>${rec ? 'Doporučená varianta: ' + escapeHtml(rec.insurer) : 'Doporučená varianta zatím není vybraná'}</h3>
+        <p>${rec ? 'Doporučení je připravené pro klientský výstup.' : 'V sekci Nabídky označte jednu variantu jako doporučenou.'}</p>
+      </div>
+      <div class="analysis-metrics-v73">
+        <div><b>${offers.length}</b><span>nabídky</span></div>
+        <div><b>${warningCount}</b><span>upozornění</span></div>
+        <div><b>${rec ? 'ano' : 'ne'}</b><span>doporučení</span></div>
+      </div>
+    </div>
+    <div class="comparison-table-wrap-v72">
+      <table class="comparison-table-v72">
+        <thead><tr><th>Parametr</th>${offers.map(o=>`<th>${escapeHtml(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td><b>${escapeHtml(r[0])}</b></td>${offers.map(o=>`<td>${escapeHtml(r[1](o))}</td>`).join('')}<td>${typeof comparisonHintV72 === 'function' ? comparisonHintV72(r[0], offers) : 'Ověřit rozdíly v nabídce.'}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+function getClientCaseSummaryV71(){
+  const offers = getOffersV72();
+  let docs = [];
+  try{
+    const c = typeof getOrCreateActiveCaseV74 === 'function' ? getOrCreateActiveCaseV74() : {};
+    docs = Array.isArray(c.documents) ? c.documents : [];
+  }catch(e){}
+  return {
+    active: {clientName: getActiveClientNameV76(), businessType: getActiveActivityV76(), clientActivity: getActiveActivityV76(), status: 'rozpracováno'},
+    docs, offers, readiness: calculateCaseReadiness(), missing: getMissingParts()
+  };
+}
+function refreshProfessionalWorkflowV76(){
+  writeProfessionalOffersToCaseV76();
+  renderAdvisorCockpitV76();
+  if(typeof renderCaseCommandCenter === 'function') renderCaseCommandCenter();
+  if(typeof renderOffersV72 === 'function') renderOffersV72();
+  if(typeof renderOfferComparisonV72 === 'function') renderOfferComparisonV72();
+  if(typeof renderClientOutputStats === 'function') renderClientOutputStats();
+}
+if(typeof applyState === 'function' && !window.__applyStateV76Wrapped){
+  window.__applyStateV76Wrapped = true;
+  const originalApplyStateV76 = applyState;
+  applyState = function(s){
+    originalApplyStateV76(s);
+    setTimeout(refreshProfessionalWorkflowV76, 250);
+  };
+}
+if(typeof showView === 'function' && !window.__showViewV76Wrapped){
+  window.__showViewV76Wrapped = true;
+  const originalShowViewV76 = showView;
+  showView = function(id){
+    originalShowViewV76(id);
+    setTimeout(refreshProfessionalWorkflowV76, 160);
+  };
+}
+setTimeout(refreshProfessionalWorkflowV76, 500);
+setTimeout(refreshProfessionalWorkflowV76, 1500);
