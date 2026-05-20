@@ -7162,3 +7162,337 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
   setTimeout(boot, 3000);
 
 })();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.7.0
+// Case Workflow Professional
+// ============================================================
+(function(){
+
+  const STORAGE_KEY = 'brh270_cases';
+
+  function loadCases(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }catch(e){
+      return [];
+    }
+  }
+
+  function saveCases(data){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function ensureWorkflowRoot(){
+    const app =
+      document.getElementById('appView') ||
+      document.querySelector('.app-shell') ||
+      document.querySelector('main');
+
+    if(!app) return null;
+
+    let root = document.getElementById('brh270WorkflowRoot');
+
+    if(!root){
+      root = document.createElement('section');
+      root.id = 'brh270WorkflowRoot';
+      root.className = 'brh270-root';
+      app.appendChild(root);
+    }
+
+    return root;
+  }
+
+  function statusBadge(status){
+    const map = {
+      'Nový případ':'new',
+      'Rozpracováno':'progress',
+      'Odesláno pojišťovnám':'sent',
+      'Čekáme na nabídky':'waiting',
+      'Vyhodnocení':'evaluation',
+      'Doporučení klientovi':'recommendation',
+      'Uzavřeno':'done',
+      'Storno':'cancel'
+    };
+
+    return `<span class="brh270-badge ${map[status] || 'new'}">${status}</span>`;
+  }
+
+  function renderWorkflow(){
+    const root = ensureWorkflowRoot();
+    if(!root) return;
+
+    const cases = loadCases();
+
+    root.innerHTML = `
+      <section class="panel brh270-panel">
+
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Business Risk Hub 2.7.0</p>
+            <h2>Case Workflow Professional</h2>
+            <p class="muted">
+              Centrální brokerské workflow pro obchodní případy, nabídky, komunikaci a reporting.
+            </p>
+          </div>
+
+          <button class="primary" onclick="BRH270.openCaseForm()">
+            + Nový obchodní případ
+          </button>
+        </div>
+
+        <div class="brh270-dashboard">
+
+          <div class="brh270-stat">
+            <b>${cases.length}</b>
+            <span>Obchodní případy</span>
+          </div>
+
+          <div class="brh270-stat">
+            <b>${cases.filter(c=>c.status==='Rozpracováno').length}</b>
+            <span>Rozpracováno</span>
+          </div>
+
+          <div class="brh270-stat">
+            <b>${cases.filter(c=>c.status==='Čekáme na nabídky').length}</b>
+            <span>Čekáme na nabídky</span>
+          </div>
+
+          <div class="brh270-stat">
+            <b>${cases.filter(c=>c.status==='Uzavřeno').length}</b>
+            <span>Uzavřeno</span>
+          </div>
+
+        </div>
+
+        <div id="brh270FormWrap"></div>
+
+        <div class="brh270-case-list">
+          ${
+            cases.length
+            ? cases.map(c => `
+              <article class="brh270-case-card">
+
+                <div class="brh270-case-head">
+                  <div>
+                    ${statusBadge(c.status)}
+                    <h3>${c.client}</h3>
+                    <p>${c.company || ''}</p>
+                  </div>
+
+                  <div class="brh270-meta">
+                    <span>ID: ${c.id}</span>
+                    <span>Poradce: ${c.advisor}</span>
+                  </div>
+                </div>
+
+                <div class="brh270-grid">
+
+                  <div>
+                    <label>Typ rizika</label>
+                    <strong>${c.riskType}</strong>
+                  </div>
+
+                  <div>
+                    <label>Pojišťovny</label>
+                    <strong>${c.insurers}</strong>
+                  </div>
+
+                  <div>
+                    <label>Termín</label>
+                    <strong>${c.deadline}</strong>
+                  </div>
+
+                  <div>
+                    <label>Doporučení</label>
+                    <strong>${c.recommendation || 'Neurčeno'}</strong>
+                  </div>
+
+                </div>
+
+                <div class="brh270-notes">
+                  <label>Poznámka</label>
+                  <p>${c.note || 'Bez poznámky'}</p>
+                </div>
+
+                <div class="brh270-actions">
+                  <button class="secondary" onclick="BRH270.editCase('${c.id}')">Upravit</button>
+                  <button class="secondary" onclick="BRH270.changeStatus('${c.id}')">Změnit stav</button>
+                </div>
+
+              </article>
+            `).join('')
+            : `
+              <div class="textation-empty">
+                Zatím nejsou vytvořené žádné obchodní případy.
+              </div>
+            `
+          }
+        </div>
+
+      </section>
+    `;
+  }
+
+  function openCaseForm(existingId){
+
+    const wrap = document.getElementById('brh270FormWrap');
+    if(!wrap) return;
+
+    const cases = loadCases();
+    const item = cases.find(c => c.id === existingId);
+
+    wrap.innerHTML = `
+      <section class="brh270-form">
+
+        <h3>${item ? 'Úprava obchodního případu' : 'Nový obchodní případ'}</h3>
+
+        <div class="brh270-form-grid">
+
+          <label>
+            Klient
+            <input id="brh270Client" value="${item?.client || ''}">
+          </label>
+
+          <label>
+            Firma
+            <input id="brh270Company" value="${item?.company || ''}">
+          </label>
+
+          <label>
+            Poradce
+            <input id="brh270Advisor" value="${item?.advisor || ''}">
+          </label>
+
+          <label>
+            Typ rizika
+            <input id="brh270RiskType" value="${item?.riskType || ''}">
+          </label>
+
+          <label>
+            Pojišťovny
+            <input id="brh270Insurers" value="${item?.insurers || ''}">
+          </label>
+
+          <label>
+            Termín
+            <input type="date" id="brh270Deadline" value="${item?.deadline || ''}">
+          </label>
+
+          <label>
+            Stav
+            <select id="brh270Status">
+              ${
+                [
+                  'Nový případ',
+                  'Rozpracováno',
+                  'Odesláno pojišťovnám',
+                  'Čekáme na nabídky',
+                  'Vyhodnocení',
+                  'Doporučení klientovi',
+                  'Uzavřeno',
+                  'Storno'
+                ].map(s => `
+                  <option value="${s}" ${item?.status===s?'selected':''}>${s}</option>
+                `).join('')
+              }
+            </select>
+          </label>
+
+          <label>
+            Doporučení
+            <input id="brh270Recommendation" value="${item?.recommendation || ''}">
+          </label>
+
+        </div>
+
+        <label>
+          Poznámka
+          <textarea id="brh270Note">${item?.note || ''}</textarea>
+        </label>
+
+        <div class="brh270-actions">
+          <button class="primary" onclick="BRH270.saveCase('${item?.id || ''}')">
+            Uložit případ
+          </button>
+
+          <button class="secondary" onclick="document.getElementById('brh270FormWrap').innerHTML=''">
+            Zavřít
+          </button>
+        </div>
+
+      </section>
+    `;
+  }
+
+  function saveCase(existingId){
+
+    const cases = loadCases();
+
+    const data = {
+      id: existingId || ('CASE-' + Date.now()),
+      client: document.getElementById('brh270Client').value,
+      company: document.getElementById('brh270Company').value,
+      advisor: document.getElementById('brh270Advisor').value,
+      riskType: document.getElementById('brh270RiskType').value,
+      insurers: document.getElementById('brh270Insurers').value,
+      deadline: document.getElementById('brh270Deadline').value,
+      status: document.getElementById('brh270Status').value,
+      recommendation: document.getElementById('brh270Recommendation').value,
+      note: document.getElementById('brh270Note').value
+    };
+
+    const idx = cases.findIndex(c => c.id === data.id);
+
+    if(idx >= 0){
+      cases[idx] = data;
+    }else{
+      cases.unshift(data);
+    }
+
+    saveCases(cases);
+
+    document.getElementById('brh270FormWrap').innerHTML = '';
+
+    renderWorkflow();
+  }
+
+  function editCase(id){
+    openCaseForm(id);
+  }
+
+  function changeStatus(id){
+
+    const cases = loadCases();
+    const item = cases.find(c => c.id === id);
+
+    if(!item) return;
+
+    const next = prompt(
+      'Zadejte nový stav:',
+      item.status
+    );
+
+    if(!next) return;
+
+    item.status = next;
+
+    saveCases(cases);
+
+    renderWorkflow();
+  }
+
+  window.BRH270 = {
+    version: '2.7.0-case-workflow-professional',
+    renderWorkflow,
+    openCaseForm,
+    saveCase,
+    editCase,
+    changeStatus
+  };
+
+  setTimeout(renderWorkflow, 1000);
+
+})();
