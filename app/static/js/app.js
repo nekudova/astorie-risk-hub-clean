@@ -7496,3 +7496,209 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
   setTimeout(renderWorkflow, 1000);
 
 })();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.8.0
+// Comparison & Recommendation Engine
+// ============================================================
+(function(){
+
+  const STORAGE = 'brh280_offer_matrix';
+
+  const SAMPLE = [
+    {
+      insurer:'Allianz',
+      score:92,
+      premium:'148 500 Kč',
+      recommendation:'Doporučeno',
+      risks:{
+        odpovednost:'ok',
+        preruseni:'ok',
+        strojni:'warn',
+        cargo:'ok'
+      }
+    },
+    {
+      insurer:'Kooperativa',
+      score:87,
+      premium:'141 900 Kč',
+      recommendation:'Velmi dobré',
+      risks:{
+        odpovednost:'ok',
+        preruseni:'warn',
+        strojni:'ok',
+        cargo:'warn'
+      }
+    },
+    {
+      insurer:'Generali',
+      score:81,
+      premium:'133 000 Kč',
+      recommendation:'S omezeními',
+      risks:{
+        odpovednost:'ok',
+        preruseni:'fail',
+        strojni:'warn',
+        cargo:'ok'
+      }
+    }
+  ];
+
+  function ensureRoot(){
+    const app =
+      document.getElementById('appView') ||
+      document.querySelector('.app-shell') ||
+      document.querySelector('main');
+
+    if(!app) return null;
+
+    let root = document.getElementById('brh280Root');
+
+    if(!root){
+      root = document.createElement('section');
+      root.id = 'brh280Root';
+      root.className = 'brh280-root';
+      app.appendChild(root);
+    }
+
+    return root;
+  }
+
+  function icon(state){
+    if(state === 'ok') return '✅';
+    if(state === 'warn') return '⚠️';
+    return '❌';
+  }
+
+  function render(){
+
+    const root = ensureRoot();
+    if(!root) return;
+
+    root.innerHTML = `
+
+      <section class="panel brh280-panel">
+
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Business Risk Hub 2.8.0</p>
+            <h2>Comparison & Recommendation Engine</h2>
+            <p class="muted">
+              Profesionální makléřské porovnání nabídek a doporučení pro klienta.
+            </p>
+          </div>
+
+          <button class="primary">
+            Generovat klientský report
+          </button>
+        </div>
+
+        <div class="brh280-top-grid">
+
+          ${SAMPLE.map(item => `
+            <article class="brh280-score-card">
+
+              <div class="brh280-score-head">
+                <div>
+                  <h3>${item.insurer}</h3>
+                  <span>${item.recommendation}</span>
+                </div>
+
+                <div class="brh280-score">
+                  ${item.score}
+                </div>
+              </div>
+
+              <div class="brh280-price">
+                ${item.premium}
+              </div>
+
+            </article>
+          `).join('')}
+
+        </div>
+
+        <div class="brh280-table-wrap">
+
+          <table class="brh280-table">
+
+            <thead>
+              <tr>
+                <th>Riziko / parametr</th>
+                ${SAMPLE.map(s => `<th>${s.insurer}</th>`).join('')}
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>Odpovědnost</td>
+                ${SAMPLE.map(s => `<td>${icon(s.risks.odpovednost)}</td>`).join('')}
+              </tr>
+
+              <tr>
+                <td>Přerušení provozu</td>
+                ${SAMPLE.map(s => `<td>${icon(s.risks.preruseni)}</td>`).join('')}
+              </tr>
+
+              <tr>
+                <td>Strojní rizika</td>
+                ${SAMPLE.map(s => `<td>${icon(s.risks.strojni)}</td>`).join('')}
+              </tr>
+
+              <tr>
+                <td>Cargo / doprava</td>
+                ${SAMPLE.map(s => `<td>${icon(s.risks.cargo)}</td>`).join('')}
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="brh280-analysis-grid">
+
+          <section class="brh280-analysis-card">
+            <h3>Doporučení poradce</h3>
+
+            <p>
+              Na základě zadaných požadavků klienta doporučujeme variantu
+              <strong>Allianz</strong>, protože:
+            </p>
+
+            <ul>
+              <li>obsahuje nejširší rozsah krytí,</li>
+              <li>má nejlepší skóre rizik,</li>
+              <li>obsahuje rozšířené asistenční služby,</li>
+              <li>lépe pokrývá přerušení provozu.</li>
+            </ul>
+          </section>
+
+          <section class="brh280-analysis-card">
+            <h3>Risk Gap Analysis</h3>
+
+            <ul class="brh280-risk-list">
+              <li>⚠️ Generali – chybí plné krytí přerušení provozu</li>
+              <li>⚠️ Kooperativa – nižší cargo rozsah</li>
+              <li>⚠️ Allianz – doporučeno navýšení strojních limitů</li>
+            </ul>
+          </section>
+
+        </div>
+
+      </section>
+
+    `;
+  }
+
+  window.BRH280 = {
+    version:'2.8.0-comparison-recommendation-engine',
+    render
+  };
+
+  setTimeout(render, 1200);
+
+})();

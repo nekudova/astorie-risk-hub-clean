@@ -2141,3 +2141,132 @@ main{max-width:none;margin:0;padding:20px;}
   }
 
 }
+
+
+/* ============================================================
+   BRH 2.8.0
+   ============================================================ */
+
+.brh280-root{
+  margin-top:24px;
+}
+
+.brh280-panel{
+  border-left:7px solid #FC4C02;
+}
+
+.brh280-top-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin:24px 0;
+}
+
+.brh280-score-card{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:0 12px 30px rgba(0,61,76,.06);
+}
+
+.brh280-score-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.brh280-score-head h3{
+  margin:0 0 6px;
+  color:#003D4C;
+}
+
+.brh280-score-head span{
+  color:#607882;
+  font-weight:800;
+}
+
+.brh280-score{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:#003D4C;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  font-weight:900;
+}
+
+.brh280-price{
+  margin-top:20px;
+  font-size:28px;
+  font-weight:900;
+  color:#FC4C02;
+}
+
+.brh280-table-wrap{
+  overflow:auto;
+  margin:20px 0;
+}
+
+.brh280-table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.brh280-table th{
+  background:#003D4C;
+  color:#fff;
+  padding:14px;
+  text-align:left;
+}
+
+.brh280-table td{
+  padding:14px;
+  border-bottom:1px solid rgba(0,61,76,.08);
+  font-weight:800;
+}
+
+.brh280-analysis-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  margin-top:20px;
+}
+
+.brh280-analysis-card{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:22px;
+  padding:20px;
+}
+
+.brh280-analysis-card h3{
+  margin-top:0;
+  color:#003D4C;
+}
+
+.brh280-risk-list{
+  margin:0;
+  padding-left:18px;
+}
+
+.brh280-risk-list li{
+  margin-bottom:12px;
+  font-weight:700;
+  color:#214f5a;
+}
+
+@media(max-width:1000px){
+
+  .brh280-top-grid,
+  .brh280-analysis-grid{
+    grid-template-columns:1fr;
+  }
+
+}
