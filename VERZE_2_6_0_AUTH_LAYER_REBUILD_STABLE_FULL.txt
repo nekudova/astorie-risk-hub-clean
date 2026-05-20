@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub 2.6.0 – Auth Layer Rebuild Stable FULL
+Stabilní auth vrstva. Vychází z 2.5.0, ne z problematického 2.5.1/2.5.2 shell hacku.

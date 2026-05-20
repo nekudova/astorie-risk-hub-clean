@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub 2.1.0 – Workflow Engine FULL
+Plnohodnotný navazující balík nad 2.0.0 Core Data Foundation.

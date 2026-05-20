@@ -1,0 +1,31 @@
+{
+  "version": "2.2.0",
+  "entity": "offer_engine",
+  "rules": [
+    "offer must belong to case_id",
+    "offer risk must have risk_key",
+    "advisor recommendation is manual only",
+    "comparison is computed from offer_risks",
+    "client output must not include internal_note"
+  ],
+  "offer": {
+    "id": "string",
+    "case_id": "string",
+    "insurer_name": "string",
+    "product_name": "string",
+    "annual_premium": "string|number",
+    "deductible": "string|number",
+    "is_advisor_recommended": "boolean",
+    "offer_risks": "array"
+  },
+  "offer_risk": {
+    "risk_key": "string",
+    "risk_name": "string",
+    "requested_limit": "string|number",
+    "offered_limit": "string|number",
+    "coverage_status": "splněno|částečně|výluka|nutno_ověřit|nesplněno",
+    "source_reference": "string",
+    "advisor_note": "string",
+    "client_visible_note": "string"
+  }
+}

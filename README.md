@@ -204,3 +204,52 @@ UX cleanup: jeden pracovní panel obchodního případu, kompaktní workflow, od
 - Opraveno falešné násobení nabídek: zrušeno přimíchávání všech starých localStorage dat a DOM fallbacku.
 - Nabídky se čtou pouze z aktivně načtené DB poptávky + ručních úprav uložených pod konkrétním DB ID.
 - Opraveno uložení úprav nabídky, doporučená varianta a tlačítka klientského výstupu.
+
+
+# Business Risk Hub 1.0 – Core Stabilization
+
+## Co tato verze řeší
+- Jednotný aktivní obchodní případ jako hlavní zdroj pravdy.
+- Izolace nabídek podle konkrétního DB ID.
+- Zrušení nežádoucího míchání starých localStorage / fallback dat do aktivní poptávky.
+- Jednotný rebuild po každé změně.
+- Opravené napojení: nabídky → porovnání → zpráva.
+- Klientský výstup oddělený od interní analytiky.
+- Zachování stávajících modulů bez destruktivního zásahu.
+
+## Kontrolní test po nasazení
+1. V hlavičce se zobrazí `Business Risk Hub 1.0 · Core Stabilization`.
+2. Načíst DB poptávku.
+3. Počet nabídek musí odpovídat pouze této poptávce.
+4. Upravit nabídku a uložit.
+5. Porovnání musí převzít změnu.
+6. Zpráva musí převzít doporučenou variantu.
+
+
+## Business Risk Hub 1.0.1 – Case Identity + Risk Mapping Fix
+- Oprava aktivního klienta ve všech modulech.
+- Oprava mapování riziko + limit v nabídkách.
+
+
+## Business Risk Hub 1.0.2
+- Žádné automatické doporučení pojišťovny.
+- Deduplicitní výpis limitů.
+- Oprava rozpadlého risk preview layoutu.
+
+
+## Business Risk Hub 2.0.0 – Core Data Foundation
+Zachovává admin, dokumenty, textace a UI. Přidává nový datový model, SQL migraci, risk modely a runtime bridge.
+
+## Business Risk Hub 2.1.0 – Workflow Engine FULL
+
+Toto je opravená plná verze. Obsahuje celou aplikaci ze základu 2.0.0 a přidává workflow engine.
+Předchozí krátký ZIP byl pouze specifikační balíček, nikoli plnohodnotná verze k nasazení.
+
+## Business Risk Hub 2.2.0 – Offer Engine Foundation FULL
+
+Plná navazující verze nad 2.1.0. Přidává profesionální Offer Engine:
+- strukturované nabídky,
+- offer_risks,
+- validaci,
+- porovnání podle rizik,
+- ruční doporučení poradcem.

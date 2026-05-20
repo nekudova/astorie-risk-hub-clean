@@ -1,0 +1,65 @@
+{
+  "version": "2.1.0",
+  "workflow": [
+    {
+      "key": "new_case",
+      "label": "Nový případ",
+      "view": "dashboardView"
+    },
+    {
+      "key": "collecting_data",
+      "label": "Sběr podkladů",
+      "view": "documentsView"
+    },
+    {
+      "key": "insurers_selected",
+      "label": "Výběr pojišťoven",
+      "view": "adminView"
+    },
+    {
+      "key": "request_ready",
+      "label": "Poptávka připravena",
+      "view": "inquiryView"
+    },
+    {
+      "key": "request_sent",
+      "label": "Poptávka odeslána",
+      "view": "inquiryView"
+    },
+    {
+      "key": "waiting_offers",
+      "label": "Čekáme na nabídky",
+      "view": "offersView"
+    },
+    {
+      "key": "offers_received",
+      "label": "Nabídky přijaty",
+      "view": "offersView"
+    },
+    {
+      "key": "comparison_ready",
+      "label": "Porovnání",
+      "view": "comparisonView"
+    },
+    {
+      "key": "advisor_recommendation",
+      "label": "Doporučení poradce",
+      "view": "comparisonView"
+    },
+    {
+      "key": "client_output",
+      "label": "Klientský výstup",
+      "view": "reportView"
+    },
+    {
+      "key": "closed",
+      "label": "Uzavřeno",
+      "view": "dashboardView"
+    },
+    {
+      "key": "archived",
+      "label": "Archiv",
+      "view": "dashboardView"
+    }
+  ]
+}

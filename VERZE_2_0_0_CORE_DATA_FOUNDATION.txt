@@ -1,0 +1,4 @@
+ASTORIE Business Risk Hub 2.0.0 – Core Data Foundation
+První fáze přestavby na profesionální brokerský operační systém.
+Zachováno: admin, dokumenty, textace, stávající UI.
+Přidáno: datový model, risk modely, SQL migrace, runtime bridge.

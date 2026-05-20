@@ -5044,3 +5044,2764 @@ function refreshActiveCaseWorkflowV77(){ renderCaseCommandCenter(); if(typeof re
 if(typeof applyState === 'function' && !window.__applyStateV77Wrapped){ window.__applyStateV77Wrapped=true; const oldApplyStateV77=applyState; applyState=function(s){ oldApplyStateV77(s); localStorage.setItem('astorie_active_case_id_v77', getActiveCaseIdV77() || ''); setTimeout(refreshActiveCaseWorkflowV77,250); }; }
 if(typeof showView === 'function' && !window.__showViewV77Wrapped){ window.__showViewV77Wrapped=true; const oldShowViewV77=showView; showView=function(id){ oldShowViewV77(id); setTimeout(refreshActiveCaseWorkflowV77,180); }; }
 setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkflowV77,1400);
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 1.0 - Core Stabilization
+// ============================================================
+// Stabilizační vrstva: jeden aktivní case, izolace dat podle DB ID,
+// jednotný rebuild po každé změně, bez destruktivního mazání starých dat.
+
+(function(){
+  const VERSION = '1.0.0-core-stabilization';
+  const STORE_KEY = 'brh1_case_store';
+  const ACTIVE_KEY = 'brh1_active_case_id';
+  const EDITED_OFFERS_KEY = 'brh1_edited_offers_by_case';
+  const DOCS_KEY = 'brh1_documents_by_case';
+  const REPORT_KEY = 'brh1_report_by_case';
+
+  const $ = (id) => document.getElementById(id);
+  const text = (id, value) => { const el = $(id); if(el) el.textContent = value; };
+  const html = (id, value) => { const el = $(id); if(el) el.innerHTML = value; };
+  const esc = (v) => {
+    if(typeof escapeHtml === 'function') return escapeHtml(v);
+    return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  };
+  const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+  const parse = (raw, fb) => { try { return raw ? JSON.parse(raw) : fb; } catch(e){ return fb; } };
+  const moneyNum = (v) => {
+    const s = String(v || '').replace(/\s/g,'').replace(/[^\d,.-]/g,'').replace(',','.');
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  function readMap(key){
+    return parse(localStorage.getItem(key), {});
+  }
+  function writeMap(key, obj){
+    localStorage.setItem(key, JSON.stringify(obj || {}));
+  }
+
+  function currentCaseId(){
+    try{
+      if(typeof state !== 'undefined'){
+        if(state.id) return String(state.id);
+        if(state.activeInquiry && (state.activeInquiry.id || state.activeInquiry.dbId)) return String(state.activeInquiry.id || state.activeInquiry.dbId);
+        if(state.form && (state.form.id || state.form.dbId)) return String(state.form.id || state.form.dbId);
+      }
+    }catch(e){}
+    const body = document.body ? (document.body.innerText || '') : '';
+    const m = body.match(/DB\s*#?(\d+)/i);
+    if(m) return String(m[1]);
+    return localStorage.getItem(ACTIVE_KEY) || 'local';
+  }
+
+  function currentClient(){
+    try{
+      if(typeof state !== 'undefined'){
+        if(state.activeInquiry && state.activeInquiry.clientName) return state.activeInquiry.clientName;
+        if(state.form && state.form.clientName) return state.form.clientName;
+        if(state.clientName) return state.clientName;
+        if(state.form && state.form.companyName) return state.form.companyName;
+      }
+    }catch(e){}
+    const activeBanner = document.querySelector('#activeInquiryBanner h2, .active-inquiry-banner h2, #caseCCClient');
+    const t = activeBanner ? activeBanner.textContent.trim() : '';
+    if(t && !/není vybrána/i.test(t)) return t.replace(/^#\d+\s*[–-]\s*/,'');
+    return 'Není vybrána žádná poptávka';
+  }
+
+  function currentActivity(){
+    try{
+      if(typeof state !== 'undefined'){
+        if(state.activeInquiry && (state.activeInquiry.businessType || state.activeInquiry.clientActivity)) return state.activeInquiry.businessType || state.activeInquiry.clientActivity;
+        if(state.form && (state.form.businessType || state.form.clientActivity)) return state.form.businessType || state.form.clientActivity;
+        if(state.businessType) return state.businessType;
+      }
+    }catch(e){}
+    return '';
+  }
+
+  function insurerName(id){
+    try{
+      const list = (typeof CATALOG !== 'undefined' && CATALOG && Array.isArray(CATALOG.insurers)) ? CATALOG.insurers : [];
+      const found = list.find(i => String(i.id) === String(id) || String(i.code || '') === String(id) || String(i.short || '') === String(id));
+      if(found) return (found.short ? found.short + ' – ' : '') + found.name;
+    }catch(e){}
+    return String(id || '').toUpperCase();
+  }
+
+  function normalizeOffer(o, fallbackId){
+    o = o || {};
+    return {
+      id: o.id || fallbackId || ('offer-' + Date.now()),
+      insurer: o.insurer || o.company || o.pojistovna || o.insuranceCompany || o.name || '',
+      product: o.product || o.produkt || o.product_name || 'nabídka pojišťovny',
+      premium: o.premium || o.price || o.pojistne || o.annualPremium || '',
+      limit: o.limit || o.mainLimit || o.coverageLimit || '',
+      deductible: o.deductible || o.spoluucast || '',
+      territory: o.territory || o.uzemi || '',
+      frequency: o.frequency || o.frekvence || '',
+      rating: o.rating || o.verdict || o.status || 'k ověření',
+      sublimits: o.sublimits || o.subLimits || '',
+      exclusions: o.exclusions || o.vyluky || '',
+      strengths: o.strengths || '',
+      weaknesses: o.weaknesses || '',
+      note: o.note || o.poznamka || '',
+      recommended: !!o.recommended,
+      updatedAt: o.updatedAt || new Date().toISOString(),
+      source: o.source || 'active-case'
+    };
+  }
+
+  function offerFromDb(insurerId, dbOffer){
+    dbOffer = dbOffer || {};
+    const cov = isObj(dbOffer.coverages) ? Object.values(dbOffer.coverages) : [];
+    const limits = cov.map(c => c && c.limit).filter(Boolean).slice(0,6).join(', ');
+    const exclusions = cov.filter(c => /výluka|nesplněno/i.test(String(c && c.state || '')))
+      .map(c => [c.original, c.limit, c.note].filter(Boolean).join(' · '))
+      .filter(Boolean).slice(0,8).join('\n');
+    const weak = cov.filter(c => /částečně|výluka|nesplněno|nevyhodnoceno/i.test(String(c && c.state || '')))
+      .map(c => [c.state, c.limit, c.note].filter(Boolean).join(' · '))
+      .filter(Boolean).slice(0,8).join('\n');
+    const strong = cov.filter(c => String(c && c.state || '').toLowerCase() === 'splněno')
+      .map(c => [c.limit, c.source].filter(Boolean).join(' · '))
+      .filter(Boolean).slice(0,8).join('\n');
+    const id = 'db-' + currentCaseId() + '-' + insurerId;
+    return normalizeOffer({
+      id,
+      insurer: insurerName(insurerId),
+      product: dbOffer.product || dbOffer.product_name || 'nabídka pojišťovny',
+      premium: dbOffer.premium || '',
+      limit: limits || '',
+      deductible: dbOffer.deductible || '',
+      territory: dbOffer.territory || '',
+      frequency: dbOffer.frequency || '',
+      rating: dbOffer.status || 'doručeno',
+      sublimits: limits || '',
+      exclusions,
+      weaknesses: weak,
+      strengths: strong,
+      note: dbOffer.note || '',
+      recommended: !!dbOffer.recommended,
+      source: 'db-active'
+    }, id);
+  }
+
+  function readDbOffers(){
+    try{
+      if(typeof state !== 'undefined' && isObj(state.offers)){
+        return Object.entries(state.offers).map(([id, o]) => offerFromDb(id, o)).filter(o => o.insurer || o.product);
+      }
+      if(typeof state !== 'undefined' && Array.isArray(state.offers)){
+        return state.offers.map((o,i) => normalizeOffer(o, o.id || ('db-array-' + currentCaseId() + '-' + i))).filter(o => o.insurer || o.product);
+      }
+    }catch(e){}
+    return [];
+  }
+
+  function readEditedOffers(){
+    const id = currentCaseId();
+    const all = readMap(EDITED_OFFERS_KEY);
+    return Array.isArray(all[id]) ? all[id].map((o,i)=>normalizeOffer(o, o.id || ('edited-' + id + '-' + i))) : [];
+  }
+
+  function writeEditedOffers(offers){
+    const id = currentCaseId();
+    const all = readMap(EDITED_OFFERS_KEY);
+    all[id] = (offers || []).map(o => normalizeOffer(o, o.id));
+    writeMap(EDITED_OFFERS_KEY, all);
+  }
+
+  function readDocs(){
+    const id = currentCaseId();
+    const all = readMap(DOCS_KEY);
+    return Array.isArray(all[id]) ? all[id] : [];
+  }
+
+  function readReport(){
+    const id = currentCaseId();
+    const all = readMap(REPORT_KEY);
+    return all[id] || {};
+  }
+
+  function writeReport(report){
+    const id = currentCaseId();
+    const all = readMap(REPORT_KEY);
+    all[id] = Object.assign({}, all[id] || {}, report || {}, {updatedAt:new Date().toISOString()});
+    writeMap(REPORT_KEY, all);
+  }
+
+  function activeOffers(){
+    const db = readDbOffers();
+    const edited = readEditedOffers();
+    const map = new Map();
+
+    // DB = základ konkrétního případu, edited = překryv jen pro stejný case
+    db.forEach(o => map.set(o.id, o));
+    edited.forEach(o => {
+      o = normalizeOffer(o, o.id);
+      if(o.insurer || o.product) map.set(o.id, o);
+    });
+
+    return Array.from(map.values());
+  }
+
+  function missingParts(){
+    const offers = activeOffers();
+    const docs = readDocs();
+    const out = [];
+    if(!currentClient() || /není vybrána/i.test(currentClient())) out.push('klient');
+    if(!currentActivity()) out.push('typ činnosti');
+    if(offers.length < 1) out.push('nabídky');
+    if(offers.length < 2) out.push('alespoň 2 nabídky');
+    if(!offers.some(o=>o.recommended)) out.push('doporučená varianta');
+    if(!docs.length) out.push('podklady / dokumenty');
+    return out;
+  }
+
+  function readiness(){
+    const offers = activeOffers();
+    const docs = readDocs();
+    let score = 0;
+    if(currentClient() && !/není vybrána/i.test(currentClient())) score += 25;
+    if(currentActivity()) score += 15;
+    if(offers.length >= 1) score += 20;
+    if(offers.length >= 2) score += 15;
+    if(offers.some(o=>o.recommended)) score += 15;
+    if(docs.length) score += 10;
+    return Math.min(100, score);
+  }
+
+  function warningsForOffer(o){
+    const w = [];
+    if(!o.premium) w.push('chybí pojistné');
+    if(!o.limit && !o.sublimits) w.push('chybí limit');
+    if(!o.exclusions) w.push('neověřené výluky');
+    if(/výluka|nedoporu/i.test(String(o.rating))) w.push('rizikové hodnocení');
+    return w;
+  }
+
+  function bestPrice(){
+    const values = activeOffers().map(o=>moneyNum(o.premium)).filter(Boolean);
+    return values.length ? Math.min(...values).toLocaleString('cs-CZ') + ' Kč' : '–';
+  }
+
+  function activeCase(){
+    const offers = activeOffers();
+    return {
+      id: currentCaseId(),
+      clientName: currentClient(),
+      activity: currentActivity(),
+      offers,
+      documents: readDocs(),
+      report: readReport(),
+      readiness: readiness(),
+      missing: missingParts(),
+      recommended: offers.find(o=>o.recommended) || null,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function persistSnapshot(){
+    const store = readMap(STORE_KEY);
+    const c = activeCase();
+    store[c.id] = c;
+    writeMap(STORE_KEY, store);
+    localStorage.setItem(ACTIVE_KEY, c.id);
+    return c;
+  }
+
+  function updateTopPanels(){
+    const c = activeCase();
+    const offerWarnings = c.offers.reduce((s,o)=>s+warningsForOffer(o).length,0);
+
+    text('brh1Client', c.clientName);
+    text('brh1Meta', [c.activity || 'typ činnosti není vyplněn', 'DB #' + c.id, c.offers.length + ' nabídek'].join(' · '));
+    text('brh1Score', c.readiness + '%');
+    text('brh1Offers', String(c.offers.length));
+    text('brh1Docs', String(c.documents.length));
+    text('brh1Recommended', c.recommended ? 'ano' : 'ne');
+    text('brh1Missing', String(c.missing.length));
+
+    text('caseCCClient', c.clientName);
+    text('caseCCMeta', [c.activity || 'typ činnosti není vyplněn', 'DB #' + c.id, 'rozpracováno', 'stav workflow: aktivní'].join(' · '));
+    text('caseCCReady', c.readiness + '%');
+    text('caseCCDocs', String(c.documents.length));
+    text('caseCCOffers', String(c.offers.length));
+    text('caseCCMissing', String(c.missing.length));
+
+    text('offerProCount', String(c.offers.length));
+    text('offerProRecommended', c.recommended ? c.recommended.insurer : '–');
+    text('offerProBestPrice', bestPrice());
+    text('offerProWarnings', String(offerWarnings));
+
+    const warnings = $('brh1Warnings');
+    if(warnings){
+      warnings.innerHTML = c.missing.length ? c.missing.map(x=>`<span>⚠ ${esc(x)}</span>`).join('') : '<span class="ok">✓ Případ je připravený k dalšímu kroku</span>';
+    }
+
+    let title = 'Pokračujte v práci na případu';
+    let note = 'Zkontrolujte nabídky, porovnání a klientský výstup.';
+    if(/není vybrána/i.test(c.clientName)){
+      title = 'Otevřete nebo založte obchodní případ';
+      note = 'Všechny části aplikace se budou vázat na aktivní případ.';
+    }else if(c.offers.length < 1){
+      title = 'Doplňte nabídky pojišťoven';
+      note = 'Bez nabídek nelze připravit porovnání ani klientskou zprávu.';
+    }else if(c.offers.length < 2){
+      title = 'Doplňte druhou nabídku';
+      note = 'Pro relevantní makléřské porovnání je potřeba alespoň dvojice nabídek.';
+    }else if(!c.recommended){
+      title = 'Vyberte doporučenou variantu';
+      note = 'Doporučená varianta se propíše do klientského výstupu.';
+    }else if(c.readiness < 80){
+      title = 'Zkontrolujte podklady a upozornění';
+      note = 'Doplňte chybějící informace před finálním výstupem.';
+    }else{
+      title = 'Připravte klientský výstup';
+      note = 'Případ je připravený pro profesionální shrnutí klientovi.';
+    }
+    text('brh1NextTitle', title);
+    text('brh1NextText', note);
+
+    document.querySelectorAll('[data-brh-step]').forEach(btn => {
+      const step = btn.getAttribute('data-brh-step');
+      const active = (c.offers.length < 1 && step === 'offers') ||
+                     (c.offers.length >= 1 && c.offers.length < 2 && step === 'offers') ||
+                     (c.offers.length >= 2 && !c.recommended && step === 'comparison') ||
+                     (c.recommended && step === 'report');
+      btn.classList.toggle('active', active);
+    });
+
+    const bind = $('offerCaseBindingV74');
+    if(bind){
+      bind.innerHTML = `<div class="case-binding-card-v74"><b>Nabídky aktivního obchodního případu:</b><span>${esc(c.clientName)} · DB #${esc(c.id)} · ${c.offers.length} nabídek</span></div>`;
+    }
+  }
+
+  function renderComparison(){
+    const box = $('offerComparisonMatrixV72');
+    if(!box) return;
+    const c = activeCase();
+    if(!c.offers.length){
+      box.innerHTML = '<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>';
+      return;
+    }
+    const rows = [
+      ['Pojistné', o => o.premium || '–'],
+      ['Limit / sublimity', o => o.limit || o.sublimits || '–'],
+      ['Spoluúčast', o => o.deductible || '–'],
+      ['Území', o => o.territory || '–'],
+      ['Frekvence', o => o.frequency || '–'],
+      ['Hodnocení', o => o.rating || '–'],
+      ['Výluky / omezení', o => o.exclusions || 'nevyplněno'],
+      ['Silné stránky', o => o.strengths || 'nevyplněno'],
+      ['Slabá místa', o => o.weaknesses || 'nevyplněno']
+    ];
+    const warns = c.offers.reduce((s,o)=>s+warningsForOffer(o).length,0);
+    box.innerHTML = `
+      <div class="unified-analysis-v73 case-analysis-v74 brh1-analysis">
+        <div>
+          <p class="eyebrow">Makléřská analytika aktivního případu</p>
+          <h3>${c.recommended ? 'Doporučená varianta: ' + esc(c.recommended.insurer) : 'Doporučená varianta zatím není vybraná'}</h3>
+          <p>${c.recommended ? 'Doporučení se propíše do klientského výstupu.' : 'V Nabídkách označte jednu variantu jako doporučenou.'}</p>
+        </div>
+        <div class="analysis-metrics-v73">
+          <div><b>${c.offers.length}</b><span>nabídky</span></div>
+          <div><b>${warns}</b><span>upozornění</span></div>
+          <div><b>${c.recommended ? 'ano' : 'ne'}</b><span>doporučení</span></div>
+        </div>
+      </div>
+      <div class="comparison-table-wrap-v72">
+        <table class="comparison-table-v72">
+          <thead>
+            <tr><th>Parametr</th>${c.offers.map(o=>`<th>${esc(o.insurer)}${o.recommended ? ' ⭐' : ''}</th>`).join('')}<th>Makléřská poznámka</th></tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `<tr><td><b>${esc(r[0])}</b></td>${c.offers.map(o=>`<td>${esc(r[1](o))}</td>`).join('')}<td>Ověřit podle potřeb klienta, rozsahu činnosti a VPP/DPP/ZPP.</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderClientReport(){
+    const preview = $('clientPresentationPreview');
+    if(!preview) return;
+    const c = activeCase();
+    const recText = ($('clientRecommendation')?.value || c.report.recommendation || '').trim();
+    const warnText = ($('clientWarnings')?.value || c.report.warnings || '').trim();
+
+    preview.innerHTML = `
+      <div class="client-preview-header brh1-client-header">
+        <div>
+          <p>ASTORIE a.s. · Business Risk Hub</p>
+          <h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2>
+        </div>
+        <strong>${c.readiness}% připravenost</strong>
+      </div>
+      <div class="client-preview-body brh1-client-body">
+        <section>
+          <h3>1. Identifikace klienta</h3>
+          <table>
+            <tr><td>Klient</td><td><b>${esc(c.clientName)}</b></td></tr>
+            <tr><td>Činnost / typ klienta</td><td>${esc(c.activity || 'není doplněno')}</td></tr>
+            <tr><td>Počet porovnaných nabídek</td><td>${c.offers.length}</td></tr>
+          </table>
+        </section>
+        <section>
+          <h3>2. Přehled nabídek</h3>
+          <table>
+            <thead><tr><th>Pojišťovna</th><th>Pojistné</th><th>Limit</th><th>Hodnocení</th><th>Doporučení</th></tr></thead>
+            <tbody>
+              ${c.offers.map(o => `<tr><td>${esc(o.insurer)}</td><td>${esc(o.premium || '–')}</td><td>${esc(o.limit || o.sublimits || '–')}</td><td>${esc(o.rating || 'k ověření')}</td><td>${o.recommended ? 'doporučená varianta' : 'alternativa'}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </section>
+        <section>
+          <h3>3. Doporučená varianta</h3>
+          <p>${c.recommended ? esc(c.recommended.insurer) : 'Doporučená varianta zatím není označena.'}</p>
+        </section>
+        <section>
+          <h3>4. Doporučení poradce</h3>
+          <p>${recText ? esc(recText) : 'Doplní poradce po projednání s klientem.'}</p>
+        </section>
+        <section>
+          <h3>5. Upozornění pro klienta</h3>
+          <p>${warnText ? esc(warnText) : 'Doplnit limity, výluky, sublimity, spoluúčasti a body k ověření.'}</p>
+        </section>
+        <section class="brh1-disclaimer">
+          <b>Interní upozornění:</b> Výstup aplikace je analytická pomůcka. Finální doporučení musí potvrdit poradce podle potřeb a cílů klienta.
+        </section>
+      </div>`;
+  }
+
+  function renderReportCounters(){
+    const c = activeCase();
+    const cards = document.querySelectorAll('.client-output-workspace .stat-card, .client-output-workspace [id*="client"]');
+    text('clientOutputClient', c.clientName);
+    text('clientOutputReadiness', c.readiness + '%');
+    text('clientOutputOffers', String(c.offers.length));
+    text('clientOutputDocs', String(c.documents.length));
+  }
+
+  function renderOffersSummary(){
+    // Nezasahuje do původního renderu karet, jen opravuje horní souhrny a vazbu.
+    const c = activeCase();
+    text('offerProCount', String(c.offers.length));
+    text('offerProRecommended', c.recommended ? c.recommended.insurer : '–');
+    text('offerProBestPrice', bestPrice());
+    text('offerProWarnings', String(c.offers.reduce((s,o)=>s+warningsForOffer(o).length,0)));
+  }
+
+  function rebuild(silent){
+    persistSnapshot();
+    updateTopPanels();
+    renderOffersSummary();
+    renderComparison();
+    renderReportCounters();
+    if(!silent) {
+      const c = activeCase();
+      alert('Kontrola dokončena. Aktivní případ: ' + c.clientName + ' / DB #' + c.id + ' / nabídky: ' + c.offers.length);
+    }
+  }
+
+  function next(){
+    const c = activeCase();
+    if(/není vybrána/i.test(c.clientName)) return showView('inquiryView');
+    if(c.offers.length < 2) return showView('offersView');
+    if(!c.recommended) return showView('comparisonView');
+    return showView('reportView');
+  }
+
+  function saveOfferFromEditor(){
+    const insurer = ($('offerInsurerV72')?.value || '').trim();
+    if(!insurer){
+      alert('Doplňte pojišťovnu.');
+      $('offerInsurerV72')?.focus();
+      return;
+    }
+    const id = $('offerEditIdV72')?.value || ('manual-' + currentCaseId() + '-' + Date.now());
+    const current = activeOffers();
+    const payload = normalizeOffer({
+      id,
+      insurer,
+      product: ($('offerProductV72')?.value || '').trim(),
+      premium: ($('offerPremiumV72')?.value || '').trim(),
+      limit: ($('offerLimitV72')?.value || '').trim(),
+      deductible: ($('offerDeductibleV72')?.value || '').trim(),
+      territory: $('offerTerritoryV72')?.value || '',
+      frequency: $('offerFrequencyV72')?.value || '',
+      rating: $('offerRatingV72')?.value || 'k ověření',
+      sublimits: ($('offerSublimitsV72')?.value || '').trim(),
+      exclusions: ($('offerExclusionsV72')?.value || '').trim(),
+      strengths: ($('offerStrengthsV72')?.value || '').trim(),
+      weaknesses: ($('offerWeaknessesV72')?.value || '').trim(),
+      note: ($('offerNoteV72')?.value || '').trim(),
+      source: 'manual-edit'
+    }, id);
+    const idx = current.findIndex(o => o.id === id);
+    if(idx >= 0) current[idx] = payload; else current.unshift(payload);
+    writeEditedOffers(current);
+    if(typeof closeOfferEditorV72 === 'function') closeOfferEditorV72();
+    rebuild(true);
+    alert('Nabídka byla uložena do aktivního obchodního případu.');
+  }
+
+  function recommend(id){
+    const items = activeOffers().map(o => Object.assign({}, o, {recommended: o.id === id}));
+    writeEditedOffers(items);
+    rebuild(true);
+  }
+
+  function removeOffer(id){
+    if(!confirm('Smazat nabídku z aktivního obchodního případu?')) return;
+    writeEditedOffers(activeOffers().filter(o => o.id !== id));
+    rebuild(true);
+  }
+
+  function duplicate(id){
+    const o = activeOffers().find(x => x.id === id);
+    if(!o) return;
+    const copy = Object.assign({}, o, {id:'manual-' + currentCaseId() + '-' + Date.now(), insurer:o.insurer + ' – kopie', recommended:false, source:'manual-copy'});
+    writeEditedOffers([copy].concat(activeOffers()));
+    rebuild(true);
+  }
+
+  function openOfferEditor(id){
+    const box = $('offerEditorV72');
+    if(!box) return;
+    const offer = id ? activeOffers().find(o => o.id === id) : null;
+    const set = (suffix, value) => { const el = $('offer' + suffix + 'V72'); if(el) el.value = value || ''; };
+    text('offerEditorTitleV72', offer ? 'Upravit nabídku' : 'Nová nabídka');
+    if($('offerEditIdV72')) $('offerEditIdV72').value = offer ? offer.id : '';
+    set('Insurer', offer ? offer.insurer : '');
+    set('Product', offer ? offer.product : '');
+    set('Premium', offer ? offer.premium : '');
+    set('Limit', offer ? offer.limit : '');
+    set('Deductible', offer ? offer.deductible : '');
+    set('Territory', offer ? offer.territory : '');
+    set('Frequency', offer ? offer.frequency : '');
+    set('Rating', offer ? offer.rating : 'k ověření');
+    set('Sublimits', offer ? offer.sublimits : '');
+    set('Exclusions', offer ? offer.exclusions : '');
+    set('Strengths', offer ? offer.strengths : '');
+    set('Weaknesses', offer ? offer.weaknesses : '');
+    set('Note', offer ? offer.note : '');
+    box.classList.remove('hidden');
+    box.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function copyReport(){
+    renderClientReport();
+    const preview = $('clientPresentationPreview');
+    if(!preview) return;
+    const txt = preview.innerText || preview.textContent || '';
+    if(navigator.clipboard) navigator.clipboard.writeText(txt);
+    alert('Klientský výstup byl zkopírován.');
+  }
+
+  // Expose production API
+  window.BRH1 = {
+    version: VERSION,
+    activeCase,
+    offers: activeOffers,
+    rebuild,
+    next,
+    saveOffer: saveOfferFromEditor,
+    recommend,
+    removeOffer,
+    duplicate,
+    openOfferEditor,
+    renderClientReport,
+    copyReport
+  };
+
+  // Override legacy public functions safely
+  window.getOffersV72 = activeOffers;
+  window.saveOffersV72 = writeEditedOffers;
+  window.saveOfferV72 = saveOfferFromEditor;
+  window.openOfferEditorV72 = openOfferEditor;
+  window.recommendOfferV72 = recommend;
+  window.deleteOfferV72 = removeOffer;
+  window.duplicateOfferV72 = duplicate;
+  window.renderOfferComparisonV72 = renderComparison;
+  window.getClientCaseSummaryV71 = function(){ 
+    const c = activeCase();
+    return {active:{clientName:c.clientName,businessType:c.activity,clientActivity:c.activity,status:'rozpracováno'}, docs:c.documents, offers:c.offers, readiness:c.readiness, missing:c.missing};
+  };
+  window.buildClientPresentation = renderClientReport;
+  window.copyClientOutput = copyReport;
+  window.calculateCaseReadiness = readiness;
+  window.getMissingParts = missingParts;
+
+  // Wrap showView/applyState only once
+  if(typeof window.showView === 'function' && !window.__BRH1_showViewWrapped){
+    window.__BRH1_showViewWrapped = true;
+    const old = window.showView;
+    window.showView = function(id){
+      old(id);
+      setTimeout(()=>rebuild(true), 120);
+      if(id === 'reportView') setTimeout(renderClientReport, 180);
+    };
+  }
+  if(typeof window.applyState === 'function' && !window.__BRH1_applyStateWrapped){
+    window.__BRH1_applyStateWrapped = true;
+    const old = window.applyState;
+    window.applyState = function(s){
+      old(s);
+      localStorage.setItem(ACTIVE_KEY, currentCaseId());
+      setTimeout(()=>rebuild(true), 180);
+    };
+  }
+
+  document.addEventListener('input', function(e){
+    if(e.target && (e.target.id === 'clientRecommendation' || e.target.id === 'clientWarnings')){
+      writeReport({
+        recommendation: $('clientRecommendation')?.value || '',
+        warnings: $('clientWarnings')?.value || ''
+      });
+    }
+  });
+
+  setTimeout(()=>rebuild(true), 300);
+  setTimeout(()=>rebuild(true), 1000);
+  setTimeout(()=>rebuild(true), 2200);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 1.0.1 - Case Identity + Risk Mapping Fix
+// ============================================================
+(function(){
+  const ACTIVE_KEY='brh101_active_case_id';
+  const EDITED_KEY='brh1_edited_offers_by_case';
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  const parse=(raw,fb)=>{try{return raw?JSON.parse(raw):fb}catch(e){return fb}};
+  const text=(id,v)=>{const el=$(id); if(el) el.textContent=v};
+  const readMap=k=>parse(localStorage.getItem(k),{});
+  const writeMap=(k,o)=>localStorage.setItem(k,JSON.stringify(o||{}));
+
+  function cleanName(v){
+    return String(v||'').replace(/^#\d+\s*[–-]\s*/,'').replace(/^DB\s*#?\d+\s*[–-]?\s*/i,'').trim();
+  }
+  function emptyName(v){return !String(v||'').trim()||/není\s+vybrána\s+žádná\s+poptávka/i.test(String(v||''));}
+
+  function bannerText(){
+    const selectors=['#activeInquiryBanner','.active-inquiry-banner','.active-case-banner','[data-active-inquiry]','[data-active-case]'];
+    for(const s of selectors){const el=document.querySelector(s); if(el&&el.innerText&&el.innerText.trim()) return el.innerText.trim();}
+    const nodes=Array.from(document.querySelectorAll('section,.panel,.card,div')).filter(el=>{
+      const t=el.innerText||''; return /DB\s*#?\d+|Aktivní poptávka|obchodní případ/i.test(t)&&t.length<1400;
+    });
+    return nodes[0]?.innerText?.trim()||'';
+  }
+
+  function caseId(){
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&(state.activeInquiry.id||state.activeInquiry.dbId)) return String(state.activeInquiry.id||state.activeInquiry.dbId);
+        if(state.form&&(state.form.id||state.form.dbId)) return String(state.form.id||state.form.dbId);
+        if(state.id) return String(state.id);
+      }
+    }catch(e){}
+    const m=bannerText().match(/DB\s*#?(\d+)/i)||bannerText().match(/#(\d+)\s*[–-]/);
+    if(m){localStorage.setItem(ACTIVE_KEY,String(m[1])); return String(m[1]);}
+    return localStorage.getItem(ACTIVE_KEY)||'local';
+  }
+
+  function clientName(){
+    const candidates=[];
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&state.activeInquiry.clientName)candidates.push(state.activeInquiry.clientName);
+        if(state.form&&state.form.clientName)candidates.push(state.form.clientName);
+        if(state.form&&state.form.companyName)candidates.push(state.form.companyName);
+        if(state.clientName)candidates.push(state.clientName);
+      }
+    }catch(e){}
+    const b=bannerText();
+    b.split(/\n+/).forEach(line=>{
+      const m=line.match(/#\d+\s*[–-]\s*(.+)$/);
+      if(m)candidates.unshift(m[1]);
+      if(/\b(a\.s\.|s\.r\.o\.|spol\.|consulting|insurance|ASTORIE)\b/i.test(line)&&!/stav|nabíd|menu|aktivní/i.test(line))candidates.push(line);
+    });
+    const cc=$('caseCCClient'); if(cc&&!emptyName(cc.textContent)) candidates.push(cc.textContent);
+    return candidates.map(cleanName).find(n=>!emptyName(n))||'Není vybrána žádná poptávka';
+  }
+
+  function activity(){
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&(state.activeInquiry.businessType||state.activeInquiry.clientActivity)) return state.activeInquiry.businessType||state.activeInquiry.clientActivity;
+        if(state.form&&(state.form.businessType||state.form.clientActivity)) return state.form.businessType||state.form.clientActivity;
+      }
+    }catch(e){}
+    const m=bannerText().match(/·\s*([^·\n]+)\s*·\s*Nabídky/i);
+    return m?m[1].trim():'';
+  }
+
+  function insurerName(id){
+    try{
+      const list=(typeof CATALOG!=='undefined'&&CATALOG&&Array.isArray(CATALOG.insurers))?CATALOG.insurers:[];
+      const f=list.find(i=>String(i.id)===String(id)||String(i.code||'')===String(id)||String(i.short||'')===String(id));
+      if(f)return (f.short?f.short+' – ':'')+f.name;
+    }catch(e){}
+    return String(id||'').toUpperCase();
+  }
+
+  function riskName(v,i){
+    v=String(v||'').trim();
+    if(v&&!/^\d[\d\s.,]*\s*Kč$/i.test(v)&&!/^limit$/i.test(v))return v;
+    return ['Provozní odpovědnost','Odpovědnost za výrobek','Škody způsobené zaměstnanci','Čistá finanční škoda','Škody na převzatých věcech','Věci užívané'][i%6];
+  }
+
+  function normCov(c,i){
+    c=c||{};
+    return {
+      risk:riskName(c.risk||c.riskName||c.name||c.title||c.original||c.label||c.requirement,i),
+      limit:c.limit||c.value||c.amount||c.coverageLimit||'',
+      state:c.state||c.status||c.result||'nutno ověřit',
+      source:c.source||c.vpp||c.article||c.reference||'doplnit VPP/DPP, článek/odstavec',
+      note:c.note||c.comment||c.poznamka||''
+    };
+  }
+
+  function covsFromDb(o){
+    if(!o)return[];
+    if(Array.isArray(o.coverages))return o.coverages.map(normCov);
+    if(isObj(o.coverages))return Object.entries(o.coverages).map(([k,v],i)=>normCov(Object.assign({risk:k},v||{}),i));
+    if(Array.isArray(o.risks))return o.risks.map(normCov);
+    return [];
+  }
+
+  function normOffer(o,id){
+    o=o||{};
+    const covs=Array.isArray(o.coverages)?o.coverages.map(normCov):[];
+    const riskSummary=covs.map(c=>`${c.risk}: ${c.limit||'bez limitu'} (${c.state||'nutno ověřit'})`).join('\n');
+    return {
+      id:o.id||id||('offer-'+Date.now()),
+      insurer:o.insurer||o.company||o.pojistovna||o.insuranceCompany||o.name||'',
+      product:o.product||o.produkt||o.product_name||'nabídka pojišťovny',
+      premium:o.premium||o.price||o.pojistne||o.annualPremium||'',
+      limit:o.limit||o.mainLimit||o.coverageLimit||covs.map(c=>c.limit).filter(Boolean).slice(0,3).join(', '),
+      deductible:o.deductible||o.spoluucast||'',
+      territory:o.territory||o.uzemi||'',
+      frequency:o.frequency||o.frekvence||'',
+      rating:o.rating||o.verdict||o.status||'k ověření',
+      sublimits:o.sublimits||o.subLimits||riskSummary||'',
+      exclusions:o.exclusions||o.vyluky||'',
+      strengths:o.strengths||'',
+      weaknesses:o.weaknesses||'',
+      note:o.note||o.poznamka||'',
+      recommended:!!o.recommended,
+      coverages:covs,
+      updatedAt:o.updatedAt||new Date().toISOString()
+    };
+  }
+
+  function offerFromDb(id,o){
+    const covs=covsFromDb(o);
+    const limitSummary=covs.map(c=>`${c.risk}: ${c.limit||'bez limitu'}`).join('\n');
+    const weak=covs.filter(c=>/částečně|výluka|nesplněno|nevyhodnoceno|ověřit/i.test(String(c.state||''))).map(c=>`${c.risk}: ${c.state}${c.limit?' · '+c.limit:''}`).join('\n');
+    return normOffer({
+      id:'db-'+caseId()+'-'+id,
+      insurer:insurerName(id),
+      product:o?.product||o?.product_name||'nabídka pojišťovny',
+      premium:o?.premium||'',
+      limit:limitSummary,
+      deductible:o?.deductible||'',
+      territory:o?.territory||'',
+      frequency:o?.frequency||'',
+      rating:o?.status||'doručeno',
+      sublimits:limitSummary,
+      weaknesses:weak,
+      exclusions:o?.exclusions||o?.vyluky||'',
+      note:o?.note||'',
+      recommended:!!o?.recommended,
+      coverages:covs
+    },'db-'+caseId()+'-'+id);
+  }
+
+  function dbOffers(){
+    try{
+      if(typeof state!=='undefined'&&isObj(state.offers))return Object.entries(state.offers).map(([id,o])=>offerFromDb(id,o)).filter(o=>o.insurer||o.product);
+      if(typeof state!=='undefined'&&Array.isArray(state.offers))return state.offers.map((o,i)=>normOffer(o,o.id||('db-array-'+caseId()+'-'+i))).filter(o=>o.insurer||o.product);
+    }catch(e){}
+    return [];
+  }
+
+  function edited(){
+    const all=readMap(EDITED_KEY);
+    return (Array.isArray(all[caseId()])?all[caseId()]:[]).map((o,i)=>normOffer(o,o.id||('edited-'+caseId()+'-'+i)));
+  }
+
+  function saveEdited(items){
+    const all=readMap(EDITED_KEY);
+    all[caseId()]=(items||[]).map(o=>normOffer(o,o.id));
+    writeMap(EDITED_KEY,all);
+  }
+
+  function offers(){
+    const map=new Map();
+    dbOffers().forEach(o=>map.set(o.id,o));
+    edited().forEach(o=>map.set(o.id,normOffer(o,o.id)));
+    return Array.from(map.values());
+  }
+
+  function warnings(){
+    return offers().reduce((s,o)=>s+(!o.premium?1:0)+(!o.limit&&!o.sublimits&&!(o.coverages||[]).length?1:0)+(!o.exclusions?1:0),0);
+  }
+
+  function score(){
+    const os=offers(); let sc=0;
+    if(!emptyName(clientName()))sc+=30;
+    if(activity())sc+=15;
+    if(os.length>=1)sc+=20;
+    if(os.length>=2)sc+=15;
+    if(os.some(o=>o.recommended))sc+=20;
+    return Math.min(100,sc);
+  }
+
+  function missing(){
+    const os=offers(), out=[];
+    if(emptyName(clientName()))out.push('klient');
+    if(!activity())out.push('typ činnosti');
+    if(os.length<2)out.push('alespoň 2 nabídky');
+    if(!os.some(o=>o.recommended))out.push('doporučená varianta');
+    return out;
+  }
+
+  function updateIdentity(){
+    const c=clientName(), id=caseId(), act=activity(), os=offers(), rec=os.find(o=>o.recommended);
+    text('brh1Client',c); text('brh1Meta',[act||'typ činnosti není vyplněn','DB #'+id,os.length+' nabídek'].join(' · '));
+    text('brh1Score',score()+'%'); text('brh1Offers',String(os.length)); text('brh1Recommended',rec?'ano':'ne'); text('brh1Missing',String(missing().length));
+    text('caseCCClient',c); text('caseCCMeta',[act||'typ činnosti není vyplněn','DB #'+id,'rozpracováno','stav workflow: aktivní'].join(' · '));
+    text('caseCCReady',score()+'%'); text('caseCCOffers',String(os.length)); text('caseCCMissing',String(missing().length));
+    text('offerProCount',String(os.length)); text('offerProRecommended',rec?rec.insurer:'–'); text('offerProWarnings',String(warnings()));
+    const bind=$('offerCaseBindingV74');
+    if(bind)bind.innerHTML=`<div class="case-binding-card-v74"><b>Nabídky aktivního obchodního případu:</b><span>${esc(c)} · DB #${esc(id)} · ${os.length} nabídek</span></div>`;
+    if(!emptyName(c)){
+      document.querySelectorAll('h2,h3,strong,b,td,span,div').forEach(el=>{
+        if(el.children.length>0)return;
+        if(/není\s+vybrána\s+žádná\s+poptávka/i.test(el.textContent||''))el.textContent=c;
+      });
+    }
+  }
+
+  function riskList(o){
+    const covs=(o.coverages&&o.coverages.length)?o.coverages:String(o.limit||o.sublimits||'').split(/\n+/).filter(Boolean).map((line,i)=>{
+      const p=line.split(':'); return p.length>1?normCov({risk:p[0],limit:p.slice(1).join(':')},i):normCov({risk:'Riziko k ověření',limit:line},i);
+    });
+    if(!covs.length)return '<div class="brh101-empty-risk">Rizika nejsou doplněna. Doplňte krytí podle jednotných rizik ASTORIE.</div>';
+    return `<div class="brh101-risk-list">${covs.map(c=>`<div class="brh101-risk-row"><b>${esc(c.risk)}</b><span>${esc(c.limit||'bez limitu')}</span><em>${esc(c.state||'nutno ověřit')}</em></div>`).join('')}</div>`;
+  }
+
+  function renderComparison(){
+    const box=$('offerComparisonMatrixV72'); if(!box)return;
+    const os=offers(); if(!os.length){box.innerHTML='<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Přejděte do Nabídky a vložte alespoň jednu nabídku.</div>';return;}
+    const risks=[]; os.forEach(o=>(o.coverages||[]).forEach(c=>{if(c.risk&&!risks.includes(c.risk))risks.push(c.risk)}));
+    if(!risks.length)risks.push('Provozní odpovědnost','Odpovědnost za výrobek');
+    const rec=os.find(o=>o.recommended);
+    box.innerHTML=`<div class="unified-analysis-v73 case-analysis-v74 brh101-analysis"><div><p class="eyebrow">Makléřská analytika aktivního případu</p><h3>${rec?'Doporučená varianta: '+esc(rec.insurer):'Doporučená varianta zatím není vybraná'}</h3><p>${rec?'Doporučení se propíše do klientského výstupu.':'V Nabídkách označte jednu variantu jako doporučenou.'}</p></div><div class="analysis-metrics-v73"><div><b>${os.length}</b><span>nabídky</span></div><div><b>${warnings()}</b><span>upozornění</span></div><div><b>${rec?'ano':'ne'}</b><span>doporučení</span></div></div></div><div class="comparison-table-wrap-v72"><table class="comparison-table-v72"><thead><tr><th>Riziko / požadavek</th>${os.map(o=>`<th>${esc(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead><tbody>${risks.map(r=>`<tr><td><b>${esc(r)}</b></td>${os.map(o=>{const c=(o.coverages||[]).find(x=>x.risk===r);return `<td>${c?`<b>${esc(c.state||'nutno ověřit')}</b><br>${esc(c.limit||'bez limitu')}<br><small>${esc(c.source||'')}</small>`:'—'}</td>`}).join('')}<td>Ověřit rozsah, výluky, sublimity a návaznost na potřeby klienta.</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function renderReport(){
+    const p=$('clientPresentationPreview'); if(!p)return;
+    const os=offers(), c=clientName(), act=activity(), rec=os.find(o=>o.recommended);
+    const recText=($('clientRecommendation')?.value||'').trim(), warnText=($('clientWarnings')?.value||'').trim();
+    p.innerHTML=`<div class="client-preview-header brh1-client-header"><div><p>ASTORIE a.s. · BUSINESS RISK HUB</p><h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2></div><strong>${score()}% připravenost</strong></div><div class="client-preview-body brh1-client-body"><section><h3>1. Identifikace klienta</h3><table><tr><td>Klient</td><td><b>${esc(c)}</b></td></tr><tr><td>Činnost / typ klienta</td><td>${esc(act||'není doplněno')}</td></tr><tr><td>Počet porovnaných nabídek</td><td>${os.length}</td></tr></table></section><section><h3>2. Přehled nabídek</h3><table><thead><tr><th>Pojišťovna</th><th>Pojistné</th><th>Hlavní rizika / limity</th><th>Hodnocení</th><th>Doporučení</th></tr></thead><tbody>${os.map(o=>`<tr><td>${esc(o.insurer)}</td><td>${esc(o.premium||'—')}</td><td>${(o.coverages||[]).map(c=>`<b>${esc(c.risk)}</b>: ${esc(c.limit||'bez limitu')}`).join('<br>')||esc(o.limit||'—')}</td><td>${esc(o.rating||'k ověření')}</td><td>${o.recommended?'doporučená varianta':'alternativa'}</td></tr>`).join('')}</tbody></table></section><section><h3>3. Doporučená varianta</h3><p>${rec?esc(rec.insurer):'Doporučená varianta zatím není označena.'}</p></section><section><h3>4. Doporučení poradce</h3><p>${recText?esc(recText):'Doplní poradce po projednání s klientem.'}</p></section><section><h3>5. Upozornění pro klienta</h3><p>${warnText?esc(warnText):'Doplnit limity, výluky, sublimity, spoluúčasti a body k ověření.'}</p></section></div>`;
+  }
+
+  function patchCards(){
+    offers().forEach(o=>{
+      Array.from(document.querySelectorAll('h2,h3,strong,b')).filter(el=>(el.textContent||'').trim()===o.insurer).forEach(h=>{
+        const card=h.closest('.offer-card-v72,.panel,section,article,div');
+        if(!card||card.querySelector('.brh101-risk-list'))return;
+        const wrap=document.createElement('div'); wrap.className='brh101-risk-block'; wrap.innerHTML='<h4>Rizika a limity v nabídce</h4>'+riskList(o);
+        const before=card.querySelector('details,.offer-card-actions-v72,button');
+        if(before&&before.parentNode)before.parentNode.insertBefore(wrap,before); else card.appendChild(wrap);
+      });
+    });
+  }
+
+  function rebuild(){localStorage.setItem(ACTIVE_KEY,caseId());updateIdentity();renderComparison();renderReport();setTimeout(patchCards,50);}
+
+  function saveOffer(){
+    const insurer=($('offerInsurerV72')?.value||'').trim();
+    if(!insurer){alert('Doplňte pojišťovnu.');$('offerInsurerV72')?.focus();return;}
+    const id=$('offerEditIdV72')?.value||('manual-'+caseId()+'-'+Date.now());
+    const current=offers(), old=current.find(o=>o.id===id)||{};
+    const payload=normOffer({id,insurer,product:($('offerProductV72')?.value||'').trim(),premium:($('offerPremiumV72')?.value||'').trim(),limit:($('offerLimitV72')?.value||'').trim(),deductible:($('offerDeductibleV72')?.value||'').trim(),territory:$('offerTerritoryV72')?.value||'',frequency:$('offerFrequencyV72')?.value||'',rating:$('offerRatingV72')?.value||'k ověření',sublimits:($('offerSublimitsV72')?.value||'').trim(),exclusions:($('offerExclusionsV72')?.value||'').trim(),strengths:($('offerStrengthsV72')?.value||'').trim(),weaknesses:($('offerWeaknessesV72')?.value||'').trim(),note:($('offerNoteV72')?.value||'').trim(),recommended:!!old.recommended,coverages:old.coverages||[]},id);
+    const idx=current.findIndex(o=>o.id===id); if(idx>=0)current[idx]=payload; else current.unshift(payload);
+    saveEdited(current); if(typeof closeOfferEditorV72==='function')closeOfferEditorV72(); rebuild(); alert('Nabídka byla uložena do aktivního obchodního případu.');
+  }
+
+  function recommend(id){saveEdited(offers().map(o=>Object.assign({},o,{recommended:o.id===id})));rebuild();}
+
+  window.BRH101={version:'1.0.1',caseId,clientName,activity,offers,rebuild};
+  window.getOffersV72=offers; window.saveOfferV72=saveOffer; window.recommendOfferV72=recommend; window.renderOfferComparisonV72=renderComparison; window.buildClientPresentation=renderReport; window.calculateCaseReadiness=score; window.getMissingParts=missing;
+  window.getClientCaseSummaryV71=function(){return{active:{clientName:clientName(),businessType:activity(),clientActivity:activity(),status:'rozpracováno'},offers:offers(),docs:[],readiness:score(),missing:missing()}};
+
+  if(typeof window.showView==='function'&&!window.__BRH101_showViewWrapped){window.__BRH101_showViewWrapped=true;const old=window.showView;window.showView=function(id){old(id);setTimeout(rebuild,150);setTimeout(rebuild,650);};}
+  if(typeof window.applyState==='function'&&!window.__BRH101_applyStateWrapped){window.__BRH101_applyStateWrapped=true;const old=window.applyState;window.applyState=function(s){old(s);setTimeout(rebuild,150);setTimeout(rebuild,650);};}
+  setTimeout(rebuild,200); setTimeout(rebuild,900); setTimeout(rebuild,1800);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 1.0.2 - No Auto Recommendation + Limit Dedup Fix
+// ============================================================
+(function(){
+  const ACTIVE_KEY='brh102_active_case_id';
+  const EDITED_KEY='brh1_edited_offers_by_case';
+  const MANUAL_REC_KEY='brh102_manual_recommendation_by_case';
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const parse=(raw,fb)=>{try{return raw?JSON.parse(raw):fb}catch(e){return fb}};
+  const readMap=k=>parse(localStorage.getItem(k),{});
+  const writeMap=(k,o)=>localStorage.setItem(k,JSON.stringify(o||{}));
+  const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  const text=(id,v)=>{const el=$(id); if(el) el.textContent=v};
+
+  function emptyName(v){return !String(v||'').trim()||/není\s+vybrána\s+žádná\s+poptávka/i.test(String(v||''));}
+  function cleanName(v){return String(v||'').replace(/^#\d+\s*[–-]\s*/,'').replace(/^DB\s*#?\d+\s*[–-]?\s*/i,'').trim();}
+  function bannerText(){
+    for(const s of ['#activeInquiryBanner','.active-inquiry-banner','.active-case-banner','[data-active-inquiry]','[data-active-case]']){
+      const el=document.querySelector(s); if(el&&el.innerText&&el.innerText.trim()) return el.innerText.trim();
+    }
+    const nodes=Array.from(document.querySelectorAll('section,.panel,.card,div')).filter(el=>{
+      const t=el.innerText||''; return /DB\s*#?\d+|Aktivní poptávka|obchodní případ/i.test(t)&&t.length<1400;
+    });
+    return nodes[0]?.innerText?.trim()||'';
+  }
+  function caseId(){
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&(state.activeInquiry.id||state.activeInquiry.dbId)) return String(state.activeInquiry.id||state.activeInquiry.dbId);
+        if(state.form&&(state.form.id||state.form.dbId)) return String(state.form.id||state.form.dbId);
+        if(state.id) return String(state.id);
+      }
+    }catch(e){}
+    const b=bannerText(), m=b.match(/DB\s*#?(\d+)/i)||b.match(/#(\d+)\s*[–-]/);
+    if(m){localStorage.setItem(ACTIVE_KEY,String(m[1])); return String(m[1]);}
+    return localStorage.getItem(ACTIVE_KEY)||'local';
+  }
+  function clientName(){
+    const c=[];
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&state.activeInquiry.clientName)c.push(state.activeInquiry.clientName);
+        if(state.form&&state.form.clientName)c.push(state.form.clientName);
+        if(state.form&&state.form.companyName)c.push(state.form.companyName);
+        if(state.clientName)c.push(state.clientName);
+      }
+    }catch(e){}
+    bannerText().split(/\n+/).forEach(line=>{
+      const m=line.match(/#\d+\s*[–-]\s*(.+)$/); if(m)c.unshift(m[1]);
+      if(/\b(a\.s\.|s\.r\.o\.|spol\.|consulting|insurance|ASTORIE)\b/i.test(line)&&!/stav|nabíd|menu|aktivní/i.test(line))c.push(line);
+    });
+    const cc=$('caseCCClient'); if(cc&&!emptyName(cc.textContent))c.push(cc.textContent);
+    return c.map(cleanName).find(n=>!emptyName(n))||'Není vybrána žádná poptávka';
+  }
+  function activity(){
+    try{
+      if(typeof state!=='undefined'){
+        if(state.activeInquiry&&(state.activeInquiry.businessType||state.activeInquiry.clientActivity))return state.activeInquiry.businessType||state.activeInquiry.clientActivity;
+        if(state.form&&(state.form.businessType||state.form.clientActivity))return state.form.businessType||state.form.clientActivity;
+      }
+    }catch(e){}
+    const m=bannerText().match(/·\s*([^·\n]+)\s*·\s*Nabídky/i); return m?m[1].trim():'';
+  }
+  function insurerName(id){
+    try{
+      const list=(typeof CATALOG!=='undefined'&&CATALOG&&Array.isArray(CATALOG.insurers))?CATALOG.insurers:[];
+      const f=list.find(i=>String(i.id)===String(id)||String(i.code||'')===String(id)||String(i.short||'')===String(id));
+      if(f)return (f.short?f.short+' – ':'')+f.name;
+    }catch(e){}
+    return String(id||'').toUpperCase();
+  }
+
+  function unique(parts){
+    const seen=new Set(), out=[];
+    (parts||[]).forEach(p=>{
+      p=String(p||'').trim();
+      if(!p||p==='—'||p==='-')return;
+      const key=p.toLowerCase().replace(/\s+/g,' ').replace(/[;,.]+$/,'');
+      if(!seen.has(key)){seen.add(key);out.push(p);}
+    });
+    return out;
+  }
+  function normLimit(v){return unique(String(v||'').split(/\n|;|\|/)).join('\n');}
+  function pureLimit(v){return /^[\d\s.,]+(?:Kč|CZK)?(?:\s*,\s*[\d\s.,]+(?:Kč|CZK)?)*$/i.test(String(v||'').trim());}
+  function riskName(v,i){
+    v=String(v||'').trim();
+    if(v&&!pureLimit(v)&&!/^limit$/i.test(v)&&!/riziko k ověření/i.test(v))return v;
+    return ['Provozní odpovědnost','Odpovědnost za výrobek','Škody způsobené zaměstnanci','Čistá finanční škoda','Škody na převzatých věcech','Věci užívané'][i%6];
+  }
+  function normCov(c,i){
+    c=c||{};
+    return {risk:riskName(c.risk||c.riskName||c.name||c.title||c.original||c.label||c.requirement,i),limit:normLimit(c.limit||c.value||c.amount||c.coverageLimit||''),state:c.state||c.status||c.result||'nutno ověřit',source:c.source||c.vpp||c.article||c.reference||'doplnit VPP/DPP, článek/odstavec',note:c.note||c.comment||c.poznamka||''};
+  }
+  function mergeCovs(covs){
+    const map=new Map();
+    (covs||[]).forEach((c,i)=>{
+      c=normCov(c,i); const key=c.risk.toLowerCase();
+      if(!map.has(key))map.set(key,c);
+      else{
+        const o=map.get(key);
+        o.limit=unique([o.limit,c.limit]).join('\n');
+        o.source=unique([o.source,c.source]).join('\n');
+        o.note=unique([o.note,c.note]).join('\n');
+      }
+    });
+    return Array.from(map.values());
+  }
+  function covsFromDb(o){
+    if(!o)return[];
+    if(Array.isArray(o.coverages))return mergeCovs(o.coverages);
+    if(isObj(o.coverages))return mergeCovs(Object.entries(o.coverages).map(([k,v])=>Object.assign({risk:k},v||{})));
+    if(Array.isArray(o.risks))return mergeCovs(o.risks);
+    return [];
+  }
+  function manualRecId(){return readMap(MANUAL_REC_KEY)[caseId()]||'';}
+  function setManualRec(id){const all=readMap(MANUAL_REC_KEY); all[caseId()]=id||''; writeMap(MANUAL_REC_KEY,all);}
+
+  function normOffer(o,id){
+    o=o||{};
+    const covs=mergeCovs(Array.isArray(o.coverages)?o.coverages:[]);
+    const plain=normLimit(o.limit||o.mainLimit||o.coverageLimit||'');
+    const fromCov=covs.map(c=>c.limit).filter(Boolean);
+    const finalLimit=unique([plain,...fromCov]).join('\n');
+    const subs=normLimit(o.sublimits||o.subLimits||'');
+    return {
+      id:o.id||id||('offer-'+Date.now()),
+      insurer:o.insurer||o.company||o.pojistovna||o.insuranceCompany||o.name||'',
+      product:o.product||o.produkt||o.product_name||'nabídka pojišťovny',
+      premium:o.premium||o.price||o.pojistne||o.annualPremium||'',
+      limit:finalLimit,
+      deductible:o.deductible||o.spoluucast||'',
+      territory:o.territory||o.uzemi||'',
+      frequency:o.frequency||o.frekvence||'',
+      rating:o.rating||o.verdict||o.status||'k ověření',
+      sublimits:subs&&subs!==finalLimit?subs:'',
+      exclusions:o.exclusions||o.vyluky||'',
+      strengths:o.strengths||'',
+      weaknesses:o.weaknesses||'',
+      note:o.note||o.poznamka||'',
+      recommended:false,
+      coverages:covs,
+      updatedAt:o.updatedAt||new Date().toISOString()
+    };
+  }
+  function offerFromDb(id,o){
+    const covs=covsFromDb(o);
+    return normOffer({id:'db-'+caseId()+'-'+id,insurer:insurerName(id),product:o?.product||o?.product_name||'nabídka pojišťovny',premium:o?.premium||'',limit:covs.map(c=>c.limit).filter(Boolean).join('\n'),deductible:o?.deductible||'',territory:o?.territory||'',frequency:o?.frequency||'',rating:o?.status||'doručeno',exclusions:o?.exclusions||o?.vyluky||'',note:o?.note||'',coverages:covs},'db-'+caseId()+'-'+id);
+  }
+  function dbOffers(){
+    try{
+      if(typeof state!=='undefined'&&isObj(state.offers))return Object.entries(state.offers).map(([id,o])=>offerFromDb(id,o)).filter(o=>o.insurer||o.product);
+      if(typeof state!=='undefined'&&Array.isArray(state.offers))return state.offers.map((o,i)=>normOffer(o,o.id||('db-array-'+caseId()+'-'+i))).filter(o=>o.insurer||o.product);
+    }catch(e){}
+    return [];
+  }
+  function edited(){
+    const all=readMap(EDITED_KEY);
+    return (Array.isArray(all[caseId()])?all[caseId()]:[]).map((o,i)=>normOffer(o,o.id||('edited-'+caseId()+'-'+i)));
+  }
+  function saveEdited(items){
+    const all=readMap(EDITED_KEY);
+    all[caseId()]=(items||[]).map(o=>{const n=normOffer(o,o.id); n.recommended=(n.id===manualRecId()); return n;});
+    writeMap(EDITED_KEY,all);
+  }
+  function offers(){
+    const map=new Map();
+    dbOffers().forEach(o=>map.set(o.id,o));
+    edited().forEach(o=>map.set(o.id,o));
+    const rec=manualRecId();
+    return Array.from(map.values()).map(o=>Object.assign({},o,{recommended:!!rec&&o.id===rec}));
+  }
+  function recOffer(){const id=manualRecId(); return id?offers().find(o=>o.id===id)||null:null;}
+  function coverageRows(o){
+    let covs=(o.coverages||[]).filter(c=>c.risk||c.limit);
+    if(!covs.length&&o.limit){covs=normLimit(o.limit).split(/\n+/).filter(Boolean).map((limit,i)=>({risk:riskName('',i),limit,state:'nutno ověřit',source:'doplnit VPP/DPP, článek/odstavec'}));}
+    return mergeCovs(covs);
+  }
+  function warnings(){return offers().reduce((s,o)=>s+(!o.premium?1:0)+(!o.limit&&!(o.coverages||[]).length?1:0)+(!o.exclusions?1:0),0);}
+  function score(){const os=offers();let sc=0;if(!emptyName(clientName()))sc+=30;if(activity())sc+=15;if(os.length>=1)sc+=20;if(os.length>=2)sc+=15;if(recOffer())sc+=20;return Math.min(100,sc);}
+  function missing(){const os=offers(),out=[];if(emptyName(clientName()))out.push('klient');if(!activity())out.push('typ činnosti');if(os.length<2)out.push('alespoň 2 nabídky');if(!recOffer())out.push('doporučená varianta');return out;}
+
+  function updateIdentity(){
+    const c=clientName(), id=caseId(), act=activity(), os=offers(), rec=recOffer();
+    text('brh1Client',c); text('brh1Meta',[act||'typ činnosti není vyplněn','DB #'+id,os.length+' nabídek'].join(' · '));
+    text('brh1Score',score()+'%'); text('brh1Offers',String(os.length)); text('brh1Recommended',rec?'ano':'ne'); text('brh1Missing',String(missing().length));
+    text('caseCCClient',c); text('caseCCMeta',[act||'typ činnosti není vyplněn','DB #'+id,'rozpracováno','stav workflow: aktivní'].join(' · '));
+    text('caseCCReady',score()+'%'); text('caseCCOffers',String(os.length)); text('caseCCMissing',String(missing().length));
+    text('offerProCount',String(os.length)); text('offerProRecommended',rec?rec.insurer:'–'); text('offerProWarnings',String(warnings()));
+    const bind=$('offerCaseBindingV74'); if(bind)bind.innerHTML=`<div class="case-binding-card-v74"><b>Nabídky aktivního obchodního případu:</b><span>${esc(c)} · DB #${esc(id)} · ${os.length} nabídek</span></div>`;
+  }
+  function renderComparison(){
+    const box=$('offerComparisonMatrixV72'); if(!box)return;
+    const os=offers(); if(!os.length){box.innerHTML='<div class="textation-empty">Nejsou vložené nabídky pro porovnání.</div>';return;}
+    const risks=[]; os.forEach(o=>coverageRows(o).forEach(c=>{if(c.risk&&!risks.includes(c.risk))risks.push(c.risk)}));
+    if(!risks.length)risks.push('Provozní odpovědnost','Odpovědnost za výrobek');
+    const rec=recOffer();
+    box.innerHTML=`<div class="unified-analysis-v73 case-analysis-v74 brh102-analysis"><div><p class="eyebrow">Makléřská analytika aktivního případu</p><h3>${rec?'Doporučená varianta: '+esc(rec.insurer):'Doporučená varianta zatím není vybraná'}</h3><p>${rec?'Doporučení bylo označeno poradcem.':'Aplikace nic nedoporučuje automaticky. Doporučení musí ručně potvrdit poradce.'}</p></div><div class="analysis-metrics-v73"><div><b>${os.length}</b><span>nabídky</span></div><div><b>${warnings()}</b><span>upozornění</span></div><div><b>${rec?'ano':'ne'}</b><span>doporučení</span></div></div></div><div class="comparison-table-wrap-v72"><table class="comparison-table-v72"><thead><tr><th>Riziko / požadavek</th>${os.map(o=>`<th>${esc(o.insurer)}${o.recommended?' ⭐':''}</th>`).join('')}<th>Makléřská poznámka</th></tr></thead><tbody>${risks.map(r=>`<tr><td><b>${esc(r)}</b></td>${os.map(o=>{const c=coverageRows(o).find(x=>x.risk===r);return `<td>${c?`<b>${esc(c.state||'nutno ověřit')}</b><br>${esc(c.limit||'bez limitu')}<br><small>${esc(c.source||'')}</small>`:'—'}</td>`}).join('')}<td>Ověřit rozsah, výluky, sublimity a návaznost na potřeby klienta.</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  function renderReport(){
+    const p=$('clientPresentationPreview'); if(!p)return;
+    const os=offers(), c=clientName(), act=activity(), rec=recOffer();
+    const recText=($('clientRecommendation')?.value||'').trim(), warnText=($('clientWarnings')?.value||'').trim();
+    p.innerHTML=`<div class="client-preview-header brh1-client-header"><div><p>ASTORIE a.s. · BUSINESS RISK HUB</p><h2>Poradenské shrnutí k pojištění podnikatelských rizik</h2></div><strong>${score()}% připravenost</strong></div><div class="client-preview-body brh1-client-body"><section><h3>1. Identifikace klienta</h3><table><tr><td>Klient</td><td><b>${esc(c)}</b></td></tr><tr><td>Činnost / typ klienta</td><td>${esc(act||'není doplněno')}</td></tr><tr><td>Počet porovnaných nabídek</td><td>${os.length}</td></tr></table></section><section><h3>2. Přehled nabídek</h3><table><thead><tr><th>Pojišťovna</th><th>Pojistné</th><th>Rizika / limity</th><th>Hodnocení</th><th>Doporučení</th></tr></thead><tbody>${os.map(o=>`<tr><td>${esc(o.insurer)}</td><td>${esc(o.premium||'—')}</td><td>${coverageRows(o).map(c=>`<b>${esc(c.risk)}</b>: ${esc(c.limit||'bez limitu')}`).join('<br>')||'—'}</td><td>${esc(o.rating||'k ověření')}</td><td>${o.recommended?'doporučená varianta poradce':'alternativa'}</td></tr>`).join('')}</tbody></table></section><section><h3>3. Doporučená varianta</h3><p>${rec?esc(rec.insurer):'Doporučená varianta zatím nebyla poradcem označena.'}</p></section><section><h3>4. Doporučení poradce</h3><p>${recText?esc(recText):'Doplní poradce po projednání s klientem.'}</p></section><section><h3>5. Upozornění pro klienta</h3><p>${warnText?esc(warnText):'Doplnit limity, výluky, sublimity, spoluúčasti a body k ověření.'}</p></section></div>`;
+  }
+  function riskList(o){
+    const covs=coverageRows(o);
+    if(!covs.length)return '<div class="brh102-empty-risk">Rizika nejsou doplněna.</div>';
+    return `<div class="brh102-risk-list">${covs.map(c=>`<div class="brh102-risk-row"><b>${esc(c.risk)}</b><span>${esc(c.limit||'bez limitu')}</span><em>${esc(c.state||'nutno ověřit')}</em></div>`).join('')}</div>`;
+  }
+  function patchCards(){
+    document.querySelectorAll('.brh101-risk-block,.brh101-risk-list,.brh102-risk-block').forEach(el=>el.remove());
+    offers().forEach(o=>{
+      Array.from(document.querySelectorAll('h2,h3,strong,b')).filter(el=>(el.textContent||'').trim()===o.insurer).forEach(h=>{
+        const card=h.closest('.offer-card-v72,.panel,section,article,div');
+        if(!card||card.classList.contains('stat-card')||card.querySelector('.brh102-risk-block'))return;
+        const wrap=document.createElement('div');wrap.className='brh102-risk-block';wrap.innerHTML='<h4>Rizika a limity v nabídce</h4>'+riskList(o);
+        const before=card.querySelector('.offer-card-actions-v72,details,textarea,.offer-fields-v72');
+        if(before&&before.parentNode)before.parentNode.insertBefore(wrap,before);else card.appendChild(wrap);
+      });
+    });
+  }
+  function rebuild(){localStorage.setItem(ACTIVE_KEY,caseId());updateIdentity();renderComparison();renderReport();setTimeout(patchCards,80);}
+  function recommend(id){setManualRec(id);saveEdited(offers().map(o=>Object.assign({},o,{recommended:o.id===id})));rebuild();}
+  function clearRecommendation(){setManualRec('');saveEdited(offers().map(o=>Object.assign({},o,{recommended:false})));rebuild();}
+  function saveOffer(){
+    const insurer=($('offerInsurerV72')?.value||'').trim(); if(!insurer){alert('Doplňte pojišťovnu.');return;}
+    const id=$('offerEditIdV72')?.value||('manual-'+caseId()+'-'+Date.now());
+    const current=offers(), old=current.find(o=>o.id===id)||{};
+    const payload=normOffer({id,insurer,product:($('offerProductV72')?.value||'').trim(),premium:($('offerPremiumV72')?.value||'').trim(),limit:($('offerLimitV72')?.value||'').trim(),deductible:($('offerDeductibleV72')?.value||'').trim(),territory:$('offerTerritoryV72')?.value||'',frequency:$('offerFrequencyV72')?.value||'',rating:$('offerRatingV72')?.value||'k ověření',sublimits:($('offerSublimitsV72')?.value||'').trim(),exclusions:($('offerExclusionsV72')?.value||'').trim(),strengths:($('offerStrengthsV72')?.value||'').trim(),weaknesses:($('offerWeaknessesV72')?.value||'').trim(),note:($('offerNoteV72')?.value||'').trim(),coverages:old.coverages||[]},id);
+    const idx=current.findIndex(o=>o.id===id); if(idx>=0)current[idx]=payload; else current.unshift(payload);
+    saveEdited(current); if(typeof closeOfferEditorV72==='function')closeOfferEditorV72(); rebuild(); alert('Nabídka byla uložena do aktivního obchodního případu.');
+  }
+
+  window.BRH102={version:'1.0.2',caseId,clientName,activity,offers,recommendedOffer:recOffer,rebuild,clearRecommendation};
+  window.getOffersV72=offers; window.saveOfferV72=saveOffer; window.recommendOfferV72=recommend; window.renderOfferComparisonV72=renderComparison; window.buildClientPresentation=renderReport; window.calculateCaseReadiness=score; window.getMissingParts=missing;
+  window.getClientCaseSummaryV71=function(){return{active:{clientName:clientName(),businessType:activity(),clientActivity:activity(),status:'rozpracováno'},offers:offers(),docs:[],readiness:score(),missing:missing()}};
+  if(typeof window.showView==='function'&&!window.__BRH102_showViewWrapped){window.__BRH102_showViewWrapped=true;const old=window.showView;window.showView=function(id){old(id);setTimeout(rebuild,150);setTimeout(rebuild,700);};}
+  if(typeof window.applyState==='function'&&!window.__BRH102_applyStateWrapped){window.__BRH102_applyStateWrapped=true;const old=window.applyState;window.applyState=function(s){old(s);setTimeout(rebuild,150);setTimeout(rebuild,700);};}
+  setTimeout(rebuild,200);setTimeout(rebuild,900);setTimeout(rebuild,1800);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.0.0 - Core Data Foundation
+// Runtime bridge: zachovává UI, zavádí nové jádro.
+// ============================================================
+(function(){
+  const VERSION='2.0.0-core-data-foundation',NS='brh2';
+  const parse=(r,f)=>{try{return r?JSON.parse(r):f}catch(e){return f}}, save=(k,v)=>localStorage.setItem(NS+':'+k,JSON.stringify(v)), load=(k,f)=>parse(localStorage.getItem(NS+':'+k),f), now=()=>new Date().toISOString();
+  const RISKS=[['LIABILITY_OPERATION','Provozní odpovědnost'],['LIABILITY_PRODUCT','Odpovědnost za výrobek'],['FINANCIAL_LOSS','Čistá finanční škoda'],['EMPLOYEE_DAMAGE','Škody způsobené zaměstnanci'],['TAKEN_ITEMS','Věci převzaté / užívané'],['PROPERTY','Majetek'],['MACHINERY','Stroje'],['ELECTRONICS','Elektronika'],['BUSINESS_INTERRUPTION','Přerušení provozu'],['CYBER','Kybernetická rizika']];
+  const riskName=k=>(RISKS.find(r=>r[0]===k)||[k,k])[1];
+  function normRisk(n){n=String(n||'').toLowerCase(); if(n.includes('provoz'))return'LIABILITY_OPERATION'; if(n.includes('výrob')||n.includes('vadn'))return'LIABILITY_PRODUCT'; if(n.includes('finan'))return'FINANCIAL_LOSS'; if(n.includes('zaměst'))return'EMPLOYEE_DAMAGE'; if(n.includes('převzat')||n.includes('užívan'))return'TAKEN_ITEMS'; if(n.includes('majet'))return'PROPERTY'; if(n.includes('stroj'))return'MACHINERY'; if(n.includes('elektr'))return'ELECTRONICS'; if(n.includes('přeruš'))return'BUSINESS_INTERRUPTION'; if(n.includes('kyber'))return'CYBER'; return'';}
+  function caseId(){try{if(typeof state!=='undefined'){if(state.activeInquiry&&(state.activeInquiry.id||state.activeInquiry.dbId))return String(state.activeInquiry.id||state.activeInquiry.dbId); if(state.form&&(state.form.id||state.form.dbId))return String(state.form.id||state.form.dbId);}}catch(e){} const m=(document.body.innerText||'').match(/DB\s*#?(\d+)/i); return m?m[1]:(localStorage.getItem('brh2:last_case_id')||'local');}
+  function getCoreCase(){const id=caseId(); localStorage.setItem('brh2:last_case_id',id); const cases=load('cases',{}); if(!cases[id]){cases[id]={id,source:'legacy-runtime',client:{},risk_model_id:'BUSINESS_RISKS',workflow_step:'rozpracováno',request:{risks:[]},case_insurers:[],offers:[],documents:[],text_usages:[],recommendation:{advisor_recommended_offer_id:null,advisor_comment:'',client_warning:''},created_at:now(),updated_at:now()}; save('cases',cases);} return cases[id];}
+  function saveCoreCase(c){const cases=load('cases',{}); c.updated_at=now(); cases[c.id]=c; save('cases',cases);}
+  function audit(type,id,action,oldValue,newValue){const log=load('audit_log',[]); log.unshift({type,id,action,oldValue,newValue,created_at:now()}); save('audit_log',log.slice(0,500));}
+  function normalizeOffer(o){o=o||{}; const c=getCoreCase(); const arr=Array.isArray(o.coverages)?o.coverages:[]; let offer_risks=arr.map((x,i)=>{const key=x.risk_key||x.riskKey||normRisk(x.risk||x.name||x.title); return key?{id:x.id||`${o.id||'offer'}-risk-${i}`,risk_key:key,risk_name:riskName(key),requested_limit:x.requested_limit||'',offered_limit:x.offered_limit||x.limit||'',coverage_status:x.coverage_status||x.status||'nutno_ověřit',exclusions:x.exclusions||'',sublimits:x.sublimits||'',source_reference:x.source_reference||x.source||'',advisor_note:x.advisor_note||x.note||''}:null}).filter(Boolean);
+    if(!offer_risks.length&&o.limit){const first=(c.request.risks||[])[0]||{risk_key:'LIABILITY_OPERATION'}; offer_risks.push({id:`${o.id||'offer'}-risk-default`,risk_key:first.risk_key,risk_name:riskName(first.risk_key),requested_limit:first.requested_limit||'',offered_limit:o.limit,coverage_status:'nutno_ověřit',source_reference:'',advisor_note:''});}
+    return {id:o.id||('offer-'+Date.now()),case_id:c.id,insurer_id:o.insurer_id||'',insurer_name:o.insurer_name||o.insurer||o.company||'',product_name:o.product_name||o.product||'nabídka pojišťovny',status:o.status||o.rating||'čekáme_na_nabídku',annual_premium:o.annual_premium||o.premium||'',deductible:o.deductible||'',valid_until:o.valid_until||o.validUntil||'',advisor_summary:o.advisor_summary||o.note||'',ai_summary:o.ai_summary||'',is_advisor_recommended:false,offer_risks,created_at:o.created_at||now(),updated_at:now()};}
+  function upsertOffer(o){const c=getCoreCase(),n=normalizeOffer(o),before=JSON.parse(JSON.stringify(c.offers||[])); c.offers=c.offers||[]; const i=c.offers.findIndex(x=>x.id===n.id); if(i>=0)c.offers[i]=Object.assign({},c.offers[i],n); else c.offers.push(n); const rec=c.recommendation&&c.recommendation.advisor_recommended_offer_id; c.offers=c.offers.map(x=>Object.assign({},x,{is_advisor_recommended:x.id===rec})); saveCoreCase(c); audit('offer',n.id,i>=0?'offer_updated':'offer_created',before,c.offers); return n;}
+  function setAdvisorRecommendation(id){const c=getCoreCase(),before=JSON.parse(JSON.stringify(c.recommendation||{})); c.recommendation=c.recommendation||{}; c.recommendation.advisor_recommended_offer_id=id||null; c.offers=(c.offers||[]).map(o=>Object.assign({},o,{is_advisor_recommended:o.id===id})); saveCoreCase(c); audit('case',c.id,'advisor_recommendation_changed',before,c.recommendation);}
+  function validateCase(){const c=getCoreCase(),errors=[]; if(!c.id)errors.push('Chybí CASE_ID.'); if(!c.risk_model_id)errors.push('Chybí risk model.'); (c.offers||[]).forEach(o=>(o.offer_risks||[]).forEach(r=>{if(!r.risk_key)errors.push('Krytí bez risk_key.')})); return{ok:!errors.length,errors,case_id:c.id,version:VERSION};}
+  function createTextTemplate(t){const list=load('text_templates',[]),item=Object.assign({id:'txt-'+Date.now(),scope:'private',status:'draft',category:'',tag:'',title:'',body:'',risk_key:'',insurer_id:'',created_at:now(),updated_at:now()},t||{}); list.unshift(item); save('text_templates',list); audit('text_template',item.id,'created',null,item); return item;}
+  function addDocument(d){const c=getCoreCase(),item=Object.assign({id:'doc-'+Date.now(),case_id:c.id,scope:'case',category:'',title:'',filename:'',file_url:'',document_type:'',insurer_id:'',risk_key:'',version:'',created_at:now(),archived_at:null},d||{}); c.documents.unshift(item); saveCoreCase(c); audit('document',item.id,'created',null,item); return item;}
+  function badge(){document.querySelectorAll('header,.topbar,.app-header,*').forEach(x=>{if((x.textContent||'').match(/Business Risk Hub 1\.0\.2|MVP\s*0\./)&&x.textContent.length<160)x.textContent='Business Risk Hub 2.0.0 · Core Data Foundation';});}
+  window.BRH2={version:VERSION,riskModels:{BUSINESS_RISKS:{id:'BUSINESS_RISKS',name:'Podnikatelská rizika',risks:RISKS.map(r=>({key:r[0],name:r[1]}))}},getCoreCase,saveCoreCase,validateCase,normalizeOffer,upsertOffer,setAdvisorRecommendation,createTextTemplate,addDocument,audit};
+  if(typeof window.recommendOfferV72==='function'&&!window.__BRH2_rec){window.__BRH2_rec=true;const old=window.recommendOfferV72;window.recommendOfferV72=function(id){setAdvisorRecommendation(id);return old.apply(this,arguments)}}
+  if(typeof window.saveOfferV72==='function'&&!window.__BRH2_save){window.__BRH2_save=true;const old=window.saveOfferV72;window.saveOfferV72=function(){const r=old.apply(this,arguments);setTimeout(()=>{try{if(typeof window.getOffersV72==='function')(window.getOffersV72()||[]).forEach(upsertOffer)}catch(e){}},250);return r}}
+  setTimeout(()=>{badge();getCoreCase();validateCase()},250); setTimeout(badge,1200);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.1.0 - Workflow Engine FULL
+// Navazuje na Core Data Foundation 2.0.0 a neničí Admin, textace ani dokumenty.
+// ============================================================
+(function(){
+  const VERSION = '2.1.0-workflow-engine-full';
+  const NS = 'brh210';
+  const $ = id => document.getElementById(id);
+  const parse = (raw, fb) => { try { return raw ? JSON.parse(raw) : fb; } catch(e){ return fb; } };
+  const load = (key, fb) => parse(localStorage.getItem(NS + ':' + key), fb);
+  const save = (key, val) => localStorage.setItem(NS + ':' + key, JSON.stringify(val));
+  const text = (id, value) => { const el = $(id); if(el) el.textContent = value; };
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  const WORKFLOW = [
+    { key:'new_case', label:'Nový případ', view:'dashboardView' },
+    { key:'collecting_data', label:'Sběr podkladů', view:'documentsView' },
+    { key:'insurers_selected', label:'Výběr pojišťoven', view:'adminView' },
+    { key:'request_ready', label:'Poptávka připravena', view:'inquiryView' },
+    { key:'request_sent', label:'Poptávka odeslána', view:'inquiryView' },
+    { key:'waiting_offers', label:'Čekáme na nabídky', view:'offersView' },
+    { key:'offers_received', label:'Nabídky přijaty', view:'offersView' },
+    { key:'comparison_ready', label:'Porovnání', view:'comparisonView' },
+    { key:'advisor_recommendation', label:'Doporučení poradce', view:'comparisonView' },
+    { key:'client_output', label:'Klientský výstup', view:'reportView' },
+    { key:'closed', label:'Uzavřeno', view:'dashboardView' },
+    { key:'archived', label:'Archiv', view:'dashboardView' }
+  ];
+
+  function caseId(){
+    try{
+      if(window.BRH2 && BRH2.getCoreCase) return String(BRH2.getCoreCase().id || 'local');
+      if(window.BRH102 && BRH102.caseId) return String(BRH102.caseId());
+      if(typeof state !== 'undefined'){
+        if(state.activeInquiry && (state.activeInquiry.id || state.activeInquiry.dbId)) return String(state.activeInquiry.id || state.activeInquiry.dbId);
+        if(state.id) return String(state.id);
+      }
+    }catch(e){}
+    const body = document.body ? document.body.innerText || '' : '';
+    const m = body.match(/DB\s*#?(\d+)/i) || body.match(/#(\d+)\s*[–-]/);
+    return m ? String(m[1]) : 'local';
+  }
+
+  function getWorkflowMap(){
+    return load('workflow_by_case', {});
+  }
+
+  function setWorkflowMap(map){
+    save('workflow_by_case', map || {});
+  }
+
+  function getState(){
+    const id = caseId();
+    const map = getWorkflowMap();
+    if(!map[id]){
+      map[id] = {
+        case_id: id,
+        step: 'new_case',
+        insurers: [],
+        request_log: [],
+        updated_at: new Date().toISOString()
+      };
+      setWorkflowMap(map);
+    }
+    return map[id];
+  }
+
+  function saveState(st){
+    const map = getWorkflowMap();
+    st.updated_at = new Date().toISOString();
+    map[st.case_id || caseId()] = st;
+    setWorkflowMap(map);
+    audit('workflow_updated', st);
+  }
+
+  function audit(action, payload){
+    const log = load('audit', []);
+    log.unshift({ action, payload, created_at: new Date().toISOString() });
+    save('audit', log.slice(0, 500));
+    if(window.BRH2 && BRH2.audit){
+      try { BRH2.audit('workflow', caseId(), action, null, payload); } catch(e) {}
+    }
+  }
+
+  function currentStepIndex(){
+    const st = getState();
+    return Math.max(0, WORKFLOW.findIndex(x => x.key === st.step));
+  }
+
+  function setStep(step){
+    const st = getState();
+    if(!WORKFLOW.find(x => x.key === step)) return;
+    const old = st.step;
+    st.step = step;
+    saveState(st);
+    render();
+    audit('workflow_step_changed', { old, step });
+  }
+
+  function nextStep(){
+    const idx = currentStepIndex();
+    const next = WORKFLOW[Math.min(WORKFLOW.length - 1, idx + 1)];
+    setStep(next.key);
+    if(window.showView && next.view) showView(next.view);
+  }
+
+  function previousStep(){
+    const idx = currentStepIndex();
+    const prev = WORKFLOW[Math.max(0, idx - 1)];
+    setStep(prev.key);
+    if(window.showView && prev.view) showView(prev.view);
+  }
+
+  function addCaseInsurer(insurer){
+    const st = getState();
+    insurer = Object.assign({
+      id: 'ci-' + Date.now(),
+      insurer_id: '',
+      insurer_name: '',
+      email: '',
+      status: 'neodesláno',
+      sent_at: null,
+      answered_at: null,
+      note: ''
+    }, insurer || {});
+    st.insurers = st.insurers || [];
+    st.insurers.push(insurer);
+    saveState(st);
+    render();
+    return insurer;
+  }
+
+  function markRequestSent(caseInsurerId, emailSubject, emailBody){
+    const st = getState();
+    st.insurers = st.insurers || [];
+    const item = st.insurers.find(x => x.id === caseInsurerId);
+    if(item){
+      item.status = 'odesláno';
+      item.sent_at = new Date().toISOString();
+      item.request_email_subject = emailSubject || '';
+      item.request_email_body = emailBody || '';
+      st.request_log = st.request_log || [];
+      st.request_log.unshift({
+        case_insurer_id: caseInsurerId,
+        action: 'sent',
+        subject: emailSubject || '',
+        body: emailBody || '',
+        created_at: new Date().toISOString()
+      });
+      if(st.step === 'request_ready' || st.step === 'insurers_selected') st.step = 'request_sent';
+      saveState(st);
+      render();
+    }
+  }
+
+  function generateRequestEmail(insurer){
+    const client = getClientName();
+    const activity = getActivity();
+    const subject = `Poptávka pojištění podnikatelských rizik – ${client}`;
+    const body = [
+      'Dobrý den,',
+      '',
+      'obracíme se na Vás s poptávkou pojištění podnikatelských rizik pro klienta:',
+      '',
+      `Klient: ${client}`,
+      `Činnost: ${activity || 'bude doplněno v podkladech'}`,
+      '',
+      'Prosíme o zpracování nabídky dle přiložených podkladů a požadovaných rizik.',
+      '',
+      'Děkujeme.',
+      '',
+      'ASTORIE a.s.'
+    ].join('\n');
+    return { to: insurer.email || '', subject, body };
+  }
+
+  function getClientName(){
+    try{
+      if(window.BRH2 && BRH2.getCoreCase){
+        const c = BRH2.getCoreCase();
+        if(c.client && c.client.name) return c.client.name;
+      }
+      if(window.BRH102 && BRH102.clientName) return BRH102.clientName();
+      const cc = $('caseCCClient');
+      if(cc && cc.textContent.trim()) return cc.textContent.trim();
+    }catch(e){}
+    return 'Není vybrána žádná poptávka';
+  }
+
+  function getActivity(){
+    try{
+      if(window.BRH102 && BRH102.activity) return BRH102.activity();
+      const meta = $('caseCCMeta');
+      if(meta && meta.textContent) return meta.textContent.split('·')[0].trim();
+    }catch(e){}
+    return '';
+  }
+
+  function getOfferCount(){
+    try{
+      if(window.getOffersV72) return (window.getOffersV72() || []).length;
+      if(window.BRH2 && BRH2.listOffers) return (BRH2.listOffers() || []).length;
+    }catch(e){}
+    return 0;
+  }
+
+  function getRecommended(){
+    try{
+      if(window.BRH2 && BRH2.getAdvisorRecommendation) return !!BRH2.getAdvisorRecommendation();
+      if(window.BRH102 && BRH102.recommendedOffer) return !!BRH102.recommendedOffer();
+      const offers = window.getOffersV72 ? window.getOffersV72() : [];
+      return offers.some(o => o.recommended || o.is_advisor_recommended);
+    }catch(e){}
+    return false;
+  }
+
+  function suggestedStep(){
+    const st = getState();
+    const offers = getOfferCount();
+    const hasRec = getRecommended();
+    if(!getClientName() || /není vybrána/i.test(getClientName())) return 'new_case';
+    if(!st.insurers || !st.insurers.length) return 'insurers_selected';
+    if(st.insurers.some(i => i.status === 'neodesláno')) return 'request_ready';
+    if(offers < 1) return 'waiting_offers';
+    if(offers >= 1 && offers < 2) return 'offers_received';
+    if(!hasRec) return 'comparison_ready';
+    return 'client_output';
+  }
+
+  function render(){
+    const st = getState();
+    const idx = currentStepIndex();
+    const sent = (st.insurers || []).filter(i => i.status === 'odesláno').length;
+
+    text('brh210Case', '#' + caseId());
+    text('brh210Step', WORKFLOW[idx] ? WORKFLOW[idx].label : st.step);
+    text('brh210Insurers', String((st.insurers || []).length));
+    text('brh210Sent', String(sent));
+
+    const flow = $('brh210Flow');
+    if(flow){
+      flow.innerHTML = WORKFLOW.map((step, i) => {
+        const cls = i < idx ? 'done' : (i === idx ? 'active' : '');
+        return `<button type="button" class="${cls}" onclick="BRH210.setStep('${step.key}')"><b>${i+1}</b><span>${esc(step.label)}</span></button>`;
+      }).join('');
+    }
+
+    const suggested = suggestedStep();
+    const sObj = WORKFLOW.find(x => x.key === suggested) || WORKFLOW[0];
+    text('brh210NextTitle', 'Doporučený další krok: ' + sObj.label);
+    let nextText = 'Pokračujte podle workflow aktivního obchodního případu.';
+    if(suggested === 'insurers_selected') nextText = 'Vyberte pojišťovny pro poptávku. Musí být možné použít centrální DB i vlastní pojišťovnu mimo seznam.';
+    if(suggested === 'request_ready') nextText = 'Připravte a odešlete poptávku vybraným pojišťovnám.';
+    if(suggested === 'waiting_offers') nextText = 'Evidujte stav pojišťoven a čekejte na přijaté nabídky.';
+    if(suggested === 'comparison_ready') nextText = 'Porovnejte nabídky podle rizik, limitů, výluk a zdrojů.';
+    if(suggested === 'client_output') nextText = 'Připravte profesionální klientský výstup.';
+    text('brh210NextText', nextText);
+  }
+
+  function exportWorkflow(){
+    return {
+      version: VERSION,
+      case_id: caseId(),
+      state: getState(),
+      workflow: WORKFLOW,
+      client: getClientName(),
+      activity: getActivity(),
+      offer_count: getOfferCount(),
+      advisor_recommendation: getRecommended()
+    };
+  }
+
+  window.BRH210 = {
+    version: VERSION,
+    workflow: WORKFLOW,
+    getState,
+    saveState,
+    setStep,
+    nextStep,
+    previousStep,
+    addCaseInsurer,
+    markRequestSent,
+    generateRequestEmail,
+    suggestedStep,
+    render,
+    exportWorkflow
+  };
+
+  if(typeof window.showView === 'function' && !window.__BRH210_showViewWrapped){
+    window.__BRH210_showViewWrapped = true;
+    const oldShowView = window.showView;
+    window.showView = function(id){
+      oldShowView(id);
+      setTimeout(render, 150);
+      setTimeout(render, 700);
+    };
+  }
+
+  if(typeof window.applyState === 'function' && !window.__BRH210_applyStateWrapped){
+    window.__BRH210_applyStateWrapped = true;
+    const oldApply = window.applyState;
+    window.applyState = function(s){
+      oldApply(s);
+      setTimeout(render, 200);
+      setTimeout(render, 900);
+    };
+  }
+
+  setTimeout(render, 300);
+  setTimeout(render, 1200);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.2.0 - Offer Engine Foundation FULL
+// Navazuje na 2.1.0 Workflow Engine. Neodstraňuje Admin, dokumenty ani textace.
+// ============================================================
+(function(){
+  const VERSION = '2.2.0-offer-engine-foundation-full';
+  const NS = 'brh220';
+  const $ = id => document.getElementById(id);
+  const parse = (raw, fb) => { try { return raw ? JSON.parse(raw) : fb; } catch(e){ return fb; } };
+  const load = (key, fb) => parse(localStorage.getItem(NS + ':' + key), fb);
+  const save = (key, val) => localStorage.setItem(NS + ':' + key, JSON.stringify(val));
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const text = (id, val) => { const el = $(id); if(el) el.textContent = val; };
+
+  const DEFAULT_RISKS = [
+    { risk_key:'LIABILITY_OPERATION', risk_name:'Provozní odpovědnost', requested_limit:'' },
+    { risk_key:'LIABILITY_PRODUCT', risk_name:'Odpovědnost za výrobek', requested_limit:'' },
+    { risk_key:'FINANCIAL_LOSS', risk_name:'Čistá finanční škoda', requested_limit:'' },
+    { risk_key:'EMPLOYEE_DAMAGE', risk_name:'Škody způsobené zaměstnanci', requested_limit:'' },
+    { risk_key:'TAKEN_ITEMS', risk_name:'Věci převzaté / užívané', requested_limit:'' }
+  ];
+
+  function caseId(){
+    try{
+      if(window.BRH2 && BRH2.getCoreCase) return String(BRH2.getCoreCase().id || 'local');
+      if(window.BRH210 && BRH210.exportWorkflow) return String(BRH210.exportWorkflow().case_id || 'local');
+      if(typeof state !== 'undefined'){
+        if(state.activeInquiry && (state.activeInquiry.id || state.activeInquiry.dbId)) return String(state.activeInquiry.id || state.activeInquiry.dbId);
+        if(state.id) return String(state.id);
+      }
+    }catch(e){}
+    const body = document.body ? document.body.innerText || '' : '';
+    const m = body.match(/DB\s*#?(\d+)/i) || body.match(/#(\d+)\s*[–-]/);
+    return m ? String(m[1]) : 'local';
+  }
+
+  function offersMap(){
+    return load('offers_by_case', {});
+  }
+
+  function saveOffersMap(map){
+    save('offers_by_case', map || {});
+  }
+
+  function requestRisks(){
+    try{
+      if(window.BRH2 && BRH2.listRequestRisks){
+        const r = BRH2.listRequestRisks();
+        if(Array.isArray(r) && r.length) return r.map(x => ({
+          risk_key: x.risk_key || x.key,
+          risk_name: x.risk_name || x.name || x.risk_key || x.key,
+          requested_limit: x.requested_limit || x.limit || ''
+        }));
+      }
+    }catch(e){}
+    return DEFAULT_RISKS;
+  }
+
+  function listOffers(){
+    const map = offersMap();
+    const id = caseId();
+    return Array.isArray(map[id]) ? map[id] : [];
+  }
+
+  function writeOffers(items){
+    const map = offersMap();
+    map[caseId()] = (items || []).map(normalizeOffer);
+    saveOffersMap(map);
+    syncToBRH2();
+    render();
+  }
+
+  function uniqueRiskRows(rows){
+    const map = new Map();
+    (rows || []).forEach(r => {
+      const key = r.risk_key || r.risk_name;
+      if(!key) return;
+      if(!map.has(key)){
+        map.set(key, normalizeOfferRisk(r));
+      }else{
+        const old = map.get(key);
+        old.offered_limit = old.offered_limit || r.offered_limit || '';
+        old.coverage_status = old.coverage_status || r.coverage_status || 'nutno_ověřit';
+        old.exclusions = old.exclusions || r.exclusions || '';
+        old.sublimits = old.sublimits || r.sublimits || '';
+        old.source_reference = old.source_reference || r.source_reference || '';
+        old.advisor_note = old.advisor_note || r.advisor_note || '';
+      }
+    });
+    return Array.from(map.values());
+  }
+
+  function normalizeOfferRisk(r){
+    r = r || {};
+    return {
+      id: r.id || 'or-' + Date.now() + '-' + Math.random().toString(16).slice(2),
+      risk_key: r.risk_key || r.key || '',
+      risk_name: r.risk_name || r.name || r.risk_key || r.key || '',
+      requested_limit: r.requested_limit || r.requestedLimit || '',
+      offered_limit: r.offered_limit || r.offeredLimit || r.limit || '',
+      coverage_status: r.coverage_status || r.status || 'nutno_ověřit',
+      exclusions: r.exclusions || '',
+      sublimits: r.sublimits || '',
+      source_reference: r.source_reference || r.source || '',
+      advisor_note: r.advisor_note || r.note || '',
+      client_visible_note: r.client_visible_note || ''
+    };
+  }
+
+  function normalizeOffer(o){
+    o = o || {};
+    return {
+      id: o.id || 'offer-' + Date.now() + '-' + Math.random().toString(16).slice(2),
+      case_id: caseId(),
+      insurer_id: o.insurer_id || '',
+      insurer_name: o.insurer_name || o.insurer || o.company || '',
+      custom_insurer_name: o.custom_insurer_name || '',
+      product_name: o.product_name || o.product || '',
+      annual_premium: o.annual_premium || o.premium || '',
+      deductible: o.deductible || '',
+      status: o.status || 'rozpracováno',
+      is_advisor_recommended: !!o.is_advisor_recommended,
+      internal_note: o.internal_note || o.note || '',
+      client_visible_note: o.client_visible_note || '',
+      offer_risks: uniqueRiskRows(o.offer_risks || o.coverages || []),
+      created_at: o.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  function seedOfferFromRequest(insurerName){
+    const risks = requestRisks().map(r => normalizeOfferRisk({
+      risk_key: r.risk_key,
+      risk_name: r.risk_name,
+      requested_limit: r.requested_limit,
+      offered_limit: '',
+      coverage_status: 'nutno_ověřit'
+    }));
+    const offer = normalizeOffer({
+      insurer_name: insurerName || '',
+      product_name: '',
+      offer_risks: risks
+    });
+    writeOffers([offer].concat(listOffers()));
+    return offer;
+  }
+
+  function openOfferWizard(offerId){
+    const box = $('brh220OfferWizard');
+    if(!box) return;
+    const offer = offerId ? listOffers().find(o => o.id === offerId) : null;
+    $('brh220OfferId').value = offer ? offer.id : '';
+    $('brh220InsurerName').value = offer ? offer.insurer_name : '';
+    $('brh220ProductName').value = offer ? offer.product_name : '';
+    $('brh220Premium').value = offer ? offer.annual_premium : '';
+    $('brh220Deductible').value = offer ? offer.deductible : '';
+    $('brh220InternalNote').value = offer ? offer.internal_note : '';
+    $('brh220ClientNote').value = offer ? offer.client_visible_note : '';
+
+    const risks = offer ? offer.offer_risks : requestRisks().map(r => normalizeOfferRisk(r));
+    renderRiskEditor(risks);
+    box.classList.remove('hidden');
+    box.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function closeOfferWizard(){
+    const box = $('brh220OfferWizard');
+    if(box) box.classList.add('hidden');
+  }
+
+  function renderRiskEditor(risks){
+    const el = $('brh220RiskEditor');
+    if(!el) return;
+    el.innerHTML = `
+      <div class="brh220-risk-editor-head">
+        <b>Rizika v nabídce</b>
+        <span>Každý řádek musí mít risk_key / riziko, požadavek klienta, nabídnutý limit, stav a zdroj.</span>
+      </div>
+      ${(risks || []).map((r, i) => `
+        <div class="brh220-risk-row" data-risk-index="${i}">
+          <input data-field="risk_key" value="${esc(r.risk_key || '')}" placeholder="risk_key">
+          <input data-field="risk_name" value="${esc(r.risk_name || '')}" placeholder="název rizika">
+          <input data-field="requested_limit" value="${esc(r.requested_limit || '')}" placeholder="požadovaný limit">
+          <input data-field="offered_limit" value="${esc(r.offered_limit || '')}" placeholder="nabídnutý limit">
+          <select data-field="coverage_status">
+            ${['splněno','částečně','výluka','nutno_ověřit','nesplněno'].map(s => `<option value="${s}" ${r.coverage_status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+          <input data-field="source_reference" value="${esc(r.source_reference || '')}" placeholder="zdroj VPP/DPP">
+          <textarea data-field="advisor_note" placeholder="poznámka poradce">${esc(r.advisor_note || '')}</textarea>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function readRiskEditor(){
+    const rows = [];
+    document.querySelectorAll('#brh220RiskEditor .brh220-risk-row').forEach(row => {
+      const get = field => row.querySelector(`[data-field="${field}"]`)?.value || '';
+      rows.push(normalizeOfferRisk({
+        risk_key: get('risk_key'),
+        risk_name: get('risk_name'),
+        requested_limit: get('requested_limit'),
+        offered_limit: get('offered_limit'),
+        coverage_status: get('coverage_status'),
+        source_reference: get('source_reference'),
+        advisor_note: get('advisor_note')
+      }));
+    });
+    return rows;
+  }
+
+  function saveOfferFromWizard(){
+    const id = $('brh220OfferId')?.value || '';
+    const items = listOffers();
+    const old = id ? items.find(o => o.id === id) : null;
+    const offer = normalizeOffer({
+      id: id || undefined,
+      insurer_name: $('brh220InsurerName')?.value || '',
+      product_name: $('brh220ProductName')?.value || '',
+      annual_premium: $('brh220Premium')?.value || '',
+      deductible: $('brh220Deductible')?.value || '',
+      internal_note: $('brh220InternalNote')?.value || '',
+      client_visible_note: $('brh220ClientNote')?.value || '',
+      offer_risks: readRiskEditor(),
+      is_advisor_recommended: old ? old.is_advisor_recommended : false
+    });
+
+    if(!offer.insurer_name){
+      alert('Doplňte pojišťovnu.');
+      return;
+    }
+
+    const idx = items.findIndex(o => o.id === offer.id);
+    if(idx >= 0) items[idx] = offer;
+    else items.unshift(offer);
+    writeOffers(items);
+    closeOfferWizard();
+    alert('Nabídka byla uložena do Offer Engine.');
+  }
+
+  function deleteOffer(id){
+    if(!confirm('Smazat nabídku z aktivního obchodního případu?')) return;
+    writeOffers(listOffers().filter(o => o.id !== id));
+  }
+
+  function setAdvisorRecommendation(id){
+    const items = listOffers().map(o => Object.assign({}, o, { is_advisor_recommended: o.id === id }));
+    writeOffers(items);
+    if(window.BRH2 && BRH2.setAdvisorRecommendation){
+      try { BRH2.setAdvisorRecommendation(id); } catch(e) {}
+    }
+  }
+
+  function clearAdvisorRecommendation(){
+    writeOffers(listOffers().map(o => Object.assign({}, o, { is_advisor_recommended: false })));
+    if(window.BRH2 && BRH2.setAdvisorRecommendation){
+      try { BRH2.setAdvisorRecommendation(null); } catch(e) {}
+    }
+  }
+
+  function validateOffers(){
+    const errors = [];
+    listOffers().forEach(o => {
+      if(!o.case_id) errors.push(`Nabídka ${o.insurer_name || o.id}: chybí case_id.`);
+      if(!o.insurer_name && !o.insurer_id) errors.push(`Nabídka ${o.id}: chybí pojišťovna.`);
+      (o.offer_risks || []).forEach(r => {
+        if(!r.risk_key) errors.push(`${o.insurer_name}: chybí risk_key u rizika ${r.risk_name || '(bez názvu)'}.`);
+        if(!r.risk_name) errors.push(`${o.insurer_name}: chybí název rizika.`);
+      });
+    });
+    const recommended = listOffers().filter(o => o.is_advisor_recommended);
+    if(recommended.length > 1) errors.push('Více než jedna nabídka je označena jako doporučená.');
+    return { ok: errors.length === 0, errors };
+  }
+
+  function validateAndRender(){
+    const result = validateOffers();
+    text('brh220Validation', result.ok ? 'OK' : 'chyby');
+    if(!result.ok){
+      alert('Validace našla chyby:\n\n' + result.errors.join('\n'));
+    }
+    render();
+    return result;
+  }
+
+  function allRiskKeys(){
+    const keys = [];
+    listOffers().forEach(o => (o.offer_risks || []).forEach(r => {
+      if(r.risk_key && !keys.includes(r.risk_key)) keys.push(r.risk_key);
+    }));
+    requestRisks().forEach(r => {
+      if(r.risk_key && !keys.includes(r.risk_key)) keys.push(r.risk_key);
+    });
+    return keys;
+  }
+
+  function riskLabel(key){
+    const req = requestRisks().find(r => r.risk_key === key);
+    if(req) return req.risk_name || key;
+    for(const offer of listOffers()){
+      const r = (offer.offer_risks || []).find(x => x.risk_key === key);
+      if(r) return r.risk_name || key;
+    }
+    return key;
+  }
+
+  function renderComparison(){
+    const box = document.getElementById('offerComparisonMatrixV72');
+    if(!box) return;
+    const offers = listOffers();
+    if(!offers.length){
+      box.innerHTML = '<div class="textation-empty">Nejsou vložené nabídky pro porovnání. Vytvořte nabídku v Offer Engine.</div>';
+      return;
+    }
+    const risks = allRiskKeys();
+    const rec = offers.find(o => o.is_advisor_recommended);
+    box.innerHTML = `
+      <div class="unified-analysis-v73 case-analysis-v74 brh220-analysis">
+        <div>
+          <p class="eyebrow">Offer Engine 2.2.0</p>
+          <h3>${rec ? 'Doporučená varianta poradce: ' + esc(rec.insurer_name) : 'Doporučená varianta zatím není vybraná'}</h3>
+          <p>${rec ? 'Doporučení bylo potvrzeno poradcem.' : 'Aplikace nic nedoporučuje automaticky. Doporučení musí potvrdit poradce.'}</p>
+        </div>
+        <div class="analysis-metrics-v73">
+          <div><b>${offers.length}</b><span>nabídky</span></div>
+          <div><b>${risks.length}</b><span>rizika</span></div>
+          <div><b>${rec ? 'ano' : 'ne'}</b><span>doporučení</span></div>
+        </div>
+      </div>
+      <div class="comparison-table-wrap-v72">
+        <table class="comparison-table-v72">
+          <thead>
+            <tr><th>Riziko / požadavek</th>${offers.map(o => `<th>${esc(o.insurer_name)}${o.is_advisor_recommended ? ' ⭐' : ''}</th>`).join('')}<th>Makléřská poznámka</th></tr>
+          </thead>
+          <tbody>
+            ${risks.map(key => `<tr>
+              <td><b>${esc(riskLabel(key))}</b><br><small>${esc(key)}</small></td>
+              ${offers.map(o => {
+                const r = (o.offer_risks || []).find(x => x.risk_key === key);
+                return `<td>${r ? `<b>${esc(r.coverage_status)}</b><br>Pož.: ${esc(r.requested_limit || '—')}<br>Nab.: ${esc(r.offered_limit || '—')}<br><small>${esc(r.source_reference || '')}</small>` : '—'}</td>`;
+              }).join('')}
+              <td>Ověřit limit, stav krytí, výluky, sublimity a zdroj.</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderCards(){
+    const box = $('brh220OfferCards');
+    if(!box) return;
+    const offers = listOffers();
+    if(!offers.length){
+      box.innerHTML = '<div class="textation-empty">Zatím není vytvořená žádná nabídka v Offer Engine.</div>';
+      return;
+    }
+    box.innerHTML = offers.map(o => `
+      <article class="brh220-offer-card ${o.is_advisor_recommended ? 'recommended' : ''}">
+        <div class="brh220-offer-head">
+          <div>
+            <span>${esc(o.status || 'rozpracováno')}</span>
+            <h3>${esc(o.insurer_name || 'bez pojišťovny')}</h3>
+            <p>${esc(o.product_name || 'produkt není doplněn')}</p>
+          </div>
+          ${o.is_advisor_recommended ? '<strong>Doporučeno poradcem</strong>' : ''}
+        </div>
+        <div class="brh220-offer-metrics">
+          <div><b>${esc(o.annual_premium || '—')}</b><span>pojistné</span></div>
+          <div><b>${esc(o.deductible || '—')}</b><span>spoluúčast</span></div>
+          <div><b>${(o.offer_risks || []).length}</b><span>rizik</span></div>
+        </div>
+        <div class="brh220-risk-list">
+          ${(o.offer_risks || []).map(r => `
+            <div class="brh220-risk-pill">
+              <b>${esc(r.risk_name || r.risk_key)}</b>
+              <span>${esc(r.offered_limit || 'bez limitu')} · ${esc(r.coverage_status)}</span>
+            </div>`).join('')}
+        </div>
+        <div class="brh220-card-actions">
+          <button class="primary small-btn" type="button" onclick="BRH220.setAdvisorRecommendation('${esc(o.id)}')">Doporučit</button>
+          <button class="secondary small-btn" type="button" onclick="BRH220.openOfferWizard('${esc(o.id)}')">Upravit</button>
+          <button class="secondary small-btn" type="button" onclick="BRH220.deleteOffer('${esc(o.id)}')">Smazat</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function render(){
+    const offers = listOffers();
+    const riskRows = offers.reduce((s,o) => s + (o.offer_risks || []).length, 0);
+    const valid = validateOffers();
+    const rec = offers.find(o => o.is_advisor_recommended);
+    text('brh220OfferCount', String(offers.length));
+    text('brh220RiskRows', String(riskRows));
+    text('brh220Validation', valid.ok ? 'OK' : 'chyby');
+    text('brh220Recommendation', rec ? 'ano' : 'ne');
+    renderCards();
+    if(document.getElementById('offerComparisonMatrixV72')) renderComparison();
+  }
+
+  function syncToBRH2(){
+    if(!window.BRH2 || !BRH2.upsertOffer) return;
+    listOffers().forEach(o => {
+      try{
+        BRH2.upsertOffer({
+          id: o.id,
+          case_id: o.case_id,
+          insurer_name: o.insurer_name,
+          product_name: o.product_name,
+          annual_premium: o.annual_premium,
+          deductible: o.deductible,
+          is_advisor_recommended: o.is_advisor_recommended,
+          offer_risks: (o.offer_risks || []).map(r => ({
+            risk_key: r.risk_key,
+            risk_name: r.risk_name,
+            requested_limit: r.requested_limit,
+            offered_limit: r.offered_limit,
+            coverage_status: r.coverage_status,
+            source_reference: r.source_reference,
+            advisor_note: r.advisor_note
+          }))
+        });
+      }catch(e){}
+    });
+  }
+
+  window.BRH220 = {
+    version: VERSION,
+    caseId,
+    requestRisks,
+    listOffers,
+    writeOffers,
+    seedOfferFromRequest,
+    openOfferWizard,
+    closeOfferWizard,
+    saveOfferFromWizard,
+    deleteOffer,
+    setAdvisorRecommendation,
+    clearAdvisorRecommendation,
+    validateOffers,
+    validateAndRender,
+    renderComparison,
+    render,
+    normalizeOffer,
+    normalizeOfferRisk
+  };
+
+  // Bezpečné přesměrování starších čteček nabídek na nový engine, pokud už jsou v něm data
+  const oldGetOffers = window.getOffersV72;
+  window.getOffersV72 = function(){
+    const engineOffers = listOffers();
+    if(engineOffers.length) {
+      return engineOffers.map(o => ({
+        id: o.id,
+        insurer: o.insurer_name,
+        product: o.product_name,
+        premium: o.annual_premium,
+        deductible: o.deductible,
+        recommended: o.is_advisor_recommended,
+        coverages: o.offer_risks.map(r => ({
+          risk_key: r.risk_key,
+          risk: r.risk_name,
+          limit: r.offered_limit,
+          state: r.coverage_status,
+          source: r.source_reference,
+          note: r.advisor_note
+        }))
+      }));
+    }
+    return oldGetOffers ? oldGetOffers() : [];
+  };
+
+  const oldRecommend = window.recommendOfferV72;
+  window.recommendOfferV72 = function(id){
+    const exists = listOffers().find(o => o.id === id);
+    if(exists) return setAdvisorRecommendation(id);
+    if(oldRecommend) return oldRecommend.apply(this, arguments);
+  };
+
+  if(typeof window.showView === 'function' && !window.__BRH220_showViewWrapped){
+    window.__BRH220_showViewWrapped = true;
+    const oldShow = window.showView;
+    window.showView = function(id){
+      oldShow(id);
+      setTimeout(render, 180);
+      setTimeout(render, 800);
+    };
+  }
+
+  setTimeout(render, 300);
+  setTimeout(render, 1200);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.3.0 - Textation & Document Management
+// ============================================================
+(function(){
+ const NS='brh230';
+ const $=id=>document.getElementById(id);
+ const parse=(r,f)=>{try{return r?JSON.parse(r):f}catch(e){return f}};
+ const load=(k,f)=>parse(localStorage.getItem(NS+':'+k),f);
+ const save=(k,v)=>localStorage.setItem(NS+':'+k,JSON.stringify(v));
+ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+ let activeTab='private';
+
+ function templates(){ return load('templates',[]); }
+ function saveTemplates(v){ save('templates',v); }
+
+ function docs(){ return load('documents',[]); }
+ function saveDocs(v){ save('documents',v); }
+
+ function switchTab(tab){
+   activeTab=tab;
+   document.querySelectorAll('.brh230-tabs button').forEach(b=>b.classList.remove('active'));
+   const map={private:'brh230TabPrivate',proposal:'brh230TabProposal',central:'brh230TabCentral',documents:'brh230TabDocuments'};
+   const btn=$(map[tab]); if(btn) btn.classList.add('active');
+   render();
+ }
+
+ function openTemplateEditor(id){
+   const t=id?templates().find(x=>x.id===id):null;
+   const box=$('brh230TemplateEditor');
+   if(!box) return;
+   box.classList.remove('hidden');
+   box.innerHTML=`
+    <div class="section-head compact-head">
+      <div><h3>${t?'Upravit':'Nová'} textace</h3></div>
+      <button class="secondary" onclick="BRH230.closeEditor()">Zavřít</button>
+    </div>
+    <input type="hidden" id="brh230EditId" value="${esc(t?t.id:'')}">
+    <div class="brh230-grid">
+      <label>Název<input id="brh230Title" value="${esc(t?t.title:'')}"></label>
+      <label>Tag<input id="brh230Tag" value="${esc(t?t.tag:'')}"></label>
+      <label>Riziko<input id="brh230Risk" value="${esc(t?t.risk_key:'')}"></label>
+      <label>Pojišťovna<input id="brh230Insurer" value="${esc(t?t.insurer_name||'')}"></label>
+    </div>
+    <label>Textace<textarea id="brh230Body">${esc(t?t.body:'')}</textarea></label>
+    <div class="brh230-actions">
+      <button class="primary" onclick="BRH230.saveTemplate()">Uložit</button>
+      <button class="secondary" onclick="BRH230.proposeTemplate()">Navrhnout do centrální DB</button>
+    </div>
+   `;
+ }
+
+ function closeEditor(){
+   const box=$('brh230TemplateEditor');
+   if(box) box.classList.add('hidden');
+ }
+
+ function saveTemplate(){
+   const arr=templates();
+   const id=$('brh230EditId').value || ('txt-'+Date.now());
+   const item={
+     id,
+     scope:'private',
+     status:'draft',
+     title:$('brh230Title').value,
+     tag:$('brh230Tag').value,
+     risk_key:$('brh230Risk').value,
+     insurer_name:$('brh230Insurer').value,
+     body:$('brh230Body').value,
+     updated_at:new Date().toISOString()
+   };
+   const idx=arr.findIndex(x=>x.id===id);
+   if(idx>=0) arr[idx]=Object.assign({},arr[idx],item);
+   else arr.unshift(item);
+   saveTemplates(arr);
+   render();
+   alert('Textace byla uložena.');
+ }
+
+ function proposeTemplate(){
+   saveTemplate();
+   const arr=templates();
+   const id=$('brh230EditId').value;
+   const item=arr.find(x=>x.id===id);
+   if(item){
+      item.scope='proposal';
+      item.status='proposed';
+   }
+   saveTemplates(arr);
+   render();
+   alert('Textace byla navržena do centrální databáze.');
+ }
+
+ function approveTemplate(id){
+   const arr=templates();
+   const item=arr.find(x=>x.id===id);
+   if(item){
+     item.scope='central';
+     item.status='approved';
+     saveTemplates(arr);
+     render();
+   }
+ }
+
+ function deleteTemplate(id){
+   if(!confirm('Smazat textaci?')) return;
+   saveTemplates(templates().filter(x=>x.id!==id));
+   render();
+ }
+
+ function addDocument(){
+   const arr=docs();
+   arr.unshift({
+     id:'doc-'+Date.now(),
+     title:'Nový dokument',
+     category:'obecné',
+     version:'1.0',
+     created_at:new Date().toISOString()
+   });
+   saveDocs(arr);
+   render();
+ }
+
+ function filteredTemplates(){
+   const q=($('brh230Search')?.value||'').toLowerCase();
+   const risk=$('brh230FilterRisk')?.value||'';
+   return templates().filter(t=>{
+      if(activeTab!=='documents' && t.scope!==activeTab) return false;
+      if(risk && t.risk_key!==risk) return false;
+      const txt=(t.title+' '+t.tag+' '+t.body+' '+(t.insurer_name||'')).toLowerCase();
+      return !q || txt.includes(q);
+   });
+ }
+
+ function renderTemplates(){
+   const list=filteredTemplates();
+   return list.length ? list.map(t=>`
+    <article class="brh230-card">
+      <div class="brh230-head">
+        <div>
+          <span>${esc(t.scope)}</span>
+          <h3>${esc(t.title||'Bez názvu')}</h3>
+          <p>${esc(t.tag||'bez tagu')} · ${esc(t.risk_key||'bez rizika')}</p>
+        </div>
+      </div>
+      <div class="brh230-body">${esc((t.body||'').slice(0,320))}</div>
+      <div class="brh230-actions">
+        <button class="primary small-btn" onclick="BRH230.openTemplateEditor('${esc(t.id)}')">Upravit</button>
+        ${t.scope!=='central'?`<button class="secondary small-btn" onclick="BRH230.proposeTemplateById('${esc(t.id)}')">Navrhnout</button>`:''}
+        ${t.scope==='proposal'?`<button class="secondary small-btn" onclick="BRH230.approveTemplate('${esc(t.id)}')">Schválit</button>`:''}
+        <button class="secondary small-btn" onclick="BRH230.deleteTemplate('${esc(t.id)}')">Smazat</button>
+      </div>
+    </article>
+   `).join('') : '<div class="textation-empty">Žádné záznamy.</div>';
+ }
+
+ function proposeTemplateById(id){
+   const arr=templates();
+   const item=arr.find(x=>x.id===id);
+   if(item){
+      item.scope='proposal';
+      item.status='proposed';
+      saveTemplates(arr);
+      render();
+   }
+ }
+
+ function renderDocuments(){
+   const list=docs();
+   return `
+     <div class="brh230-actions">
+       <button class="primary" onclick="BRH230.addDocument()">+ Přidat dokument</button>
+     </div>
+     ${list.map(d=>`
+      <article class="brh230-card">
+        <div class="brh230-head">
+          <div>
+            <span>${esc(d.category||'dokument')}</span>
+            <h3>${esc(d.title||'Bez názvu')}</h3>
+            <p>Verze ${esc(d.version||'1.0')}</p>
+          </div>
+        </div>
+      </article>
+     `).join('')}
+   `;
+ }
+
+ function render(){
+   const box=$('brh230LibraryContent');
+   if(!box) return;
+   box.innerHTML = activeTab==='documents' ? renderDocuments() : renderTemplates();
+ }
+
+ window.BRH230={
+   switchTab,
+   openTemplateEditor,
+   closeEditor,
+   saveTemplate,
+   proposeTemplate,
+   proposeTemplateById,
+   approveTemplate,
+   deleteTemplate,
+   addDocument,
+   render
+ };
+
+ setTimeout(render,400);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.4.0 - Client Output & Reporting
+// ============================================================
+(function(){
+ const $=id=>document.getElementById(id);
+ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+ function offers(){
+   try{
+     if(window.BRH220 && BRH220.listOffers) return BRH220.listOffers();
+     if(window.BRH2 && BRH2.listOffers) return BRH2.listOffers();
+   }catch(e){}
+   return [];
+ }
+
+ function recommendedOffer(){
+   return offers().find(o=>o.is_advisor_recommended);
+ }
+
+ function allRisks(){
+   const arr=[];
+   offers().forEach(o=>(o.offer_risks||[]).forEach(r=>{
+     if(!arr.find(x=>x.risk_key===r.risk_key)){
+       arr.push(r);
+     }
+   }));
+   return arr;
+ }
+
+ function renderSummary(){
+   const off=offers();
+   const rec=recommendedOffer();
+   const risks=allRisks();
+
+   const t=(id,v)=>{const el=$(id); if(el) el.textContent=v;};
+   t('brh240Offers', String(off.length));
+   t('brh240Risks', String(risks.length));
+   t('brh240Recommended', rec?'ano':'ne');
+   t('brh240Status', off.length?'připraven':'čeká');
+ }
+
+ function generateClientOutput(){
+   const off=offers();
+   const rec=recommendedOffer();
+   const preview=$('brh240ClientPreview');
+   if(!preview) return;
+
+   if(!off.length){
+      preview.innerHTML='<div class="textation-empty">Nejsou vložené nabídky.</div>';
+      return;
+   }
+
+   const intro=$('brh240Intro')?.value||'';
+   const conclusion=$('brh240Conclusion')?.value||'';
+
+   preview.innerHTML=`
+    <div class="brh240-report">
+      <div class="brh240-brand">
+        <div>
+          <p>ASTORIE a.s.</p>
+          <h1>Porovnání nabídek pojištění podnikatelských rizik</h1>
+          <span>Profesionální makléřský výstup</span>
+        </div>
+      </div>
+
+      <section class="brh240-section">
+        <h2>Úvodní shrnutí</h2>
+        <p>${esc(intro)}</p>
+      </section>
+
+      <section class="brh240-section">
+        <h2>Přehled nabídek</h2>
+        <div class="brh240-offers">
+          ${off.map(o=>`
+            <article class="brh240-offer ${o.is_advisor_recommended?'recommended':''}">
+              <header>
+                <div>
+                  <h3>${esc(o.insurer_name||'Pojišťovna')}</h3>
+                  <p>${esc(o.product_name||'Produkt')}</p>
+                </div>
+                ${o.is_advisor_recommended?'<strong>Doporučeno poradcem</strong>':''}
+              </header>
+
+              <div class="brh240-metrics">
+                <div><b>${esc(o.annual_premium||'—')}</b><span>Roční pojistné</span></div>
+                <div><b>${esc(o.deductible||'—')}</b><span>Spoluúčast</span></div>
+                <div><b>${(o.offer_risks||[]).length}</b><span>Rizik</span></div>
+              </div>
+
+              <table class="brh240-risk-table">
+                <thead>
+                  <tr>
+                    <th>Riziko</th>
+                    <th>Požadavek</th>
+                    <th>Nabídka</th>
+                    <th>Stav</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(o.offer_risks||[]).map(r=>`
+                    <tr>
+                      <td>${esc(r.risk_name||r.risk_key)}</td>
+                      <td>${esc(r.requested_limit||'—')}</td>
+                      <td>${esc(r.offered_limit||'—')}</td>
+                      <td>${esc(r.coverage_status||'nutno ověřit')}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+
+              ${o.client_visible_note?`
+                <div class="brh240-client-note">
+                  <b>Poznámka pro klienta</b>
+                  <p>${esc(o.client_visible_note)}</p>
+                </div>
+              `:''}
+            </article>
+          `).join('')}
+        </div>
+      </section>
+
+      <section class="brh240-section">
+        <h2>Doporučení poradce</h2>
+        <p>${esc(conclusion)}</p>
+        ${rec?`
+          <div class="brh240-recommendation">
+            <b>Doporučená varianta:</b>
+            <span>${esc(rec.insurer_name)} – ${esc(rec.product_name||'varianta')}</span>
+          </div>
+        `:'<p>Zatím nebyla vybrána doporučená varianta.</p>'}
+      </section>
+
+      <section class="brh240-section">
+        <h2>Důležité upozornění</h2>
+        <p>Výstup představuje makléřské porovnání nabídek. Rozhodující jsou vždy pojistné podmínky konkrétní pojišťovny, výluky, sublimity a individuální underwriting.</p>
+      </section>
+    </div>
+   `;
+
+   renderSummary();
+ }
+
+ window.BRH240={
+   generateClientOutput,
+   renderSummary
+ };
+
+ setTimeout(renderSummary,400);
+})();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.5.0 - Insurer Request & Communication
+// ============================================================
+(function(){
+ const NS='brh250';
+ const $=id=>document.getElementById(id);
+ const parse=(r,f)=>{try{return r?JSON.parse(r):f}catch(e){return f}};
+ const load=(k,f)=>parse(localStorage.getItem(NS+':'+k),f);
+ const save=(k,v)=>localStorage.setItem(NS+':'+k,JSON.stringify(v));
+ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+ function requests(){ return load('requests',[]); }
+ function saveRequests(v){ save('requests',v); }
+
+ function openRequestWizard(id){
+   const req=id?requests().find(x=>x.id===id):null;
+   const box=$('brh250Wizard');
+   if(!box) return;
+
+   box.classList.remove('hidden');
+   box.innerHTML=`
+    <div class="section-head compact-head">
+      <div>
+        <h3>${req?'Upravit':'Nová'} poptávka</h3>
+        <p class="muted">Evidence komunikace s pojišťovnami.</p>
+      </div>
+      <button class="secondary" onclick="BRH250.closeRequestWizard()">Zavřít</button>
+    </div>
+
+    <input type="hidden" id="brh250Id" value="${esc(req?req.id:'')}">
+
+    <div class="brh250-form">
+      <label>Pojišťovna
+        <input id="brh250Insurer" value="${esc(req?req.insurer_name:'')}">
+      </label>
+
+      <label>E-mail
+        <input id="brh250Email" value="${esc(req?req.email:'')}">
+      </label>
+
+      <label>Termín odpovědi
+        <input type="date" id="brh250Deadline" value="${esc(req?req.deadline:'')}">
+      </label>
+
+      <label>Předmět
+        <input id="brh250Subject" value="${esc(req?req.subject:'Poptávka pojištění podnikatelských rizik')}">
+      </label>
+    </div>
+
+    <label>Zpráva
+      <textarea id="brh250Body">${esc(req?req.body:'Dobrý den, zasíláme poptávku pojištění podnikatelských rizik.')}</textarea>
+    </label>
+
+    <label>Interní poznámka
+      <textarea id="brh250Internal">${esc(req?req.internal_note:'')}</textarea>
+    </label>
+
+    <div class="brh250-actions">
+      <button class="primary" onclick="BRH250.saveRequest()">Uložit</button>
+      <button class="secondary" onclick="BRH250.markSent()">Označit jako odeslané</button>
+    </div>
+   `;
+ }
+
+ function closeRequestWizard(){
+   const box=$('brh250Wizard');
+   if(box) box.classList.add('hidden');
+ }
+
+ function saveRequest(){
+   const arr=requests();
+   const id=$('brh250Id').value || ('req-'+Date.now());
+
+   const item={
+     id,
+     insurer_name:$('brh250Insurer').value,
+     email:$('brh250Email').value,
+     deadline:$('brh250Deadline').value,
+     subject:$('brh250Subject').value,
+     body:$('brh250Body').value,
+     internal_note:$('brh250Internal').value,
+     status:'rozpracováno',
+     updated_at:new Date().toISOString()
+   };
+
+   const idx=arr.findIndex(x=>x.id===id);
+   if(idx>=0) arr[idx]=Object.assign({},arr[idx],item);
+   else arr.unshift(item);
+
+   saveRequests(arr);
+   render();
+   alert('Poptávka byla uložena.');
+ }
+
+ function markSent(){
+   const id=$('brh250Id').value;
+   const arr=requests();
+   const item=arr.find(x=>x.id===id);
+   if(item){
+      item.status='odesláno';
+      item.sent_at=new Date().toISOString();
+      saveRequests(arr);
+      render();
+      alert('Poptávka označena jako odeslaná.');
+   }
+ }
+
+ function addReply(id,text){
+   const arr=requests();
+   const item=arr.find(x=>x.id===id);
+   if(item){
+      item.reply=text;
+      item.reply_at=new Date().toISOString();
+      item.status='odpověď přijata';
+      saveRequests(arr);
+      render();
+   }
+ }
+
+ function renderTimeline(){
+   const box=$('brh250Timeline');
+   if(!box) return;
+
+   const arr=requests();
+
+   if(!arr.length){
+      box.innerHTML='<div class="textation-empty">Nejsou evidované poptávky.</div>';
+      return;
+   }
+
+   box.innerHTML=arr.map(r=>`
+    <article class="brh250-card">
+      <div class="brh250-head">
+        <div>
+          <span>${esc(r.status||'rozpracováno')}</span>
+          <h3>${esc(r.insurer_name||'Pojišťovna')}</h3>
+          <p>${esc(r.email||'bez e-mailu')}</p>
+        </div>
+      </div>
+
+      <div class="brh250-meta">
+        <div><b>${esc(r.deadline||'—')}</b><span>Termín odpovědi</span></div>
+        <div><b>${r.sent_at?'ano':'ne'}</b><span>Odesláno</span></div>
+        <div><b>${r.reply_at?'ano':'ne'}</b><span>Odpověď</span></div>
+      </div>
+
+      <div class="brh250-message">
+        <b>Předmět</b>
+        <p>${esc(r.subject||'')}</p>
+
+        <b>Zpráva</b>
+        <p>${esc((r.body||'').slice(0,500))}</p>
+      </div>
+
+      ${r.reply?`
+       <div class="brh250-reply">
+         <b>Odpověď pojišťovny</b>
+         <p>${esc(r.reply)}</p>
+       </div>
+      `:''}
+
+      <div class="brh250-actions">
+        <button class="primary small-btn" onclick="BRH250.openRequestWizard('${esc(r.id)}')">Upravit</button>
+        <button class="secondary small-btn" onclick="BRH250.quickReply('${esc(r.id)}')">Přidat odpověď</button>
+      </div>
+    </article>
+   `).join('');
+ }
+
+ function quickReply(id){
+   const txt=prompt('Zadejte odpověď pojišťovny:');
+   if(txt) addReply(id,txt);
+ }
+
+ function renderStats(){
+   const arr=requests();
+   const sent=arr.filter(x=>x.sent_at).length;
+   const replies=arr.filter(x=>x.reply_at).length;
+   const deadlines=arr.filter(x=>x.deadline).length;
+
+   const t=(id,v)=>{const el=$(id); if(el) el.textContent=v;};
+
+   t('brh250RequestCount', String(arr.length));
+   t('brh250SentCount', String(sent));
+   t('brh250ReplyCount', String(replies));
+   t('brh250DeadlineCount', String(deadlines));
+ }
+
+ function render(){
+   renderStats();
+   renderTimeline();
+ }
+
+ window.BRH250={
+   openRequestWizard,
+   closeRequestWizard,
+   saveRequest,
+   markSent,
+   addReply,
+   quickReply,
+   render
+ };
+
+ setTimeout(render,400);
+})();
+
+
+
+
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.6.1
+// Auth Rollback Stable
+// Odstraněna konfliktní BRH260Auth vrstva.
+// Tato vrstva pouze stabilizuje login eventy a neoverrideuje router.
+// ============================================================
+(function(){
+  const VERSION = '2.6.1-auth-rollback-stable';
+
+  function qs(sel){ return document.querySelector(sel); }
+
+  function loginFields(){
+    const email =
+      document.getElementById('loginEmail') ||
+      qs('input[type="email"]') ||
+      qs('input[name="email"]') ||
+      Array.from(document.querySelectorAll('input')).find(i => /email|mail/i.test((i.id||'') + ' ' + (i.name||'') + ' ' + (i.placeholder||'')));
+
+    const password =
+      document.getElementById('loginPassword') ||
+      qs('input[type="password"]') ||
+      qs('input[name="password"]') ||
+      Array.from(document.querySelectorAll('input')).find(i => /heslo|password/i.test((i.id||'') + ' ' + (i.name||'') + ' ' + (i.placeholder||'')));
+
+    return { email, password };
+  }
+
+  function loginButton(){
+    return Array.from(document.querySelectorAll('button,input[type="submit"],input[type="button"]')).find(btn => {
+      const txt = (btn.innerText || btn.value || '').trim();
+      return /Přihlásit|Login|Sign in/i.test(txt);
+    });
+  }
+
+  function isLoginVisible(){
+    const { email, password } = loginFields();
+    const text = document.body ? (document.body.innerText || '') : '';
+    const appVisible = /PRACOVNÍ REŽIM|Dashboard|Poptávka|Nabídky|Porovnání|Zpráva|Admin/i.test(text);
+    return !!(email && password && /Přihlášení|Přihlásit/i.test(text) && !appVisible);
+  }
+
+  function callNativeLogin(){
+    const candidates = [
+      'login',
+      'doLogin',
+      'handleLogin',
+      'loginUser',
+      'submitLogin',
+      'appLogin',
+      'performLogin',
+      'enterApp'
+    ];
+
+    for(const name of candidates){
+      if(typeof window[name] === 'function' && !window[name].__BRH261Calling){
+        try {
+          window[name].__BRH261Calling = true;
+          const result = window[name]();
+          window[name].__BRH261Calling = false;
+          return true;
+        } catch(e) {
+          window[name].__BRH261Calling = false;
+          console.warn('[BRH 2.6.1] Login function failed:', name, e);
+        }
+      }
+    }
+    return false;
+  }
+
+  function fallbackSessionBridge(){
+    const { email } = loginFields();
+    const value = email && email.value ? email.value.trim() : 'admin@astorie.local';
+
+    const user = {
+      email: value,
+      name: value.includes('poradce') ? 'Poradce ASTORIE' : 'Administrátor ASTORIE',
+      role: value.includes('poradce') ? 'advisor' : 'admin'
+    };
+
+    try {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('brh_current_user', JSON.stringify(user));
+      sessionStorage.setItem('currentUser', JSON.stringify(user));
+      window.currentUser = user;
+      window.BRH_CURRENT_USER = user;
+    } catch(e){}
+
+    const renderCandidates = ['init','renderApp','showApp','renderDashboard'];
+    for(const name of renderCandidates){
+      if(typeof window[name] === 'function'){
+        try {
+          window[name]();
+          return true;
+        } catch(e) {
+          console.warn('[BRH 2.6.1] Render function failed:', name, e);
+        }
+      }
+    }
+
+    if(typeof window.showView === 'function'){
+      try {
+        window.showView('dashboard');
+        return true;
+      } catch(e){}
+    }
+
+    return false;
+  }
+
+  function handleLogin(ev){
+    if(!isLoginVisible()) return;
+    if(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+
+    const ok = callNativeLogin();
+    if(!ok) fallbackSessionBridge();
+
+    setTimeout(cleanLoginLeak, 250);
+    setTimeout(cleanLoginLeak, 900);
+  }
+
+  function bindLogin(){
+    const btn = loginButton();
+    if(btn && !btn.__BRH261Bound){
+      btn.__BRH261Bound = true;
+      btn.addEventListener('click', handleLogin, true);
+    }
+
+    const { email, password } = loginFields();
+    [email, password].forEach(el => {
+      if(el && !el.__BRH261EnterBound){
+        el.__BRH261EnterBound = true;
+        el.addEventListener('keydown', e => {
+          if(e.key === 'Enter') handleLogin(e);
+        }, true);
+      }
+    });
+
+    Array.from(document.querySelectorAll('form')).forEach(form => {
+      if(!form.__BRH261Bound){
+        form.__BRH261Bound = true;
+        form.addEventListener('submit', handleLogin, true);
+      }
+    });
+  }
+
+  function cleanLoginLeak(){
+    const ids = ['brh230LibraryPanel','brh240ClientPanel','brh250Panel','brh251ModuleWorkspace'];
+
+    if(isLoginVisible()){
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+      });
+      return;
+    }
+
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = '';
+    });
+  }
+
+  function boot(){
+    bindLogin();
+    cleanLoginLeak();
+  }
+
+  window.BRH261AuthRollback = {
+    version: VERSION,
+    isLoginVisible,
+    bindLogin,
+    handleLogin,
+    callNativeLogin,
+    fallbackSessionBridge,
+    cleanLoginLeak
+  };
+
+  setTimeout(boot, 100);
+  setTimeout(boot, 500);
+  setTimeout(boot, 1200);
+
+  if(document.body){
+    const observer = new MutationObserver(() => {
+      clearTimeout(window.__BRH261Timer);
+      window.__BRH261Timer = setTimeout(boot, 120);
+    });
+    observer.observe(document.body, { childList:true, subtree:true });
+  }
+})();

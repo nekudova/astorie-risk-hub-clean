@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub 2.6.1 – Auth Rollback Stable FULL
+Odstraňuje konfliktní BRH260Auth vrstvu a vrací stabilní login/render flow.
