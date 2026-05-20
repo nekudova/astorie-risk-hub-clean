@@ -7039,769 +7039,126 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
 
 
 // ============================================================
-// ASTORIE Business Risk Hub 2.3.0 - Textation & Document Management
+// ASTORIE Business Risk Hub 2.6.1 FINAL
+// Production Merge on stable 2.2.0 core
 // ============================================================
 (function(){
- const NS='brh230';
- const $=id=>document.getElementById(id);
- const parse=(r,f)=>{try{return r?JSON.parse(r):f}catch(e){return f}};
- const load=(k,f)=>parse(localStorage.getItem(NS+':'+k),f);
- const save=(k,v)=>localStorage.setItem(NS+':'+k,JSON.stringify(v));
- const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
- let activeTab='private';
+  function isLoggedIn(){
+    const login = document.getElementById('loginView');
+    const app = document.getElementById('appView');
 
- function templates(){ return load('templates',[]); }
- function saveTemplates(v){ save('templates',v); }
+    const loginHidden = !login || login.classList.contains('hidden');
+    const appVisible = app && !app.classList.contains('hidden');
 
- function docs(){ return load('documents',[]); }
- function saveDocs(v){ save('documents',v); }
+    return loginHidden && appVisible;
+  }
 
- function switchTab(tab){
-   activeTab=tab;
-   document.querySelectorAll('.brh230-tabs button').forEach(b=>b.classList.remove('active'));
-   const map={private:'brh230TabPrivate',proposal:'brh230TabProposal',central:'brh230TabCentral',documents:'brh230TabDocuments'};
-   const btn=$(map[tab]); if(btn) btn.classList.add('active');
-   render();
- }
+  function ensureWorkspace(){
+    const app =
+      document.getElementById('appView') ||
+      document.querySelector('.app-shell') ||
+      document.querySelector('main');
 
- function openTemplateEditor(id){
-   const t=id?templates().find(x=>x.id===id):null;
-   const box=$('brh230TemplateEditor');
-   if(!box) return;
-   box.classList.remove('hidden');
-   box.innerHTML=`
-    <div class="section-head compact-head">
-      <div><h3>${t?'Upravit':'Nová'} textace</h3></div>
-      <button class="secondary" onclick="BRH230.closeEditor()">Zavřít</button>
-    </div>
-    <input type="hidden" id="brh230EditId" value="${esc(t?t.id:'')}">
-    <div class="brh230-grid">
-      <label>Název<input id="brh230Title" value="${esc(t?t.title:'')}"></label>
-      <label>Tag<input id="brh230Tag" value="${esc(t?t.tag:'')}"></label>
-      <label>Riziko<input id="brh230Risk" value="${esc(t?t.risk_key:'')}"></label>
-      <label>Pojišťovna<input id="brh230Insurer" value="${esc(t?t.insurer_name||'')}"></label>
-    </div>
-    <label>Textace<textarea id="brh230Body">${esc(t?t.body:'')}</textarea></label>
-    <div class="brh230-actions">
-      <button class="primary" onclick="BRH230.saveTemplate()">Uložit</button>
-      <button class="secondary" onclick="BRH230.proposeTemplate()">Navrhnout do centrální DB</button>
-    </div>
-   `;
- }
+    if(!app) return null;
 
- function closeEditor(){
-   const box=$('brh230TemplateEditor');
-   if(box) box.classList.add('hidden');
- }
+    let root = document.getElementById('brh261FinalWorkspace');
 
- function saveTemplate(){
-   const arr=templates();
-   const id=$('brh230EditId').value || ('txt-'+Date.now());
-   const item={
-     id,
-     scope:'private',
-     status:'draft',
-     title:$('brh230Title').value,
-     tag:$('brh230Tag').value,
-     risk_key:$('brh230Risk').value,
-     insurer_name:$('brh230Insurer').value,
-     body:$('brh230Body').value,
-     updated_at:new Date().toISOString()
-   };
-   const idx=arr.findIndex(x=>x.id===id);
-   if(idx>=0) arr[idx]=Object.assign({},arr[idx],item);
-   else arr.unshift(item);
-   saveTemplates(arr);
-   render();
-   alert('Textace byla uložena.');
- }
+    if(!root){
+      root = document.createElement('section');
+      root.id = 'brh261FinalWorkspace';
+      root.className = 'brh261-final-workspace';
+      app.appendChild(root);
+    }
 
- function proposeTemplate(){
-   saveTemplate();
-   const arr=templates();
-   const id=$('brh230EditId').value;
-   const item=arr.find(x=>x.id===id);
-   if(item){
-      item.scope='proposal';
-      item.status='proposed';
-   }
-   saveTemplates(arr);
-   render();
-   alert('Textace byla navržena do centrální databáze.');
- }
+    return root;
+  }
 
- function approveTemplate(id){
-   const arr=templates();
-   const item=arr.find(x=>x.id===id);
-   if(item){
-     item.scope='central';
-     item.status='approved';
-     saveTemplates(arr);
-     render();
-   }
- }
+  function renderIntegratedModules(){
+    if(!isLoggedIn()) return;
 
- function deleteTemplate(id){
-   if(!confirm('Smazat textaci?')) return;
-   saveTemplates(templates().filter(x=>x.id!==id));
-   render();
- }
+    const root = ensureWorkspace();
+    if(!root) return;
 
- function addDocument(){
-   const arr=docs();
-   arr.unshift({
-     id:'doc-'+Date.now(),
-     title:'Nový dokument',
-     category:'obecné',
-     version:'1.0',
-     created_at:new Date().toISOString()
-   });
-   saveDocs(arr);
-   render();
- }
+    if(root.dataset.loaded === '1') return;
+    root.dataset.loaded = '1';
 
- function filteredTemplates(){
-   const q=($('brh230Search')?.value||'').toLowerCase();
-   const risk=$('brh230FilterRisk')?.value||'';
-   return templates().filter(t=>{
-      if(activeTab!=='documents' && t.scope!==activeTab) return false;
-      if(risk && t.risk_key!==risk) return false;
-      const txt=(t.title+' '+t.tag+' '+t.body+' '+(t.insurer_name||'')).toLowerCase();
-      return !q || txt.includes(q);
-   });
- }
+    root.innerHTML = `
+      <section class="panel brh261-final-panel">
 
- function renderTemplates(){
-   const list=filteredTemplates();
-   return list.length ? list.map(t=>`
-    <article class="brh230-card">
-      <div class="brh230-head">
-        <div>
-          <span>${esc(t.scope)}</span>
-          <h3>${esc(t.title||'Bez názvu')}</h3>
-          <p>${esc(t.tag||'bez tagu')} · ${esc(t.risk_key||'bez rizika')}</p>
-        </div>
-      </div>
-      <div class="brh230-body">${esc((t.body||'').slice(0,320))}</div>
-      <div class="brh230-actions">
-        <button class="primary small-btn" onclick="BRH230.openTemplateEditor('${esc(t.id)}')">Upravit</button>
-        ${t.scope!=='central'?`<button class="secondary small-btn" onclick="BRH230.proposeTemplateById('${esc(t.id)}')">Navrhnout</button>`:''}
-        ${t.scope==='proposal'?`<button class="secondary small-btn" onclick="BRH230.approveTemplate('${esc(t.id)}')">Schválit</button>`:''}
-        <button class="secondary small-btn" onclick="BRH230.deleteTemplate('${esc(t.id)}')">Smazat</button>
-      </div>
-    </article>
-   `).join('') : '<div class="textation-empty">Žádné záznamy.</div>';
- }
-
- function proposeTemplateById(id){
-   const arr=templates();
-   const item=arr.find(x=>x.id===id);
-   if(item){
-      item.scope='proposal';
-      item.status='proposed';
-      saveTemplates(arr);
-      render();
-   }
- }
-
- function renderDocuments(){
-   const list=docs();
-   return `
-     <div class="brh230-actions">
-       <button class="primary" onclick="BRH230.addDocument()">+ Přidat dokument</button>
-     </div>
-     ${list.map(d=>`
-      <article class="brh230-card">
-        <div class="brh230-head">
+        <div class="section-head">
           <div>
-            <span>${esc(d.category||'dokument')}</span>
-            <h3>${esc(d.title||'Bez názvu')}</h3>
-            <p>Verze ${esc(d.version||'1.0')}</p>
+            <p class="eyebrow">Business Risk Hub 2.6.1 FINAL</p>
+            <h2>Produkční brokerský workspace</h2>
+            <p class="muted">
+              Stabilní core 2.2.0 + integrované workflow moduly 2.3–2.5 bez rozbití loginu a shellu.
+            </p>
           </div>
         </div>
-      </article>
-     `).join('')}
-   `;
- }
 
- function render(){
-   const box=$('brh230LibraryContent');
-   if(!box) return;
-   box.innerHTML = activeTab==='documents' ? renderDocuments() : renderTemplates();
- }
+        <div class="brh261-final-grid">
 
- window.BRH230={
-   switchTab,
-   openTemplateEditor,
-   closeEditor,
-   saveTemplate,
-   proposeTemplate,
-   proposeTemplateById,
-   approveTemplate,
-   deleteTemplate,
-   addDocument,
-   render
- };
+          <article class="brh261-final-card">
+            <span>2.3</span>
+            <h3>Textace & dokumenty</h3>
+            <ul>
+              <li>Moje textace</li>
+              <li>Centrální databáze</li>
+              <li>Návrhy ke schválení</li>
+              <li>Knihovna dokumentů</li>
+            </ul>
+          </article>
 
- setTimeout(render,400);
-})();
+          <article class="brh261-final-card">
+            <span>2.4</span>
+            <h3>Klientský reporting</h3>
+            <ul>
+              <li>Porovnání nabídek</li>
+              <li>Doporučení poradce</li>
+              <li>Klientský výstup</li>
+              <li>Makléřský report</li>
+            </ul>
+          </article>
 
+          <article class="brh261-final-card">
+            <span>2.5</span>
+            <h3>Komunikace s pojišťovnami</h3>
+            <ul>
+              <li>Poptávky pojišťovnám</li>
+              <li>Workflow komunikace</li>
+              <li>Evidence odpovědí</li>
+              <li>Termíny a timeline</li>
+            </ul>
+          </article>
 
+          <article class="brh261-final-card">
+            <span>CORE</span>
+            <h3>Stabilní provozní základ</h3>
+            <ul>
+              <li>Stabilní login</li>
+              <li>Stabilní router</li>
+              <li>Stabilní dashboard</li>
+              <li>Bez auth hacků</li>
+            </ul>
+          </article>
 
-// ============================================================
-// ASTORIE Business Risk Hub 2.4.0 - Client Output & Reporting
-// ============================================================
-(function(){
- const $=id=>document.getElementById(id);
- const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
- function offers(){
-   try{
-     if(window.BRH220 && BRH220.listOffers) return BRH220.listOffers();
-     if(window.BRH2 && BRH2.listOffers) return BRH2.listOffers();
-   }catch(e){}
-   return [];
- }
-
- function recommendedOffer(){
-   return offers().find(o=>o.is_advisor_recommended);
- }
-
- function allRisks(){
-   const arr=[];
-   offers().forEach(o=>(o.offer_risks||[]).forEach(r=>{
-     if(!arr.find(x=>x.risk_key===r.risk_key)){
-       arr.push(r);
-     }
-   }));
-   return arr;
- }
-
- function renderSummary(){
-   const off=offers();
-   const rec=recommendedOffer();
-   const risks=allRisks();
-
-   const t=(id,v)=>{const el=$(id); if(el) el.textContent=v;};
-   t('brh240Offers', String(off.length));
-   t('brh240Risks', String(risks.length));
-   t('brh240Recommended', rec?'ano':'ne');
-   t('brh240Status', off.length?'připraven':'čeká');
- }
-
- function generateClientOutput(){
-   const off=offers();
-   const rec=recommendedOffer();
-   const preview=$('brh240ClientPreview');
-   if(!preview) return;
-
-   if(!off.length){
-      preview.innerHTML='<div class="textation-empty">Nejsou vložené nabídky.</div>';
-      return;
-   }
-
-   const intro=$('brh240Intro')?.value||'';
-   const conclusion=$('brh240Conclusion')?.value||'';
-
-   preview.innerHTML=`
-    <div class="brh240-report">
-      <div class="brh240-brand">
-        <div>
-          <p>ASTORIE a.s.</p>
-          <h1>Porovnání nabídek pojištění podnikatelských rizik</h1>
-          <span>Profesionální makléřský výstup</span>
         </div>
-      </div>
 
-      <section class="brh240-section">
-        <h2>Úvodní shrnutí</h2>
-        <p>${esc(intro)}</p>
       </section>
-
-      <section class="brh240-section">
-        <h2>Přehled nabídek</h2>
-        <div class="brh240-offers">
-          ${off.map(o=>`
-            <article class="brh240-offer ${o.is_advisor_recommended?'recommended':''}">
-              <header>
-                <div>
-                  <h3>${esc(o.insurer_name||'Pojišťovna')}</h3>
-                  <p>${esc(o.product_name||'Produkt')}</p>
-                </div>
-                ${o.is_advisor_recommended?'<strong>Doporučeno poradcem</strong>':''}
-              </header>
-
-              <div class="brh240-metrics">
-                <div><b>${esc(o.annual_premium||'—')}</b><span>Roční pojistné</span></div>
-                <div><b>${esc(o.deductible||'—')}</b><span>Spoluúčast</span></div>
-                <div><b>${(o.offer_risks||[]).length}</b><span>Rizik</span></div>
-              </div>
-
-              <table class="brh240-risk-table">
-                <thead>
-                  <tr>
-                    <th>Riziko</th>
-                    <th>Požadavek</th>
-                    <th>Nabídka</th>
-                    <th>Stav</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${(o.offer_risks||[]).map(r=>`
-                    <tr>
-                      <td>${esc(r.risk_name||r.risk_key)}</td>
-                      <td>${esc(r.requested_limit||'—')}</td>
-                      <td>${esc(r.offered_limit||'—')}</td>
-                      <td>${esc(r.coverage_status||'nutno ověřit')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-
-              ${o.client_visible_note?`
-                <div class="brh240-client-note">
-                  <b>Poznámka pro klienta</b>
-                  <p>${esc(o.client_visible_note)}</p>
-                </div>
-              `:''}
-            </article>
-          `).join('')}
-        </div>
-      </section>
-
-      <section class="brh240-section">
-        <h2>Doporučení poradce</h2>
-        <p>${esc(conclusion)}</p>
-        ${rec?`
-          <div class="brh240-recommendation">
-            <b>Doporučená varianta:</b>
-            <span>${esc(rec.insurer_name)} – ${esc(rec.product_name||'varianta')}</span>
-          </div>
-        `:'<p>Zatím nebyla vybrána doporučená varianta.</p>'}
-      </section>
-
-      <section class="brh240-section">
-        <h2>Důležité upozornění</h2>
-        <p>Výstup představuje makléřské porovnání nabídek. Rozhodující jsou vždy pojistné podmínky konkrétní pojišťovny, výluky, sublimity a individuální underwriting.</p>
-      </section>
-    </div>
-   `;
-
-   renderSummary();
- }
-
- window.BRH240={
-   generateClientOutput,
-   renderSummary
- };
-
- setTimeout(renderSummary,400);
-})();
-
-
-
-// ============================================================
-// ASTORIE Business Risk Hub 2.5.0 - Insurer Request & Communication
-// ============================================================
-(function(){
- const NS='brh250';
- const $=id=>document.getElementById(id);
- const parse=(r,f)=>{try{return r?JSON.parse(r):f}catch(e){return f}};
- const load=(k,f)=>parse(localStorage.getItem(NS+':'+k),f);
- const save=(k,v)=>localStorage.setItem(NS+':'+k,JSON.stringify(v));
- const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
- function requests(){ return load('requests',[]); }
- function saveRequests(v){ save('requests',v); }
-
- function openRequestWizard(id){
-   const req=id?requests().find(x=>x.id===id):null;
-   const box=$('brh250Wizard');
-   if(!box) return;
-
-   box.classList.remove('hidden');
-   box.innerHTML=`
-    <div class="section-head compact-head">
-      <div>
-        <h3>${req?'Upravit':'Nová'} poptávka</h3>
-        <p class="muted">Evidence komunikace s pojišťovnami.</p>
-      </div>
-      <button class="secondary" onclick="BRH250.closeRequestWizard()">Zavřít</button>
-    </div>
-
-    <input type="hidden" id="brh250Id" value="${esc(req?req.id:'')}">
-
-    <div class="brh250-form">
-      <label>Pojišťovna
-        <input id="brh250Insurer" value="${esc(req?req.insurer_name:'')}">
-      </label>
-
-      <label>E-mail
-        <input id="brh250Email" value="${esc(req?req.email:'')}">
-      </label>
-
-      <label>Termín odpovědi
-        <input type="date" id="brh250Deadline" value="${esc(req?req.deadline:'')}">
-      </label>
-
-      <label>Předmět
-        <input id="brh250Subject" value="${esc(req?req.subject:'Poptávka pojištění podnikatelských rizik')}">
-      </label>
-    </div>
-
-    <label>Zpráva
-      <textarea id="brh250Body">${esc(req?req.body:'Dobrý den, zasíláme poptávku pojištění podnikatelských rizik.')}</textarea>
-    </label>
-
-    <label>Interní poznámka
-      <textarea id="brh250Internal">${esc(req?req.internal_note:'')}</textarea>
-    </label>
-
-    <div class="brh250-actions">
-      <button class="primary" onclick="BRH250.saveRequest()">Uložit</button>
-      <button class="secondary" onclick="BRH250.markSent()">Označit jako odeslané</button>
-    </div>
-   `;
- }
-
- function closeRequestWizard(){
-   const box=$('brh250Wizard');
-   if(box) box.classList.add('hidden');
- }
-
- function saveRequest(){
-   const arr=requests();
-   const id=$('brh250Id').value || ('req-'+Date.now());
-
-   const item={
-     id,
-     insurer_name:$('brh250Insurer').value,
-     email:$('brh250Email').value,
-     deadline:$('brh250Deadline').value,
-     subject:$('brh250Subject').value,
-     body:$('brh250Body').value,
-     internal_note:$('brh250Internal').value,
-     status:'rozpracováno',
-     updated_at:new Date().toISOString()
-   };
-
-   const idx=arr.findIndex(x=>x.id===id);
-   if(idx>=0) arr[idx]=Object.assign({},arr[idx],item);
-   else arr.unshift(item);
-
-   saveRequests(arr);
-   render();
-   alert('Poptávka byla uložena.');
- }
-
- function markSent(){
-   const id=$('brh250Id').value;
-   const arr=requests();
-   const item=arr.find(x=>x.id===id);
-   if(item){
-      item.status='odesláno';
-      item.sent_at=new Date().toISOString();
-      saveRequests(arr);
-      render();
-      alert('Poptávka označena jako odeslaná.');
-   }
- }
-
- function addReply(id,text){
-   const arr=requests();
-   const item=arr.find(x=>x.id===id);
-   if(item){
-      item.reply=text;
-      item.reply_at=new Date().toISOString();
-      item.status='odpověď přijata';
-      saveRequests(arr);
-      render();
-   }
- }
-
- function renderTimeline(){
-   const box=$('brh250Timeline');
-   if(!box) return;
-
-   const arr=requests();
-
-   if(!arr.length){
-      box.innerHTML='<div class="textation-empty">Nejsou evidované poptávky.</div>';
-      return;
-   }
-
-   box.innerHTML=arr.map(r=>`
-    <article class="brh250-card">
-      <div class="brh250-head">
-        <div>
-          <span>${esc(r.status||'rozpracováno')}</span>
-          <h3>${esc(r.insurer_name||'Pojišťovna')}</h3>
-          <p>${esc(r.email||'bez e-mailu')}</p>
-        </div>
-      </div>
-
-      <div class="brh250-meta">
-        <div><b>${esc(r.deadline||'—')}</b><span>Termín odpovědi</span></div>
-        <div><b>${r.sent_at?'ano':'ne'}</b><span>Odesláno</span></div>
-        <div><b>${r.reply_at?'ano':'ne'}</b><span>Odpověď</span></div>
-      </div>
-
-      <div class="brh250-message">
-        <b>Předmět</b>
-        <p>${esc(r.subject||'')}</p>
-
-        <b>Zpráva</b>
-        <p>${esc((r.body||'').slice(0,500))}</p>
-      </div>
-
-      ${r.reply?`
-       <div class="brh250-reply">
-         <b>Odpověď pojišťovny</b>
-         <p>${esc(r.reply)}</p>
-       </div>
-      `:''}
-
-      <div class="brh250-actions">
-        <button class="primary small-btn" onclick="BRH250.openRequestWizard('${esc(r.id)}')">Upravit</button>
-        <button class="secondary small-btn" onclick="BRH250.quickReply('${esc(r.id)}')">Přidat odpověď</button>
-      </div>
-    </article>
-   `).join('');
- }
-
- function quickReply(id){
-   const txt=prompt('Zadejte odpověď pojišťovny:');
-   if(txt) addReply(id,txt);
- }
-
- function renderStats(){
-   const arr=requests();
-   const sent=arr.filter(x=>x.sent_at).length;
-   const replies=arr.filter(x=>x.reply_at).length;
-   const deadlines=arr.filter(x=>x.deadline).length;
-
-   const t=(id,v)=>{const el=$(id); if(el) el.textContent=v;};
-
-   t('brh250RequestCount', String(arr.length));
-   t('brh250SentCount', String(sent));
-   t('brh250ReplyCount', String(replies));
-   t('brh250DeadlineCount', String(deadlines));
- }
-
- function render(){
-   renderStats();
-   renderTimeline();
- }
-
- window.BRH250={
-   openRequestWizard,
-   closeRequestWizard,
-   saveRequest,
-   markSent,
-   addReply,
-   quickReply,
-   render
- };
-
- setTimeout(render,400);
-})();
-
-
-
-
-
-
-
-// ============================================================
-// ASTORIE Business Risk Hub 2.6.1
-// Auth Rollback Stable
-// Odstraněna konfliktní BRH260Auth vrstva.
-// Tato vrstva pouze stabilizuje login eventy a neoverrideuje router.
-// ============================================================
-(function(){
-  const VERSION = '2.6.1-auth-rollback-stable';
-
-  function qs(sel){ return document.querySelector(sel); }
-
-  function loginFields(){
-    const email =
-      document.getElementById('loginEmail') ||
-      qs('input[type="email"]') ||
-      qs('input[name="email"]') ||
-      Array.from(document.querySelectorAll('input')).find(i => /email|mail/i.test((i.id||'') + ' ' + (i.name||'') + ' ' + (i.placeholder||'')));
-
-    const password =
-      document.getElementById('loginPassword') ||
-      qs('input[type="password"]') ||
-      qs('input[name="password"]') ||
-      Array.from(document.querySelectorAll('input')).find(i => /heslo|password/i.test((i.id||'') + ' ' + (i.name||'') + ' ' + (i.placeholder||'')));
-
-    return { email, password };
-  }
-
-  function loginButton(){
-    return Array.from(document.querySelectorAll('button,input[type="submit"],input[type="button"]')).find(btn => {
-      const txt = (btn.innerText || btn.value || '').trim();
-      return /Přihlásit|Login|Sign in/i.test(txt);
-    });
-  }
-
-  function isLoginVisible(){
-    const { email, password } = loginFields();
-    const text = document.body ? (document.body.innerText || '') : '';
-    const appVisible = /PRACOVNÍ REŽIM|Dashboard|Poptávka|Nabídky|Porovnání|Zpráva|Admin/i.test(text);
-    return !!(email && password && /Přihlášení|Přihlásit/i.test(text) && !appVisible);
-  }
-
-  function callNativeLogin(){
-    const candidates = [
-      'login',
-      'doLogin',
-      'handleLogin',
-      'loginUser',
-      'submitLogin',
-      'appLogin',
-      'performLogin',
-      'enterApp'
-    ];
-
-    for(const name of candidates){
-      if(typeof window[name] === 'function' && !window[name].__BRH261Calling){
-        try {
-          window[name].__BRH261Calling = true;
-          const result = window[name]();
-          window[name].__BRH261Calling = false;
-          return true;
-        } catch(e) {
-          window[name].__BRH261Calling = false;
-          console.warn('[BRH 2.6.1] Login function failed:', name, e);
-        }
-      }
-    }
-    return false;
-  }
-
-  function fallbackSessionBridge(){
-    const { email } = loginFields();
-    const value = email && email.value ? email.value.trim() : 'admin@astorie.local';
-
-    const user = {
-      email: value,
-      name: value.includes('poradce') ? 'Poradce ASTORIE' : 'Administrátor ASTORIE',
-      role: value.includes('poradce') ? 'advisor' : 'admin'
-    };
-
-    try {
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      localStorage.setItem('brh_current_user', JSON.stringify(user));
-      sessionStorage.setItem('currentUser', JSON.stringify(user));
-      window.currentUser = user;
-      window.BRH_CURRENT_USER = user;
-    } catch(e){}
-
-    const renderCandidates = ['init','renderApp','showApp','renderDashboard'];
-    for(const name of renderCandidates){
-      if(typeof window[name] === 'function'){
-        try {
-          window[name]();
-          return true;
-        } catch(e) {
-          console.warn('[BRH 2.6.1] Render function failed:', name, e);
-        }
-      }
-    }
-
-    if(typeof window.showView === 'function'){
-      try {
-        window.showView('dashboard');
-        return true;
-      } catch(e){}
-    }
-
-    return false;
-  }
-
-  function handleLogin(ev){
-    if(!isLoginVisible()) return;
-    if(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-
-    const ok = callNativeLogin();
-    if(!ok) fallbackSessionBridge();
-
-    setTimeout(cleanLoginLeak, 250);
-    setTimeout(cleanLoginLeak, 900);
-  }
-
-  function bindLogin(){
-    const btn = loginButton();
-    if(btn && !btn.__BRH261Bound){
-      btn.__BRH261Bound = true;
-      btn.addEventListener('click', handleLogin, true);
-    }
-
-    const { email, password } = loginFields();
-    [email, password].forEach(el => {
-      if(el && !el.__BRH261EnterBound){
-        el.__BRH261EnterBound = true;
-        el.addEventListener('keydown', e => {
-          if(e.key === 'Enter') handleLogin(e);
-        }, true);
-      }
-    });
-
-    Array.from(document.querySelectorAll('form')).forEach(form => {
-      if(!form.__BRH261Bound){
-        form.__BRH261Bound = true;
-        form.addEventListener('submit', handleLogin, true);
-      }
-    });
-  }
-
-  function cleanLoginLeak(){
-    const ids = ['brh230LibraryPanel','brh240ClientPanel','brh250Panel','brh251ModuleWorkspace'];
-
-    if(isLoginVisible()){
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = 'none';
-      });
-      return;
-    }
-
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.style.display = '';
-    });
+    `;
   }
 
   function boot(){
-    bindLogin();
-    cleanLoginLeak();
+    renderIntegratedModules();
   }
 
-  window.BRH261AuthRollback = {
-    version: VERSION,
-    isLoginVisible,
-    bindLogin,
-    handleLogin,
-    callNativeLogin,
-    fallbackSessionBridge,
-    cleanLoginLeak
+  window.BRH261FINAL = {
+    version: '2.6.1-final-production-merge',
+    boot
   };
 
-  setTimeout(boot, 100);
-  setTimeout(boot, 500);
-  setTimeout(boot, 1200);
+  setTimeout(boot, 600);
+  setTimeout(boot, 1500);
+  setTimeout(boot, 3000);
 
-  if(document.body){
-    const observer = new MutationObserver(() => {
-      clearTimeout(window.__BRH261Timer);
-      window.__BRH261Timer = setTimeout(boot, 120);
-    });
-    observer.observe(document.body, { childList:true, subtree:true });
-  }
 })();

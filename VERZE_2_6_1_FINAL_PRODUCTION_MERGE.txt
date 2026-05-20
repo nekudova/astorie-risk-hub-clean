@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub 2.6.1 FINAL – Production Merge
+Stabilní core 2.2.0 + workflow moduly 2.3–2.5.

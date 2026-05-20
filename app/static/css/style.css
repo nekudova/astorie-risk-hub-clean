@@ -1906,446 +1906,61 @@ main{max-width:none;margin:0;padding:20px;}
 }
 
 
-
 /* ============================================================
-   ASTORIE Business Risk Hub 2.3.0
+   BRH 2.6.1 FINAL
    ============================================================ */
-.brh230-library-panel{margin:20px;border-left:7px solid var(--orange,#FC4C02)}
-.brh230-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-.brh230-tabs button{
- border:1px solid var(--line,#d7e5e9);
- background:#fff;
- border-radius:12px;
- padding:10px 14px;
- font-weight:900;
- cursor:pointer;
+
+.brh261-final-workspace{
+  margin-top:24px;
 }
-.brh230-tabs button.active{
- background:#fff8f5;
- border-color:var(--orange,#FC4C02);
- color:var(--orange,#FC4C02);
+
+.brh261-final-panel{
+  border-left:7px solid #FC4C02;
 }
-.brh230-toolbar{
- display:flex;
- gap:10px;
- margin:14px 0;
- flex-wrap:wrap;
+
+.brh261-final-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  margin-top:20px;
 }
-.brh230-toolbar input,.brh230-toolbar select{
- border:1px solid var(--line,#d7e5e9);
- border-radius:12px;
- padding:10px;
- min-width:220px;
+
+.brh261-final-card{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:0 12px 30px rgba(0,61,76,.06);
 }
-.brh230-editor{
- border:1px solid rgba(252,76,2,.2);
- border-left:6px solid var(--orange,#FC4C02);
- background:#fff8f5;
- border-radius:18px;
- padding:18px;
- margin:16px 0;
+
+.brh261-final-card span{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#eaf5f7;
+  color:#003D4C;
+  font-size:11px;
+  font-weight:900;
 }
-.brh230-grid{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:10px;
+
+.brh261-final-card h3{
+  margin:12px 0 10px;
+  color:#003D4C;
 }
-.brh230-grid label{
- display:flex;
- flex-direction:column;
- gap:6px;
- font-weight:900;
+
+.brh261-final-card ul{
+  margin:0;
+  padding-left:18px;
 }
-.brh230-grid input,.brh230-editor textarea{
- border:1px solid var(--line,#d7e5e9);
- border-radius:12px;
- padding:10px;
+
+.brh261-final-card li{
+  margin-bottom:8px;
+  color:#214f5a;
+  font-weight:700;
 }
-.brh230-editor textarea{min-height:160px;resize:vertical}
-.brh230-card{
- border:1px solid var(--line,#d7e5e9);
- border-radius:18px;
- background:#fff;
- padding:16px;
- margin:12px 0;
-}
-.brh230-head{
- display:flex;
- justify-content:space-between;
-}
-.brh230-head span{
- display:inline-block;
- background:#eaf5f7;
- color:var(--petrol,#003D4C);
- border-radius:999px;
- padding:4px 10px;
- font-size:11px;
- font-weight:900;
- text-transform:uppercase;
-}
-.brh230-head h3{
- margin:8px 0 4px;
- color:var(--petrol,#003D4C);
-}
-.brh230-body{
- margin:12px 0;
- white-space:pre-wrap;
- color:#214f5a;
-}
-.brh230-actions{
- display:flex;
- gap:8px;
- flex-wrap:wrap;
- margin-top:12px;
-}
+
 @media(max-width:900px){
- .brh230-grid{grid-template-columns:1fr}
-}
-
-
-
-/* ============================================================
-   ASTORIE Business Risk Hub 2.4.0
-   ============================================================ */
-.brh240-client-panel{
- margin:20px;
- border-left:7px solid var(--orange,#FC4C02);
-}
-.brh240-summary-grid{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:12px;
- margin:16px 0;
-}
-.brh240-summary-grid div{
- background:#fff;
- border:1px solid var(--line,#d7e5e9);
- border-radius:18px;
- padding:14px;
-}
-.brh240-summary-grid b{
- display:block;
- font-size:26px;
- color:var(--petrol,#003D4C);
-}
-.brh240-summary-grid span{
- display:block;
- font-size:11px;
- text-transform:uppercase;
- font-weight:900;
- color:var(--muted,#607882);
-}
-.brh240-config{
- display:grid;
- gap:14px;
- margin:18px 0;
-}
-.brh240-config label{
- display:flex;
- flex-direction:column;
- gap:8px;
- font-weight:900;
-}
-.brh240-config textarea{
- min-height:120px;
- border:1px solid var(--line,#d7e5e9);
- border-radius:14px;
- padding:12px;
-}
-.brh240-preview{
- margin-top:20px;
-}
-.brh240-report{
- background:#fff;
- border-radius:24px;
- border:1px solid rgba(0,61,76,.12);
- overflow:hidden;
- box-shadow:0 18px 40px rgba(0,61,76,.08);
-}
-.brh240-brand{
- background:linear-gradient(135deg,#003D4C,#005C66);
- color:#fff;
- padding:28px;
-}
-.brh240-brand p{
- margin:0;
- font-size:13px;
- text-transform:uppercase;
- letter-spacing:.08em;
- opacity:.9;
-}
-.brh240-brand h1{
- margin:10px 0;
- font-size:32px;
-}
-.brh240-brand span{
- color:#E6B15D;
- font-weight:900;
-}
-.brh240-section{
- padding:24px 28px;
- border-top:1px solid rgba(0,61,76,.08);
-}
-.brh240-section h2{
- margin:0 0 14px;
- color:#003D4C;
-}
-.brh240-offers{
- display:grid;
- gap:18px;
-}
-.brh240-offer{
- border:1px solid rgba(0,61,76,.12);
- border-radius:20px;
- padding:18px;
- background:#fff;
-}
-.brh240-offer.recommended{
- border-color:#FC4C02;
- box-shadow:0 0 0 3px rgba(252,76,2,.08);
-}
-.brh240-offer header{
- display:flex;
- justify-content:space-between;
- gap:12px;
-}
-.brh240-offer header h3{
- margin:0 0 6px;
- color:#003D4C;
-}
-.brh240-offer header p{
- margin:0;
- color:#607882;
- font-weight:800;
-}
-.brh240-offer header strong{
- color:#FC4C02;
- font-size:12px;
- text-transform:uppercase;
-}
-.brh240-metrics{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:10px;
- margin:16px 0;
-}
-.brh240-metrics div{
- background:#f8fcfd;
- border-radius:14px;
- padding:12px;
- border:1px solid rgba(0,61,76,.08);
-}
-.brh240-metrics b{
- display:block;
- color:#003D4C;
-}
-.brh240-metrics span{
- display:block;
- font-size:11px;
- text-transform:uppercase;
- font-weight:900;
- color:#607882;
-}
-.brh240-risk-table{
- width:100%;
- border-collapse:collapse;
- margin-top:12px;
-}
-.brh240-risk-table th{
- background:#003D4C;
- color:#fff;
- text-align:left;
- padding:10px;
- font-size:12px;
-}
-.brh240-risk-table td{
- border-bottom:1px solid rgba(0,61,76,.08);
- padding:10px;
-}
-.brh240-client-note{
- margin-top:14px;
- border-left:5px solid #FC4C02;
- background:#fff8f5;
- padding:14px;
- border-radius:14px;
-}
-.brh240-recommendation{
- border-left:6px solid #FC4C02;
- background:#fff8f5;
- border-radius:14px;
- padding:16px;
-}
-@media(max-width:900px){
- .brh240-summary-grid,.brh240-metrics{
-  grid-template-columns:1fr;
- }
- .brh240-offer header{
-  flex-direction:column;
- }
-}
-
-
-
-/* ============================================================
-   ASTORIE Business Risk Hub 2.5.0
-   ============================================================ */
-.brh250-panel{
- margin:20px;
- border-left:7px solid var(--orange,#FC4C02);
-}
-.brh250-grid{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:12px;
- margin:16px 0;
-}
-.brh250-grid div{
- background:#fff;
- border:1px solid var(--line,#d7e5e9);
- border-radius:18px;
- padding:14px;
-}
-.brh250-grid b{
- display:block;
- font-size:26px;
- color:#003D4C;
-}
-.brh250-grid span{
- display:block;
- font-size:11px;
- text-transform:uppercase;
- font-weight:900;
- color:#607882;
-}
-.brh250-wizard{
- border:1px solid rgba(252,76,2,.18);
- border-left:6px solid #FC4C02;
- background:#fff8f5;
- border-radius:20px;
- padding:18px;
- margin:18px 0;
-}
-.brh250-form{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:12px;
-}
-.brh250-form label{
- display:flex;
- flex-direction:column;
- gap:6px;
- font-weight:900;
-}
-.brh250-form input,
-.brh250-wizard textarea{
- border:1px solid var(--line,#d7e5e9);
- border-radius:12px;
- padding:10px;
-}
-.brh250-wizard textarea{
- min-height:120px;
- resize:vertical;
-}
-.brh250-actions{
- display:flex;
- gap:8px;
- flex-wrap:wrap;
- margin-top:14px;
-}
-.brh250-timeline{
- display:grid;
- gap:16px;
- margin-top:20px;
-}
-.brh250-card{
- background:#fff;
- border-radius:20px;
- border:1px solid rgba(0,61,76,.12);
- padding:18px;
-}
-.brh250-head span{
- display:inline-block;
- background:#eaf5f7;
- color:#003D4C;
- border-radius:999px;
- padding:5px 10px;
- font-size:11px;
- font-weight:900;
- text-transform:uppercase;
-}
-.brh250-head h3{
- margin:10px 0 4px;
- color:#003D4C;
-}
-.brh250-head p{
- margin:0;
- color:#607882;
- font-weight:800;
-}
-.brh250-meta{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:10px;
- margin:16px 0;
-}
-.brh250-meta div{
- background:#f8fcfd;
- border:1px solid rgba(0,61,76,.08);
- border-radius:14px;
- padding:12px;
-}
-.brh250-meta b{
- display:block;
- color:#003D4C;
-}
-.brh250-meta span{
- display:block;
- font-size:11px;
- text-transform:uppercase;
- font-weight:900;
- color:#607882;
-}
-.brh250-message,
-.brh250-reply{
- margin-top:14px;
- border-left:5px solid #003D4C;
- background:#f8fcfd;
- padding:14px;
- border-radius:14px;
-}
-.brh250-reply{
- border-left-color:#FC4C02;
- background:#fff8f5;
-}
-@media(max-width:900px){
- .brh250-grid,
- .brh250-form,
- .brh250-meta{
-  grid-template-columns:1fr;
- }
-}
-
-
-
-/* ============================================================
-   ASTORIE Business Risk Hub 2.6.0 – Auth Layer Rebuild Stable
-   ============================================================ */
-body.brh260-login-error input[type="email"],
-body.brh260-login-error input[type="password"]{
-  border-color:#FC4C02 !important;
-  box-shadow:0 0 0 3px rgba(252,76,2,.14) !important;
-}
-body.brh260-authenticated::after{
-  content:"";
-  display:none;
-}
-
-
-
-/* ============================================================
-   ASTORIE Business Risk Hub 2.6.1 – Auth Rollback Stable
-   ============================================================ */
-body.brh261-login-repair::after{
-  content:"";
-  display:none;
+  .brh261-final-grid{
+    grid-template-columns:1fr;
+  }
 }
