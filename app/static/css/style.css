@@ -11,3 +11,14 @@
 
 /* BRH 3.3.0 – production UX */
 .smart-panel{border-left:6px solid var(--orange);background:#fffaf7}.mini-select{width:100%;margin:8px 0;border-radius:12px;padding:10px}.insurer-title{font-size:16px;font-weight:900;margin-bottom:8px}.offer-head .btn.small{width:100%;margin:6px 0;border-radius:12px;padding:10px 12px}.pro-table td{max-width:420px;word-break:normal;overflow-wrap:anywhere}.pro-table textarea,.textation-card p,.request-print td{white-space:pre-wrap;overflow:visible}.textation-card{min-height:220px}.textation-grid{align-items:stretch}.risk-request small{display:block;margin-top:6px;color:var(--muted);font-weight:700}.request-card .grid3{align-items:start}
+
+
+/* === BRH 3.3.1c – stable professional risk UX === */
+.risk-catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:14px}
+.risk-tile{border:1px solid #cfe4e8;background:#eef8fa;color:#003D4C;border-radius:18px;padding:14px;text-align:left;font-weight:800;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:120px;white-space:normal;line-height:1.25}
+.risk-tile:hover{box-shadow:0 8px 24px rgba(0,61,76,.15);transform:translateY(-1px)}
+.risk-tile.selected{background:#003D4C;color:#fff;border-color:#003D4C}
+.risk-tile small{font-weight:700;opacity:.88}.risk-tile em{font-style:normal;font-weight:600;opacity:.85}.tile-action{font-size:12px;opacity:.8;margin-top:auto}
+.risk-pro-table{table-layout:auto;width:100%}.risk-pro-table th{position:sticky;top:0;z-index:2}.risk-product-col{min-width:260px}.spec-col{min-width:420px;width:48%}
+.risk-product-cell{display:flex;flex-direction:column;gap:8px}.risk-name-field{font-weight:800}.risk-help{background:#f4fbfc;border:1px solid #d8edf1;border-radius:14px;padding:8px 10px;font-size:13px;line-height:1.35}.risk-help summary{cursor:pointer;font-weight:800;color:#005C66}.risk-help div{margin-top:7px;color:#31535c;white-space:normal}
+textarea.fit{width:100%;min-height:46px;resize:vertical;white-space:pre-wrap;overflow:visible}.spec-field{min-height:96px}.pro-table td,.pro-table th{vertical-align:top;white-space:normal;word-break:normal}.table-wrap{overflow:auto}

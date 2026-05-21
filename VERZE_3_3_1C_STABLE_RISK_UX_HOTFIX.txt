@@ -1,0 +1,2 @@
+Business Risk Hub 3.3.1c – Stable Risk UX Hotfix
+Základ: 3.3.0 production + DB offer load hotfix. Opraveny rozbité klikací akce z 3.3.1a. Upraven UX rizik bez zásahu do DB.

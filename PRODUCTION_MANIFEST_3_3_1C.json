@@ -1,0 +1,7 @@
+{
+  "version": "3.3.1c",
+  "name": "Stable Risk UX Hotfix",
+  "base": "3.3.0 PRODUCTION",
+  "files": "real application build",
+  "db_changed": "non destructive only; offer workflow load/sync preserved"
+}
