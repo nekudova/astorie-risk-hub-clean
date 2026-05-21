@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ASTORIE Business Risk Hub 3.0.0</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=3000">
+  <title>ASTORIE Business Risk Hub 3.0.1</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=3010">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="brand-mark">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.0.0 · Case Workspace Rebuild</span></div>
+    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.0.1 · Functional Workspace Restore</span></div>
   </header>
 
   <main class="layout">
@@ -65,11 +65,11 @@
       <section class="view" id="documentsView"><div class="panel"><p class="eyebrow">Dokumentová knihovna</p><h1>Dokumenty</h1><p>Modul je zachovaný pro napojení na dokumentovou knihovnu a přílohy obchodního případu. V této verzi není mazán ani nahrazován.</p><div id="caseDocsBox" class="info-box">Dokumenty se budou vázat na aktivní CASE_ID.</div></div></section>
       <section class="view" id="textationsView"><div class="panel"><p class="eyebrow">Textace</p><h1>Textace a šablony</h1><p>Zachováno pro moje textace, centrální textace a návrhy ke schválení. Budoucí verze napojí textace na konkrétní rizikový model a klientský výstup.</p></div></section>
       <section class="view" id="riskModelView"><div class="panel"><p class="eyebrow">Master Risk Library</p><h1>Rizikový model</h1><div id="riskModelBox"></div></div></section>
-      <section class="view" id="adminView"><div class="panel"><p class="eyebrow">Administrace</p><h1>Admin</h1><p>Admin je zachovaný. Správa číselníků se ukládá přes stávající API.</p><div id="adminBox"></div></div></section>
+      <section class="view" id="adminView"><div class="panel"><p class="eyebrow">Administrace</p><h1>Admin</h1><p>Admin je zachovaný a zobrazený. Správa číselníků se ukládá přes stávající API bez destruktivních zásahů do DB.</p><div id="adminBox"></div></div></section>
     </section>
   </main>
 
   <div id="toast" class="toast hidden"></div>
-  <script src="/static/js/app.js?v=3000"></script>
+  <script src="/static/js/app.js?v=3010"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.0.0")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.0.1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -198,7 +198,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.0.0", "name": "Business Risk Hub 3.0.0 - Case Workspace Rebuild"}
+    return {"ok": True, "database_connected": ok, "version": "3.0.1", "name": "Business Risk Hub 3.0.1 - Functional Workspace Restore"}
 
 
 def get_catalogs() -> Dict[str, Any]:
@@ -338,6 +338,71 @@ def upsert_client(cur, client: Dict[str, Any]) -> int:
             values,
         )
     return cur.fetchone()[0]
+
+
+@app.get("/api/clients")
+def list_clients(q: str = ""):
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "items": []}
+    try:
+        init_db()
+        term = (q or "").strip()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            if term:
+                like = f"%{term}%"
+                cur.execute(
+                    """
+                    SELECT id, ico, name, legal_form, address, data_box, contact_person, contact_email, contact_phone, website, updated_at
+                    FROM clients
+                    WHERE COALESCE(ico,'') ILIKE %s OR COALESCE(name,'') ILIKE %s
+                    ORDER BY updated_at DESC NULLS LAST, id DESC
+                    LIMIT 50
+                    """,
+                    (like, like),
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT id, ico, name, legal_form, address, data_box, contact_person, contact_email, contact_phone, website, updated_at
+                    FROM clients
+                    ORDER BY updated_at DESC NULLS LAST, id DESC
+                    LIMIT 50
+                    """
+                )
+            rows = cur.fetchall()
+            for row in rows:
+                if row.get("updated_at"):
+                    row["updated_at"] = row["updated_at"].isoformat()
+            return {"ok": True, "db": True, "items": rows}
+    except Exception as exc:
+        print(f"List clients failed: {exc}")
+        return {"ok": False, "db": True, "items": [], "message": f"Klienty se nepodařilo načíst: {exc}"}
+    finally:
+        conn.close()
+
+
+@app.get("/api/clients/{client_id}")
+def get_client(client_id: int):
+    conn = _connect()
+    if not conn:
+        raise HTTPException(status_code=503, detail="Databáze není připojena.")
+    try:
+        init_db()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT id, ico, name, legal_form, address, data_box, contact_person, contact_email, contact_phone, website
+                FROM clients WHERE id=%s
+                """,
+                (client_id,),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Klient nebyl nalezen.")
+            return {"ok": True, "item": row}
+    finally:
+        conn.close()
 
 
 @app.post("/api/inquiries")
@@ -501,7 +566,7 @@ def list_inquiries():
             return {"ok": True, "db": True, "items": items}
     except Exception as exc:
         print(f"List inquiries failed: {exc}")
-        raise HTTPException(status_code=500, detail=f"Nepodařilo se načíst poptávky: {exc}")
+        return {"ok": False, "db": True, "items": [], "message": f"Nepodařilo se načíst obchodní případy: {exc}"}
     finally:
         conn.close()
 
@@ -512,6 +577,7 @@ def get_inquiry(inquiry_id: int):
     if not conn:
         raise HTTPException(status_code=503, detail="Databáze není připojena.")
     try:
+        init_db()
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT i.*, c.ico, c.name AS client_name, c.legal_form, c.address, c.data_box,
@@ -524,6 +590,11 @@ def get_inquiry(inquiry_id: int):
             if not row:
                 raise HTTPException(status_code=404, detail="Poptávka nebyla nalezena.")
             item = row.get("full_payload") or {}
+            if isinstance(item, str):
+                try:
+                    item = json.loads(item)
+                except Exception:
+                    item = {}
             if not isinstance(item, dict):
                 item = {}
             item["id"] = row.get("id")
