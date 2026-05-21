@@ -1,0 +1,17 @@
+Business Risk Hub 3.0.2 – Risk Input / Admin / Textace Restore
+
+Cíl: opravit funkční blokace po 3.0.1 bez destruktivních změn DB.
+
+Změny:
+- Opraveno načítání knihovny rizik, která může být v JSONu jako objekt podle skupin, ne pouze pole.
+- Opraven výběr rizik ve vstupním dotazníku.
+- Doplněna doporučená sada rizik podle typu činnosti z risk_model.
+- Karta klienta rozdělena na Kartu klienta a Kartu pro pojištění.
+- Obnoven provozní Admin s editací pojišťoven, rizik, typů činností, textací a JSON import/exportem.
+- Doplněna funkční sekce Textace a šablony.
+- Doplněn katalog textTemplates bez destruktivních zásahů do DB.
+- Zachován CASE workspace, ARES, klienti, obchodní případy, dokumenty a DB.
+
+Důležité:
+- Nejde o mazání starého systému.
+- Jde o stabilizační funkční obnovu nejdůležitějších pracovních částí.

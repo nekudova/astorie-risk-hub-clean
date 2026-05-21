@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.0.1")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.0.2")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -161,6 +161,7 @@ def init_db() -> bool:
                 ('coverageDictionary', 'coverage_dictionary.json'),
                 ('policyReferences', 'policy_references.json'),
                 ('riskModel', 'risk_model.json'),
+                ('textTemplates', 'text_templates.json'),
             ]:
                 cur.execute("SELECT 1 FROM catalog_settings WHERE key=%s", (key,))
                 if not cur.fetchone():
@@ -198,7 +199,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.0.1", "name": "Business Risk Hub 3.0.1 - Functional Workspace Restore"}
+    return {"ok": True, "database_connected": ok, "version": "3.0.2", "name": "Business Risk Hub 3.0.2 - Risk Input Admin Textation Restore"}
 
 
 def get_catalogs() -> Dict[str, Any]:
@@ -211,6 +212,7 @@ def get_catalogs() -> Dict[str, Any]:
         "coverageDictionary": load_json("coverage_dictionary.json"),
         "policyReferences": load_json("policy_references.json"),
         "riskModel": load_json("risk_model.json"),
+        "textTemplates": load_json("text_templates.json"),
     }
     conn = _connect()
     if not conn:
@@ -245,7 +247,7 @@ async def save_admin_catalogs(request: Request):
     conn = _connect()
     if not conn:
         raise HTTPException(status_code=503, detail="Databáze není připojena.")
-    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences"}
+    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences", "textTemplates"}
     try:
         with conn, conn.cursor() as cur:
             for key in allowed:
