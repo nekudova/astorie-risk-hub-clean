@@ -1,0 +1,8 @@
+Business Risk Hub 3.3.2 – Risk Tooltip & Table UX PRO
+
+- profesionální zobrazení tabulky rizik bez sloupce Risk key v UI
+- hover nápověda nad názvem rizika
+- interní metodika se neexportuje
+- širší specifikace pro pojišťovnu
+- klik na riziko v katalogu přidá/odebere
+- zachováno CASE_ID, Admin, Textace, Dokumenty a DB bez destruktivních změn

@@ -1,0 +1,10 @@
+Business Risk Hub 3.3.1 – Risk UX Professionalization SAFE
+
+Základ: 3.3.0 PRODUCTION.
+Změny:
+- Risk key odebrán z uživatelské tabulky rizik; zůstává interně v DB/API.
+- Katalog rizik funguje jako přepínač: klik přidá, další klik odebere.
+- Interní metodické poznámky jsou přesunuty do detailu/nápovědy rizika.
+- Pole „Specifikace / doplnění pro pojišťovnu“ je rozšířeno a používá se pro poptávky/nabídky.
+- Tabulky mají zalamování textů a větší pracovní pole.
+- Admin, Textace, Dokumenty, DB a CASE_ID workflow nejsou destruktivně měněny.

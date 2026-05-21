@@ -12,6 +12,44 @@
 /* BRH 3.3.0 – production UX */
 .smart-panel{border-left:6px solid var(--orange);background:#fffaf7}.mini-select{width:100%;margin:8px 0;border-radius:12px;padding:10px}.insurer-title{font-size:16px;font-weight:900;margin-bottom:8px}.offer-head .btn.small{width:100%;margin:6px 0;border-radius:12px;padding:10px 12px}.pro-table td{max-width:420px;word-break:normal;overflow-wrap:anywhere}.pro-table textarea,.textation-card p,.request-print td{white-space:pre-wrap;overflow:visible}.textation-card{min-height:220px}.textation-grid{align-items:stretch}.risk-request small{display:block;margin-top:6px;color:var(--muted);font-weight:700}.request-card .grid3{align-items:start}
 
+/* BRH 3.3.2 – Risk Tooltip & Table UX PRO */
+.risk-ux-table{min-width:1180px;table-layout:auto}
+.risk-ux-table th:first-child{min-width:260px;width:26%}
+.risk-ux-table th.wide-spec{min-width:420px;width:38%}
+.risk-ux-table td{vertical-align:top;white-space:normal;overflow:visible}
+.risk-product-cell{min-width:260px;background:#fbfefe}
+.risk-name{font-weight:900;color:var(--petrol);min-height:58px!important}
+.spec-field{min-width:420px;min-height:120px!important;resize:vertical;white-space:pre-wrap;overflow:visible;line-height:1.45}
+.risk-help{margin-top:8px;background:#fff7f2;border:1px solid #ffd7c9;border-radius:14px;padding:10px;color:#6f3b23}
+.risk-help summary{cursor:pointer;font-weight:900;color:#a74422}
+.risk-help p{margin:8px 0 0;white-space:pre-wrap}
+.risk-tile.selected span::after{content:'  – kliknutím odeberete';font-size:12px;font-weight:700;opacity:.85}
 
-/* BRH 3.3.1d – Safe Risk UX Professionalization */
-.risk-pro-table{table-layout:auto;min-width:1120px}.risk-pro-table th,.risk-pro-table td{white-space:normal;vertical-align:top}.risk-product-col{min-width:280px;width:28%}.spec-col{min-width:420px;width:42%}.risk-product-cell{min-width:250px}.risk-name-field{font-weight:900;min-height:54px}.risk-help{margin-top:8px;border:1px solid #ffd7c9;background:#fff7f2;border-radius:12px;padding:8px 10px;color:#6f3b23}.risk-help summary{cursor:pointer;font-weight:900;color:#a34a1f}.risk-help div{white-space:pre-wrap;line-height:1.45;margin-top:8px}.spec-field{min-height:110px;width:100%;white-space:pre-wrap;overflow:visible}.tile-action{display:inline-block;margin-top:10px;font-size:12px;background:rgba(255,255,255,.75);color:#003D4C;border-radius:999px;padding:5px 9px}.risk-tile.selected .tile-action{background:#fff;color:#003D4C}.chip.selected{background:#003D4C;color:#fff;border-color:#003D4C}.pro-table textarea{overflow:visible;white-space:pre-wrap}.table-wrap{scrollbar-width:thin}
+
+/* BRH 3.3.2 – Risk Tooltip & Table UX PRO */
+.risk-catalog-grid.compact{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.risk-tile{position:relative;transition:.16s ease;min-height:104px}
+.risk-tile:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(0,61,76,.12)}
+.risk-tile.selected{box-shadow:0 0 0 3px rgba(252,76,2,.22) inset}
+.risk-pro-table{border:1px solid var(--line);border-radius:20px;overflow:visible;background:white;margin-top:14px}
+.risk-pro-head,.risk-pro-row{display:grid;grid-template-columns:minmax(220px,1.15fr) minmax(145px,.55fr) minmax(130px,.5fr) minmax(360px,1.7fr) 105px;gap:0;align-items:stretch}
+.risk-pro-head{position:sticky;top:92px;z-index:3;background:var(--petrol);color:white;font-weight:900;border-radius:18px 18px 0 0}
+.risk-pro-head>div{padding:14px 16px;border-right:1px solid rgba(255,255,255,.18)}
+.risk-pro-row{border-top:1px solid #e6f2f4;background:#fff}
+.risk-pro-row:nth-child(odd){background:#fbfefe}
+.risk-pro-cell{padding:12px 14px;border-right:1px solid #e6f2f4;min-width:0;position:relative}
+.risk-pro-cell label{display:block;margin-bottom:7px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.risk-pro-cell textarea,.risk-pro-cell input{margin:0;width:100%;min-width:0;white-space:pre-wrap;overflow:hidden;resize:vertical;line-height:1.35}
+.risk-pro-cell textarea.fit{min-height:58px}
+.risk-pro-spec textarea{min-height:98px;font-weight:700;background:#fff}
+.risk-pro-actions{display:flex;align-items:center;justify-content:center;border-right:0}
+.risk-pro-actions .btn{padding:11px 14px;border-radius:14px}
+.risk-pro-product{overflow:visible}
+.risk-name-hover{position:relative;border:1px solid #cfe7ec;border-radius:16px;padding:13px 44px 13px 14px;background:#f7fcfd;cursor:help;min-height:52px;line-height:1.3;display:flex;align-items:center;overflow:visible}
+.risk-name-hover strong{display:block;white-space:normal;overflow-wrap:anywhere;color:var(--petrol)}
+.info-dot{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--petrol);color:#fff;font-weight:900;font-size:13px}
+.risk-hover-tip{display:none;position:absolute;left:0;top:calc(100% + 8px);width:min(460px,70vw);background:#fff7f2;color:#6f3b23;border:1px solid #ffcdbd;border-radius:16px;padding:14px 16px;box-shadow:0 18px 40px rgba(0,61,76,.18);z-index:50;font-weight:700;line-height:1.42;white-space:normal}
+.risk-name-hover:hover .risk-hover-tip,.risk-name-hover:focus .risk-hover-tip{display:block}
+.risk-name-edit{margin-top:8px!important;font-size:13px;background:#fff;color:var(--muted)}
+.risk-pro-empty{padding:24px;border-top:1px dashed var(--line);text-align:center;color:var(--muted);font-weight:900}
+@media(max-width:1180px){.risk-pro-table{overflow:auto}.risk-pro-head,.risk-pro-row{min-width:980px}.risk-pro-head{top:0}}
