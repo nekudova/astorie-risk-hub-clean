@@ -1,0 +1,2 @@
+Business Risk Hub 3.3.1d – Risk UX Professionalization SAFE HOTFIX
+Základ: stabilní 3.3.0. Oprava bez zásahu do init/bindButtons.

@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.3.1c")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.3.1d")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -233,7 +233,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.3.1c", "name": "Business Risk Hub 3.3.1c - Stable Risk UX Hotfix"}
+    return {"ok": True, "database_connected": ok, "version": "3.3.1d", "name": "Business Risk Hub 3.3.1d - Risk UX Professionalization Stable"}
 
 
 def get_catalogs() -> Dict[str, Any]:
@@ -376,131 +376,6 @@ def upsert_client(cur, client: Dict[str, Any]) -> int:
     return cur.fetchone()[0]
 
 
-def _json_dict(value: Any) -> Dict[str, Any]:
-    """Bezpečně převede JSONB/řetězec na dict; používá se pro starší i nové DB payloady."""
-    if isinstance(value, dict):
-        return value
-    if isinstance(value, str) and value.strip():
-        try:
-            parsed = json.loads(value)
-            return parsed if isinstance(parsed, dict) else {}
-        except Exception:
-            return {}
-    return {}
-
-
-def _json_list(value: Any) -> List[Any]:
-    if isinstance(value, list):
-        return value
-    if isinstance(value, str) and value.strip():
-        try:
-            parsed = json.loads(value)
-            return parsed if isinstance(parsed, list) else []
-        except Exception:
-            return []
-    return []
-
-
-def sync_offer_workflow(cur, inquiry_id: int, payload: Dict[str, Any]) -> None:
-    """BRH 3.3.1b: uloží nabídky také do samostatné tabulky insurer_offer_workflow.
-
-    Důvod: nabídky poradce nesmí zůstat jen ve full_payload. Starší verze už měly
-    pomocnou tabulku, ale při uložení případu se do ní data nepropsala a při otevření
-    se z ní zase nenačetla. Výsledkem bylo, že uložené nabídky z DB nebyly vidět.
-    """
-    offers = payload.get("offers") or {}
-    if not isinstance(offers, dict):
-        offers = {}
-    selected = payload.get("selected_insurers") or []
-    if not isinstance(selected, list):
-        selected = []
-
-    codes = []
-    for code in list(selected) + list(offers.keys()):
-        c = str(code or "").strip()
-        if c and c not in codes:
-            codes.append(c)
-
-    for code in codes:
-        offer = offers.get(code) if isinstance(offers.get(code), dict) else {}
-        status = offer.get("workflow_status") or offer.get("status") or "rozpracováno"
-        cur.execute(
-            """
-            INSERT INTO insurer_offer_workflow (
-                inquiry_id, insurer_code, status, sent_at, received_at, premium,
-                insurance_start, insurance_period, payment_frequency, payload, updated_at
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,NOW())
-            ON CONFLICT (inquiry_id, insurer_code) DO UPDATE SET
-                status=EXCLUDED.status,
-                sent_at=EXCLUDED.sent_at,
-                received_at=EXCLUDED.received_at,
-                premium=EXCLUDED.premium,
-                insurance_start=EXCLUDED.insurance_start,
-                insurance_period=EXCLUDED.insurance_period,
-                payment_frequency=EXCLUDED.payment_frequency,
-                payload=EXCLUDED.payload,
-                updated_at=NOW();
-            """,
-            (
-                inquiry_id,
-                code,
-                status,
-                offer.get("sent_at") or offer.get("sentAt") or "",
-                offer.get("received_at") or offer.get("receivedAt") or "",
-                offer.get("premium") or "",
-                offer.get("insurance_start") or "",
-                offer.get("insurance_period") or "",
-                offer.get("payment_frequency") or "",
-                json.dumps(offer),
-            ),
-        )
-
-
-def merge_offer_workflow_into_case(cur, inquiry_id: int, item: Dict[str, Any]) -> Dict[str, Any]:
-    """Načte uložené nabídky z DB a sloučí je zpět do CASE payloadu pro frontend."""
-    item = item if isinstance(item, dict) else {}
-    item.setdefault("offers", {})
-    if not isinstance(item.get("offers"), dict):
-        item["offers"] = {}
-
-    cur.execute(
-        """
-        SELECT insurer_code, status, sent_at, received_at, premium,
-               insurance_start, insurance_period, payment_frequency, payload, updated_at
-        FROM insurer_offer_workflow
-        WHERE inquiry_id=%s
-        ORDER BY insurer_code;
-        """,
-        (inquiry_id,),
-    )
-    rows = cur.fetchall()
-    for row in rows:
-        code = row.get("insurer_code") if isinstance(row, dict) else row[0]
-        if not code:
-            continue
-        payload = _json_dict(row.get("payload") if isinstance(row, dict) else row[8])
-        payload.setdefault("workflow_status", (row.get("status") if isinstance(row, dict) else row[1]) or "rozpracováno")
-        payload.setdefault("premium", (row.get("premium") if isinstance(row, dict) else row[5]) or "")
-        payload.setdefault("insurance_start", (row.get("insurance_start") if isinstance(row, dict) else row[6]) or "")
-        payload.setdefault("insurance_period", (row.get("insurance_period") if isinstance(row, dict) else row[7]) or "")
-        payload.setdefault("payment_frequency", (row.get("payment_frequency") if isinstance(row, dict) else row[8]) or "")
-        payload.setdefault("risks", {})
-        existing = item["offers"].get(code) if isinstance(item["offers"].get(code), dict) else {}
-        merged = {**existing, **payload}
-        item["offers"][code] = merged
-
-    # Pokud jsou v DB nabídky pro pojišťovny, které nejsou ve selected_insurers,
-    # doplníme je, aby se po otevření CASE zobrazily a neztratily se.
-    selected = item.get("selected_insurers")
-    if not isinstance(selected, list):
-        selected = []
-    for code in item.get("offers", {}).keys():
-        if code and code not in selected:
-            selected.append(code)
-    item["selected_insurers"] = selected
-    return item
-
-
 @app.get("/api/clients")
 def list_clients(q: str = ""):
     conn = _connect()
@@ -639,7 +514,6 @@ async def save_inquiry(request: Request):
                 )
                 saved_id = cur.fetchone()[0]
                 action = "create"
-            sync_offer_workflow(cur, saved_id, payload)
             cur.execute(
                 "INSERT INTO audit_log (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)",
                 ("inquiry", saved_id, action, data["adviser_email"], json.dumps({"title": title, "client_id": client_id})),
@@ -677,7 +551,6 @@ def list_inquiries():
                     COALESCE(c.name, i.full_payload->'client'->>'name', '') AS client_name,
                     i.selected_insurers,
                     i.full_payload,
-                    (SELECT COUNT(*) FROM insurer_offer_workflow ow WHERE ow.inquiry_id = i.id) AS workflow_offer_count,
                     COALESCE(i.full_payload->'report'->>'client_selected_offer', '') AS client_selected_offer
                 FROM inquiries i
                 LEFT JOIN clients c ON c.id = i.client_id
@@ -720,12 +593,7 @@ def list_inquiries():
                 item = dict(r)
                 item.pop("full_payload", None)
                 item.pop("selected_insurers", None)
-                item.pop("workflow_offer_count", None)
-                try:
-                    workflow_offer_count = int(r.get("workflow_offer_count") or 0)
-                except Exception:
-                    workflow_offer_count = 0
-                item["offer_count"] = max(offer_count, workflow_offer_count)
+                item["offer_count"] = offer_count
                 item["selected_insurer_count"] = selected_count
                 for k in ("created_at", "updated_at"):
                     if item.get(k):
@@ -778,7 +646,6 @@ def get_inquiry(inquiry_id: int):
                     "contact_email": row.get("contact_email") or "", "contact_phone": row.get("contact_phone") or "",
                     "website": row.get("website") or "",
                 }
-            item = merge_offer_workflow_into_case(cur, inquiry_id, item)
             return {"ok": True, "item": item}
     finally:
         conn.close()
