@@ -1,4 +1,4 @@
-const BRH_SHELL_VERSION = '2.9.1';
+const BRH_SHELL_VERSION = '2.9.1a';
 let CATALOG = null;
 let state = {
   id:null,
@@ -385,14 +385,14 @@ function getAstorieShellUser(){
     role: 'admin',
     company: admin.company || 'ASTORIE a.s.',
     registration: admin.registration || 'samostatný zprostředkovatel',
-    shellVersion: '2.9.1'
+    shellVersion: '2.9.1a'
   };
 }
 
 function stabiliseShell291(){
   document.body.classList.add('brh291-shell');
   const badge = document.querySelector('.top-actions .badge');
-  if(badge) badge.textContent = 'Business Risk Hub 2.9.1 · Stabilní shell';
+  if(badge) badge.textContent = 'Business Risk Hub 2.9.1a · Recovery Build';
   const logout = document.getElementById('logoutBtn');
   if(logout) logout.classList.add('hidden');
   document.querySelectorAll('.admin-only').forEach(x=>x.classList.remove('hidden'));
@@ -8180,7 +8180,7 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
   }
 
   window.BRH290 = {
-    version:'2.9.0-klienti-pojistovny-poptavky',
+    version:'2.9.1a-recovery-klienti-pojistovny-poptavky',
     render,
     zalozKlientaForm,
     ulozKlienta,
@@ -8196,6 +8196,8 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
     poptavky
   };
 
-  // BRH 2.9.1: samostatný vývojový root Klienti/Pojišťovny/Poptávky se nespouští automaticky. Data a funkce zůstávají zachované, shell používá jeden pracovní prostor.
+  // BRH 2.9.1a: modul Klienti / pojišťovny / poptávky je zachovaný a renderuje se bezpečně až po přihlášení.
+  setTimeout(render, 400);
+  setTimeout(render, 1200);
 
 })();

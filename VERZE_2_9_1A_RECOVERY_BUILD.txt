@@ -1,0 +1,2 @@
+Business Risk Hub 2.9.1a – Recovery Build
+Oprava rozpadlého shell layoutu z 2.9.1. Zachovává Admin, DB, Dokumenty, Textace a modul 2.9.0 Klienti/Pojišťovny/Poptávky.

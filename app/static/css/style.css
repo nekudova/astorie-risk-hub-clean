@@ -2422,7 +2422,8 @@ main{max-width:none;margin:0;padding:20px;}
    Cíl: potlačit duplicitní vývojové panely, zachovat Admin/DB/Dokumenty/Textace a jeden aktivní obchodní případ. */
 .brh291-hidden { display: none !important; }
 .brh291-shell #loginView { display: none !important; }
-.brh291-shell #appView { display: block !important; }
+.brh291-shell #appView:not(.hidden) { display: grid !important; grid-template-columns: 250px minmax(0,1fr) !important; gap:20px !important; align-items:start !important; }
+.brh291-shell #appView > :not(.app-nav){grid-column:2;min-width:0;}
 .brh291-shell .top-actions .badge {
   border-color: rgba(255,255,255,.35);
   background: rgba(255,255,255,.06);
@@ -2461,5 +2462,13 @@ main{max-width:none;margin:0;padding:20px;}
 .brh291-shell .app-section .eyebrow { letter-spacing: .18em; }
 
 .brh291-shell #brh270WorkflowRoot,
-.brh291-shell #brh280Root,
-.brh291-shell #brh290Root { display: none !important; }
+.brh291-shell #brh280Root { display: none !important; }
+.brh291-shell #brh290Root { display: block !important; }
+
+
+/* BRH 2.9.1a – recovery fix: na desktopu musí zůstat levé menu + pracovní plocha vedle sebe. */
+@media (min-width:901px){
+  .brh291-shell #appView:not(.hidden){display:grid!important;grid-template-columns:250px minmax(0,1fr)!important;gap:20px!important;align-items:start!important;}
+  .brh291-shell #appView > .app-nav{grid-column:1!important;}
+  .brh291-shell #appView > :not(.app-nav){grid-column:2!important;min-width:0!important;}
+}
