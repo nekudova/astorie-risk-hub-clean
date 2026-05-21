@@ -1,0 +1,6 @@
+Business Risk Hub 3.0.3 – Insurance Card + Admin/Textace Restore
+- oddělená Karta klienta a Karta pro pojištění
+- rozšířená karta pro pojištění podle původního vstupního formuláře
+- Admin rozšířen na pojišťovny, poradce, činnosti, rizika, rizikový model, textace, dokumenty a JSON
+- Textace se zobrazují přímo v sekci Textace a zároveň jsou editovatelné v Adminu
+- bez destruktivních změn DB
