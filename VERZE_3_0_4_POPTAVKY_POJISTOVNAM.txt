@@ -1,0 +1,11 @@
+Business Risk Hub 3.0.4 – Poptávky pojišťovnám
+
+Přidána samostatná fáze CASE workspace: Poptávky pojišťovnám.
+- generování poptávky pro každou vybranou pojišťovnu zvlášť,
+- PDF/tisk přes prohlížeč,
+- Excel export ve formátu .xls,
+- kopírování e-mailu pro pojišťovnu,
+- evidence stavu a data odeslání,
+- bez duplicit zdrojových dat – vše z jednoho CASE_ID.
+
+DB není destruktivně měněna. Admin, dokumenty, textace a karta pojištění zůstávají zachovány.
