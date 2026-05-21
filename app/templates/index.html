@@ -4,30 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub 3.3.1</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=3310">
+  <link rel="stylesheet" href="/static/css/style.css?v=3311a">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="brand-mark">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.3.1 · Risk UX Professionalization</span></div>
+    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.3.1a · Click Hotfix</span></div>
   </header>
 
   <main class="layout">
     <aside class="sidebar">
       <div class="sidebar-title">PRACOVNÍ REŽIM</div>
-      <button class="nav active" data-view="dashboard">Dashboard</button>
-      <button class="nav" data-view="cases">Obchodní případy</button>
-      <button class="nav" data-view="workspace">Pracovní prostor</button>
-      <button class="nav" data-view="documents">Dokumenty</button>
-      <button class="nav" data-view="textations">Textace</button>
-      <button class="nav" data-view="riskModel">Rizikový model</button>
-      <button class="nav" data-view="admin">Admin</button>
+      <button class="nav active" data-view="dashboard" onclick="showView('dashboard')">Dashboard</button>
+      <button class="nav" data-view="cases" onclick="showView('cases')">Obchodní případy</button>
+      <button class="nav" data-view="workspace" onclick="showView('workspace')">Pracovní prostor</button>
+      <button class="nav" data-view="documents" onclick="showView('documents')">Dokumenty</button>
+      <button class="nav" data-view="textations" onclick="showView('textations')">Textace</button>
+      <button class="nav" data-view="riskModel" onclick="showView('riskModel')">Rizikový model</button>
+      <button class="nav" data-view="admin" onclick="showView('admin')">Admin</button>
     </aside>
 
     <section class="content">
       <div class="case-strip" id="caseStrip">
         <div><span>Aktivní obchodní případ</span><strong id="stripTitle">Není vybrán žádný případ</strong><em id="stripMeta">Založte nebo otevřete obchodní případ.</em></div>
-        <div class="strip-actions"><button class="btn secondary" id="newCaseBtn">+ Nový případ</button><button class="btn primary" id="saveCaseBtn">Uložit do DB</button><button class="btn secondary" id="loadCasesBtn">Načíst případy</button></div>
+        <div class="strip-actions"><button class="btn secondary" id="newCaseBtn" onclick="newCase(true);showView('workspace')">+ Nový případ</button><button class="btn primary" id="saveCaseBtn" onclick="saveCase()">Uložit do DB</button><button class="btn secondary" id="loadCasesBtn" onclick="loadCases(true)">Načíst případy</button></div>
       </div>
 
       <section class="view active" id="dashboardView">
@@ -41,7 +41,7 @@
       </section>
 
       <section class="view" id="casesView">
-        <div class="panel"><div class="section-head"><div><p class="eyebrow">Evidence případů</p><h1>Obchodní případy</h1><p>Otevřete existující případ nebo založte nový. Karta klienta, pojišťovny, nabídky i porovnání jsou uvnitř jednoho pracovního prostoru.</p></div><button class="btn primary" id="newCaseBtn2">+ Nový případ</button></div><div id="casesList" class="case-list empty">Případy nejsou načtené.</div></div>
+        <div class="panel"><div class="section-head"><div><p class="eyebrow">Evidence případů</p><h1>Obchodní případy</h1><p>Otevřete existující případ nebo založte nový. Karta klienta, pojišťovny, nabídky i porovnání jsou uvnitř jednoho pracovního prostoru.</p></div><button class="btn primary" id="newCaseBtn2" onclick="newCase(true);showView('workspace')">+ Nový případ</button></div><div id="casesList" class="case-list empty">Případy nejsou načtené.</div></div>
       </section>
 
       <section class="view" id="workspaceView">
@@ -50,17 +50,17 @@
           <div class="readiness"><b id="readyScore">0%</b><span>připravenost</span></div>
         </div>
         <div class="tabs">
-          <button class="tab active" data-tab="client">1. Karta klienta</button>
-          <button class="tab" data-tab="insurance">2. Karta pro pojištění</button>
-          <button class="tab" data-tab="liability">3. Modul odpovědnosti</button>
-          <button class="tab" data-tab="risks">4. Ostatní rizika</button>
-          <button class="tab" data-tab="insurers">5. Pojišťovny</button>
-          <button class="tab" data-tab="requests">6. Poptávky pojišťovnám</button>
-          <button class="tab" data-tab="offers">7. Nabídky v jedné tabulce</button>
-          <button class="tab" data-tab="comparison">8. Porovnání</button>
-          <button class="tab" data-tab="recommendation">9. Doporučení poradce</button>
-          <button class="tab" data-tab="output">10. Klientský výstup</button>
-          <button class="tab" data-tab="audit">11. Kontrola</button>
+          <button class="tab active" data-tab="client" onclick="readCurrentTab();currentTab='client';renderWorkspace()">1. Karta klienta</button>
+          <button class="tab" data-tab="insurance" onclick="readCurrentTab();currentTab='insurance';renderWorkspace()">2. Karta pro pojištění</button>
+          <button class="tab" data-tab="liability" onclick="readCurrentTab();currentTab='liability';renderWorkspace()">3. Modul odpovědnosti</button>
+          <button class="tab" data-tab="risks" onclick="readCurrentTab();currentTab='risks';renderWorkspace()">4. Ostatní rizika</button>
+          <button class="tab" data-tab="insurers" onclick="readCurrentTab();currentTab='insurers';renderWorkspace()">5. Pojišťovny</button>
+          <button class="tab" data-tab="requests" onclick="readCurrentTab();currentTab='requests';renderWorkspace()">6. Poptávky pojišťovnám</button>
+          <button class="tab" data-tab="offers" onclick="readCurrentTab();currentTab='offers';renderWorkspace()">7. Nabídky v jedné tabulce</button>
+          <button class="tab" data-tab="comparison" onclick="readCurrentTab();currentTab='comparison';renderWorkspace()">8. Porovnání</button>
+          <button class="tab" data-tab="recommendation" onclick="readCurrentTab();currentTab='recommendation';renderWorkspace()">9. Doporučení poradce</button>
+          <button class="tab" data-tab="output" onclick="readCurrentTab();currentTab='output';renderWorkspace()">10. Klientský výstup</button>
+          <button class="tab" data-tab="audit" onclick="readCurrentTab();currentTab='audit';renderWorkspace()">11. Kontrola</button>
         </div>
         <div id="tabContent" class="panel tab-content"></div>
       </section>
@@ -73,6 +73,6 @@
   </main>
 
   <div id="toast" class="toast hidden"></div>
-  <script src="/static/js/app.js?v=3310"></script>
+  <script src="/static/js/app.js?v=3311a"></script>
 </body>
 </html>

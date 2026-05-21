@@ -508,4 +508,24 @@ function tabOffers(){
   return `<p class="eyebrow">7. Smart nabídky</p><h2>Požadavek klienta × nabídky pojišťoven</h2><p class="muted">Při volbě „splněno“ se automaticky doplní požadovaný limit a spoluúčast z poptávky. Poradce řeší pouze odchylky.</p>${common}<div class="table-wrap"><table class="offer-table pro-table"><thead><tr><th>Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div>`;
 }
 
-document.addEventListener('DOMContentLoaded',init);
+
+async function safeInit(){
+  try { await init(); }
+  catch(e){
+    console.error('BRH init failed', e);
+    try { bindNav(); bindButtons(); renderAll(); toast('Aplikace běží v nouzovém režimu klikání.'); } catch(inner){ console.error('BRH fallback failed', inner); }
+  }
+}
+function exposeBrhActions(){
+  Object.assign(window,{showView,newCase,loadCases,saveCase,renderWorkspace,readCurrentTab,openCase,loadAres,searchClients,useClient,renderAll,bindNav,bindButtons});
+}
+exposeBrhActions();
+document.addEventListener('DOMContentLoaded', safeInit);
+setTimeout(()=>{ try { exposeBrhActions(); bindNav(); bindButtons(); } catch(e){ console.error('BRH rebinding failed', e); } }, 500);
+
+
+
+/* === BRH 3.3.1a CLICK HOTFIX === */
+try {
+  Object.assign(window,{showView,newCase,loadCases,saveCase,renderWorkspace,readCurrentTab,openCase,loadAres,searchClients,useClient,renderAll,bindNav,bindButtons,addLiabilityRisk,tabLiability,tabRisks});
+} catch(e) { console.error('BRH action exposure failed', e); }

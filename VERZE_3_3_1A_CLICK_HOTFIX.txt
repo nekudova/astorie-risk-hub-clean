@@ -1,0 +1,2 @@
+Business Risk Hub 3.3.1a – Click Hotfix
+Oprava nefunkčních tlačítek: inline fallback, globální akce, nouzové bindování. Základ 3.3.1 REAL.

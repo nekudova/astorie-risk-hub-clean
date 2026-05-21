@@ -1,0 +1,12 @@
+Business Risk Hub 3.3.1 – Risk UX Professionalization
+
+Skutečný patch nad verzí 3.3.0 PRODUCTION.
+
+Změny:
+- UI tabulky rizik již nezobrazuje Risk key.
+- Interní metodika je přesunuta do rozbalovací nápovědy u Produktu/Rizika.
+- Sloupec Specifikace / doplnění pro pojišťovnu je širší a multiline.
+- Kliknutí na již vybrané riziko v katalogu riziko odebere.
+- Texty v tabulkách se zalamují a nejsou useknuté.
+- Interní metodika se neexportuje do poptávky, nabídky ani klientského výstupu.
+- CASE_ID, Admin, Textace, Dokumenty a DB zůstávají zachované.
