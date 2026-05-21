@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ASTORIE Business Risk Hub 3.0.4</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=3040">
+  <title>ASTORIE Business Risk Hub 3.1.0</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=3100">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="brand-mark">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.0.4 · Functional Workspace Restore</span></div>
+    <div class="top-actions"><span class="version-badge">Business Risk Hub 3.1.0 · Modul odpovědnosti PROFI</span></div>
   </header>
 
   <main class="layout">
@@ -32,7 +32,7 @@
 
       <section class="view active" id="dashboardView">
         <div class="panel hero">
-          <p class="eyebrow">Business Risk Hub 3.0.0</p>
+          <p class="eyebrow">Business Risk Hub 3.1.0</p>
           <h1>Jeden obchodní případ. Jeden pracovní prostor. Žádné duplicity.</h1>
           <p>Dashboard slouží pouze jako vstupní přehled. Veškerá práce probíhá v pracovním prostoru obchodního případu nad jedním CASE_ID.</p>
           <div class="metric-grid"><div><b id="mCases">0</b><span>případů</span></div><div><b id="mOpen">0</b><span>aktivních</span></div><div><b id="mOffers">0</b><span>nabídek</span></div><div><b id="mReady">0%</b><span>připravenost</span></div></div>
@@ -52,14 +52,15 @@
         <div class="tabs">
           <button class="tab active" data-tab="client">1. Karta klienta</button>
           <button class="tab" data-tab="insurance">2. Karta pro pojištění</button>
-          <button class="tab" data-tab="risks">3. Rizika a požadavky</button>
-          <button class="tab" data-tab="insurers">4. Pojišťovny</button>
-          <button class="tab" data-tab="requests">5. Poptávky pojišťovnám</button>
-          <button class="tab" data-tab="offers">6. Nabídky v jedné tabulce</button>
-          <button class="tab" data-tab="comparison">7. Porovnání</button>
-          <button class="tab" data-tab="recommendation">8. Doporučení poradce</button>
-          <button class="tab" data-tab="output">9. Klientský výstup</button>
-          <button class="tab" data-tab="audit">10. Kontrola</button>
+          <button class="tab" data-tab="liability">3. Modul odpovědnosti</button>
+          <button class="tab" data-tab="risks">4. Ostatní rizika</button>
+          <button class="tab" data-tab="insurers">5. Pojišťovny</button>
+          <button class="tab" data-tab="requests">6. Poptávky pojišťovnám</button>
+          <button class="tab" data-tab="offers">7. Nabídky v jedné tabulce</button>
+          <button class="tab" data-tab="comparison">8. Porovnání</button>
+          <button class="tab" data-tab="recommendation">9. Doporučení poradce</button>
+          <button class="tab" data-tab="output">10. Klientský výstup</button>
+          <button class="tab" data-tab="audit">11. Kontrola</button>
         </div>
         <div id="tabContent" class="panel tab-content"></div>
       </section>
@@ -72,6 +73,6 @@
   </main>
 
   <div id="toast" class="toast hidden"></div>
-  <script src="/static/js/app.js?v=3040"></script>
+  <script src="/static/js/app.js?v=3100"></script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+Business Risk Hub 3.1.0 – Modul odpovědnosti PROFI
+- katalog rizik odpovědnosti
+- zvláštní ujednání
+- vlastní rizika a vlastní doložky
+- napojení na poptávky pojišťovnám
+- jeden CASE_ID, bez destruktivních DB změn
