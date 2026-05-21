@@ -1,0 +1,13 @@
+Business Risk Hub 3.3.0 – Smart Nabídky & Textation Workflow PRO
+
+Produkční merge nad verzí 3.2.0.
+
+Hlavní změny:
+- Smart předvyplnění nabídek z jednoho CASE_ID.
+- Počátek, období, frekvence, území a spoluúčast se přebírají z karty pro pojištění.
+- Stav „splněno“ automaticky převezme požadovaný limit a spoluúčast z poptávky.
+- Lze nastavit „splněno“ pro celou pojišťovnu nebo všechny pojišťovny.
+- Textace vložené do případu lze použít pro poptávku, nabídku nebo klientský výstup.
+- Poptávky pojišťovnám obsahují pouze klientské/specifikační texty, nikoli interní metodické poznámky.
+- Zachován Admin, Dokumenty, Textace, DB a CASE_ID workflow.
+- DB změny jsou nedestruktivní.

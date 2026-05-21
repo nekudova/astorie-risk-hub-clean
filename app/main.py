@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.2.0")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.3.1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -116,6 +116,40 @@ def init_db() -> bool:
             cur.execute("UPDATE inquiries SET status = COALESCE(NULLIF(status,''), 'rozpracováno') WHERE status IS NULL OR status='';")
             cur.execute(
                 """
+                CREATE TABLE IF NOT EXISTS case_textations (
+                    id SERIAL PRIMARY KEY,
+                    inquiry_id INTEGER REFERENCES inquiries(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    area TEXT,
+                    type TEXT,
+                    text TEXT,
+                    targets JSONB DEFAULT '[]'::jsonb,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """
+            )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS insurer_offer_workflow (
+                    id SERIAL PRIMARY KEY,
+                    inquiry_id INTEGER REFERENCES inquiries(id) ON DELETE CASCADE,
+                    insurer_code TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'rozpracováno',
+                    sent_at TEXT,
+                    received_at TEXT,
+                    premium TEXT,
+                    insurance_start TEXT,
+                    insurance_period TEXT,
+                    payment_frequency TEXT,
+                    payload JSONB DEFAULT '{}'::jsonb,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE(inquiry_id, insurer_code)
+                );
+                """
+            )
+            cur.execute(
+                """
                 CREATE TABLE IF NOT EXISTS audit_log (
                     id SERIAL PRIMARY KEY,
                     entity_type TEXT NOT NULL,
@@ -199,7 +233,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.2.0", "name": "Business Risk Hub 3.2.0 - Professional Risk Workflow & Textation Engine"}
+    return {"ok": True, "database_connected": ok, "version": "3.3.1", "name": "Business Risk Hub 3.3.1 - Risk UX Professionalization"}
 
 
 def get_catalogs() -> Dict[str, Any]:
