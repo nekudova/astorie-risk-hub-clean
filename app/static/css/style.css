@@ -2416,3 +2416,50 @@ main{max-width:none;margin:0;padding:20px;}
   .brh290-stats,.brh290-columns,.brh290-form-grid,.brh290-checks{grid-template-columns:1fr}
   .brh290-request{flex-direction:column}
 }
+
+
+/* Business Risk Hub 2.9.1 – Stabilní shell + jeden pracovní prostor
+   Cíl: potlačit duplicitní vývojové panely, zachovat Admin/DB/Dokumenty/Textace a jeden aktivní obchodní případ. */
+.brh291-hidden { display: none !important; }
+.brh291-shell #loginView { display: none !important; }
+.brh291-shell #appView { display: block !important; }
+.brh291-shell .top-actions .badge {
+  border-color: rgba(255,255,255,.35);
+  background: rgba(255,255,255,.06);
+}
+.brh291-shell #dashboardView > .hero.compact,
+.brh291-shell #dashboardView > section.panel:not(#coreStabilizationV100) {
+  display: none !important;
+}
+.brh291-shell #coreStabilizationV100 {
+  display: block !important;
+  border-left: 7px solid var(--orange, #FC4C02);
+}
+.brh291-shell #offersView > #brh220OfferEnginePanel,
+.brh291-shell #offersView > .unified-offer-note-v73,
+.brh291-shell #offersView > .hero.compact,
+.brh291-shell #offersView > section.panel:last-child {
+  display: none !important;
+}
+.brh291-shell #offersView > .offer-pro-workspace { display: block !important; }
+.brh291-shell #comparisonView > .comparison-helper-panel,
+.brh291-shell #comparisonView > .hero.compact,
+.brh291-shell #comparisonView > section.panel:not(.offer-comparison-v72) {
+  display: none !important;
+}
+.brh291-shell #reportView > .hero.compact,
+.brh291-shell #reportView > section.panel:not(.client-output-workspace) {
+  display: none !important;
+}
+.brh291-shell .case-command-center {
+  position: sticky;
+  top: 92px;
+  z-index: 10;
+  box-shadow: 0 12px 28px rgba(0,61,76,.10);
+}
+.brh291-shell .app-nav .nav-btn::after { display: none !important; }
+.brh291-shell .app-section .eyebrow { letter-spacing: .18em; }
+
+.brh291-shell #brh270WorkflowRoot,
+.brh291-shell #brh280Root,
+.brh291-shell #brh290Root { display: none !important; }

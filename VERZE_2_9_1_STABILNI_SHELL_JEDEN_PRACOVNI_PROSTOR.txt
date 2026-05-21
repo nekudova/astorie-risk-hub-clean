@@ -1,0 +1,28 @@
+Business Risk Hub 2.9.1 – Stabilní shell + jeden pracovní prostor
+
+Cíl verze:
+- stabilizovat aplikaci nad verzí 2.9.0,
+- odstranit vizuální chaos z vývojových panelů,
+- zachovat DB, Admin, dokumenty, textace, nabídky, porovnání a workflow,
+- nevytvářet nové demo bloky ani automatická doporučení,
+- pracovat nad jedním aktivním obchodním případem.
+
+Změny:
+1. Verze aplikace nastavena na 2.9.1.
+2. Dashboard zobrazuje pouze finální stabilní pracovní prostor obchodního případu.
+3. Potlačeny samostatně vkládané vývojové root panely 2.7 / 2.8 / 2.9, které způsobovaly duplicitní obrazovky pod sebou.
+4. Potlačen demo Comparison & Recommendation root s napevno vloženými pojišťovnami a skóre.
+5. Nabídky zobrazují pouze jednotný nabídkový workspace.
+6. Porovnání zobrazuje pouze porovnání ze skutečných nabídek aktivního případu.
+7. Klientský výstup zobrazuje pouze čistý workspace výstupu.
+8. Automatický interní vstup do shellu jako Admin – nepoužívá se ruční vývojové přihlášení cizími lokálními uživateli.
+9. Admin zůstává dostupný.
+10. Dokumenty a Textace zůstávají dostupné.
+11. Databázové tabulky a migrace nejsou mazány ani resetovány.
+
+Důležité:
+- Tato verze není destruktivní pro databázi.
+- Neprovádí DROP tabulek.
+- Nepřepisuje Neon DB.
+- Neodstraňuje Admin, dokumenty ani textace.
+- Je to stabilizační shell pro další fázi 2.9.2.

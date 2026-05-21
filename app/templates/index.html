@@ -4,24 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=2900">
+  <link rel="stylesheet" href="/static/css/style.css?v=2910">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><div class="logo">A</div><div><strong>ASTORIE</strong><span>Business Risk Hub</span></div></div>
-    <div class="top-actions"><span class="badge">Business Risk Hub 2.9.0 · Klienti, pojišťovny a poptávky</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
+    <div class="top-actions"><span class="badge">Business Risk Hub 2.9.1 · Stabilní shell</span><button id="logoutBtn" class="ghost hidden">Odhlásit</button></div>
   </header>
 
   <main>
     <section id="loginView" class="panel narrow">
       <h1>Přihlášení</h1>
-      <p class="muted">Interní vývojová verze. Přihlášení používá uživatele z číselníku poradců.</p>
+      <p class="muted">Interní režim ASTORIE. Aplikace se v produkčním shellu spouští automaticky pro interního správce.</p>
       <div class="grid2">
         <label>E-mail<input id="loginEmail" value="admin@astorie.local"></label>
         <label>Heslo<input id="loginPassword" type="password" value="Astorie2026!"></label>
       </div>
       <button id="loginBtn" class="primary">Přihlásit</button>
-      <p class="hint">Admin: admin@astorie.local / Astorie2026! · Poradce: poradce@astorie.local / Poradce2026!</p>
+      <p class="hint">Business Risk Hub 2.9.1 – stabilní pracovní prostor bez demo dat a duplicitních obrazovek.</p>
     </section>
 
     <section id="appView" class="hidden">
@@ -127,9 +127,9 @@
         <section class="panel core-stabilization-v100" id="coreStabilizationV100">
           <div class="section-head">
             <div>
-              <p class="eyebrow">Business Risk Hub 2.9.0 · Klienti, pojišťovny a poptávky</p>
-              <h2>Stabilní obchodní případ</h2>
-              <p class="muted">Jednotný zdroj pravdy pro klienta, nabídky, porovnání, dokumenty a klientský výstup.</p>
+              <p class="eyebrow">Business Risk Hub 2.9.1 · Stabilní shell</p>
+              <h2>Stabilní pracovní prostor obchodního případu</h2>
+              <p class="muted">Jeden aktivní obchodní případ je zdrojem pravdy pro poptávku, nabídky, porovnání, dokumenty, textace a klientský výstup.</p>
             </div>
             <div class="core-actions-v100">
               <button class="secondary" type="button" onclick="BRH1.rebuild(true)">Zkontrolovat případ</button>
@@ -778,7 +778,7 @@
           <div class="section-head">
             <div>
               <h2>Archiv dokumentů</h2>
-              <p class="muted">Business Risk Hub 2.9.0 · Klienti, pojišťovny a poptávky</p>
+              <p class="muted">Business Risk Hub 2.9.1 · Stabilní shell</p>
             </div>
             <button class="secondary" type="button" onclick="alert('Upload dokumentů bude doplněn v další verzi. Zatím je připravena struktura archivu.')">+ Přidat dokument</button>
           </div>
@@ -1170,7 +1170,7 @@
 
           <div id="documentsAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Správa dokumentů a zdrojů</h2><p class="muted">Budoucí evidence VPP/DPP/ZPP, článků, odstavců, odkazů a vazeb na rizika.</p></div><button class="secondary" type="button">+ Přidat dokument</button></div>
-            <div class="admin-note">Business Risk Hub 2.9.0 · Klienti, pojišťovny a poptávky</div>
+            <div class="admin-note">Business Risk Hub 2.9.1 · Stabilní shell</div>
           </div>
           
           <div id="textationsAdmin" class="admin-section hidden">
@@ -1202,7 +1202,7 @@
 
           <div id="checklistAdmin" class="admin-section hidden">
             <div class="section-head"><div><h2>Správa underwriting checklistů</h2><p class="muted">Checklisty podle typu klienta, rizika nebo budoucího modulu.</p></div><button class="secondary" type="button">+ Přidat kontrolní bod</button></div>
-            <div class="admin-note">Business Risk Hub 2.9.0 · Klienti, pojišťovny a poptávky</div>
+            <div class="admin-note">Business Risk Hub 2.9.1 · Stabilní shell</div>
           </div>
 
           <div class="admin-actions"><button id="saveAdminCatalogs" class="primary">Uložit admin číselníky do DB</button></div>

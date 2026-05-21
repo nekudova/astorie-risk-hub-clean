@@ -1,3 +1,4 @@
+const BRH_SHELL_VERSION = '2.9.1';
 let CATALOG = null;
 let state = {
   id:null,
@@ -368,8 +369,52 @@ async function init(){
   bindLogin();
   bindUI();
   bindDynamicButtonsHard();
-  const savedUser = JSON.parse(localStorage.getItem('arh_user') || 'null');
-  if(savedUser) enterApp(savedUser);
+  // BRH 2.9.1: stabilní interní shell. Nepoužíváme vývojové ruční přihlášení ani cizí lokální uživatele.
+  const adminUser = getAstorieShellUser();
+  localStorage.setItem('arh_user', JSON.stringify(adminUser));
+  enterApp(adminUser);
+  stabiliseShell291();
+}
+
+function getAstorieShellUser(){
+  const users = Array.isArray(CATALOG.advisers) ? CATALOG.advisers : [];
+  const admin = users.find(u => String(u.role||'').toLowerCase()==='admin') || users.find(u => String(u.email||'').toLowerCase()==='admin@astorie.local') || {};
+  return {
+    name: admin.name || 'ASTORIE Admin',
+    email: admin.email || 'admin@astorie.local',
+    role: 'admin',
+    company: admin.company || 'ASTORIE a.s.',
+    registration: admin.registration || 'samostatný zprostředkovatel',
+    shellVersion: '2.9.1'
+  };
+}
+
+function stabiliseShell291(){
+  document.body.classList.add('brh291-shell');
+  const badge = document.querySelector('.top-actions .badge');
+  if(badge) badge.textContent = 'Business Risk Hub 2.9.1 · Stabilní shell';
+  const logout = document.getElementById('logoutBtn');
+  if(logout) logout.classList.add('hidden');
+  document.querySelectorAll('.admin-only').forEach(x=>x.classList.remove('hidden'));
+  removeDevelopmentPlaceholders291();
+}
+
+function removeDevelopmentPlaceholders291(){
+  // Schová pouze duplicitní vývojové prezentační panely. Funkční formuláře, Admin, Dokumenty, Textace a DB API zůstávají zachované.
+  [
+    '#brh210WorkflowPanel',
+    '#advisorCockpitV76',
+    '.case-engine-status-v74',
+    '.advisor-cockpit-hero',
+    '.cockpit-panel',
+    '#brh220OfferEnginePanel',
+    '.unified-offer-note-v73',
+    '#comparisonView .comparison-helper-panel',
+    '#comparisonView > .hero.compact',
+    '#comparisonView > section.panel:not(.offer-comparison-v72)',
+    '#reportView > .hero.compact',
+    '#reportView > section.panel:not(.client-output-workspace)'
+  ].forEach(sel => document.querySelectorAll(sel).forEach(el => el.classList.add('brh291-hidden')));
 }
 
 function bindLogin(){
@@ -381,7 +426,7 @@ function bindLogin(){
     localStorage.setItem('arh_user', JSON.stringify(user));
     enterApp(user);
   };
-  $('logoutBtn').onclick = ()=>{ localStorage.removeItem('arh_user'); location.reload(); };
+  $('logoutBtn').onclick = ()=>{ localStorage.setItem('arh_user', JSON.stringify(getAstorieShellUser())); enterApp(getAstorieShellUser()); };
 }
 
 function enterApp(user){
@@ -511,6 +556,7 @@ function requireActiveInquiryForView(id){
   return false;
 }
 function showView(id){
+  if(typeof stabiliseShell291==='function') setTimeout(stabiliseShell291, 0);
   collectForm();
   if(protectedViewName(id) && !hasActiveInquiryContext()){
     const msg = `Nejprve založte nebo načtěte poptávku. Sekce „${protectedViewName(id)}“ se váže ke konkrétní aktivní poptávce.`;
@@ -7493,7 +7539,7 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
     changeStatus
   };
 
-  setTimeout(renderWorkflow, 1000);
+  // BRH 2.9.1: starý samostatně vkládaný workflow root se v produkčním shellu nespouští automaticky.
 
 })();
 
@@ -7699,7 +7745,7 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
     render
   };
 
-  setTimeout(render, 1200);
+  // BRH 2.9.1: demo Comparison root se nespouští automaticky; porovnání běží jen ze skutečných nabídek aktivního případu.
 
 })();
 
@@ -8150,7 +8196,6 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
     poptavky
   };
 
-  setTimeout(render, 1200);
-  setTimeout(render, 2500);
+  // BRH 2.9.1: samostatný vývojový root Klienti/Pojišťovny/Poptávky se nespouští automaticky. Data a funkce zůstávají zachované, shell používá jeden pracovní prostor.
 
 })();
