@@ -1,0 +1,2 @@
+Business Risk Hub 3.3.2a – Risk Tooltip & Table UX SAFE HOTFIX
+Základ: 3.3.1d funkční větev. Úprava pouze risk UX, bez zásahu do DB/Admin/klikání.
