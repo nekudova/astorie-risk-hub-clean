@@ -1,0 +1,12 @@
+Business Risk Hub 3.2.0 – Professional Risk Workflow & Textation Engine
+
+Obsah:
+- profesionální katalog rizik odpovědnosti
+- oddělení interní metodiky od textu pro pojišťovnu
+- pole Specifikace / doplnění pro pojišťovnu
+- hromadné odebrání rizik a zvláštních ujednání
+- textace přiřaditelné do aktivního obchodního případu
+- textace použitelné pro poptávku, nabídku a klientský výstup
+- automatické propsání společných údajů do nabídek
+- při stavu „splněno“ automatické doplnění limitu a spoluúčasti z poptávky
+- DB bez destruktivních změn

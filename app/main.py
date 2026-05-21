@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.1.0")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -199,7 +199,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.1.0", "name": "Business Risk Hub 3.1.0 - Modul odpovědnosti PROFI"}
+    return {"ok": True, "database_connected": ok, "version": "3.2.0", "name": "Business Risk Hub 3.2.0 - Professional Risk Workflow & Textation Engine"}
 
 
 def get_catalogs() -> Dict[str, Any]:
