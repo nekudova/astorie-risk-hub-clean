@@ -1,0 +1,2 @@
+ASTORIE Business Risk Hub 2.9.0 – Klienti, pojišťovny a poptávky
+Databáze klientů, databáze pojišťoven, karta klienta, samostatné poptávky pojišťovnám a souhrn pro srovnání.

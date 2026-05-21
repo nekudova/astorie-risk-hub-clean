@@ -1,0 +1,10 @@
+{
+  "verze": "2.9.0",
+  "entity": [
+    "klienti",
+    "pojistovny",
+    "poptavky_pojistovnam"
+  ],
+  "princip": "karta klienta je zdroj údajů pro vstupní dotazník a poptávku",
+  "pravidlo": "pro každou pojišťovnu vzniká samostatná poptávka, ale všechny patří pod jeden souhrn obchodního případu"
+}

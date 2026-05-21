@@ -2270,3 +2270,149 @@ main{max-width:none;margin:0;padding:20px;}
   }
 
 }
+
+
+
+/* ============================================================
+   BRH 2.9.0 – Klienti, pojišťovny a poptávky
+   ============================================================ */
+.brh290-root{margin-top:24px}
+.brh290-panel{border-left:7px solid #FC4C02}
+.brh290-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.brh290-actions.top{margin:18px 0}
+.brh290-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin:18px 0;
+}
+.brh290-stats div{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:18px;
+  padding:16px;
+}
+.brh290-stats b{
+  display:block;
+  font-size:28px;
+  color:#003D4C;
+}
+.brh290-stats span{
+  color:#607882;
+  font-weight:900;
+  text-transform:uppercase;
+  font-size:11px;
+}
+.brh290-columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.brh290-card{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:18px;
+  padding:16px;
+  margin:12px 0;
+}
+.brh290-card span{
+  display:inline-block;
+  background:#eaf5f7;
+  color:#003D4C;
+  border-radius:999px;
+  padding:5px 10px;
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.brh290-card h4{
+  margin:10px 0 6px;
+  color:#003D4C;
+}
+.brh290-card p{
+  margin:6px 0;
+  color:#214f5a;
+  font-weight:700;
+}
+.brh290-form{
+  background:#fff8f5;
+  border-left:6px solid #FC4C02;
+  border-radius:20px;
+  padding:18px;
+  margin:18px 0;
+}
+.brh290-form-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.brh290-form label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-weight:900;
+  color:#003D4C;
+}
+.brh290-form input,
+.brh290-form select,
+.brh290-form textarea{
+  border:1px solid rgba(0,61,76,.15);
+  border-radius:12px;
+  padding:11px;
+  font:inherit;
+  background:#fff;
+}
+.brh290-form textarea{
+  min-height:110px;
+  resize:vertical;
+}
+.brh290-full{margin-top:12px}
+.brh290-preview{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:16px;
+  padding:14px;
+  margin:16px 0;
+  color:#214f5a;
+  font-weight:700;
+}
+.brh290-checks{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:12px 0;
+}
+.brh290-checks label{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:14px;
+  padding:10px;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:8px;
+}
+.brh290-summary{
+  margin-top:20px;
+}
+.brh290-request{
+  background:#fff;
+  border:1px solid rgba(0,61,76,.12);
+  border-radius:16px;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0;
+}
+.brh290-request b{color:#003D4C}
+.brh290-request p{margin:6px 0 0;color:#607882;font-weight:700}
+.brh290-request span{
+  display:block;
+  color:#214f5a;
+  font-weight:800;
+}
+@media(max-width:1100px){
+  .brh290-stats,.brh290-columns,.brh290-form-grid,.brh290-checks{grid-template-columns:1fr}
+  .brh290-request{flex-direction:column}
+}

@@ -7702,3 +7702,455 @@ setTimeout(refreshActiveCaseWorkflowV77,500); setTimeout(refreshActiveCaseWorkfl
   setTimeout(render, 1200);
 
 })();
+
+
+
+// ============================================================
+// ASTORIE Business Risk Hub 2.9.0
+// Klienti, pojišťovny a poptávky
+// Bez anglických popisků v UI. Zachováno: stabilní login/router z 2.2/2.6 FINAL.
+// ============================================================
+(function(){
+
+  const STORAGE_CLIENTS = 'brh290_clients';
+  const STORAGE_INSURERS = 'brh290_insurers';
+  const STORAGE_REQUESTS = 'brh290_requests';
+
+  const DEFAULT_INSURERS = [
+    {id:'koop', nazev:'Kooperativa pojišťovna, a.s.', zkratka:'KOOP', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Majetek, odpovědnost, podnikatelé.'},
+    {id:'allianz', nazev:'Allianz pojišťovna, a.s.', zkratka:'Allianz', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Majetek, odpovědnost, flotily.'},
+    {id:'generali', nazev:'Generali Česká pojišťovna a.s.', zkratka:'GČP', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Podnikatelská rizika, majetek, odpovědnost.'},
+    {id:'cpp', nazev:'Česká podnikatelská pojišťovna, a.s.', zkratka:'ČPP', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Podnikatelé, odpovědnost, majetek.'},
+    {id:'csob', nazev:'ČSOB Pojišťovna, a.s.', zkratka:'ČSOB', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Majetek, odpovědnost, podnikatelé.'},
+    {id:'uniqa', nazev:'UNIQA pojišťovna, a.s.', zkratka:'UNIQA', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Majetek, odpovědnost, speciální rizika.'},
+    {id:'colonnade', nazev:'Colonnade Insurance S.A.', zkratka:'Colonnade', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Speciální rizika, odpovědnost, kyber.'},
+    {id:'maxima', nazev:'MAXIMA pojišťovna, a.s.', zkratka:'MAXIMA', email:'', kontakt:'', portal:'', aktivni:true, poznamka:'Vybrané podnikatelské produkty.'}
+  ];
+
+  function nacti(klic, vychozi){
+    try { return JSON.parse(localStorage.getItem(klic) || JSON.stringify(vychozi)); }
+    catch(e){ return vychozi; }
+  }
+
+  function uloz(klic, hodnota){
+    localStorage.setItem(klic, JSON.stringify(hodnota));
+  }
+
+  function klienti(){
+    return nacti(STORAGE_CLIENTS, []);
+  }
+
+  function ulozKlienty(data){
+    uloz(STORAGE_CLIENTS, data);
+  }
+
+  function pojistovny(){
+    const ulozene = nacti(STORAGE_INSURERS, null);
+    if(!ulozene){
+      uloz(STORAGE_INSURERS, DEFAULT_INSURERS);
+      return DEFAULT_INSURERS;
+    }
+    return ulozene;
+  }
+
+  function ulozPojistovny(data){
+    uloz(STORAGE_INSURERS, data);
+  }
+
+  function poptavky(){
+    return nacti(STORAGE_REQUESTS, []);
+  }
+
+  function ulozPoptavky(data){
+    uloz(STORAGE_REQUESTS, data);
+  }
+
+  function appRoot(){
+    return document.getElementById('appView') || document.querySelector('.app-shell') || document.querySelector('main');
+  }
+
+  function prihlaseno(){
+    const login = document.getElementById('loginView');
+    const app = document.getElementById('appView');
+    return (!login || login.classList.contains('hidden')) && app && !app.classList.contains('hidden');
+  }
+
+  function zajistiRoot(){
+    const app = appRoot();
+    if(!app || !prihlaseno()) return null;
+
+    let root = document.getElementById('brh290Root');
+    if(!root){
+      root = document.createElement('section');
+      root.id = 'brh290Root';
+      root.className = 'brh290-root';
+      app.appendChild(root);
+    }
+    return root;
+  }
+
+  function htmlEscape(v){
+    return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function zalozKlientaForm(id){
+    const seznam = klienti();
+    const k = id ? seznam.find(x => x.id === id) : null;
+
+    const root = document.getElementById('brh290Form');
+    if(!root) return;
+
+    root.innerHTML = `
+      <div class="brh290-form">
+        <div class="section-head">
+          <div>
+            <h3>${k ? 'Upravit kartu klienta' : 'Nová karta klienta'}</h3>
+            <p class="muted">Údaje z karty klienta se budou přenášet do vstupního dotazníku a poptávky.</p>
+          </div>
+          <button class="secondary" onclick="BRH290.zavriForm()">Zavřít</button>
+        </div>
+
+        <input type="hidden" id="brh290KlientId" value="${htmlEscape(k?.id || '')}">
+
+        <div class="brh290-form-grid">
+          <label>Název klienta<input id="brh290Nazev" value="${htmlEscape(k?.nazev || '')}"></label>
+          <label>IČO<input id="brh290Ico" value="${htmlEscape(k?.ico || '')}"></label>
+          <label>DIČ<input id="brh290Dic" value="${htmlEscape(k?.dic || '')}"></label>
+          <label>Činnost<input id="brh290Cinnost" value="${htmlEscape(k?.cinnost || '')}"></label>
+          <label>Adresa<input id="brh290Adresa" value="${htmlEscape(k?.adresa || '')}"></label>
+          <label>Kontaktní osoba<input id="brh290Kontakt" value="${htmlEscape(k?.kontakt || '')}"></label>
+          <label>E-mail<input id="brh290Email" value="${htmlEscape(k?.email || '')}"></label>
+          <label>Telefon<input id="brh290Telefon" value="${htmlEscape(k?.telefon || '')}"></label>
+          <label>Obrat<input id="brh290Obrat" value="${htmlEscape(k?.obrat || '')}"></label>
+          <label>Počet zaměstnanců<input id="brh290Zamestnanci" value="${htmlEscape(k?.zamestnanci || '')}"></label>
+          <label>Územní rozsah<input id="brh290Uzemi" value="${htmlEscape(k?.uzemi || '')}"></label>
+          <label>Poradce<input id="brh290Poradce" value="${htmlEscape(k?.poradce || '')}"></label>
+        </div>
+
+        <label class="brh290-full">Poznámka<textarea id="brh290Poznamka">${htmlEscape(k?.poznamka || '')}</textarea></label>
+
+        <div class="brh290-actions">
+          <button class="primary" onclick="BRH290.ulozKlienta()">Uložit kartu klienta</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function ulozKlienta(){
+    const seznam = klienti();
+    const id = document.getElementById('brh290KlientId').value || ('KLIENT-' + Date.now());
+
+    const data = {
+      id,
+      nazev: document.getElementById('brh290Nazev').value,
+      ico: document.getElementById('brh290Ico').value,
+      dic: document.getElementById('brh290Dic').value,
+      cinnost: document.getElementById('brh290Cinnost').value,
+      adresa: document.getElementById('brh290Adresa').value,
+      kontakt: document.getElementById('brh290Kontakt').value,
+      email: document.getElementById('brh290Email').value,
+      telefon: document.getElementById('brh290Telefon').value,
+      obrat: document.getElementById('brh290Obrat').value,
+      zamestnanci: document.getElementById('brh290Zamestnanci').value,
+      uzemi: document.getElementById('brh290Uzemi').value,
+      poradce: document.getElementById('brh290Poradce').value,
+      poznamka: document.getElementById('brh290Poznamka').value,
+      aktualizovano: new Date().toISOString()
+    };
+
+    const idx = seznam.findIndex(x => x.id === id);
+    if(idx >= 0) seznam[idx] = data;
+    else seznam.unshift(data);
+
+    ulozKlienty(seznam);
+    zavriForm();
+    render();
+  }
+
+  function zavriForm(){
+    const f = document.getElementById('brh290Form');
+    if(f) f.innerHTML = '';
+  }
+
+  function smazKlienta(id){
+    if(!confirm('Opravdu smazat kartu klienta?')) return;
+    ulozKlienty(klienti().filter(x => x.id !== id));
+    render();
+  }
+
+  function pojistovnaForm(id){
+    const seznam = pojistovny();
+    const p = id ? seznam.find(x => x.id === id) : null;
+    const root = document.getElementById('brh290Form');
+    if(!root) return;
+
+    root.innerHTML = `
+      <div class="brh290-form">
+        <div class="section-head">
+          <div>
+            <h3>${p ? 'Upravit pojišťovnu' : 'Nová pojišťovna mimo seznam'}</h3>
+            <p class="muted">Pojišťovnu lze použít při tvorbě samostatné poptávky.</p>
+          </div>
+          <button class="secondary" onclick="BRH290.zavriForm()">Zavřít</button>
+        </div>
+
+        <input type="hidden" id="brh290PojId" value="${htmlEscape(p?.id || '')}">
+
+        <div class="brh290-form-grid">
+          <label>Název pojišťovny<input id="brh290PojNazev" value="${htmlEscape(p?.nazev || '')}"></label>
+          <label>Zkratka<input id="brh290PojZkratka" value="${htmlEscape(p?.zkratka || '')}"></label>
+          <label>E-mail pro poptávky<input id="brh290PojEmail" value="${htmlEscape(p?.email || '')}"></label>
+          <label>Kontaktní osoba<input id="brh290PojKontakt" value="${htmlEscape(p?.kontakt || '')}"></label>
+          <label>Portál / URL<input id="brh290PojPortal" value="${htmlEscape(p?.portal || '')}"></label>
+          <label>Aktivní
+            <select id="brh290PojAktivni">
+              <option value="true" ${p?.aktivni !== false ? 'selected' : ''}>ano</option>
+              <option value="false" ${p?.aktivni === false ? 'selected' : ''}>ne</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="brh290-full">Poznámka<textarea id="brh290PojPoznamka">${htmlEscape(p?.poznamka || '')}</textarea></label>
+
+        <div class="brh290-actions">
+          <button class="primary" onclick="BRH290.ulozPojistovnu()">Uložit pojišťovnu</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function ulozPojistovnu(){
+    const seznam = pojistovny();
+    const id = document.getElementById('brh290PojId').value || ('poj-' + Date.now());
+
+    const data = {
+      id,
+      nazev: document.getElementById('brh290PojNazev').value,
+      zkratka: document.getElementById('brh290PojZkratka').value,
+      email: document.getElementById('brh290PojEmail').value,
+      kontakt: document.getElementById('brh290PojKontakt').value,
+      portal: document.getElementById('brh290PojPortal').value,
+      aktivni: document.getElementById('brh290PojAktivni').value === 'true',
+      poznamka: document.getElementById('brh290PojPoznamka').value
+    };
+
+    const idx = seznam.findIndex(x => x.id === id);
+    if(idx >= 0) seznam[idx] = data;
+    else seznam.unshift(data);
+
+    ulozPojistovny(seznam);
+    zavriForm();
+    render();
+  }
+
+  function poptavkaForm(){
+    const root = document.getElementById('brh290Form');
+    if(!root) return;
+
+    const klientOptions = klienti().map(k => `<option value="${htmlEscape(k.id)}">${htmlEscape(k.nazev)} · ${htmlEscape(k.ico || 'bez IČO')}</option>`).join('');
+    const pojOptions = pojistovny().filter(p => p.aktivni !== false).map(p => `<label><input type="checkbox" value="${htmlEscape(p.id)}"> ${htmlEscape(p.zkratka || p.nazev)}</label>`).join('');
+
+    root.innerHTML = `
+      <div class="brh290-form">
+        <div class="section-head">
+          <div>
+            <h3>Vytvořit poptávky pojišťovnám</h3>
+            <p class="muted">Vyberte klienta a pojišťovny. Systém vytvoří samostatnou poptávku pro každou pojišťovnu a zároveň souhrn pro srovnání.</p>
+          </div>
+          <button class="secondary" onclick="BRH290.zavriForm()">Zavřít</button>
+        </div>
+
+        <div class="brh290-form-grid">
+          <label>Klient
+            <select id="brh290PoptKlient" onchange="BRH290.natahniKlientaDoPoptavky()">
+              <option value="">Vyberte klienta</option>
+              ${klientOptions}
+            </select>
+          </label>
+          <label>Požadovaný limit odpovědnosti<input id="brh290Limit" placeholder="např. 10 000 000 Kč"></label>
+          <label>Požadovaná spoluúčast<input id="brh290Spoluucast" placeholder="např. 10 000 Kč"></label>
+          <label>Termín odpovědi<input type="date" id="brh290Termin"></label>
+        </div>
+
+        <div id="brh290KlientPreview" class="brh290-preview">Po výběru klienta se sem načtou údaje z karty klienta.</div>
+
+        <h4>Vybrané pojišťovny</h4>
+        <div class="brh290-checks">${pojOptions}</div>
+
+        <label class="brh290-full">Rozsah poptávky<textarea id="brh290Rozsah" placeholder="Popište požadovaná rizika, limity, provoz, dokumenty a specifika."></textarea></label>
+
+        <div class="brh290-actions">
+          <button class="primary" onclick="BRH290.vytvorPoptavky()">Vytvořit poptávky</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function natahniKlientaDoPoptavky(){
+    const id = document.getElementById('brh290PoptKlient').value;
+    const k = klienti().find(x => x.id === id);
+    const box = document.getElementById('brh290KlientPreview');
+    if(!box || !k) return;
+
+    box.innerHTML = `
+      <strong>${htmlEscape(k.nazev)}</strong><br>
+      IČO: ${htmlEscape(k.ico || '—')} · Činnost: ${htmlEscape(k.cinnost || '—')}<br>
+      Kontakt: ${htmlEscape(k.kontakt || '—')} · ${htmlEscape(k.email || '—')} · ${htmlEscape(k.telefon || '—')}<br>
+      Obrat: ${htmlEscape(k.obrat || '—')} · Zaměstnanci: ${htmlEscape(k.zamestnanci || '—')} · Území: ${htmlEscape(k.uzemi || '—')}
+    `;
+  }
+
+  function vytvorPoptavky(){
+    const klientId = document.getElementById('brh290PoptKlient').value;
+    const k = klienti().find(x => x.id === klientId);
+    if(!k){
+      alert('Nejdříve vyberte klienta.');
+      return;
+    }
+
+    const checked = Array.from(document.querySelectorAll('.brh290-checks input:checked')).map(i => i.value);
+    if(!checked.length){
+      alert('Vyberte alespoň jednu pojišťovnu.');
+      return;
+    }
+
+    const poj = pojistovny();
+    const existing = poptavky();
+
+    const caseId = 'CASE-' + Date.now();
+
+    checked.forEach(pojId => {
+      const p = poj.find(x => x.id === pojId);
+      existing.unshift({
+        id: 'POPT-' + Date.now() + '-' + Math.random().toString(16).slice(2),
+        caseId,
+        klientId,
+        klientNazev: k.nazev,
+        pojistovnaId: p.id,
+        pojistovnaNazev: p.nazev,
+        pojistovnaZkratka: p.zkratka,
+        email: p.email,
+        limit: document.getElementById('brh290Limit').value,
+        spoluucast: document.getElementById('brh290Spoluucast').value,
+        termin: document.getElementById('brh290Termin').value,
+        rozsah: document.getElementById('brh290Rozsah').value,
+        stav: 'připraveno k odeslání',
+        vytvoreno: new Date().toISOString()
+      });
+    });
+
+    ulozPoptavky(existing);
+    zavriForm();
+    render();
+  }
+
+  function render(){
+    const root = zajistiRoot();
+    if(!root) return;
+
+    const seznamKlientu = klienti();
+    const seznamPoj = pojistovny();
+    const seznamPopt = poptavky();
+
+    root.innerHTML = `
+      <section class="panel brh290-panel">
+
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Business Risk Hub 2.9.0</p>
+            <h2>Klienti, pojišťovny a samostatné poptávky</h2>
+            <p class="muted">Karta klienta slouží jako zdroj údajů pro vstupní dotazník. Pro každou pojišťovnu vzniká samostatná poptávka a současně společný souhrn pro srovnání.</p>
+          </div>
+        </div>
+
+        <div class="brh290-actions top">
+          <button class="primary" onclick="BRH290.zalozKlientaForm()">+ Karta klienta</button>
+          <button class="secondary" onclick="BRH290.pojistovnaForm()">+ Pojišťovna mimo seznam</button>
+          <button class="primary" onclick="BRH290.poptavkaForm()">Vytvořit poptávky</button>
+        </div>
+
+        <div class="brh290-stats">
+          <div><b>${seznamKlientu.length}</b><span>klientů v databázi</span></div>
+          <div><b>${seznamPoj.length}</b><span>pojišťoven</span></div>
+          <div><b>${seznamPopt.length}</b><span>samostatných poptávek</span></div>
+          <div><b>${new Set(seznamPopt.map(p => p.caseId)).size}</b><span>souhrnů pro srovnání</span></div>
+        </div>
+
+        <div id="brh290Form"></div>
+
+        <div class="brh290-columns">
+
+          <section>
+            <h3>Databáze klientů</h3>
+            ${seznamKlientu.length ? seznamKlientu.map(k => `
+              <article class="brh290-card">
+                <span>Klient</span>
+                <h4>${htmlEscape(k.nazev)}</h4>
+                <p>IČO: ${htmlEscape(k.ico || '—')} · Činnost: ${htmlEscape(k.cinnost || '—')}</p>
+                <p>Kontakt: ${htmlEscape(k.kontakt || '—')} · ${htmlEscape(k.email || '—')}</p>
+                <div class="brh290-actions">
+                  <button class="secondary small-btn" onclick="BRH290.zalozKlientaForm('${htmlEscape(k.id)}')">Upravit</button>
+                  <button class="secondary small-btn" onclick="BRH290.smazKlienta('${htmlEscape(k.id)}')">Smazat</button>
+                </div>
+              </article>
+            `).join('') : '<div class="textation-empty">Zatím není založen žádný klient.</div>'}
+          </section>
+
+          <section>
+            <h3>Databáze pojišťoven</h3>
+            ${seznamPoj.map(p => `
+              <article class="brh290-card">
+                <span>${htmlEscape(p.zkratka || 'Pojišťovna')}</span>
+                <h4>${htmlEscape(p.nazev)}</h4>
+                <p>E-mail: ${htmlEscape(p.email || 'není doplněn')}</p>
+                <p>${htmlEscape(p.poznamka || '')}</p>
+                <div class="brh290-actions">
+                  <button class="secondary small-btn" onclick="BRH290.pojistovnaForm('${htmlEscape(p.id)}')">Upravit</button>
+                </div>
+              </article>
+            `).join('')}
+          </section>
+
+        </div>
+
+        <section class="brh290-summary">
+          <h3>Souhrn poptávek pro srovnání</h3>
+          ${seznamPopt.length ? seznamPopt.map(p => `
+            <article class="brh290-request">
+              <div>
+                <b>${htmlEscape(p.klientNazev)}</b>
+                <p>${htmlEscape(p.pojistovnaZkratka || p.pojistovnaNazev)} · stav: ${htmlEscape(p.stav)} · termín: ${htmlEscape(p.termin || '—')}</p>
+              </div>
+              <div>
+                <span>Limit: ${htmlEscape(p.limit || '—')}</span>
+                <span>Spoluúčast: ${htmlEscape(p.spoluucast || '—')}</span>
+              </div>
+            </article>
+          `).join('') : '<div class="textation-empty">Zatím nejsou vytvořené žádné poptávky.</div>'}
+        </section>
+
+      </section>
+    `;
+  }
+
+  window.BRH290 = {
+    version:'2.9.0-klienti-pojistovny-poptavky',
+    render,
+    zalozKlientaForm,
+    ulozKlienta,
+    smazKlienta,
+    pojistovnaForm,
+    ulozPojistovnu,
+    poptavkaForm,
+    natahniKlientaDoPoptavky,
+    vytvorPoptavky,
+    zavriForm,
+    klienti,
+    pojistovny,
+    poptavky
+  };
+
+  setTimeout(render, 1200);
+  setTimeout(render, 2500);
+
+})();
