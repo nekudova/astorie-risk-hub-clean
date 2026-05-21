@@ -1,0 +1,17 @@
+Business Risk Hub 3.0.0 – Case Workspace Rebuild
+
+Cíl verze:
+- převést aplikaci z modulového/demo pohledu na jeden profesionální pracovní prostor obchodního případu,
+- zachovat DB, Admin, Dokumenty, Textace a Rizikový model,
+- odstranit duplicitní vývojové panely v dashboardu,
+- zobrazovat nabídky v jedné společné tabulce: požadavek klienta × pojišťovny,
+- vázat Klienta, Rizika, Pojišťovny, Nabídky, Porovnání, Doporučení a Klientský výstup na jeden aktivní CASE_ID.
+
+Nedestruktivní změna:
+- nebyly mazány tabulky,
+- nebyly mazány migrace,
+- nebyly mazány admin číselníky,
+- nebyly mazány dokumenty ani textace.
+
+Důležité pravidlo:
+AI ani systém automaticky nedoporučuje pojišťovnu. Doporučení potvrzuje pouze poradce.
