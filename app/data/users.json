@@ -1,0 +1,4 @@
+[
+  {"id":"admin","name":"Administrátor ASTORIE","email":"admin@astorie.local","position":"Administrátor","roles":["ADMIN"],"active":true},
+  {"id":"bo","name":"Backoffice ASTORIE","email":"backoffice@astorie.local","position":"Backoffice","roles":["BO"],"active":true}
+]

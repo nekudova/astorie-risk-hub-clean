@@ -1,0 +1,8 @@
+Business Risk Hub 3.5.0 – Attachments & Permissions Engine PRO
+
+- Přílohy: Plná moc, Výpis z OR, Škodní průběh + vlastní přílohy
+- Admin: Uživatelé, role/pozice, modulová oprávnění
+- Karta klienta: kontaktní osoby pro jednání o pojistné smlouvě
+- Soft delete obchodních případů
+- Interaktivní nápovědy
+- DB bez destruktivních změn

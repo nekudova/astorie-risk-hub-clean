@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.3.1d")
+app = FastAPI(title="ASTORIE Business Risk Hub", version="3.5.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -196,6 +196,10 @@ def init_db() -> bool:
                 ('policyReferences', 'policy_references.json'),
                 ('riskModel', 'risk_model.json'),
                 ('textTemplates', 'text_templates.json'),
+                ('attachmentTypes', 'attachment_types.json'),
+                ('users', 'users.json'),
+                ('modulePermissions', 'module_permissions.json'),
+                ('roleProfiles', 'role_profiles.json'),
             ]:
                 cur.execute("SELECT 1 FROM catalog_settings WHERE key=%s", (key,))
                 if not cur.fetchone():
@@ -233,7 +237,7 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.3.1d", "name": "Business Risk Hub 3.3.1d - Risk UX Professionalization Stable"}
+    return {"ok": True, "database_connected": ok, "version": "3.5.0", "name": "Business Risk Hub 3.5.0 - Attachments & Permissions Engine PRO"}
 
 
 def get_catalogs() -> Dict[str, Any]:
@@ -281,7 +285,7 @@ async def save_admin_catalogs(request: Request):
     conn = _connect()
     if not conn:
         raise HTTPException(status_code=503, detail="Databáze není připojena.")
-    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences", "textTemplates"}
+    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences", "textTemplates", "attachmentTypes", "users", "modulePermissions", "roleProfiles"}
     try:
         with conn, conn.cursor() as cur:
             for key in allowed:

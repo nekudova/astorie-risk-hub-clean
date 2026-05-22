@@ -1,0 +1,7 @@
+[
+  {"code":"PORADCE","name":"Poradce","description":"Práce s vlastními klienty, případy, poptávkami a nabídkami."},
+  {"code":"SPECIALISTA","name":"Specialista","description":"Odborné posouzení rizik, nabídek a doporučení."},
+  {"code":"BACKOFFICE","name":"Backoffice","description":"Dokumenty, přílohy, evidence, kontrola a administrativní podpora."},
+  {"code":"MANAGEMENT","name":"Management","description":"Přehledy, reporting a čtení obchodních případů."},
+  {"code":"ADMIN","name":"Administrátor","description":"Kompletní správa systému a číselníků."}
+]

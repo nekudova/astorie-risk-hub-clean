@@ -1,0 +1,14 @@
+Business Risk Hub 3.4.0 – Intelligent Workflow Engine PRO
+
+- interaktivní malé nápovědy v UI
+- profesionální karta klienta
+- kontaktní osoby pro jednání o pojistné smlouvě
+- nová karta Přílohy
+- základní přílohy: Plná moc, Výpis z OR
+- produktová příloha pro odpovědnost: Škodní průběh
+- admin číselník příloh
+- rozšířený admin číselník pojišťoven: název, zkratka, IČO, adresa, e-mail, web/portál
+- profesionální označení doporučené pojišťovny a možnost doporučení zrušit
+- stavové badge v porovnání
+- smart propagace základních údajů nabídky mezi pojišťovnami
+- DB bez destruktivních změn

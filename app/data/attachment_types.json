@@ -1,0 +1,34 @@
+[
+  {
+    "id": "plna_moc",
+    "title": "Plná moc",
+    "category": "Základní",
+    "scope": "all",
+    "required": true,
+    "note": "Plná moc klienta pro jednání s pojišťovnami a získání podkladů."
+  },
+  {
+    "id": "vypis_or",
+    "title": "Výpis z OR",
+    "category": "Základní",
+    "scope": "all",
+    "required": true,
+    "note": "Aktuální výpis z obchodního rejstříku nebo obdobný identifikační doklad."
+  },
+  {
+    "id": "skodni_prubeh",
+    "title": "Škodní průběh",
+    "category": "Pojištění odpovědnosti",
+    "scope": "liability",
+    "required": true,
+    "note": "Škodní průběh za poslední období dle požadavku pojišťovny."
+  },
+  {
+    "id": "seznam_cinnosti",
+    "title": "Seznam činností klienta",
+    "category": "Pojištění odpovědnosti",
+    "scope": "liability",
+    "required": false,
+    "note": "Detailní popis hlavních a vedlejších činností pro posouzení rizika."
+  }
+]

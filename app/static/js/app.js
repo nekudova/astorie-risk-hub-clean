@@ -1,4 +1,4 @@
-const VERSION = '3.3.2a';
+const VERSION = '3.5.0';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -602,3 +602,444 @@ function tabRisks(){
 }
 window.tabLiability=tabLiability;
 window.tabRisks=tabRisks;
+
+/* === BRH 3.4.0 – Intelligent Workflow Engine PRO ===
+   Bezpečný nadstavbový patch nad funkční větví 3.3.2a.
+   Nemění DB destruktivně. Doplňuje: kontaktní osoby, přílohy, admin příloh,
+   ARES údaje pojišťoven, doporučení UX, smart propagaci údajů v nabídkách. */
+(function(){
+  const PREV_VERSION = (typeof VERSION !== 'undefined') ? VERSION : '';
+  window.BRH_VERSION = '3.4.0';
+
+  function ensureEnhancedCase(){
+    state.client ||= {};
+    state.client.contacts = Array.isArray(state.client.contacts) ? state.client.contacts : [];
+    state.attachments = Array.isArray(state.attachments) ? state.attachments : [];
+    CATALOG.attachmentTypes = Array.isArray(CATALOG.attachmentTypes) ? CATALOG.attachmentTypes : [
+      {id:'plna_moc', title:'Plná moc', category:'Základní', required:true, scope:'all', note:'Základní podklad pro jednání s pojišťovnou.'},
+      {id:'vypis_or', title:'Výpis z OR', category:'Základní', required:true, scope:'all', note:'Aktuální výpis z obchodního rejstříku nebo obdobný identifikační doklad.'},
+      {id:'skodni_prubeh', title:'Škodní průběh', category:'Pojištění odpovědnosti', required:true, scope:'liability', note:'Škodní průběh za poslední období dle požadavku pojišťovny.'}
+    ];
+    state.report ||= {};
+  }
+
+  const oldNormalizeCase = typeof normalizeCase === 'function' ? normalizeCase : null;
+  window.normalizeCase = normalizeCase = function(item){
+    const s = oldNormalizeCase ? oldNormalizeCase(item) : (item || blankCase());
+    s.client ||= {}; s.client.contacts = Array.isArray(s.client.contacts) ? s.client.contacts : [];
+    s.attachments = Array.isArray(s.attachments) ? s.attachments : [];
+    return s;
+  };
+
+  const oldBlankCase = typeof blankCase === 'function' ? blankCase : null;
+  window.blankCase = blankCase = function(){
+    const s = oldBlankCase ? oldBlankCase() : {};
+    s.client ||= {}; s.client.contacts = Array.isArray(s.client.contacts) ? s.client.contacts : [];
+    s.attachments = Array.isArray(s.attachments) ? s.attachments : [];
+    return s;
+  };
+
+  function helpIcon(text){
+    return `<span class="help-dot" tabindex="0" aria-label="Nápověda">i<span class="help-popover">${esc(text||'Nápověda není doplněna.')}</span></span>`;
+  }
+  window.helpIcon = helpIcon;
+
+  const oldReadCurrentTab = typeof readCurrentTab === 'function' ? readCurrentTab : function(){};
+  window.readCurrentTab = readCurrentTab = function(){
+    ensureEnhancedCase();
+    oldReadCurrentTab();
+    if(currentTab==='client'){
+      ['name','ico','legal_form','address','data_box','contact_person','contact_email','contact_phone','website','billing_email','registered_office'].forEach(k=>{const el=$('client_'+k); if(el) state.client[k]=el.value;});
+      ['name','email'].forEach(k=>{const el=$('adviser_'+k); if(el) state.adviser[k]=el.value;});
+      state.client.contacts = Array.from(document.querySelectorAll('[data-contact-row]')).map(row=>({
+        surname_name: row.querySelector('[data-contact="surname_name"]')?.value || '',
+        email: row.querySelector('[data-contact="email"]')?.value || '',
+        phone: row.querySelector('[data-contact="phone"]')?.value || '',
+        insurance_area: row.querySelector('[data-contact="insurance_area"]')?.value || ''
+      })).filter(c=>c.surname_name || c.email || c.phone || c.insurance_area);
+    }
+    if(currentTab==='attachments'){
+      state.attachments = Array.from(document.querySelectorAll('[data-attachment-row]')).map(row=>({
+        id: row.dataset.attachmentId || ('att_'+Date.now()),
+        title: row.querySelector('[data-att="title"]')?.value || '',
+        category: row.querySelector('[data-att="category"]')?.value || '',
+        required: row.querySelector('[data-att="required"]')?.checked || false,
+        status: row.querySelector('[data-att="status"]')?.value || 'chybí',
+        note: row.querySelector('[data-att="note"]')?.value || '',
+        file_name: row.querySelector('[data-att="file_name"]')?.value || ''
+      })).filter(a=>a.title || a.note || a.file_name);
+    }
+  };
+
+  window.addClientContact = function(){
+    ensureEnhancedCase();
+    state.client.contacts.push({surname_name:'',email:'',phone:'',insurance_area:''});
+    renderWorkspace();
+  };
+  window.removeClientContact = function(i){
+    ensureEnhancedCase();
+    state.client.contacts.splice(i,1);
+    renderWorkspace();
+  };
+
+  window.tabClient = tabClient = function(){
+    ensureEnhancedCase();
+    const clientRows=clients.length?`<div class="client-results">${clients.map((c,i)=>`<div class="case-row"><div><strong>${esc(c.name)}</strong><small>IČO: ${esc(c.ico||'neuvedeno')} · ${esc(c.address||'')}</small></div><button class="btn secondary" onclick="useClient(${i})">Použít klienta</button></div>`).join('')}</div>`:'';
+    const contacts=(state.client.contacts||[]).map((c,i)=>`<div class="contact-row" data-contact-row><label>Příjmení a jméno<input data-contact="surname_name" value="${esc(c.surname_name||'')}" placeholder="např. Novák Jan"></label><label>E-mail<input data-contact="email" value="${esc(c.email||'')}" placeholder="jmeno@firma.cz"></label><label>Telefon<input data-contact="phone" value="${esc(c.phone||'')}" placeholder="+420..."></label><label>Oblast pojištění<input data-contact="insurance_area" value="${esc(c.insurance_area||'')}" placeholder="odpovědnost / majetek / flotila..."></label><button class="btn danger contact-del" onclick="removeClientContact(${i})">Smazat</button></div>`).join('') || '<div class="empty">Zatím není doplněna žádná kontaktní osoba pro jednání.</div>';
+    return `<p class="eyebrow">1. Karta klienta</p><div class="client-card-pro"><div><h2>Profesionální karta klienta</h2><p class="muted">Identifikační a kontaktní část klienta. Odborné údaje pro pojištění zůstávají v samostatné kartě pro pojištění.</p></div><div class="client-card-badge">CASE ${esc(state.id||'nový')}</div></div>
+    <div class="tools"><input id="clientSearch" class="grow" placeholder="Vyhledat klienta v DB podle názvu nebo IČO"><button class="btn secondary" onclick="searchClients()">Načíst klienta z DB</button></div>${clientRows}
+    <div class="section-soft pro-form-block"><p class="eyebrow">Identifikace klienta</p><div class="grid3"><label>Název klienta<input id="client_name" value="${esc(state.client.name)}"></label><label>IČO<div class="inline-field"><input id="client_ico" value="${esc(state.client.ico)}"><button class="btn secondary small" onclick="loadAres()">ARES</button></div></label><label>Právní forma<input id="client_legal_form" value="${esc(state.client.legal_form)}"></label></div><label>Sídlo / adresa<input id="client_address" value="${esc(state.client.address)}"></label><div class="grid4"><label>Datová schránka<input id="client_data_box" value="${esc(state.client.data_box)}"></label><label>Hlavní kontaktní osoba<input id="client_contact_person" value="${esc(state.client.contact_person)}"></label><label>E-mail<input id="client_contact_email" value="${esc(state.client.contact_email)}"></label><label>Telefon<input id="client_contact_phone" value="${esc(state.client.contact_phone)}"></label></div><div class="grid3"><label>Web<input id="client_website" value="${esc(state.client.website)}"></label><label>Fakturační / obecný e-mail<input id="client_billing_email" value="${esc(state.client.billing_email)}"></label><label>Další adresa / poznámka<input id="client_registered_office" value="${esc(state.client.registered_office)}"></label></div><div class="grid2"><label>Poradce<input id="adviser_name" value="${esc(state.adviser.name)}"></label><label>E-mail poradce<input id="adviser_email" value="${esc(state.adviser.email)}"></label></div></div>
+    <div class="section-soft"><div class="section-head"><div><h3>Kontaktní osoby pro jednání o pojistné smlouvě ${helpIcon('Zde se evidují osoby klienta, se kterými poradce řeší pojistnou smlouvu. Tyto kontakty se použijí při přípravě poptávky a komunikace.')}</h3><p class="muted">Ke každé osobě uveďte oblast pojištění, které se týká.</p></div><button class="btn secondary" onclick="addClientContact()">+ Přidat kontaktní osobu</button></div><div class="contact-table-pro">${contacts}</div></div>
+    <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu klienta</button><button class="btn secondary" onclick="readCurrentTab();currentTab='insurance';renderWorkspace()">Pokračovat na kartu pro pojištění</button></div>`;
+  };
+
+  window.defaultAttachmentTypes = function(){
+    ensureEnhancedCase();
+    return CATALOG.attachmentTypes || [];
+  };
+  window.ensureDefaultAttachments = function(){
+    ensureEnhancedCase();
+    defaultAttachmentTypes().forEach(t=>{
+      const include = t.scope==='all' || (t.scope==='liability' && (state.risks||[]).some(r=>String(r.risk_key||'').includes('provoz') || String(r.risk_key||'').includes('vadna') || String(r.risk_key||'').includes('vyrobek')));
+      if(include && !state.attachments.some(a=>a.id===t.id || a.title===t.title)) state.attachments.push({id:t.id,title:t.title,category:t.category,required:!!t.required,status:'chybí',note:t.note||'',file_name:''});
+    });
+    renderWorkspace();
+  };
+  window.addCustomAttachment = function(){ensureEnhancedCase();state.attachments.push({id:'custom_'+Date.now(),title:'Vlastní příloha',category:'Vlastní',required:false,status:'chybí',note:'',file_name:''});renderWorkspace();};
+  window.removeAttachment = function(i){ensureEnhancedCase();state.attachments.splice(i,1);renderWorkspace();};
+  window.tabAttachments = function(){
+    ensureEnhancedCase();
+    const rows=(state.attachments||[]).map((a,i)=>`<div class="attachment-row" data-attachment-row data-attachment-id="${esc(a.id||'')}"><label>Název přílohy<input data-att="title" value="${esc(a.title||'')}"></label><label>Kategorie<input data-att="category" value="${esc(a.category||'')}"></label><label>Stav<select data-att="status"><option ${a.status==='chybí'?'selected':''}>chybí</option><option ${a.status==='dodá klient'?'selected':''}>dodá klient</option><option ${a.status==='nahráno'?'selected':''}>nahráno</option><option ${a.status==='zkontrolováno'?'selected':''}>zkontrolováno</option></select></label><label class="check-inline"><input type="checkbox" data-att="required" ${a.required?'checked':''}> povinná</label><label>Soubor / odkaz<input data-att="file_name" value="${esc(a.file_name||'')}" placeholder="název souboru nebo URL"></label><label class="attachment-note">Poznámka<textarea data-att="note">${esc(a.note||'')}</textarea></label><button class="btn danger" onclick="removeAttachment(${i})">Smazat</button></div>`).join('') || '<div class="empty">Zatím nejsou doplněné žádné přílohy.</div>';
+    return `<p class="eyebrow">6. Přílohy</p><h2>Přílohy k obchodnímu případu</h2><p class="muted">Základní a produktové přílohy. Poradce může vždy doplnit další přílohu ručně.</p><div class="tools"><button class="btn primary" onclick="ensureDefaultAttachments()">Doplnit povinné přílohy</button><button class="btn secondary" onclick="addCustomAttachment()">+ Vlastní příloha</button><button class="btn secondary" onclick="showView('admin');adminPanel('attachments')">Spravovat číselník příloh</button></div><div class="attachment-board">${rows}</div><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit přílohy</button><button class="btn secondary" onclick="currentTab='requests';renderWorkspace()">Pokračovat na poptávky</button></div>`;
+  };
+
+  window.propagateOfferField = function(sourceCode, field, value){
+    ensureEnhancedCase();
+    (state.selected_insurers||[]).forEach(code=>{ if(code!==sourceCode){ ensureOffer(code)[field]=value; }});
+    renderWorkspace(); toast('Údaj byl propsán do ostatních pojišťoven.');
+  };
+  window.setOfferCommonField = function(code, field, value){
+    const o=ensureOffer(code); o[field]=value;
+    if(['insurance_start','payment_frequency','deductible'].includes(field)){
+      if(confirm('Propsat tento údaj i do ostatních pojišťoven?')) propagateOfferField(code, field, value);
+    }
+  };
+
+  function statusBadge(status){
+    const s=String(status||'nutno ověřit');
+    const cls=s.includes('splněno')?'ok':s.includes('omezeno')?'warn':s.includes('výluka')?'bad':'check';
+    return `<span class="status-badge ${cls}">${esc(s)}</span>`;
+  }
+  window.statusBadge = statusBadge;
+
+  window.toggleRecommendedInsurer = function(code){
+    ensureEnhancedCase();
+    state.report.client_selected_offer = state.report.client_selected_offer===code ? '' : code;
+    renderWorkspace();
+  };
+
+  window.offerCell = offerCell = function(code,r,i){
+    const k=r.risk_key||riskKey(r); const o=ensureOffer(code);
+    o.risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',exclusions:'',sublimits:'',source_reference:'',note:''};
+    const x=o.risks[k];
+    return `<td class="offer-cell-pro"><select onchange="setOfferRiskStatus('${esc(code)}','${esc(k)}',this.value)"><option ${x.status==='splněno'?'selected':''}>splněno</option><option ${x.status==='omezeno'?'selected':''}>omezeno</option><option ${x.status==='výluka'?'selected':''}>výluka</option><option ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option></select><input placeholder="Nabídnutý limit" value="${esc(x.offered_limit)}" onchange="ensureOffer('${esc(code)}').risks['${esc(k)}'].offered_limit=this.value"><input placeholder="Spoluúčast" value="${esc(x.deductible)}" onchange="ensureOffer('${esc(code)}').risks['${esc(k)}'].deductible=this.value"><textarea placeholder="Výluky / sublimity / zdroj VPP" onchange="ensureOffer('${esc(code)}').risks['${esc(k)}'].note=this.value">${esc(x.note)}</textarea></td>`;
+  };
+
+  window.tabOffers = tabOffers = function(){
+    ensureEnhancedCase();
+    if(!state.selected_insurers.length)return `<p class="eyebrow">8. Nabídky</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Nabídky se zobrazí v jedné společné tabulce až po výběru pojišťoven.</div>`;
+    if(!state.risks.length)return `<p class="eyebrow">8. Nabídky</p><h2>Nejdříve vyplňte rizika</h2><div class="info-box">Tabulka nabídek musí vycházet z požadavků klienta. Doplňte rizika v modulu odpovědnosti nebo v ostatních rizicích.</div>`;
+    (state.selected_insurers||[]).forEach(code=>smartOfferDefaults(code));
+    const heads=state.selected_insurers.map(code=>{const o=smartOfferDefaults(code);return `<th class="offer-head ${state.report.client_selected_offer===code?'recommended-head':''}"><div class="insurer-title">${esc(insurerByCode(code).name||code)}<div class="mini">${esc(code)}</div></div>${state.report.client_selected_offer===code?'<div class="recommended-ribbon">DOPORUČENO</div>':''}${offerWorkflowBadge(code)}<button class="btn small secondary" onclick="fulfillAllRisksForInsurer('${esc(code)}')">Tato pojišťovna splňuje vše</button><button class="btn small ${state.report.client_selected_offer===code?'danger':'primary'}" onclick="toggleRecommendedInsurer('${esc(code)}')">${state.report.client_selected_offer===code?'Zrušit doporučení':'Doporučit'}</button><input placeholder="Nabídnuté pojistné" onchange="setOfferCommonField('${esc(code)}','premium',this.value)" value="${esc(o.premium)}"><input placeholder="Počátek pojištění" onchange="setOfferCommonField('${esc(code)}','insurance_start',this.value)" value="${esc(o.insurance_start||state.questionnaire.insurance_start||'')}"><input placeholder="Frekvence placení" onchange="setOfferCommonField('${esc(code)}','payment_frequency',this.value)" value="${esc(o.payment_frequency||state.questionnaire.payment_frequency||'ročně')}"><input placeholder="Celková spoluúčast / pozn." onchange="setOfferCommonField('${esc(code)}','deductible',this.value)" value="${esc(o.deductible||state.questionnaire.deductible_preference||'')}"></th>`}).join('');
+    const rows=state.risks.map((r,i)=>`<tr><td class="risk-request"><b>${esc(r.name)}</b><br>Požadavek: ${esc(r.requested_limit||'není uveden')}<br>Spoluúčast: ${esc(r.deductible||state.questionnaire.deductible_preference||'není uvedena')}<br>${riskSpecification(r)?`<small>Specifikace: ${esc(riskSpecification(r))}</small>`:''}</td>${state.selected_insurers.map(code=>offerCell(code,r,i)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">8. Smart nabídky</p><h2>Požadavek klienta × nabídky pojišťoven</h2><p class="muted">Při volbě „splněno“ se automaticky doplní požadovaný limit a spoluúčast z poptávky. Základní údaje lze jedním potvrzením propsat do všech pojišťoven.</p><div class="tools"><button class="btn secondary" onclick="smartPrefillAllOffers()">Předvyplnit společné údaje</button><button class="btn secondary" onclick="fulfillAllRisksEverywhere()">Všude nastavit splněno</button></div>${smartRequestTextationBlock('offer')}<div class="table-wrap"><table class="offer-table pro-table"><thead><tr><th>Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div>`;
+  };
+
+  window.tabComparison = tabComparison = function(){
+    ensureEnhancedCase();
+    if(!state.selected_insurers.length||!state.risks.length)return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve doplňte rizika, pojišťovny a nabídky.</div>`;
+    const rows=state.risks.map(r=>`<tr><td class="risk-request"><b>${esc(r.name)}</b><br>${esc(r.requested_limit||'limit neuveden')}</td>${state.selected_insurers.map(code=>{const x=ensureOffer(code).risks[r.risk_key]||{};return `<td>${statusBadge(x.status)}<br>Limit: ${esc(x.offered_limit||'–')}<br>Spoluúčast: ${esc(x.deductible||'–')}<br>${esc(x.note||'')}</td>`}).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Makléřské porovnání</p><h2>Rozdíly mezi nabídkami</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap"><table class="comparison-table pro-table"><thead><tr><th>Riziko / požadavek</th>${state.selected_insurers.map(c=>`<th class="${state.report.client_selected_offer===c?'recommended-head':''}">${esc(c)} ${state.report.client_selected_offer===c?'<span class="recommended-ribbon compact">DOPORUČENO</span>':''}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+
+  window.tabRecommendation = tabRecommendation = function(){
+    ensureEnhancedCase();
+    const cards=(state.selected_insurers||[]).map(code=>`<button class="recommend-card ${state.report.client_selected_offer===code?'selected':''}" onclick="toggleRecommendedInsurer('${esc(code)}')"><strong>${esc(insurerByCode(code).name||code)}</strong><span>${state.report.client_selected_offer===code?'✓ DOPORUČENO – kliknutím zrušíte':'Vybrat jako doporučenou variantu'}</span></button>`).join('') || '<div class="empty">Nejdříve vyberte pojišťovny.</div>';
+    return `<p class="eyebrow">10. Doporučení poradce</p><h2>Doporučená varianta</h2><p class="muted">Doporučení vždy potvrzuje poradce. Vybraná pojišťovna je zřetelně zvýrazněna a lze ji dalším kliknutím zrušit.</p><div class="recommend-grid">${cards}</div><input type="hidden" id="selected_offer" value="${esc(state.report.client_selected_offer||'')}"><label>Odůvodnění poradce<textarea id="choice_reason">${esc(state.report.client_choice_reason)}</textarea></label><label>Poznámka poradce<textarea id="advisor_note">${esc(state.report.advisor_note)}</textarea></label><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit doporučení</button></div>`;
+  };
+
+  const oldRenderAdmin = typeof renderAdmin === 'function' ? renderAdmin : null;
+  window.renderAdmin = renderAdmin = function(){
+    ensureEnhancedCase();
+    const ins=CATALOG.insurers||[], risks=CATALOG.risks||[], acts=CATALOG.activities||[], texts=CATALOG.textTemplates||[], atts=CATALOG.attachmentTypes||[];
+    $('adminBox').innerHTML=`<div class="metric-grid"><div><b>${ins.length}</b><span>pojišťoven</span></div><div><b>${risks.length}</b><span>rizik</span></div><div><b>${acts.length}</b><span>činností</span></div><div><b>${texts.length}</b><span>textací</span></div><div><b>${atts.length}</b><span>příloh</span></div></div><div class="admin-tabs"><button class="chip active" onclick="adminPanel('insurers')">Pojišťovny</button><button class="chip" onclick="adminPanel('attachments')">Přílohy</button><button class="chip" onclick="adminPanel('advisers')">Poradci</button><button class="chip" onclick="adminPanel('activities')">Typy klientů / činnosti</button><button class="chip" onclick="adminPanel('risks')">Rizika</button><button class="chip" onclick="adminPanel('riskModel')">Rizikový model</button><button class="chip" onclick="adminPanel('texts')">Textace</button><button class="chip" onclick="adminPanel('documents')">Dokumenty</button><button class="chip" onclick="adminPanel('json')">Import / export JSON</button></div><div id="adminPanel"></div>`;
+    adminPanel('insurers');
+  };
+
+  const oldAdminPanel = typeof adminPanel === 'function' ? adminPanel : function(){};
+  window.adminPanel = adminPanel = function(type){
+    document.querySelectorAll('.admin-tabs .chip').forEach(b=>b.classList.remove('active'));
+    const box=$('adminPanel'); if(!box) return;
+    if(type==='insurers'){
+      box.innerHTML=`<h2>Pojišťovny v číselníku</h2><p class="muted">Rozšířený číselník pojišťoven pro poptávky, nabídky a komunikaci.</p><div class="table-wrap"><table class="admin-wide-table"><thead><tr><th>Zkratka</th><th>Název</th><th>IČO</th><th>Adresa</th><th>E-mail</th><th>Web / portál</th><th>Aktivní</th></tr></thead><tbody>${(CATALOG.insurers||[]).map((i,idx)=>`<tr><td><input onchange="CATALOG.insurers[${idx}].code=this.value;CATALOG.insurers[${idx}].short=this.value" value="${esc(insurerCode(i)||'')}"></td><td><input onchange="CATALOG.insurers[${idx}].name=this.value" value="${esc(i.name||'')}"></td><td><div class="inline-field"><input onchange="CATALOG.insurers[${idx}].ico=this.value" value="${esc(i.ico||'')}"><button class="btn secondary small" onclick="toast('ARES pro pojišťovny bude napojen v další integrační vrstvě.')">ARES</button></div></td><td><textarea onchange="CATALOG.insurers[${idx}].address=this.value">${esc(i.address||'')}</textarea></td><td><input onchange="CATALOG.insurers[${idx}].email=this.value;CATALOG.insurers[${idx}].request_email=this.value" value="${esc(i.email||i.request_email||'')}"></td><td><input onchange="CATALOG.insurers[${idx}].portal=this.value;CATALOG.insurers[${idx}].web=this.value" value="${esc(i.portal||i.url||i.web||'')}"></td><td><select onchange="CATALOG.insurers[${idx}].active=this.value==='ano'"><option ${i.active!==false?'selected':''}>ano</option><option ${i.active===false?'selected':''}>ne</option></select></td></tr>`).join('')}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="CATALOG.insurers.push({code:'',short:'',name:'',ico:'',address:'',email:'',request_email:'',portal:'',web:'',active:true});adminPanel('insurers')">+ Přidat pojišťovnu</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit admin</button></div>`;
+      return;
+    }
+    if(type==='attachments'){
+      ensureEnhancedCase();
+      box.innerHTML=`<h2>Číselník příloh</h2><p class="muted">Admin může spravovat základní i produktové povinné přílohy. Poradce může v případu vždy doplnit další vlastní přílohu.</p><div class="table-wrap"><table><thead><tr><th>ID</th><th>Název</th><th>Kategorie</th><th>Rozsah</th><th>Povinná</th><th>Nápověda</th><th></th></tr></thead><tbody>${(CATALOG.attachmentTypes||[]).map((a,idx)=>`<tr><td><input onchange="CATALOG.attachmentTypes[${idx}].id=this.value" value="${esc(a.id||'')}"></td><td><input onchange="CATALOG.attachmentTypes[${idx}].title=this.value" value="${esc(a.title||'')}"></td><td><input onchange="CATALOG.attachmentTypes[${idx}].category=this.value" value="${esc(a.category||'')}"></td><td><select onchange="CATALOG.attachmentTypes[${idx}].scope=this.value"><option ${a.scope==='all'?'selected':''} value="all">obecné</option><option ${a.scope==='liability'?'selected':''} value="liability">odpovědnost</option><option ${a.scope==='property'?'selected':''} value="property">majetek</option><option ${a.scope==='custom'?'selected':''} value="custom">vlastní</option></select></td><td><input type="checkbox" ${a.required?'checked':''} onchange="CATALOG.attachmentTypes[${idx}].required=this.checked"></td><td><textarea onchange="CATALOG.attachmentTypes[${idx}].note=this.value">${esc(a.note||'')}</textarea></td><td><button class="btn danger" onclick="CATALOG.attachmentTypes.splice(${idx},1);adminPanel('attachments')">Smazat</button></td></tr>`).join('')}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="CATALOG.attachmentTypes.push({id:'att_'+Date.now(),title:'Nová příloha',category:'Vlastní',scope:'custom',required:false,note:''});adminPanel('attachments')">+ Přidat přílohu</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit přílohy</button></div>`;
+      return;
+    }
+    oldAdminPanel(type);
+  };
+
+  const oldSaveAdminCatalog = typeof saveAdminCatalog === 'function' ? saveAdminCatalog : null;
+  window.saveAdminCatalog = saveAdminCatalog = async function(){
+    try{
+      normalizeCatalog(); ensureEnhancedCase();
+      const payload={insurers:CATALOG.insurers, advisers:CATALOG.advisers, requirementTypes:CATALOG.requirementTypes, coverageDictionary:CATALOG.coverageDictionary, policyReferences:CATALOG.policyReferences, risks:CATALOG.risks, activities:CATALOG.activities, riskModel:CATALOG.riskModel, textTemplates:CATALOG.textTemplates, attachmentTypes:CATALOG.attachmentTypes, actor_email:state.adviser.email||''};
+      const data=await fetchJson('/api/admin/catalogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      toast(data.message||'Admin číselníky uloženy.'); renderAll();
+    }catch(e){toast('Admin se nepodařilo uložit: '+e.message);}
+  };
+
+  const oldRenderWorkspace = typeof renderWorkspace === 'function' ? renderWorkspace : null;
+  window.renderWorkspace = renderWorkspace = function(){
+    ensureEnhancedCase();
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+    const map={client:tabClient,insurance:tabInsurance,liability:tabLiability,risks:tabRisks,insurers:tabInsurers,attachments:tabAttachments,requests:tabInsurerRequests,offers:tabOffers,comparison:tabComparison,recommendation:tabRecommendation,output:tabOutput,audit:tabAudit};
+    if($('tabContent')) $('tabContent').innerHTML=(map[currentTab]||tabClient)();
+    renderHeader();
+  };
+
+  const oldRenderAll = typeof renderAll === 'function' ? renderAll : null;
+  window.renderAll = renderAll = function(){ ensureEnhancedCase(); if(oldRenderAll) oldRenderAll(); };
+})();
+
+
+/* ==========================================================
+   Business Risk Hub 3.5.0 – Attachments & Permissions Engine PRO
+   Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
+   pouze rozšiřuje klientský payload a Admin číselníky.
+   ========================================================== */
+(function(){
+  function safeArray(v){ return Array.isArray(v) ? v : []; }
+  function ensure350(){
+    state.client ||= {};
+    state.client.contacts = safeArray(state.client.contacts);
+    state.attachments = safeArray(state.attachments);
+    state.permissions ||= {};
+    CATALOG.attachmentTypes = safeArray(CATALOG.attachmentTypes);
+    CATALOG.users = safeArray(CATALOG.users);
+    CATALOG.roleProfiles = safeArray(CATALOG.roleProfiles);
+    CATALOG.modulePermissions = safeArray(CATALOG.modulePermissions);
+    if(!CATALOG.attachmentTypes.length){
+      CATALOG.attachmentTypes = [
+        {id:'plna_moc', title:'Plná moc', category:'Základní', scope:'all', required:true, note:'Plná moc klienta pro jednání s pojišťovnami a získání podkladů.'},
+        {id:'vypis_or', title:'Výpis z OR', category:'Základní', scope:'all', required:true, note:'Aktuální výpis z obchodního rejstříku nebo obdobný identifikační doklad.'},
+        {id:'skodni_prubeh', title:'Škodní průběh', category:'Pojištění odpovědnosti', scope:'liability', required:true, note:'Škodní průběh za poslední období dle požadavku pojišťovny.'},
+        {id:'seznam_cinnosti', title:'Seznam činností klienta', category:'Pojištění odpovědnosti', scope:'liability', required:false, note:'Detailní seznam činností, které mají být zahrnuty do odpovědnostního programu.'}
+      ];
+    }
+    if(!CATALOG.roleProfiles.length){
+      CATALOG.roleProfiles = [
+        {code:'PORADCE', name:'Poradce'}, {code:'SPECIALISTA', name:'Specialista'}, {code:'BACKOFFICE', name:'Backoffice'}, {code:'MANAGEMENT', name:'Management'}, {code:'ADMIN', name:'Administrátor'}
+      ];
+    }
+    if(!CATALOG.users.length){
+      CATALOG.users = (CATALOG.advisers||[]).slice(0,20).map((a,i)=>({
+        id:a.id||String(i+1), name:a.name||a.full_name||'', email:a.email||'', position:a.position||'Poradce', roles:a.roles||['PORADCE'], active:a.active!==false
+      }));
+      if(!CATALOG.users.length) CATALOG.users.push({id:'admin',name:'Administrátor ASTORIE',email:'admin@astorie.local',position:'Administrátor',roles:['ADMIN'],active:true});
+    }
+    if(!CATALOG.modulePermissions.length){
+      CATALOG.modulePermissions = defaultModulePermissions350();
+    }
+  }
+  window.ensure350 = ensure350;
+
+  function defaultModulePermissions350(){
+    const roles=['PORADCE','SPECIALISTA','BACKOFFICE','MANAGEMENT','ADMIN'];
+    const defs=[
+      ['dashboard','Dashboard'],['cases','Obchodní případy'],['workspace','Pracovní prostor'],['client','Karta klienta'],['insurance','Karta pro pojištění'],['liability','Modul odpovědnosti'],['attachments','Přílohy'],['requests','Poptávky pojišťovnám'],['offers','Nabídky'],['comparison','Porovnání'],['recommendation','Doporučení poradce'],['output','Klientský výstup'],['documents','Dokumenty'],['textations','Textace'],['riskModel','Rizikový model'],['admin','Admin']
+    ];
+    return defs.map(([module,label])=>{
+      const row={module,label};
+      roles.forEach(role=>{
+        const isAdmin=role==='ADMIN';
+        const isMgmt=role==='MANAGEMENT';
+        const adminOnly=['admin','riskModel'].includes(module);
+        row[role]={view:isAdmin || (!adminOnly && role!=='MANAGEMENT') || isMgmt, edit:isAdmin || (['cases','workspace','client','insurance','liability','attachments','requests','offers','comparison','recommendation','output','textations'].includes(module)&&!isMgmt), delete:isAdmin, export:isAdmin||isMgmt||['PORADCE','SPECIALISTA','BACKOFFICE'].includes(role), approve:isAdmin||role==='SPECIALISTA'||role==='BACKOFFICE'};
+      });
+      return row;
+    });
+  }
+
+  const oldNormalizeCatalog350 = normalizeCatalog;
+  window.normalizeCatalog = normalizeCatalog = function(){
+    oldNormalizeCatalog350();
+    CATALOG.attachmentTypes = safeArray(CATALOG.attachmentTypes);
+    CATALOG.users = safeArray(CATALOG.users);
+    CATALOG.roleProfiles = safeArray(CATALOG.roleProfiles);
+    CATALOG.modulePermissions = safeArray(CATALOG.modulePermissions);
+    ensure350();
+  };
+
+  const oldNormalizeCase350 = normalizeCase;
+  window.normalizeCase = normalizeCase = function(item){
+    const s = oldNormalizeCase350(item);
+    s.client ||= {};
+    s.client.contacts = safeArray(s.client.contacts);
+    s.attachments = safeArray(s.attachments);
+    return s;
+  };
+
+  const oldBlankCase350 = blankCase;
+  window.blankCase = blankCase = function(){
+    const s = oldBlankCase350();
+    s.client ||= {};
+    s.client.contacts = safeArray(s.client.contacts);
+    s.attachments = safeArray(s.attachments);
+    return s;
+  };
+
+  function help350(txt){ return `<span class="help-mini" tabindex="0">i<span>${esc(txt||'Nápověda není doplněna.')}</span></span>`; }
+  window.help350 = help350;
+
+  const oldReadCurrentTab350 = readCurrentTab;
+  window.readCurrentTab = readCurrentTab = function(){
+    ensure350();
+    oldReadCurrentTab350();
+    if(currentTab==='client'){
+      state.client.contacts = Array.from(document.querySelectorAll('[data-contact-row]')).map(row=>({
+        surname_name: row.querySelector('[data-contact="surname_name"]')?.value || '',
+        email: row.querySelector('[data-contact="email"]')?.value || '',
+        phone: row.querySelector('[data-contact="phone"]')?.value || '',
+        insurance_area: row.querySelector('[data-contact="insurance_area"]')?.value || ''
+      })).filter(c=>c.surname_name || c.email || c.phone || c.insurance_area);
+    }
+    if(currentTab==='attachments'){
+      state.attachments = Array.from(document.querySelectorAll('[data-attachment-row]')).map(row=>({
+        id: row.dataset.attachmentId || ('att_'+Date.now()),
+        title: row.querySelector('[data-att="title"]')?.value || '',
+        category: row.querySelector('[data-att="category"]')?.value || '',
+        required: row.querySelector('[data-att="required"]')?.checked || false,
+        status: row.querySelector('[data-att="status"]')?.value || 'chybí',
+        note: row.querySelector('[data-att="note"]')?.value || '',
+        file_name: row.querySelector('[data-att="file_name"]')?.value || ''
+      })).filter(a=>a.title || a.note || a.file_name);
+    }
+  };
+
+  window.addClientContact = function(){ ensure350(); state.client.contacts.push({surname_name:'',email:'',phone:'',insurance_area:''}); renderWorkspace(); };
+  window.removeClientContact = function(i){ ensure350(); state.client.contacts.splice(i,1); renderWorkspace(); };
+
+  window.tabClient = tabClient = function(){
+    ensure350();
+    const clientRows=clients.length?`<div class="client-results">${clients.map((c,i)=>`<div class="case-row"><div><strong>${esc(c.name)}</strong><small>IČO: ${esc(c.ico||'neuvedeno')} · ${esc(c.address||'')}</small></div><button class="btn secondary" onclick="useClient(${i})">Použít klienta</button></div>`).join('')}</div>`:'';
+    const contacts=(state.client.contacts||[]).map((c,i)=>`<div class="contact-card-pro" data-contact-row><label>Příjmení a jméno<input data-contact="surname_name" value="${esc(c.surname_name||'')}" placeholder="např. Novák Jan"></label><label>E-mail<input data-contact="email" value="${esc(c.email||'')}" placeholder="jmeno@firma.cz"></label><label>Telefon<input data-contact="phone" value="${esc(c.phone||'')}" placeholder="+420..."></label><label>Oblast pojištění<input data-contact="insurance_area" value="${esc(c.insurance_area||'')}" placeholder="odpovědnost / majetek / flotila"></label><button class="btn danger" onclick="removeClientContact(${i})">Smazat</button></div>`).join('') || '<div class="empty">Zatím není doplněna žádná kontaktní osoba pro jednání.</div>';
+    return `<p class="eyebrow">1. Karta klienta</p><div class="client-card-pro premium"><div><h2>Profesionální karta klienta</h2><p class="muted">Identifikace klienta, kontakty pro jednání a základní obchodní vazby. Odborná pojistná data jsou oddělená v kartě pro pojištění.</p></div><div class="client-card-badge">CASE ${esc(state.id||'nový')}</div></div>
+    <div class="tools"><input id="clientSearch" class="grow" placeholder="Vyhledat klienta v DB podle názvu nebo IČO"><button class="btn secondary" onclick="searchClients()">Načíst klienta z DB</button></div>${clientRows}
+    <div class="section-soft pro-form-block"><p class="eyebrow">Identifikace klienta</p><div class="grid3"><label>Název klienta<input id="client_name" value="${esc(state.client.name)}"></label><label>IČO<div class="inline-field"><input id="client_ico" value="${esc(state.client.ico)}"><button class="btn secondary small" onclick="loadAres()">ARES</button></div></label><label>Právní forma<input id="client_legal_form" value="${esc(state.client.legal_form)}"></label></div><label>Sídlo / adresa<input id="client_address" value="${esc(state.client.address)}"></label><div class="grid4"><label>Datová schránka<input id="client_data_box" value="${esc(state.client.data_box)}"></label><label>Hlavní kontaktní osoba<input id="client_contact_person" value="${esc(state.client.contact_person)}"></label><label>E-mail<input id="client_contact_email" value="${esc(state.client.contact_email)}"></label><label>Telefon<input id="client_contact_phone" value="${esc(state.client.contact_phone)}"></label></div><div class="grid3"><label>Web<input id="client_website" value="${esc(state.client.website)}"></label><label>Fakturační / obecný e-mail<input id="client_billing_email" value="${esc(state.client.billing_email)}"></label><label>Další adresa / poznámka<input id="client_registered_office" value="${esc(state.client.registered_office)}"></label></div><div class="grid2"><label>Poradce<input id="adviser_name" value="${esc(state.adviser.name)}"></label><label>E-mail poradce<input id="adviser_email" value="${esc(state.adviser.email)}"></label></div></div>
+    <div class="section-soft"><div class="section-head"><div><h3>Kontaktní osoby pro jednání o pojistné smlouvě ${help350('Ke klientovi lze vést více osob pro různá pojištění. Tyto kontakty se použijí v poptávce a komunikaci, ale poradce může vždy vybrat relevantní osobu.')}</h3><p class="muted">Přidávejte a mažte osoby podle skutečné komunikace s klientem.</p></div><button class="btn secondary" onclick="addClientContact()">+ Přidat kontaktní osobu</button></div><div class="contact-grid-pro">${contacts}</div></div>
+    <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu klienta</button><button class="btn secondary" onclick="readCurrentTab();currentTab='insurance';renderWorkspace()">Pokračovat na kartu pro pojištění</button></div>`;
+  };
+
+  function attachmentDefaultsForCase(){
+    ensure350();
+    const hasLiability = (state.risks||[]).some(r=>['provoz','vadna_prace','vyrobek','prevzate_veci','smluvni_odpovednost'].includes(String(r.risk_key||'')));
+    return (CATALOG.attachmentTypes||[]).filter(t=>t.scope==='all' || (t.scope==='liability' && hasLiability));
+  }
+  window.ensureDefaultAttachments = function(){
+    ensure350();
+    attachmentDefaultsForCase().forEach(t=>{
+      if(!state.attachments.some(a=>a.id===t.id || a.title===t.title)) state.attachments.push({id:t.id,title:t.title,category:t.category,required:!!t.required,status:'chybí',note:t.note||'',file_name:''});
+    });
+    renderWorkspace();
+    toast('Doplněny povinné přílohy podle případu.');
+  };
+  window.addCustomAttachment = function(){ ensure350(); state.attachments.push({id:'custom_'+Date.now(),title:'Vlastní příloha',category:'Vlastní',required:false,status:'chybí',note:'',file_name:''}); renderWorkspace(); };
+  window.removeAttachment = function(i){ ensure350(); state.attachments.splice(i,1); renderWorkspace(); };
+  function attStatusBadge(status){
+    const s=String(status||'chybí').toLowerCase();
+    const cls=s.includes('nahr')||s.includes('zkontrol')?'ok':s.includes('dod')?'warn':'bad';
+    return `<span class="att-status ${cls}">${esc(status||'chybí')}</span>`;
+  }
+  window.tabAttachments = function(){
+    ensure350();
+    const defaults=attachmentDefaultsForCase();
+    const rows=(state.attachments||[]).map((a,i)=>`<div class="attachment-card-pro" data-attachment-row data-attachment-id="${esc(a.id||'')}"><div><strong>${esc(a.title||'Příloha')}</strong>${a.required?'<span class="badge">povinná</span>':''}<small>${esc(a.category||'')}</small>${attStatusBadge(a.status)}</div><label>Název<input data-att="title" value="${esc(a.title||'')}"></label><label>Kategorie<input data-att="category" value="${esc(a.category||'')}"></label><label>Stav<select data-att="status"><option ${a.status==='chybí'?'selected':''}>chybí</option><option ${a.status==='dodá klient'?'selected':''}>dodá klient</option><option ${a.status==='nahráno'?'selected':''}>nahráno</option><option ${a.status==='zkontrolováno'?'selected':''}>zkontrolováno</option></select></label><label class="check-inline"><input type="checkbox" data-att="required" ${a.required?'checked':''}> povinná</label><label>Soubor / odkaz<input data-att="file_name" value="${esc(a.file_name||'')}" placeholder="název souboru nebo URL"></label><label class="attachment-note">Poznámka<textarea data-att="note">${esc(a.note||'')}</textarea></label><button class="btn danger" onclick="removeAttachment(${i})">Smazat</button></div>`).join('') || '<div class="empty">Zatím nejsou doplněné žádné přílohy.</div>';
+    const chips=defaults.map(d=>`<span class="attachment-chip ${d.required?'required':''}">${esc(d.title)} ${help350(d.note||'')}</span>`).join('');
+    return `<p class="eyebrow">6. Přílohy</p><h2>Přílohy k obchodnímu případu</h2><p class="muted">Základní přílohy: Plná moc, Výpis z OR. Produktové přílohy se doplňují podle typu pojištění. Poradce může vždy přidat vlastní přílohu.</p><div class="section-soft"><h3>Doporučené / povinné přílohy pro tento případ</h3><div class="attachment-chip-row">${chips || '<span class="muted">Zatím není doporučena žádná příloha.</span>'}</div></div><div class="tools"><button class="btn primary" onclick="ensureDefaultAttachments()">Doplnit povinné přílohy</button><button class="btn secondary" onclick="addCustomAttachment()">+ Vlastní příloha</button></div><div class="attachment-list-pro">${rows}</div><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit přílohy</button><button class="btn secondary" onclick="currentTab='requests';renderWorkspace()">Pokračovat na poptávky</button></div>`;
+  };
+
+  window.deleteCase = async function(id){
+    if(!id) return;
+    if(!confirm('Opravdu chcete obchodní případ odstranit z aktivního přehledu? Půjde o bezpečné soft delete, ne fyzické smazání DB.')) return;
+    try{
+      const data=await fetchJson(`/api/inquiries/${Number(id)}/delete`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor_email:state.adviser?.email||'',actor_role:'admin'})});
+      toast(data.message||'Obchodní případ byl odstraněn z aktivního přehledu.');
+      if(state.id===id) newCase(false);
+      await loadCases(false); renderAll();
+    }catch(e){toast('Odstranění případu se nepodařilo: '+e.message);}
+  };
+  window.caseRow = function(c){
+    return `<div class="case-row"><div><strong>${esc(c.client_name||c.title||'Bez názvu')}</strong><small>CASE_ID #${esc(c.id)} · ${esc(c.activity_name||'bez typu činnosti')} · ${esc(c.status||'rozpracováno')} · pojišťovny: ${esc(c.selected_insurer_count||0)} · nabídky: ${esc(c.offer_count||0)}</small></div><div class="row-actions"><button class="btn primary" onclick="openCase(${Number(c.id)})">Otevřít</button><button class="btn danger" onclick="deleteCase(${Number(c.id)})">Smazat</button></div></div>`;
+  };
+
+  window.renderAdmin = function(){
+    ensure350();
+    const ins=CATALOG.insurers||[], users=CATALOG.users||[], roles=CATALOG.roleProfiles||[], perms=CATALOG.modulePermissions||[], atts=CATALOG.attachmentTypes||[];
+    $('adminBox').innerHTML=`<div class="metric-grid"><div><b>${users.length}</b><span>uživatelů</span></div><div><b>${roles.length}</b><span>pozic</span></div><div><b>${perms.length}</b><span>modulů práv</span></div><div><b>${ins.length}</b><span>pojišťoven</span></div><div><b>${atts.length}</b><span>typů příloh</span></div></div><div class="admin-tabs"><button class="chip active" onclick="adminPanel('users')">Uživatelé</button><button class="chip" onclick="adminPanel('permissions')">Oprávnění / pozice</button><button class="chip" onclick="adminPanel('insurers')">Pojišťovny</button><button class="chip" onclick="adminPanel('attachments')">Přílohy</button><button class="chip" onclick="adminPanel('texts')">Textace</button><button class="chip" onclick="adminPanel('riskModel')">Rizikový model</button><button class="chip" onclick="adminPanel('json')">Import / export JSON</button></div><div id="adminPanel"></div>`;
+    adminPanel('users');
+  };
+
+  const oldAdminPanel350 = adminPanel;
+  window.adminPanel = function(type){
+    ensure350();
+    document.querySelectorAll('.admin-tabs .chip').forEach(b=>b.classList.remove('active'));
+    const box=$('adminPanel'); if(!box) return;
+    if(type==='users'){
+      box.innerHTML=`<h2>Uživatelé a role</h2><p class="muted">Správa uživatelů včetně pozic a rolí. Jeden uživatel může mít více rolí.</p><div class="table-wrap"><table class="admin-users-table"><thead><tr><th>ID</th><th>Jméno</th><th>E-mail</th><th>Pozice</th><th>Role</th><th>Aktivní</th><th></th></tr></thead><tbody>${(CATALOG.users||[]).map((u,idx)=>`<tr><td><input value="${esc(u.id||'')}" onchange="CATALOG.users[${idx}].id=this.value"></td><td><input value="${esc(u.name||'')}" onchange="CATALOG.users[${idx}].name=this.value"></td><td><input value="${esc(u.email||'')}" onchange="CATALOG.users[${idx}].email=this.value"></td><td><select onchange="CATALOG.users[${idx}].position=this.value"><option></option>${CATALOG.roleProfiles.map(r=>`<option ${u.position===r.name?'selected':''}>${esc(r.name)}</option>`).join('')}</select></td><td><div class="role-checks">${CATALOG.roleProfiles.map(r=>`<label><input type="checkbox" ${safeArray(u.roles).includes(r.code)?'checked':''} onchange="toggleUserRole(${idx},'${esc(r.code)}',this.checked)"> ${esc(r.code)}</label>`).join('')}</div></td><td><input type="checkbox" ${u.active!==false?'checked':''} onchange="CATALOG.users[${idx}].active=this.checked"></td><td><button class="btn danger" onclick="CATALOG.users.splice(${idx},1);adminPanel('users')">Smazat</button></td></tr>`).join('')}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="CATALOG.users.push({id:'u_'+Date.now(),name:'',email:'',position:'Poradce',roles:['PORADCE'],active:true});adminPanel('users')">+ Nový uživatel</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit uživatele</button></div>`;
+      return;
+    }
+    if(type==='permissions'){
+      const actions=[['view','vidí'],['edit','edí'],['delete','maže'],['export','exportuje'],['approve','schvaluje']];
+      box.innerHTML=`<h2>Oprávnění podle pozic</h2><p class="muted">Zaklikněte, co může daná pozice vidět nebo provádět. Oranžově označená administrátorská práva používejte opatrně.</p><div class="table-wrap"><table class="permissions-table"><thead><tr><th>Modul</th>${CATALOG.roleProfiles.map(r=>`<th>${esc(r.name||r.code)}</th>`).join('')}</tr></thead><tbody>${(CATALOG.modulePermissions||[]).map((m,mi)=>`<tr><td><b>${esc(m.label||m.module)}</b><small>${esc(m.module)}</small></td>${CATALOG.roleProfiles.map(r=>`<td>${actions.map(([a,l])=>`<label class="perm"><input type="checkbox" ${m[r.code]?.[a]?'checked':''} onchange="setPermission(${mi},'${esc(r.code)}','${a}',this.checked)"> ${l}</label>`).join('')}</td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="CATALOG.modulePermissions.push({module:'novy_modul',label:'Nový modul'});adminPanel('permissions')">+ Přidat modul práv</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit oprávnění</button></div>`;
+      return;
+    }
+    if(type==='attachments'){
+      box.innerHTML=`<h2>Číselník příloh</h2><p class="muted">Admin spravuje základní i produktové přílohy. Poradce v případu může vždy doplnit další vlastní přílohu.</p><div class="table-wrap"><table><thead><tr><th>ID</th><th>Název</th><th>Kategorie</th><th>Rozsah</th><th>Povinná</th><th>Nápověda</th><th></th></tr></thead><tbody>${(CATALOG.attachmentTypes||[]).map((a,idx)=>`<tr><td><input onchange="CATALOG.attachmentTypes[${idx}].id=this.value" value="${esc(a.id||'')}"></td><td><input onchange="CATALOG.attachmentTypes[${idx}].title=this.value" value="${esc(a.title||'')}"></td><td><input onchange="CATALOG.attachmentTypes[${idx}].category=this.value" value="${esc(a.category||'')}"></td><td><select onchange="CATALOG.attachmentTypes[${idx}].scope=this.value"><option ${a.scope==='all'?'selected':''} value="all">obecné</option><option ${a.scope==='liability'?'selected':''} value="liability">odpovědnost</option><option ${a.scope==='property'?'selected':''} value="property">majetek</option><option ${a.scope==='custom'?'selected':''} value="custom">vlastní</option></select></td><td><input type="checkbox" ${a.required?'checked':''} onchange="CATALOG.attachmentTypes[${idx}].required=this.checked"></td><td><textarea onchange="CATALOG.attachmentTypes[${idx}].note=this.value">${esc(a.note||'')}</textarea></td><td><button class="btn danger" onclick="CATALOG.attachmentTypes.splice(${idx},1);adminPanel('attachments')">Smazat</button></td></tr>`).join('')}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="CATALOG.attachmentTypes.push({id:'att_'+Date.now(),title:'Nová příloha',category:'Vlastní',scope:'custom',required:false,note:''});adminPanel('attachments')">+ Přidat přílohu</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit přílohy</button></div>`;
+      return;
+    }
+    oldAdminPanel350(type);
+  };
+  window.toggleUserRole = function(idx,role,checked){ ensure350(); const u=CATALOG.users[idx]; u.roles=safeArray(u.roles); if(checked && !u.roles.includes(role)) u.roles.push(role); if(!checked) u.roles=u.roles.filter(r=>r!==role); };
+  window.setPermission = function(mi,role,action,checked){ ensure350(); const m=CATALOG.modulePermissions[mi]; m[role] ||= {}; m[role][action]=checked; };
+
+  const oldSaveAdminCatalog350 = saveAdminCatalog;
+  window.saveAdminCatalog = async function(){
+    try{
+      normalizeCatalog(); ensure350();
+      const payload={
+        insurers:CATALOG.insurers, advisers:CATALOG.advisers, requirementTypes:CATALOG.requirementTypes, coverageDictionary:CATALOG.coverageDictionary, policyReferences:CATALOG.policyReferences,
+        risks:CATALOG.risks, activities:CATALOG.activities, riskModel:CATALOG.riskModel, textTemplates:CATALOG.textTemplates,
+        attachmentTypes:CATALOG.attachmentTypes, users:CATALOG.users, modulePermissions:CATALOG.modulePermissions, roleProfiles:CATALOG.roleProfiles,
+        actor_email:state.adviser?.email||''
+      };
+      const data=await fetchJson('/api/admin/catalogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      toast(data.message||'Admin číselníky byly uloženy.'); renderAll();
+    }catch(e){toast('Admin se nepodařilo uložit: '+e.message);}
+  };
+
+  const oldRenderWorkspace350 = renderWorkspace;
+  window.renderWorkspace = function(){
+    ensure350();
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+    const map={client:tabClient,insurance:tabInsurance,liability:tabLiability,risks:tabRisks,insurers:tabInsurers,attachments:tabAttachments,requests:tabInsurerRequests,offers:tabOffers,comparison:tabComparison,recommendation:tabRecommendation,output:tabOutput,audit:tabAudit};
+    if($('tabContent')) $('tabContent').innerHTML=(map[currentTab]||tabClient)();
+    renderHeader();
+  };
+
+  const oldRenderAll350 = renderAll;
+  window.renderAll = function(){ ensure350(); oldRenderAll350(); };
+})();

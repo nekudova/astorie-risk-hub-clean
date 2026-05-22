@@ -1,0 +1,13 @@
+{
+  "version": "3.5.0",
+  "name": "Attachments & Permissions Engine PRO",
+  "file_count": 97,
+  "base": "3.4.0 Intelligent Workflow Engine PRO",
+  "notes": [
+    "Přílohy engine",
+    "Admin oprávnění a pozice",
+    "Uživatelé",
+    "Soft delete případů",
+    "Karta klienta – kontaktní osoby"
+  ]
+}
