@@ -1,0 +1,16 @@
+{
+  "version": "3.5.1a",
+  "name": "Deployment Identity & Regression Fix",
+  "base": "3.5.1 Stabilization Hotfix",
+  "universal_zip": true,
+  "environment_variable": "APP_ENV=TEST or APP_ENV=PROD",
+  "db_destructive_changes": false,
+  "checks": [
+    "backend version constants",
+    "/health",
+    "/version",
+    "HTML badge",
+    "JS version",
+    "ZIP integrity"
+  ]
+}

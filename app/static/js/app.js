@@ -1,4 +1,4 @@
-const VERSION = '3.5.0';
+const VERSION = '3.5.1a';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -817,7 +817,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 3.5.0 – Attachments & Permissions Engine PRO
+   Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1045,7 +1045,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 3.5.1 – Stabilization Hotfix
+   Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1053,15 +1053,33 @@ window.tabRisks=tabRisks;
    - Doporučená varianta má viditelný a zrušitelný stav.
    ========================================================== */
 (function(){
-  const VERSION_351 = '3.5.1';
+  const VERSION_351 = '3.5.1a';
 
   function riskId351(r){
     return String((r && (r.risk_key || r.key || r.id || r.name)) || '').trim();
   }
   function displayInsurer351(code){
-    const ins = insurerByCode(code) || {};
-    return { code: String(code||''), name: ins.name || ins.title || code, email: ins.email || ins.request_email || '', portal: ins.portal || ins.web || ins.url || '' };
+    const raw = String(code||'').trim();
+    const list = CATALOG.insurers || [];
+    const ins = list.find(i => String(insurerCode(i)||'').toLowerCase() === raw.toLowerCase())
+      || list.find(i => String(i.name||i.title||'').toLowerCase() === raw.toLowerCase())
+      || insurerByCode(raw) || {};
+    const cleanCode = String(ins.code || ins.shortcut || ins.zkratka || raw || '').trim();
+    const cleanName = String(ins.name || ins.title || raw || cleanCode || '').trim();
+    return { code: cleanCode, name: cleanName, email: ins.email || ins.request_email || '', portal: ins.portal || ins.web || ins.url || '', ico: ins.ico || '', address: ins.address || '' };
   }
+  function canonicalSelectedInsurers351(){
+    const seen = new Set();
+    const out = [];
+    (state.selected_insurers || []).forEach(code => {
+      const d = displayInsurer351(code);
+      const key = String(d.code || d.name || code).toLowerCase();
+      if(!seen.has(key)){ seen.add(key); out.push(d.code || code); }
+    });
+    state.selected_insurers = out;
+    return out;
+  }
+
   function offerRisk351(code, r){
     const o = ensureOffer(code);
     o.risks ||= {};
@@ -1159,8 +1177,8 @@ window.tabRisks=tabRisks;
   window.tabComparison = tabComparison = function(){
     if(!state.selected_insurers.length||!allRequestRisks351().length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve doplňte rizika, pojišťovny a nabídky.</div>`;
     const risks = allRequestRisks351();
-    const rows=risks.map(r=>`<tr><td class="risk-request"><b>${esc(r.name||r.label||r.risk_key)}</b><br>${esc(r.requested_limit||'limit neuveden')}${riskSpecification(r)?`<br><small>${esc(riskSpecification(r))}</small>`:''}</td>${state.selected_insurers.map(code=>comparisonCell351(code,r)).join('')}</tr>`).join('');
-    return `<p class="eyebrow">9. Makléřské porovnání</p><h2>Rozdíly mezi nabídkami</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap"><table class="comparison-table pro-table"><thead><tr><th>Riziko / požadavek</th>${state.selected_insurers.map(c=>{const ins=displayInsurer351(c);return `<th class="${state.report.client_selected_offer===c?'recommended-head':''}">${esc(ins.name)}${state.report.client_selected_offer===c?'<span class="recommended-ribbon compact">DOPORUČENO</span>':''}</th>`}).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="currentTab='recommendation';renderWorkspace()">Přejít na doporučení poradce</button></div>`;
+    const rows=risks.map(r=>`<tr><td class="risk-request"><b>${esc(r.name||r.label||r.risk_key)}</b><br>${esc(r.requested_limit||'limit neuveden')}${riskSpecification(r)?`<br><small>${esc(riskSpecification(r))}</small>`:''}</td>${canonicalSelectedInsurers351().map(code=>comparisonCell351(code,r)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Makléřské porovnání</p><h2>Rozdíly mezi nabídkami</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap"><table class="comparison-table pro-table"><thead><tr><th>Riziko / požadavek</th>${canonicalSelectedInsurers351().map(c=>{const ins=displayInsurer351(c);return `<th class="${state.report.client_selected_offer===c?'recommended-head':''}">${esc(ins.name)}${state.report.client_selected_offer===c?'<span class="recommended-ribbon compact">DOPORUČENO</span>':''}</th>`}).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="currentTab='recommendation';renderWorkspace()">Přejít na doporučení poradce</button></div>`;
   };
 
   window.toggleRecommendedInsurer = function(code){
@@ -1170,7 +1188,7 @@ window.tabRisks=tabRisks;
     toast(state.report.client_selected_offer ? 'Doporučená varianta nastavena.' : 'Doporučená varianta byla zrušena.');
   };
   window.tabRecommendation = tabRecommendation = function(){
-    const cards=(state.selected_insurers||[]).map(code=>{const ins=displayInsurer351(code); const sel=state.report.client_selected_offer===code; return `<button class="recommend-card ${sel?'selected':''}" onclick="toggleRecommendedInsurer('${esc(code)}')"><span class="recommend-mark">${sel?'✓':'○'}</span><strong>${esc(ins.name)}</strong><small>${esc(ins.code)}</small><span>${sel?'DOPORUČENO – kliknutím zrušíte':'Vybrat jako doporučenou variantu'}</span></button>`}).join('') || '<div class="empty">Nejdříve vyberte pojišťovny.</div>';
+    const cards=canonicalSelectedInsurers351().map(code=>{const ins=displayInsurer351(code); const sel=state.report.client_selected_offer===code; return `<button class="recommend-card ${sel?'selected':''}" onclick="toggleRecommendedInsurer('${esc(code)}')"><span class="recommend-mark">${sel?'✓':'○'}</span><strong>${esc(ins.name)}</strong><small>${esc(ins.code)}</small><span>${sel?'DOPORUČENO – kliknutím zrušíte':'Vybrat jako doporučenou variantu'}</span></button>`}).join('') || '<div class="empty">Nejdříve vyberte pojišťovny.</div>';
     return `<p class="eyebrow">10. Doporučení poradce</p><h2>Doporučená varianta</h2><p class="muted">Doporučení vždy potvrzuje poradce. Vybraná pojišťovna je zřetelně zvýrazněna a lze ji dalším kliknutím zrušit.</p><div class="recommend-grid">${cards}</div><input type="hidden" id="selected_offer" value="${esc(state.report.client_selected_offer||'')}"><label>Odůvodnění poradce<textarea id="choice_reason">${esc(state.report.client_choice_reason||'')}</textarea></label><label>Poznámka poradce<textarea id="advisor_note">${esc(state.report.advisor_note||'')}</textarea></label><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit doporučení</button><button class="btn secondary" onclick="currentTab='output';renderWorkspace()">Pokračovat na klientský výstup</button></div>`;
   };
 
@@ -1181,4 +1199,24 @@ window.tabRisks=tabRisks;
     if($('tabContent')) $('tabContent').innerHTML=(map[currentTab]||tabClient)();
     renderHeader();
   };
+})();
+
+
+/* BRH 3.5.1a – deployment identity runtime check */
+(function(){
+  async function refreshBuildIdentity(){
+    try{
+      const res = await fetch('/version', {cache:'no-store'});
+      if(!res.ok) return;
+      const v = await res.json();
+      const badge = document.getElementById('versionBadge');
+      if(badge){
+        badge.textContent = `Business Risk Hub ${v.version} · ${v.environment || 'UNSET'} · ${v.build_id || ''}`;
+        badge.title = `${v.name || ''} | DB: ${v.database_configured ? 'configured' : 'not configured'}`;
+      }
+      window.BRH_BUILD_IDENTITY = v;
+    }catch(e){ console.warn('BRH version check failed', e); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshBuildIdentity);
+  else refreshBuildIdentity();
 })();

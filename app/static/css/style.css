@@ -34,7 +34,7 @@
 @media(max-width:1100px){.contact-row,.attachment-row{grid-template-columns:1fr}.help-dot .help-popover{left:auto;right:0;top:24px}}
 
 /* ==========================================================
-   Business Risk Hub 3.5.0 – Attachments & Permissions Engine PRO
+   Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
    ========================================================== */
 .help-mini{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:999px;background:#eaf6f8;color:#004b57;border:1px solid #bcdde3;font-size:11px;font-weight:900;position:relative;margin-left:6px;vertical-align:middle;cursor:help}
 .help-mini>span{display:none;position:absolute;left:50%;top:24px;transform:translateX(-50%);z-index:50;min-width:260px;max-width:380px;background:#fff;border:1px solid #d7e8ec;border-left:5px solid #fc4c02;border-radius:16px;padding:14px 16px;box-shadow:0 18px 38px rgba(0,61,76,.22);font-size:13px;line-height:1.45;color:#003d4c;text-align:left;font-weight:700}
@@ -48,5 +48,8 @@
 .admin-users-table td,.permissions-table td{vertical-align:top}.role-checks{display:flex;flex-wrap:wrap;gap:6px}.role-checks label,.perm{display:flex;align-items:center;gap:6px;background:#f3fafb;border:1px solid #d6ebef;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900;margin:2px}.permissions-table small{display:block;color:#7a8d95;margin-top:3px}.row-actions{display:flex;gap:8px;align-items:center}
 @media(max-width:1100px){.contact-card-pro,.attachment-card-pro{grid-template-columns:1fr}.help-mini>span{left:auto;right:0;transform:none}}
 
-/* BRH 3.5.1 Stabilization Hotfix */
+/* BRH 3.5.1a Deployment Identity & Regression Fix */
 .compare-cell{vertical-align:top;line-height:1.35;background:#fff}.compare-cell.is-ok{background:#F1FBF4}.compare-cell.is-warn{background:#FFF7E8}.compare-cell.is-bad{background:#FFF1F0}.compare-cell.is-check{background:#F7FBFC}.compare-note{margin-top:6px;color:#607783;white-space:pre-wrap}.recommended-head{position:relative;box-shadow:inset 0 0 0 3px #2E7D32;background:#EAF7EE!important}.recommended-ribbon.compact{display:block;margin-top:6px;padding:4px 8px;border-radius:999px;background:#2E7D32;color:#fff;font-size:11px;letter-spacing:.08em}.recommend-card.selected{border:2px solid #2E7D32;background:#EAF7EE;box-shadow:0 14px 32px rgba(46,125,50,.18)}.recommend-mark{font-size:22px;font-weight:900;color:#2E7D32}.request-card-351{margin-bottom:18px}.brh-print-351 td,.brh-print-351 th{white-space:normal;word-break:normal}.comparison-table td,.comparison-table th{white-space:normal}.status-badge.ok{background:#EAF7EE;color:#1B5E20}.status-badge.warn{background:#FFF3D6;color:#9A5A00}.status-badge.bad{background:#FFE5E1;color:#9A1F10}.status-badge.check{background:#EAF5F8;color:#003D4C}.status-badge{display:inline-flex;padding:4px 10px;border-radius:999px;font-weight:800;margin-bottom:4px}
+
+/* BRH 3.5.1a deployment identity */
+.version-badge{white-space:nowrap}

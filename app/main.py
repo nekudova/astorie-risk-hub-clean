@@ -14,8 +14,12 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+APP_VERSION = "3.5.1a"
+APP_RELEASE_NAME = "Deployment Identity & Regression Fix"
+APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "UNSET")).strip().upper() or "UNSET"
+BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-3.5.1a"))[:12]
 
-app = FastAPI(title="ASTORIE Business Risk Hub", version="3.5.1")
+app = FastAPI(title="ASTORIE Business Risk Hub", version=APP_VERSION)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -227,7 +231,7 @@ def load_json(filename: str) -> Any:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request, "app_version": APP_VERSION, "app_release_name": APP_RELEASE_NAME, "app_env": APP_ENV, "build_id": BUILD_ID})
 
 
 @app.get("/health")
@@ -237,7 +241,20 @@ def health():
         ok = init_db()
     except Exception:
         ok = False
-    return {"ok": True, "database_connected": ok, "version": "3.5.1", "name": "Business Risk Hub 3.5.1 - Stabilization Hotfix"}
+    return {"ok": True, "database_connected": ok, "version": APP_VERSION, "name": f"Business Risk Hub {APP_VERSION} - {APP_RELEASE_NAME}", "environment": APP_ENV, "build_id": BUILD_ID}
+
+
+
+@app.get("/version")
+def version():
+    return {
+        "ok": True,
+        "version": APP_VERSION,
+        "name": f"Business Risk Hub {APP_VERSION} - {APP_RELEASE_NAME}",
+        "environment": APP_ENV,
+        "build_id": BUILD_ID,
+        "database_configured": bool(DATABASE_URL),
+    }
 
 
 def get_catalogs() -> Dict[str, Any]:

@@ -1,0 +1,13 @@
+Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
+
+Jeden univerzální ZIP pro TEST i PROD.
+Rozlišení prostředí se provádí pouze proměnnou Render Environment APP_ENV=TEST nebo APP_ENV=PROD.
+
+Opravy:
+- sjednocený identifikátor verze v backendu, health, /version, HTML a JS,
+- viditelný runtime build badge v horním pruhu,
+- /version endpoint pro ověření skutečně nasazeného buildu,
+- oprava cache query u CSS/JS,
+- oprava duplicitních labelů pojišťoven v doporučení a porovnání,
+- bez destruktivních změn DB,
+- zachován stabilizační základ 3.5.1.
