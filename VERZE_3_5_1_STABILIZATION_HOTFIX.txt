@@ -1,0 +1,6 @@
+Business Risk Hub 3.5.1 – Stabilizační hotfix
+- oprava Porovnání
+- dynamický export všech rizik do PDF/XLS
+- odstranění duplicitního renderu poptávek
+- výrazné doporučení pojišťovny a zrušení doporučení
+- bez destruktivní změny DB

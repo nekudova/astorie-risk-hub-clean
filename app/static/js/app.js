@@ -1043,3 +1043,142 @@ window.tabRisks=tabRisks;
   const oldRenderAll350 = renderAll;
   window.renderAll = function(){ ensure350(); oldRenderAll350(); };
 })();
+
+/* ==========================================================
+   Business Risk Hub 3.5.1 – Stabilization Hotfix
+   Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
+   - Porovnání renderuje pouze compare engine, ne poptávky.
+   - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
+   - PDF/XLS export iteruje všechna dynamická rizika z CASE_ID.
+   - Doporučená varianta má viditelný a zrušitelný stav.
+   ========================================================== */
+(function(){
+  const VERSION_351 = '3.5.1';
+
+  function riskId351(r){
+    return String((r && (r.risk_key || r.key || r.id || r.name)) || '').trim();
+  }
+  function displayInsurer351(code){
+    const ins = insurerByCode(code) || {};
+    return { code: String(code||''), name: ins.name || ins.title || code, email: ins.email || ins.request_email || '', portal: ins.portal || ins.web || ins.url || '' };
+  }
+  function offerRisk351(code, r){
+    const o = ensureOffer(code);
+    o.risks ||= {};
+    const key = riskId351(r);
+    o.risks[key] ||= {status:'nutno ověřit', offered_limit:'', deductible:'', note:'', sublimits:'', exclusions:'', source_reference:''};
+    return o.risks[key];
+  }
+  function allRequestRisks351(){
+    return (state.risks || []).filter(r => (r && (norm(r.name)||norm(r.risk_key)||norm(r.requested_limit)||norm(r.specification)||norm(r.client_note))));
+  }
+  function allAgreements351(){
+    return (state.liability_agreements || []).filter(a => norm(a.title)||norm(a.text)||norm(a.limit));
+  }
+  function contactRows351(){
+    const base = [];
+    if(state.client?.contact_person || state.client?.contact_email || state.client?.contact_phone){
+      base.push({surname_name:state.client.contact_person||'', email:state.client.contact_email||'', phone:state.client.contact_phone||'', insurance_area:'hlavní kontakt'});
+    }
+    (state.client?.contacts || []).forEach(c=>base.push(c));
+    return base.filter(c=>norm(c.surname_name)||norm(c.email)||norm(c.phone)||norm(c.insurance_area));
+  }
+  function requestDataRows351(){
+    const q=state.questionnaire||{}, c=state.client||{};
+    const contacts = contactRows351().map(c=>[c.surname_name, c.email, c.phone, c.insurance_area].filter(Boolean).join(' · ')).join('\n');
+    const rows=[
+      ['Klient',c.name],['IČO',c.ico],['Adresa',c.address],['Kontaktní osoby pro jednání', contacts],
+      ['Typ činnosti',state.activity?.name],['Detail činnosti',q.main_activity_detail],['Vedlejší činnosti',q.side_activities],
+      ['Obrat',q.turnover],['Zaměstnanci',q.employees],['Území',q.territory],['Počátek pojištění',q.insurance_start],
+      ['Pojistné období',q.insurance_period],['Frekvence placení',q.payment_frequency],['Export / zahraničí',q.annual_revenue_breakdown||q.export_info],
+      ['Provozovny',q.locations],['Škodní průběh',q.claims_history],['Současné pojištění',q.current_insurance],
+      ['Požadovaný rozsah',q.requested_scope],['Preferovaná spoluúčast',q.deductible_preference],['Speciální poznámka',q.special_notes]
+    ];
+    return rows.filter(r=>norm(r[1]));
+  }
+  function attachmentSummary351(){
+    const arr = state.attachments || [];
+    if(!arr.length) return '';
+    const rows = arr.map(a=>`<tr><td>${esc(a.title||'')}</td><td>${esc(a.category||'')}</td><td>${esc(a.required?'ano':'ne')}</td><td>${esc(a.status||'chybí')}</td><td>${esc(a.file_name||a.note||'')}</td></tr>`).join('');
+    return `<h3>Přílohy / podklady</h3><table><thead><tr><th>Příloha</th><th>Kategorie</th><th>Povinná</th><th>Stav</th><th>Poznámka / soubor</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  function textationsHtml351(target){
+    const list = (typeof selectedTextations === 'function' ? selectedTextations(target) : []).filter(Boolean);
+    return list.map(t=>`<h4>${esc(t.title||'Textace')}</h4><p>${esc(textationContent(t)).replace(/\n/g,'<br>')}</p>`).join('');
+  }
+
+  window.insurerRequestHtml = insurerRequestHtml = function(code, forPrint=false){
+    const ins = displayInsurer351(code);
+    const req = ensureInsurerRequest(code);
+    const rows = requestDataRows351();
+    const risks = allRequestRisks351().map(r=>`<tr><td>${esc(r.name||r.label||r.risk_key||'')}</td><td>${esc(r.requested_limit||r.limit||'')}</td><td>${esc(r.deductible||state.questionnaire?.deductible_preference||'')}</td><td>${esc(riskSpecification(r)||'')}</td></tr>`).join('');
+    const agreements = allAgreements351().map(a=>`<tr><td>${esc(a.title||'')}</td><td>${esc(a.limit||'')}</td><td>${esc(a.text||'')}</td></tr>`).join('');
+    const texts = textationsHtml351('request');
+    return `<div class="request-print brh-print-351"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name)}</b><br>${esc(ins.code)}<br>${esc(ins.email)}</div></div>
+      <h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p>
+      <h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>
+      <h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="4">Rizika nejsou doplněna.</td></tr>'}</tbody></table>
+      <h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>
+      ${attachmentSummary351()}${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}
+      <h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted">Tento výstup je pracovní poptávka pro pojišťovnu. Zdrojem dat je jeden obchodní případ v Business Risk Hubu.</p></div>`;
+  };
+
+  window.printInsurerRequest = printInsurerRequest = function(code){
+    readCurrentTab();
+    const w=window.open('', '_blank');
+    if(!w){toast('Prohlížeč zablokoval otevření tisku.');return;}
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(requestSubject(code))}</title><style>body{font-family:Arial,sans-serif;color:#073E4A;margin:30px}.print-head{display:flex;justify-content:space-between;gap:20px;border-bottom:4px solid #FC4C02;padding-bottom:18px;margin-bottom:20px}h1{letter-spacing:8px;margin:0;color:#003D4C}h2,h3{color:#003D4C}table{border-collapse:collapse;width:100%;margin:12px 0 22px;page-break-inside:auto}tr{page-break-inside:avoid}th{background:#003D4C;color:white;text-align:left}th,td{border:1px solid #D7E8EC;padding:9px;vertical-align:top;white-space:normal}.muted{color:#607783}@media print{button{display:none}}</style></head><body>${insurerRequestHtml(code,true)}<button onclick="window.print()">Tisk / uložit jako PDF</button></body></html>`);
+    w.document.close();
+  };
+
+  window.exportInsurerRequestExcel = exportInsurerRequestExcel = function(code){
+    readCurrentTab();
+    const html=`<html><head><meta charset="utf-8"></head><body>${insurerRequestHtml(code,false)}</body></html>`;
+    const blob=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`poptavka_${safeFile(state.client.name)}_${safeFile(code)}.xls`;
+    document.body.appendChild(a); a.click(); const href=a.href; a.remove(); setTimeout(()=>URL.revokeObjectURL(href),500);
+    toast('Excel poptávky byl připraven včetně všech rizik.');
+  };
+
+  window.tabInsurerRequests = tabInsurerRequests = function(){
+    const missing=requestCompleteness();
+    if(missing.length) return `<p class="eyebrow">7. Poptávky pojišťovnám</p><h2>Nejdříve doplňte povinné části</h2><div class="info-box">Pro generování poptávek chybí: ${esc(missing.join(', '))}.</div>`;
+    const cards=selectedInsurerRows().map(({code,ins,req})=>{
+      const display = displayInsurer351(code);
+      return `<div class="request-card request-card-351"><div class="section-head"><div><p class="eyebrow">Pojišťovna</p><h2>${esc(display.name)}</h2><p class="muted"><b>${esc(display.code)}</b> · ${esc(display.email||'e-mail není doplněn')}</p></div><span class="badge">${esc(req.status||'připraveno')}</span></div><div class="grid3"><label>Předmět e-mailu<input value="${esc(req.subject||requestSubject(code))}" onchange="ensureInsurerRequest('${esc(code)}').subject=this.value"></label><label>Stav poptávky<select onchange="ensureInsurerRequest('${esc(code)}').status=this.value"><option ${req.status==='připraveno'?'selected':''}>připraveno</option><option ${req.status==='odesláno'?'selected':''}>odesláno</option><option ${req.status==='čekáme na nabídku'?'selected':''}>čekáme na nabídku</option><option ${req.status==='nabídka přijata'?'selected':''}>nabídka přijata</option></select></label><label>Datum odeslání<input type="date" value="${esc(req.sent_at||'')}" onchange="ensureInsurerRequest('${esc(code)}').sent_at=this.value"></label></div><label>Doprovodný text pro pojišťovnu<textarea onchange="ensureInsurerRequest('${esc(code)}').email_note=this.value" placeholder="Krátká poznámka k poptávce, termín pro nabídku, specifika komunikace...">${esc(req.email_note||defaultEmailNote(code))}</textarea></label><div class="tools"><button class="btn primary" onclick="printInsurerRequest('${esc(code)}')">PDF / tisk poptávky</button><button class="btn secondary" onclick="exportInsurerRequestExcel('${esc(code)}')">Excel pro pojišťovnu</button><button class="btn secondary" onclick="copyInsurerEmail('${esc(code)}')">Kopírovat e-mail</button><button class="btn ghost" onclick="ensureInsurerRequest('${esc(code)}').status='odesláno';ensureInsurerRequest('${esc(code)}').sent_at=new Date().toISOString().slice(0,10);readCurrentTab();saveCase()">Označit jako odesláno</button></div></div>`;
+    }).join('');
+    return `<p class="eyebrow">7. Smart poptávky pojišťovnám</p><h2>Samostatná poptávka pro každou pojišťovnu</h2><p class="muted">Poptávka se skládá z jednoho zdroje dat: karta klienta, karta pro pojištění, rizika, ujednání, textace a přílohy. Interní metodické nápovědy se neexportují.</p><div class="warning"><b>Důležité:</b> do PDF/XLS se propisují všechna dynamická rizika z aktuálního CASE_ID.</div>${cards}<div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit stav poptávek</button><button class="btn secondary" onclick="currentTab='offers';renderWorkspace()">Pokračovat na nabídky</button></div>`;
+  };
+
+  function comparisonCell351(code, r){
+    const x = offerRisk351(code, r);
+    const status = x.status || 'nutno ověřit';
+    return `<td class="compare-cell ${status.includes('splněno')?'is-ok':status.includes('omezeno')?'is-warn':status.includes('výluka')?'is-bad':'is-check'}">${statusBadge(status)}<div><b>Limit:</b> ${esc(x.offered_limit||'–')}</div><div><b>Spoluúčast:</b> ${esc(x.deductible||'–')}</div>${x.note?`<div class="compare-note">${esc(x.note)}</div>`:''}</td>`;
+  }
+  window.tabComparison = tabComparison = function(){
+    if(!state.selected_insurers.length||!allRequestRisks351().length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve doplňte rizika, pojišťovny a nabídky.</div>`;
+    const risks = allRequestRisks351();
+    const rows=risks.map(r=>`<tr><td class="risk-request"><b>${esc(r.name||r.label||r.risk_key)}</b><br>${esc(r.requested_limit||'limit neuveden')}${riskSpecification(r)?`<br><small>${esc(riskSpecification(r))}</small>`:''}</td>${state.selected_insurers.map(code=>comparisonCell351(code,r)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Makléřské porovnání</p><h2>Rozdíly mezi nabídkami</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap"><table class="comparison-table pro-table"><thead><tr><th>Riziko / požadavek</th>${state.selected_insurers.map(c=>{const ins=displayInsurer351(c);return `<th class="${state.report.client_selected_offer===c?'recommended-head':''}">${esc(ins.name)}${state.report.client_selected_offer===c?'<span class="recommended-ribbon compact">DOPORUČENO</span>':''}</th>`}).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="tools"><button class="btn secondary" onclick="currentTab='recommendation';renderWorkspace()">Přejít na doporučení poradce</button></div>`;
+  };
+
+  window.toggleRecommendedInsurer = function(code){
+    state.report ||= {};
+    state.report.client_selected_offer = state.report.client_selected_offer===code ? '' : code;
+    renderWorkspace();
+    toast(state.report.client_selected_offer ? 'Doporučená varianta nastavena.' : 'Doporučená varianta byla zrušena.');
+  };
+  window.tabRecommendation = tabRecommendation = function(){
+    const cards=(state.selected_insurers||[]).map(code=>{const ins=displayInsurer351(code); const sel=state.report.client_selected_offer===code; return `<button class="recommend-card ${sel?'selected':''}" onclick="toggleRecommendedInsurer('${esc(code)}')"><span class="recommend-mark">${sel?'✓':'○'}</span><strong>${esc(ins.name)}</strong><small>${esc(ins.code)}</small><span>${sel?'DOPORUČENO – kliknutím zrušíte':'Vybrat jako doporučenou variantu'}</span></button>`}).join('') || '<div class="empty">Nejdříve vyberte pojišťovny.</div>';
+    return `<p class="eyebrow">10. Doporučení poradce</p><h2>Doporučená varianta</h2><p class="muted">Doporučení vždy potvrzuje poradce. Vybraná pojišťovna je zřetelně zvýrazněna a lze ji dalším kliknutím zrušit.</p><div class="recommend-grid">${cards}</div><input type="hidden" id="selected_offer" value="${esc(state.report.client_selected_offer||'')}"><label>Odůvodnění poradce<textarea id="choice_reason">${esc(state.report.client_choice_reason||'')}</textarea></label><label>Poznámka poradce<textarea id="advisor_note">${esc(state.report.advisor_note||'')}</textarea></label><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit doporučení</button><button class="btn secondary" onclick="currentTab='output';renderWorkspace()">Pokračovat na klientský výstup</button></div>`;
+  };
+
+  const oldRenderWorkspace351 = renderWorkspace;
+  window.renderWorkspace = renderWorkspace = function(){
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+    const map={client:tabClient,insurance:tabInsurance,liability:tabLiability,risks:tabRisks,insurers:tabInsurers,attachments:tabAttachments,requests:tabInsurerRequests,offers:tabOffers,comparison:tabComparison,recommendation:tabRecommendation,output:tabOutput,audit:tabAudit};
+    if($('tabContent')) $('tabContent').innerHTML=(map[currentTab]||tabClient)();
+    renderHeader();
+  };
+})();
