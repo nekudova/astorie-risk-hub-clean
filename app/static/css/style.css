@@ -53,3 +53,19 @@
 
 /* BRH 3.5.1a deployment identity */
 .version-badge{white-space:nowrap}
+
+
+/* BRH 3.5.1b – profesionální stabilizace karet poptávek */
+.request-list-351b{display:grid;gap:18px;margin-top:18px}
+.request-card-351b{border:1px solid #d7e8ec;border-radius:24px;background:#fff;box-shadow:0 12px 34px rgba(0,61,76,.07);overflow:hidden}
+.request-card-351b[open]{border-left:6px solid #fc4c02}
+.request-summary-351b{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px;cursor:pointer;list-style:none;background:linear-gradient(180deg,#fff,#f8fcfd)}
+.request-summary-351b::-webkit-details-marker{display:none}
+.request-summary-351b h2{margin:.2rem 0 .35rem;font-size:1.55rem;line-height:1.15}
+.request-summary-351b:after{content:'Rozbalit / sbalit';font-size:.78rem;font-weight:800;color:#003D4C;background:#eaf5f7;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;align-self:center;white-space:nowrap}
+.request-card-351b[open] .request-summary-351b:after{content:'Sbalit'}
+.request-body-351b{padding:0 24px 24px}
+.request-note-351b{min-height:118px;resize:vertical;line-height:1.45}
+.request-tools-351b{margin-top:16px;gap:10px;flex-wrap:wrap}
+.request-card-351b .badge{font-weight:800;text-transform:lowercase;background:#eaf5f7;color:#003D4C;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;white-space:nowrap}
+@media(max-width:900px){.request-summary-351b{flex-direction:column}.request-summary-351b:after{align-self:flex-start}.request-body-351b{padding:0 16px 18px}}

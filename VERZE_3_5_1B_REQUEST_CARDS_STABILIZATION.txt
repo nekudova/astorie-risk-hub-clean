@@ -1,0 +1,2 @@
+Business Risk Hub 3.5.1b – Request Cards Stabilization
+Oprava zobrazení poptávek: jedna karta pro jednu pojišťovnu, deduplikace, kompaktní profesionální UX, beze změn DB.

@@ -1,4 +1,4 @@
-const VERSION = '3.5.1a';
+const VERSION = '3.5.1b';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -817,7 +817,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
+   Business Risk Hub 3.5.1b – Request Cards Stabilization
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1045,7 +1045,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 3.5.1a – Deployment Identity & Regression Fix
+   Business Risk Hub 3.5.1b – Request Cards Stabilization
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1053,7 +1053,7 @@ window.tabRisks=tabRisks;
    - Doporučená varianta má viditelný a zrušitelný stav.
    ========================================================== */
 (function(){
-  const VERSION_351 = '3.5.1a';
+  const VERSION_351 = '3.5.1b';
 
   function riskId351(r){
     return String((r && (r.risk_key || r.key || r.id || r.name)) || '').trim();
@@ -1202,7 +1202,7 @@ window.tabRisks=tabRisks;
 })();
 
 
-/* BRH 3.5.1a – deployment identity runtime check */
+/* BRH 3.5.1b – deployment identity runtime check */
 (function(){
   async function refreshBuildIdentity(){
     try{
@@ -1219,4 +1219,121 @@ window.tabRisks=tabRisks;
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshBuildIdentity);
   else refreshBuildIdentity();
+})();
+
+
+/* BRH 3.5.1b – Request Cards Stabilization
+   Cíl: jedna karta poptávky pro jednu pojišťovnu, bez duplicitních kódů/názvů,
+   profesionální kompaktní zobrazení a bezpečné zachování exportů. */
+(function(){
+  function cleanText351b(v){ return String(v || '').trim(); }
+  function normalizeKey351b(v){
+    return cleanText351b(v).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'');
+  }
+  function insurerCode351b(i){
+    return cleanText351b(i && (i.code || i.short || i.shortcut || i.zkratka || i.id || i.key || i.name));
+  }
+  function displayInsurer351b(code){
+    const raw = cleanText351b(code);
+    const list = Array.isArray(CATALOG.insurers) ? CATALOG.insurers : [];
+    const rawKey = normalizeKey351b(raw);
+    let ins = list.find(i => normalizeKey351b(insurerCode351b(i)) === rawKey)
+      || list.find(i => normalizeKey351b(i.name || i.title) === rawKey)
+      || list.find(i => normalizeKey351b(i.name || '').includes(rawKey) && rawKey)
+      || {};
+    const codeClean = cleanText351b(ins.code || ins.short || ins.shortcut || ins.zkratka || raw);
+    const nameClean = cleanText351b(ins.name || ins.title || raw || codeClean);
+    return {
+      code: codeClean,
+      name: nameClean,
+      email: cleanText351b(ins.email || ins.request_email),
+      portal: cleanText351b(ins.portal || ins.web || ins.url),
+      ico: cleanText351b(ins.ico),
+      address: cleanText351b(ins.address)
+    };
+  }
+  function canonicalSelectedInsurers351b(){
+    const source = Array.isArray(state.selected_insurers) ? state.selected_insurers : [];
+    const seen = new Set();
+    const out = [];
+    source.forEach(code => {
+      const d = displayInsurer351b(code);
+      const key = normalizeKey351b(d.code || d.name || code);
+      if(key && !seen.has(key)){
+        seen.add(key);
+        out.push(d.code || code);
+      }
+    });
+    state.selected_insurers = out;
+    return out;
+  }
+  window.canonicalSelectedInsurers351b = canonicalSelectedInsurers351b;
+
+  function requestCompleteness351b(){
+    const missing=[];
+    if(!cleanText351b(state.client && state.client.name)) missing.push('karta klienta');
+    const riskCount = (typeof allRequestRisks351 === 'function') ? allRequestRisks351().length : (state.risks||[]).length;
+    if(!riskCount) missing.push('rizika / modul odpovědnosti');
+    if(!canonicalSelectedInsurers351b().length) missing.push('vybrané pojišťovny');
+    return missing;
+  }
+  function reqFor351b(code){ return ensureInsurerRequest(code); }
+  function requestSubject351b(code){
+    return (typeof requestSubject === 'function') ? requestSubject(code) : `Poptávka pojištění podnikatelských rizik – ${state.client?.name || 'klient'} – ${code}`;
+  }
+  function defaultNote351b(code){
+    return (typeof defaultEmailNote === 'function') ? defaultEmailNote(code) : `Dobrý den,\n\nprosíme o zpracování nabídky pojištění podnikatelských rizik dle přiložené poptávky.\n\nDěkujeme.\nASTORIE a.s.`;
+  }
+  function card351b(code){
+    const d = displayInsurer351b(code);
+    const req = reqFor351b(code);
+    const email = d.email || 'e-mail není doplněn';
+    return `<details class="request-card request-card-351b" open>
+      <summary class="request-summary-351b">
+        <div><p class="eyebrow">Pojišťovna</p><h2>${esc(d.name || d.code)}</h2><p class="muted"><b>${esc(d.code)}</b> · ${esc(email)}</p></div>
+        <span class="badge">${esc(req.status || 'připraveno')}</span>
+      </summary>
+      <div class="request-body-351b">
+        <div class="grid3">
+          <label>Předmět e-mailu<input value="${esc(req.subject || requestSubject351b(d.code))}" onchange="ensureInsurerRequest('${esc(d.code)}').subject=this.value"></label>
+          <label>Stav poptávky<select onchange="ensureInsurerRequest('${esc(d.code)}').status=this.value;renderWorkspace()">
+            <option ${req.status==='připraveno'?'selected':''}>připraveno</option>
+            <option ${req.status==='odesláno'?'selected':''}>odesláno</option>
+            <option ${req.status==='čekáme na nabídku'?'selected':''}>čekáme na nabídku</option>
+            <option ${req.status==='nabídka přijata'?'selected':''}>nabídka přijata</option>
+          </select></label>
+          <label>Datum odeslání<input type="date" value="${esc(req.sent_at || '')}" onchange="ensureInsurerRequest('${esc(d.code)}').sent_at=this.value"></label>
+        </div>
+        <label>Doprovodný text pro pojišťovnu<textarea class="request-note-351b" onchange="ensureInsurerRequest('${esc(d.code)}').email_note=this.value" placeholder="Krátká poznámka k poptávce, termín pro nabídku, specifika komunikace...">${esc(req.email_note || defaultNote351b(d.code))}</textarea></label>
+        <div class="tools request-tools-351b">
+          <button class="btn primary" onclick="printInsurerRequest('${esc(d.code)}')">PDF / tisk poptávky</button>
+          <button class="btn secondary" onclick="exportInsurerRequestExcel('${esc(d.code)}')">Excel pro pojišťovnu</button>
+          <button class="btn secondary" onclick="copyInsurerEmail('${esc(d.code)}')">Kopírovat e-mail</button>
+          <button class="btn ghost" onclick="ensureInsurerRequest('${esc(d.code)}').status='odesláno';ensureInsurerRequest('${esc(d.code)}').sent_at=new Date().toISOString().slice(0,10);readCurrentTab();saveCase();renderWorkspace()">Označit jako odesláno</button>
+        </div>
+      </div>
+    </details>`;
+  }
+  window.tabInsurerRequests = tabInsurerRequests = function(){
+    const missing = requestCompleteness351b();
+    if(missing.length){
+      return `<p class="eyebrow">7. Poptávky pojišťovnám</p><h2>Nejdříve doplňte povinné části</h2><div class="info-box">Pro generování poptávek chybí: ${esc(missing.join(', '))}.</div>`;
+    }
+    const codes = canonicalSelectedInsurers351b();
+    const cards = codes.map(card351b).join('');
+    return `<p class="eyebrow">7. Smart poptávky pojišťovnám</p>
+      <h2>Samostatná poptávka pro každou pojišťovnu</h2>
+      <p class="muted">Každá pojišťovna má jednu samostatnou kartu. Zdroj dat zůstává jeden obchodní případ: karta klienta, karta pro pojištění, rizika, ujednání, textace a přílohy. Interní metodické nápovědy se neexportují.</p>
+      <div class="warning"><b>Důležité:</b> do PDF/XLS se propisují všechna dynamická rizika z aktuálního CASE_ID. Duplicitní pojišťovny jsou automaticky sloučeny.</div>
+      <div class="request-list-351b">${cards}</div>
+      <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit stav poptávek</button><button class="btn secondary" onclick="currentTab='offers';renderWorkspace()">Pokračovat na nabídky</button></div>`;
+  };
+
+  const _oldRenderWorkspace351b = window.renderWorkspace || renderWorkspace;
+  window.renderWorkspace = renderWorkspace = function(){
+    canonicalSelectedInsurers351b();
+    return _oldRenderWorkspace351b();
+  };
 })();
