@@ -1,6 +1,6 @@
 {
-  "version": "4.1.0",
-  "release": "Liability Dynamic Engine",
+  "version": "4.2.1",
+  "release": "Emergency Restore Stable 4.1.0 Core",
   "db_destructive_change": false,
   "source": "4.0.2 corrected",
   "liability_risks": 32,

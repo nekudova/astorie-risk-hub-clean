@@ -1,1 +1,1 @@
-4.2.0 - Admin Control Center PRO
+4.2.1 - Emergency Restore Stable 4.1.0 Core

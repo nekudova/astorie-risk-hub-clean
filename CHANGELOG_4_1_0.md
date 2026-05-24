@@ -1,4 +1,4 @@
-# Business Risk Hub 4.1.0 – Liability Dynamic Engine
+# Business Risk Hub 4.2.1 – Emergency Restore Stable 4.1.0 Core
 
 ## Obsah
 - Kompletní katalog odpovědnostních rizik podle původního Excelu poradce: 32 položek.
