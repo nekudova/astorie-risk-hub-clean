@@ -1525,3 +1525,108 @@ window.tabRisks=tabRisks;
   // Aktivace katalogu při načtení bez přepisování existujících dat případu.
   risk410List(); agreement410List();
 })();
+
+/* Business Risk Hub 4.2.0 – Admin Control Center PRO
+   Nedestruktivní vrstva nad 4.1.0. Cíl: zobrazit a sjednotit všechny části Adminu bez zásahu do CASE dat. */
+(function(){
+  const ADMIN420_TABS = [
+    ['users','Uživatelé'],
+    ['permissions','Oprávnění / pozice'],
+    ['insurers','Pojišťovny'],
+    ['attachments','Přílohy'],
+    ['texts','Textace'],
+    ['liabilityRisks','Odpovědnost – rizika'],
+    ['liabilityAgreements','Odpovědnost – ujednání'],
+    ['activities','Činnosti'],
+    ['riskModel','Rizikový model'],
+    ['json','Import / export JSON']
+  ];
+  const MODULES420 = [
+    ['dashboard','Dashboard'],['cases','Obchodní případy'],['workspace','Pracovní prostor'],['documents','Dokumenty'],['textace','Textace'],['riskModel','Rizikový model'],['admin','Admin'],['liability','Modul odpovědnosti'],['attachments','Přílohy'],['offers','Nabídky'],['comparison','Porovnání'],['recommendation','Doporučení poradce'],['clientOutput','Klientský výstup']
+  ];
+  const ROLES420 = ['ADMIN','MANAGEMENT','PORADCE','SPECIALISTA','BACKOFFICE'];
+  function ensureAdminCatalog420(){
+    CATALOG.users = arr(CATALOG.users); if(!CATALOG.users.length){ CATALOG.users=[{id:'admin',name:'Admin ASTORIE',email:state?.adviser?.email||'admin@astorie.local',roles:['ADMIN'],active:true},{id:'poradce_demo',name:'Poradce ASTORIE',email:'poradce@astorie.local',roles:['PORADCE'],active:true}]; }
+    CATALOG.roleProfiles = arr(CATALOG.roleProfiles); if(!CATALOG.roleProfiles.length){ CATALOG.roleProfiles=ROLES420.map(r=>({role:r,name:r,description:'',active:true})); }
+    CATALOG.modulePermissions = arr(CATALOG.modulePermissions); if(!CATALOG.modulePermissions.length){
+      CATALOG.modulePermissions = MODULES420.map(([key,label])=>({module:key,label,ADMIN:true,MANAGEMENT:key!=='admin',PORADCE:['dashboard','cases','workspace','documents','textace','liability','attachments','offers','comparison','recommendation','clientOutput'].includes(key),SPECIALISTA:['dashboard','cases','workspace','documents','liability','attachments','offers','comparison'].includes(key),BACKOFFICE:['dashboard','cases','workspace','documents','attachments','offers','comparison'].includes(key)}));
+    }
+    CATALOG.attachmentTypes = arr(CATALOG.attachmentTypes); if(!CATALOG.attachmentTypes.length){ CATALOG.attachmentTypes=[{id:'plna_moc',name:'Plná moc',module:'core',required:true,active:true,description:'Základní příloha k jednání s pojišťovnou.'},{id:'vypis_or',name:'Výpis z OR / ARES',module:'core',required:true,active:true,description:'Identifikační podklad klienta.'},{id:'skodni_prubeh',name:'Škodní průběh',module:'liability',required:true,active:true,description:'Důležité pro odpovědnostní pojištění.'}]; }
+    CATALOG.textTemplates = arr(CATALOG.textTemplates); if(!CATALOG.textTemplates.length){ CATALOG.textTemplates=[{id:'uvod_poptavka',title:'Úvodní text poptávky',category:'Poptávka pojišťovně',text:'Dobrý den,\n\nprosíme o zpracování nabídky pojištění podnikatelských rizik dle přiložené poptávky.\n\nDěkujeme.\nASTORIE a.s.',active:true},{id:'vyluky_klient',title:'Upozornění na výluky pro klienta',category:'Klientský výstup',text:'Před sjednáním je nutné ověřit výluky uvedené ve VPP/DPP/ZPP a jejich dopad na konkrétní činnost klienta.',active:true}]; }
+    CATALOG.insurers = arr(CATALOG.insurers); CATALOG.activities=arr(CATALOG.activities); CATALOG.liabilityRisks=arr(CATALOG.liabilityRisks); CATALOG.liabilityAgreements=arr(CATALOG.liabilityAgreements);
+  }
+  function setAdminActive420(type){ document.querySelectorAll('.admin-tabs .chip').forEach(b=>b.classList.toggle('active', b.dataset.admin420===type)); }
+  window.renderAdmin = function(){
+    ensureAdminCatalog420();
+    const metrics = [
+      [CATALOG.users.length,'uživatelů'],[CATALOG.roleProfiles.length,'pozic'],[CATALOG.modulePermissions.length,'modulů práv'],[CATALOG.insurers.length,'pojišťoven'],[CATALOG.attachmentTypes.length,'typů příloh'],[CATALOG.textTemplates.length,'textací'],[CATALOG.liabilityRisks.length,'rizik odpovědnosti'],[CATALOG.liabilityAgreements.length,'ujednání']
+    ].map(m=>`<div><b>${esc(m[0])}</b><span>${esc(m[1])}</span></div>`).join('');
+    $('adminBox').innerHTML = `<div class="admin-control-center"><div class="metric-grid">${metrics}</div><div class="admin-tabs">${ADMIN420_TABS.map(([t,l],i)=>`<button class="chip ${i===0?'active':''}" data-admin420="${t}" onclick="adminPanel('${t}')">${esc(l)}</button>`).join('')}</div><div id="adminPanel"></div></div>`;
+    adminPanel('users');
+  };
+  window.adminPanel = function(type){
+    ensureAdminCatalog420(); setAdminActive420(type); const box=$('adminPanel'); if(!box) return;
+    if(type==='users') return adminUsers420(box);
+    if(type==='permissions') return adminPermissions420(box);
+    if(type==='insurers') return adminInsurers420(box);
+    if(type==='attachments') return adminAttachments420(box);
+    if(type==='texts') return adminTexts420(box);
+    if(type==='liabilityRisks' || type==='risks') return adminLiabilityRisks420(box);
+    if(type==='liabilityAgreements') return adminLiabilityAgreements420(box);
+    if(type==='activities') return adminActivities420(box);
+    if(type==='riskModel') return adminRiskModel420(box);
+    if(type==='json') return adminJson420(box);
+  };
+  function adminHeader420(title,desc){return `<div class="admin-section-title"><div><h2>${esc(title)}</h2><p class="muted">${esc(desc)}</p></div><span class="admin-badge">Admin 4.2.0</span></div>`;}
+  function adminUsers420(box){
+    const rows=CATALOG.users.map((u,idx)=>`<tr><td><input value="${esc(u.id||'')}" onchange="CATALOG.users[${idx}].id=this.value"></td><td><input value="${esc(u.name||'')}" onchange="CATALOG.users[${idx}].name=this.value"><input value="${esc(u.email||'')}" onchange="CATALOG.users[${idx}].email=this.value" placeholder="e-mail"></td><td><div class="role-checks">${ROLES420.map(r=>`<label><input type="checkbox" ${arr(u.roles).includes(r)?'checked':''} onchange="toggleUserRole420(${idx},'${r}',this.checked)">${r}</label>`).join('')}</div></td><td><select onchange="CATALOG.users[${idx}].active=this.value==='ano'"><option ${u.active!==false?'selected':''}>ano</option><option ${u.active===false?'selected':''}>ne</option></select></td><td><button class="btn secondary" onclick="CATALOG.users.splice(${idx},1);adminPanel('users')">Smazat</button></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Uživatelé','Správa uživatelů a přiřazení pozic. Karta poradce v pracovním prostoru se dál bere z přihlášení / logu.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.users.push({id:'user_'+Date.now(),name:'Nový uživatel',email:'',roles:['PORADCE'],active:true});adminPanel('users')">+ Nový uživatel</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit uživatele</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>ID</th><th>Jméno / kontakt</th><th>Pozice</th><th>Aktivní</th><th>Akce</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  window.toggleUserRole420=function(idx,role,on){ const r=arr(CATALOG.users[idx].roles); CATALOG.users[idx].roles=on?[...new Set([...r,role])]:r.filter(x=>x!==role); };
+  function adminPermissions420(box){
+    const rows=CATALOG.modulePermissions.map((m,idx)=>`<tr><td><input value="${esc(m.module||'')}" onchange="CATALOG.modulePermissions[${idx}].module=this.value"></td><td><input value="${esc(m.label||'')}" onchange="CATALOG.modulePermissions[${idx}].label=this.value"></td>${ROLES420.map(r=>`<td><label class="perm"><input type="checkbox" ${m[r]?'checked':''} onchange="CATALOG.modulePermissions[${idx}]['${r}']=this.checked"> vidí</label></td>`).join('')}<td><button class="btn secondary" onclick="CATALOG.modulePermissions.splice(${idx},1);adminPanel('permissions')">Smazat</button></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Oprávnění / pozice','Zaklikávací správa toho, co jednotlivé pozice v systému vidí. Uživatel s více pozicemi uvidí součet povolených položek.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.modulePermissions.push({module:'novy_modul',label:'Nový modul',ADMIN:true,MANAGEMENT:false,PORADCE:false,SPECIALISTA:false,BACKOFFICE:false});adminPanel('permissions')">+ Přidat modul práv</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit oprávnění</button></div><div class="table-wrap"><table class="admin-pro-table permissions-table"><thead><tr><th>Modul</th><th>Název v menu</th>${ROLES420.map(r=>`<th>${r}</th>`).join('')}<th>Akce</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminInsurers420(box){
+    const rows=CATALOG.insurers.map((i,idx)=>`<tr><td><input value="${esc(insurerCode(i)||'')}" onchange="CATALOG.insurers[${idx}].code=this.value;CATALOG.insurers[${idx}].short=this.value"></td><td><input value="${esc(i.name||'')}" onchange="CATALOG.insurers[${idx}].name=this.value"></td><td><input value="${esc(i.ico||'')}" onchange="CATALOG.insurers[${idx}].ico=this.value" placeholder="IČO"><input value="${esc(i.address||'')}" onchange="CATALOG.insurers[${idx}].address=this.value" placeholder="adresa"></td><td><input value="${esc(i.email||i.request_email||'')}" onchange="CATALOG.insurers[${idx}].email=this.value;CATALOG.insurers[${idx}].request_email=this.value"></td><td><input value="${esc(i.web||i.portal||i.url||'')}" onchange="CATALOG.insurers[${idx}].web=this.value;CATALOG.insurers[${idx}].portal=this.value"></td><td><select onchange="CATALOG.insurers[${idx}].active=this.value==='ano'"><option ${i.active!==false?'selected':''}>ano</option><option ${i.active===false?'selected':''}>ne</option></select></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Pojišťovny','Rozšířený číselník pojišťoven: název, zkratka, IČO, adresa, e-mail pro poptávky a web/portál.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.insurers.push({code:'',short:'',name:'',ico:'',address:'',email:'',request_email:'',web:'',portal:'',active:true});adminPanel('insurers')">+ Přidat pojišťovnu</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit pojišťovny</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>Zkratka</th><th>Název</th><th>IČO / adresa</th><th>E-mail</th><th>Web / portál</th><th>Aktivní</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminAttachments420(box){
+    const rows=CATALOG.attachmentTypes.map((a,idx)=>`<tr><td><input value="${esc(a.id||'')}" onchange="CATALOG.attachmentTypes[${idx}].id=this.value"></td><td><input value="${esc(a.name||'')}" onchange="CATALOG.attachmentTypes[${idx}].name=this.value"></td><td><select onchange="CATALOG.attachmentTypes[${idx}].module=this.value"><option ${a.module==='core'?'selected':''}>core</option><option ${a.module==='liability'?'selected':''}>liability</option><option ${a.module==='property'?'selected':''}>property</option><option ${a.module==='cyber'?'selected':''}>cyber</option></select></td><td><select onchange="CATALOG.attachmentTypes[${idx}].required=this.value==='ano'"><option ${a.required?'selected':''}>ano</option><option ${!a.required?'selected':''}>ne</option></select></td><td><textarea onchange="CATALOG.attachmentTypes[${idx}].description=this.value">${esc(a.description||'')}</textarea></td><td><select onchange="CATALOG.attachmentTypes[${idx}].active=this.value==='ano'"><option ${a.active!==false?'selected':''}>ano</option><option ${a.active===false?'selected':''}>ne</option></select></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Přílohy','Správa základních i modulových příloh. Základ: Plná moc, Výpis z OR; modul Odpovědnost: Škodní průběh a další.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.attachmentTypes.push({id:'att_'+Date.now(),name:'Nová příloha',module:'core',required:false,description:'',active:true});adminPanel('attachments')">+ Přidat přílohu</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit přílohy</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>ID</th><th>Název</th><th>Modul</th><th>Povinná</th><th>Popis</th><th>Aktivní</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminTexts420(box){
+    const rows=CATALOG.textTemplates.map((t,idx)=>`<tr><td><input value="${esc(t.id||'')}" onchange="CATALOG.textTemplates[${idx}].id=this.value"></td><td><input value="${esc(t.title||'')}" onchange="CATALOG.textTemplates[${idx}].title=this.value"><input value="${esc(t.category||t.type||'')}" onchange="CATALOG.textTemplates[${idx}].category=this.value;CATALOG.textTemplates[${idx}].type=this.value" placeholder="kategorie"></td><td><textarea class="wide-text" onchange="CATALOG.textTemplates[${idx}].text=this.value">${esc(t.text||'')}</textarea></td><td><select onchange="CATALOG.textTemplates[${idx}].active=this.value==='ano'"><option ${t.active!==false?'selected':''}>ano</option><option ${t.active===false?'selected':''}>ne</option></select></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Textace','Centrální textace pro poptávky, nabídky, interní poznámky i klientský výstup. Textace se ukládají do číselníku a poradce je může vkládat do případu.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.textTemplates.push({id:'text_'+Date.now(),title:'Nová textace',category:'Poptávka pojišťovně',text:'',active:true});adminPanel('texts')">+ Nová textace</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit textace</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>ID</th><th>Název / kategorie</th><th>Text</th><th>Aktivní</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminLiabilityRisks420(box){
+    if(!CATALOG.liabilityRisks.length && typeof risk410List==='function') risk410List();
+    const rows=CATALOG.liabilityRisks.map((r,idx)=>`<tr><td><input value="${esc(r.risk_key||r.key||'')}" onchange="CATALOG.liabilityRisks[${idx}].risk_key=this.value;CATALOG.liabilityRisks[${idx}].key=this.value"></td><td><textarea onchange="CATALOG.liabilityRisks[${idx}].name=this.value">${esc(r.name||r.title||'')}</textarea></td><td><input value="${esc(r.recommended_limit||r.limit||'')}" onchange="CATALOG.liabilityRisks[${idx}].recommended_limit=this.value;CATALOG.liabilityRisks[${idx}].limit=this.value"></td><td><textarea class="wide-text" onchange="CATALOG.liabilityRisks[${idx}].internal_note=this.value">${esc(r.internal_note||r.description||r.note||'')}</textarea></td><td><select onchange="CATALOG.liabilityRisks[${idx}].active=this.value==='ano'"><option ${r.active!==false?'selected':''}>ano</option><option ${r.active===false?'selected':''}>ne</option></select></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Modul Odpovědnost – rizika','Dynamický katalog rizik odpovědnosti. Interní klíč zůstává technický, poradce v pracovním prostoru pracuje s názvem a specifikací.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.liabilityRisks.push({risk_key:'custom_'+Date.now(),name:'Nové riziko',recommended_limit:'',internal_note:'',module:'liability',active:true,order:CATALOG.liabilityRisks.length+1});adminPanel('liabilityRisks')">+ Přidat riziko</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit rizika odpovědnosti</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>Interní klíč</th><th>Název rizika</th><th>Doporučený limit</th><th>Interní metodika / nápověda</th><th>Aktivní</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminLiabilityAgreements420(box){
+    if(!CATALOG.liabilityAgreements.length && typeof agreement410List==='function') agreement410List();
+    const rows=CATALOG.liabilityAgreements.map((a,idx)=>`<tr><td><input value="${esc(a.id||'')}" onchange="CATALOG.liabilityAgreements[${idx}].id=this.value"></td><td><textarea onchange="CATALOG.liabilityAgreements[${idx}].title=this.value">${esc(a.title||a.name||'')}</textarea></td><td><textarea class="wide-text" onchange="CATALOG.liabilityAgreements[${idx}].text=this.value">${esc(a.text||'')}</textarea></td><td><input value="${esc(a.limit||'')}" onchange="CATALOG.liabilityAgreements[${idx}].limit=this.value"></td><td><select onchange="CATALOG.liabilityAgreements[${idx}].active=this.value==='ano'"><option ${a.active!==false?'selected':''}>ano</option><option ${a.active===false?'selected':''}>ne</option></select></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Modul Odpovědnost – zvláštní ujednání','Správa doložek a ujednání odpovědnosti z původního Excelu i vlastních textů.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.liabilityAgreements.push({id:'agr_'+Date.now(),title:'Nové ujednání',text:'',limit:'',module:'liability',active:true,order:CATALOG.liabilityAgreements.length+1});adminPanel('liabilityAgreements')">+ Přidat ujednání</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit ujednání</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>ID</th><th>Název</th><th>Text</th><th>Limit</th><th>Aktivní</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminActivities420(box){
+    const rows=CATALOG.activities.map((a,idx)=>`<tr><td><input value="${esc(a.code||a.id||'')}" onchange="CATALOG.activities[${idx}].code=this.value;CATALOG.activities[${idx}].id=this.value"></td><td><input value="${esc(a.name||'')}" onchange="CATALOG.activities[${idx}].name=this.value"></td><td><textarea onchange="CATALOG.activities[${idx}].description=this.value">${esc(a.description||'')}</textarea></td><td><textarea onchange="CATALOG.activities[${idx}].recommended_risks=this.value">${esc(arr(a.recommended_risks).join(', '))}</textarea></td></tr>`).join('');
+    box.innerHTML=adminHeader420('Typy klientů / činnosti','Číselník činností pro doporučování rizik a budoucí oborové šablony.')+`<div class="admin-action-row"><button class="btn secondary" onclick="CATALOG.activities.push({code:'',name:'',description:'',recommended_risks:[]});adminPanel('activities')">+ Přidat činnost</button><button class="btn primary" onclick="saveAdminCatalog()">Uložit činnosti</button></div><div class="table-wrap"><table class="admin-pro-table"><thead><tr><th>Kód</th><th>Název</th><th>Popis</th><th>Doporučená rizika</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function adminRiskModel420(box){
+    const value=JSON.stringify(CATALOG.riskModel||{},null,2);
+    box.innerHTML=adminHeader420('Rizikový model','Technické nastavení modelu rizik. Používat opatrně, je určeno pro rozvoj dalších pojistných modulů.')+`<div class="admin-help-line">Tato část zůstává technická. Běžné úpravy rizik odpovědnosti dělej v panelu „Odpovědnost – rizika“.</div><textarea class="admin-json-box" id="riskModelJson">${esc(value)}</textarea><div class="admin-action-row"><button class="btn primary" onclick="try{CATALOG.riskModel=JSON.parse($('riskModelJson').value);saveAdminCatalog()}catch(e){toast('JSON rizikového modelu není validní: '+e.message)}">Uložit rizikový model</button></div>`;
+  }
+  function adminJson420(box){
+    const value=JSON.stringify({insurers:CATALOG.insurers,users:CATALOG.users,modulePermissions:CATALOG.modulePermissions,attachmentTypes:CATALOG.attachmentTypes,textTemplates:CATALOG.textTemplates,liabilityRisks:CATALOG.liabilityRisks,liabilityAgreements:CATALOG.liabilityAgreements,activities:CATALOG.activities},null,2);
+    box.innerHTML=adminHeader420('Import / export JSON','Kontrolní export hlavních admin číselníků pro zálohu nebo technickou migraci.')+`<textarea class="admin-json-box" id="adminJson420">${esc(value)}</textarea><div class="admin-action-row"><button class="btn secondary" onclick="navigator.clipboard?.writeText($('adminJson420').value);toast('JSON zkopírován.')">Kopírovat JSON</button><button class="btn primary" onclick="try{const d=JSON.parse($('adminJson420').value);Object.assign(CATALOG,d);saveAdminCatalog()}catch(e){toast('JSON import není validní: '+e.message)}">Importovat a uložit</button></div>`;
+  }
+  window.saveAdminCatalog = async function(){
+    try{
+      ensureAdminCatalog420(); if(typeof normalizeCatalog==='function') normalizeCatalog();
+      const payload={insurers:CATALOG.insurers, advisers:CATALOG.advisers, requirementTypes:CATALOG.requirementTypes, coverageDictionary:CATALOG.coverageDictionary, policyReferences:CATALOG.policyReferences, risks:CATALOG.risks, activities:CATALOG.activities, riskModel:CATALOG.riskModel, textTemplates:CATALOG.textTemplates, attachmentTypes:CATALOG.attachmentTypes, liabilityRisks:CATALOG.liabilityRisks, liabilityAgreements:CATALOG.liabilityAgreements, users:CATALOG.users, modulePermissions:CATALOG.modulePermissions, roleProfiles:CATALOG.roleProfiles, actor_email:state?.adviser?.email||''};
+      const data=await fetchJson('/api/admin/catalogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      toast(data.message||'Admin číselníky uloženy.');
+    }catch(e){ toast('Admin se nepodařilo uložit: '+e.message); }
+  };
+})();

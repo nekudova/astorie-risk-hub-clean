@@ -1,0 +1,16 @@
+{
+  "version": "4.2.0",
+  "release": "Admin Control Center PRO",
+  "source": "4.1.0 Liability Dynamic Engine PRO",
+  "db_schema_change": false,
+  "destructive": false,
+  "files": 117,
+  "changes": [
+    "Admin Control Center PRO",
+    "full admin tab visibility",
+    "users and role/permission management",
+    "insurer catalog expanded",
+    "attachments/textations/liability risks/agreements panels",
+    "JSON import/export"
+  ]
+}

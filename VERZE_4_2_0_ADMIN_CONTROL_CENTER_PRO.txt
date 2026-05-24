@@ -1,0 +1,7 @@
+Business Risk Hub 4.2.0 – Admin Control Center PRO
+
+Nedestruktivní vývojová verze navazující na 4.1.0.
+- profesionální administrace číselníků v jednom kontrolním centru
+- viditelné sekce: uživatelé, oprávnění/pozice, pojišťovny, přílohy, textace, rizikový model, modul odpovědnost – rizika, modul odpovědnost – ujednání, import/export JSON
+- žádné změny DB schématu
+- zachování CASE_ID, workflow, textací, dokumentů a modulu odpovědnosti
