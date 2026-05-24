@@ -1,0 +1,10 @@
+{
+  "app": "ASTORIE Business Risk Hub",
+  "version": "4.0.2",
+  "release_name": "Release Identity Fix & Visible Build Check",
+  "base_zip": "ASTORIE_Business_Risk_Hub_4_0_1_Platform_Identity_Release_Control(1).zip",
+  "db_destructive": false,
+  "schema_change": false,
+  "created_at": "2026-05-24T20:55:31.778682Z",
+  "notes": "Version identity corrected in main.py, static JS, VERSION.txt, changelog and manifest. Default APP_ENV is TEST if not configured."
+}

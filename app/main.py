@@ -14,10 +14,10 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-APP_VERSION = "4.0.1"
-APP_RELEASE_NAME = "Platform Identity & Release Control"
-APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "UNSET")).strip().upper() or "UNSET"
-BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-4.0.1"))[:12]
+APP_VERSION = "4.0.2"
+APP_RELEASE_NAME = "Release Identity Fix & Visible Build Check"
+APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "TEST")).strip().upper() or "TEST"
+BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-4.0.2"))[:12]
 
 app = FastAPI(title="ASTORIE Business Risk Hub", version=APP_VERSION)
 app.add_middleware(

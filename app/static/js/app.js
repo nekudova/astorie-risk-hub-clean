@@ -1,4 +1,4 @@
-const VERSION = '4.0.1';
+const VERSION = '4.0.2';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -817,7 +817,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.0.1 – Platform Identity & Release Control
+   Business Risk Hub 4.0.2 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1045,7 +1045,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.0.1 – Platform Identity & Release Control
+   Business Risk Hub 4.0.2 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1053,7 +1053,7 @@ window.tabRisks=tabRisks;
    - Doporučená varianta má viditelný a zrušitelný stav.
    ========================================================== */
 (function(){
-  const VERSION_351 = '4.0.1';
+  const VERSION_351 = '4.0.2';
 
   function riskId351(r){
     return String((r && (r.risk_key || r.key || r.id || r.name)) || '').trim();
@@ -1202,7 +1202,7 @@ window.tabRisks=tabRisks;
 })();
 
 
-/* BRH 4.0.1 – deployment identity runtime check */
+/* BRH 4.0.2 – deployment identity runtime check */
 (function(){
   async function refreshBuildIdentity(){
     try{
@@ -1211,7 +1211,7 @@ window.tabRisks=tabRisks;
       const v = await res.json();
       const badge = document.getElementById('versionBadge');
       if(badge){
-        badge.textContent = `Business Risk Hub ${v.version} · ${v.environment || 'UNSET'} · ${v.build_id || ''}`;
+        badge.textContent = `Business Risk Hub ${v.version} · ${v.environment || 'TEST'} · ${v.build_id || ''}`;
         badge.title = `${v.name || ''} | DB: ${v.database_configured ? 'configured' : 'not configured'}`;
       }
       window.BRH_BUILD_IDENTITY = v;
@@ -1222,7 +1222,7 @@ window.tabRisks=tabRisks;
 })();
 
 
-/* BRH 4.0.1 – Request Cards Stabilization
+/* BRH 4.0.2 – Request Cards Stabilization
    Cíl: jedna karta poptávky pro jednu pojišťovnu, bez duplicitních kódů/názvů,
    profesionální kompaktní zobrazení a bezpečné zachování exportů. */
 (function(){

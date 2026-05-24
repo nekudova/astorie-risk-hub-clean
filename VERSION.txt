@@ -1,1 +1,1 @@
-4.0.2 - Release Identity Fix + Visible Build Check
+4.0.2 - Release Identity Fix & Visible Build Check
