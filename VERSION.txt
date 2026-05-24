@@ -1,1 +1,1 @@
-4.0.1 - Platform Identity & Release Control
+4.0.2 - Release Identity Fix + Visible Build Check
