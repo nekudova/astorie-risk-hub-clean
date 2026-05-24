@@ -1,0 +1,15 @@
+
+CORE:
+- CASE ENGINE
+- CLIENT ENGINE
+- OFFER ENGINE
+- DOCUMENT ENGINE
+- TEXTATION ENGINE
+- PERMISSION ENGINE
+
+MODULES:
+- Liability
+- Property
+- Machinery
+- Cyber
+- Fleet
