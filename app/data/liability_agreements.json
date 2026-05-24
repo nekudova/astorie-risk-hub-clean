@@ -1,0 +1,162 @@
+[
+  {
+    "id": "veci_prevzate_a_uzivane",
+    "title": "Věci převzaté a užívané:",
+    "text": "Pojištění se vztahuje i na následnou finanční újmu vyplývající z poškození veci převzaté nebo užívané.  Pojištění se nevztahuje na újmu vzniklou ztrátou věci.",
+    "limit": "",
+    "module": "liability",
+    "order": 1,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "ujma_vznikla_na_opravnene_uzivanem_dopravn",
+    "title": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle",
+    "text": "Pojištění se vztahuje na újmu vzniklou na oprávněně užívaném dopravním prostředku. Pojištění se nevztahuje na škody na vozidle, které nemá sjednáno havarijní pojištění. Pojištění se dále nevztahuje na odpovědnost za škodu vzniklou na pneumatikách, discích a kolových šroubech nebo přepravovaných věcech. Pro škodu na vozidle pojistitel poskytne pojistné plnění jen v případě, že událost bude šetřena policií.",
+    "limit": "",
+    "module": "liability",
+    "order": 2,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "majetkova_ujma_v_souvislosti_s_vykonavanou",
+    "title": "Majetková újma v souvislostí s vykonávanou objednanou činností",
+    "text": "Pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému majetkovou újmu vzniklou na věci, na které pojištěný vykonával objednanou činnost, pokud k poškození nebo zničení věci došlo tím, že objednaná činnost byla provedena vadně. Pojištění se vztahuje i na následnou finanční újmu z toho vyplývající.",
+    "limit": "",
+    "module": "liability",
+    "order": 3,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "prirozena_prava_cloveka",
+    "title": "Přirozená práva člověka",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému újmu vzniklou na přirozených právech člověka případně i způsobené duševní útrapy, nesouvisející s újmou při ublížení na zdraví a při usmrcení. Pojistné plnění bude poskytnuto pouze na základě pravomocného rozhodnutí soudu.",
+    "limit": "",
+    "module": "liability",
+    "order": 4,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "ujma_zpusobena_motorovymi_vozidly_nad_rame",
+    "title": "Újma způsobená motorovými vozidly nad rámec POV",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu způsobenou motorovými vozidly ve vlastnictví pojistníka nebo vozidly, které pojištěný po právu užívá na základě smlouvy, vzniklou při dopravní nehodě šetřené policií. Pojištění se vztahuje rovněž na újmu způsobenou při práci vozidla jako pracovního stroje, včetně stacionárního pracovního stroje. Pojistitel neposkytne pojistné plnění za újmu způsobenou provozem motorových vozidel v rozsahu, v jakém vznikl nárok na pojistné plnění z povinně smluvního pojištění odpovědnosti za újmu způsobenou provozem vozidla. Pojištění dle tohoto ujednání se nevztahuje na újmu způsobenou na samotném vozidle, jimž byla újma způsobena a na újmu způsobenou provozem motorových vozidel při jejich účasti na organizovaném motoristickém závodu .",
+    "limit": "",
+    "module": "liability",
+    "order": 5,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "ujma_zpusobena_zaku_studentu_ke_ktere_dosl",
+    "title": "Újma způsobená žáku/studentu, ke které došlo při praktickém vyučování",
+    "text": "pojištění se vztahuje i na odpovědnost za újmu způsobenou žáku/studentu, ke které došlo při praktickém vyučování u pojištěného nebo v přímé souvislosti s ním, příp. k této škodě došlo v souvislosti s jeho účastí na zájmovém vzdělávání. Ujednává se, že pojištění se vztahuje i na odpovědnost studenta/žáka za újmu způsobenou jakékoliv třetí osobě při praktickém vyučování u právnické nebo fyzické osoby anebo v přímé souvislosti s ním. Pojištění se vztahuje i na újmy způsobené pojistníkovi.",
+    "limit": "",
+    "module": "liability",
+    "order": 6,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "cista_financni_skoda",
+    "title": "Čistá finanční škoda",
+    "text": "pojištění obecné odpovědnosti a pojištění odpovědnosti za újmu způsobenou vadou poskytnuté práce, jež se projeví po jejím předání a pojištění odpovědnosti za újmu způsobenou vadou výrobku se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající.",
+    "limit": "",
+    "module": "liability",
+    "order": 7,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "pokuty_a_penale",
+    "title": "Pokuty a penále",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu vzniklou tím, že v důsledku vady pojištěným poskytnuté odborné služby nebo dodáním vadného výrobku byly poškozenému uloženy nebo proti němu uplatňovány pokuty, penále nebo jiné správní sankce k tomu oprávněným orgánem přímo na základě právního předpisu.",
+    "limit": "",
+    "module": "liability",
+    "order": 8,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "montaz_a_demontaz",
+    "title": "Montáž a demontáž",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, spočívající v nákladech na odstranění, demontáž, vyjmutí nebo uvolnění vadného výrobku a v nákladech na montáž, připevnění nebo osazení bezvadného výrobku, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající. Pojištění se vztahuje také na náhradu nákladů na přepravu výrobku bez vad určeného k výměně za vadný výrobek, náhradu nákladů na přepravu vadného výrobku a na náhradu nákladů na přepravu jiné věci, která obsahuje vadný výrobek.",
+    "limit": "",
+    "module": "liability",
+    "order": 9,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "spojeni_smiseni",
+    "title": "Spojení, smísení",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích nastalou v důsledku toho, že věc vzniklá spojením nebo smísením jiné věci s vadným výrobkem vyrobeným nebo dodaným pojištěným je vadná, nebo nastalou v důsledku toho, že věc vzniklá v důsledku dalšího zpracování nebo opracování vadného výrobku vyrobeného nebo dodaného pojištěným je vadná (dále jen „vyrobená vadná věc“).",
+    "limit": "",
+    "module": "liability",
+    "order": 10,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "cinnosti_bez_zivnostenskeho_opravneni",
+    "title": "Činnosti bez živnostenského oprávnění",
+    "text": "Pojištění se sjednává i pro případ povinnosti pojištěného uhradit škodu a v případě ublížení na zdraví nebo při usmrcení též újmu vzniklou jinému v souvislosti s činnostmi, pro jejichž výkon se živnostenské oprávnění nevyžaduje.",
+    "limit": "",
+    "module": "liability",
+    "order": 11,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "propojene_osoby_krizova_odpovednost",
+    "title": "Propojené osoby, křížová odpovědnost",
+    "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit újmu vzniklou: - spolupojištěné osobě; - právnické osobě, ve které má pojištěný nebo osoby jemu blízké majetkovou účast; - právnické osobě, ve které pojištěný vykonává funkci statutárního orgánu; - osobě, která je v pozici společníka pojištěného.",
+    "limit": "",
+    "module": "liability",
+    "order": 12,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "naklady_na_reklamaci_u_zakaznika_pojistene",
+    "title": "Náklady  na reklamaci u zákazníka pojištěného",
+    "text": "Pojišťovna zaplatí  administrativní náklady zákazníka pojištěného s dokladováním škody, které požaduje poškozený zákazník po pojištěném, pokud tyto náklady souvisí s dokladováním pojistné události.",
+    "limit": "",
+    "module": "liability",
+    "order": 13,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "smluvni_ujednani_k_ruceni_vlastnika_pozemn",
+    "title": "Smluvní ujednání k ručení vlastníka pozemní komunikace za správce pozemní komunikace",
+    "text": "Pojištění se vztahuje i na povinnost pojištěného uhradit poškozenému peněžní částku, pokud mu tato povinnost vznikla ve smyslu § 27 odst.6 zákona č. 13/1997 Sb., o pozemních komunikacích, z důvodu ručení pojištěného za splnění povinnosti správce pozemní komunikace nahradit škodu (újmu). Pojistitel však poskytne pojistné plnění maximálně v rozsahu, v jakém by je poskytl v případě, kdy by výkon správy pozemní komunikace nebyl zajišťován prostřednictvím správce, ale přímo pojištěným.",
+    "limit": "",
+    "module": "liability",
+    "order": 14,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "pojisteni_nakladu_na_kontrolu_nebo_zkousen",
+    "title": "Pojištění nákladů na kontrolu nebo zkoušení výrobku poškozeného",
+    "text": "pojištění se vztahuje i na povinnost pojištěného nahradit škodu (újmu na jmění) spočívající výlučně v nákladech vzniklých při kontrole nebo zkoušení výrobků poškozeného, která vznikla jinému.",
+    "limit": "",
+    "module": "liability",
+    "order": 15,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  },
+  {
+    "id": "pripojisteni_odpovednosti_za_ujmu_zpusoben",
+    "title": "Připojištění odpovědnosti za újmu způsobenou vyrobením vadné věci pomocí vadného stroje",
+    "text": "připojištění se vztahuje na právním předpisem stanovenou povinnost pojištěného nahradit újmu na jmění (škodu) vzniklou v důsledku toho, že věc vzniklá vyrobením/zpracováním/opracováním pomocí vadného stroje, který vadně vyrobil, dodal, (s)montoval nebo vadně udržoval či opravil pojištěný (dále jen \"vadný stroj\") je vadná (dále jen \"vyrobená vadná věc\").",
+    "limit": "",
+    "module": "liability",
+    "order": 16,
+    "active": true,
+    "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"
+  }
+]

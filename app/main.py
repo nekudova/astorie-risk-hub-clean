@@ -14,10 +14,10 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-APP_VERSION = "4.0.2"
-APP_RELEASE_NAME = "Release Identity Fix & Visible Build Check"
+APP_VERSION = "4.1.0"
+APP_RELEASE_NAME = "Liability Dynamic Engine"
 APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "TEST")).strip().upper() or "TEST"
-BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-4.0.2"))[:12]
+BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-4.1.0"))[:12]
 
 app = FastAPI(title="ASTORIE Business Risk Hub", version=APP_VERSION)
 app.add_middleware(
@@ -215,6 +215,8 @@ def init_db() -> bool:
                 ('riskModel', 'risk_model.json'),
                 ('textTemplates', 'text_templates.json'),
                 ('attachmentTypes', 'attachment_types.json'),
+                ('liabilityRisks', 'liability_risks.json'),
+                ('liabilityAgreements', 'liability_agreements.json'),
                 ('users', 'users.json'),
                 ('modulePermissions', 'module_permissions.json'),
                 ('roleProfiles', 'role_profiles.json'),
@@ -282,6 +284,9 @@ def get_catalogs() -> Dict[str, Any]:
         "policyReferences": load_json("policy_references.json"),
         "riskModel": load_json("risk_model.json"),
         "textTemplates": load_json("text_templates.json"),
+        "liabilityRisks": load_json("liability_risks.json"),
+        "liabilityAgreements": load_json("liability_agreements.json"),
+        "attachmentTypes": load_json("attachment_types.json"),
     }
     conn = _connect()
     if not conn:
@@ -316,7 +321,7 @@ async def save_admin_catalogs(request: Request):
     conn = _connect()
     if not conn:
         raise HTTPException(status_code=503, detail="Databáze není připojena.")
-    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences", "textTemplates", "attachmentTypes", "users", "modulePermissions", "roleProfiles"}
+    allowed = {"insurers", "advisers", "requirementTypes", "riskModel", "activities", "risks", "coverageDictionary", "policyReferences", "textTemplates", "attachmentTypes", "liabilityRisks", "liabilityAgreements", "users", "modulePermissions", "roleProfiles"}
     try:
         with conn, conn.cursor() as cur:
             for key in allowed:

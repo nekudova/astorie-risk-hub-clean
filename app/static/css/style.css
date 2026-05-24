@@ -69,3 +69,29 @@
 .request-tools-351b{margin-top:16px;gap:10px;flex-wrap:wrap}
 .request-card-351b .badge{font-weight:800;text-transform:lowercase;background:#eaf5f7;color:#003D4C;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;white-space:nowrap}
 @media(max-width:900px){.request-summary-351b{flex-direction:column}.request-summary-351b:after{align-self:flex-start}.request-body-351b{padding:0 16px 18px}}
+
+/* BRH 4.1.0 – Liability Dynamic Engine UX */
+.risk-grid410{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
+.risk-card410{position:relative;text-align:left;border:1px solid #d6edf1;background:#fff;border-radius:18px;padding:16px 46px 16px 16px;min-height:118px;color:#003D4C;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,61,76,.05);transition:.16s ease;white-space:normal}
+.risk-card410:hover{transform:translateY(-1px);border-color:#FC4C02;box-shadow:0 12px 28px rgba(0,61,76,.10)}
+.risk-card410.selected{background:#004b55;color:#fff;border-color:#004b55}
+.risk-card-title{display:block;font-size:15px;line-height:1.25;margin-bottom:10px}
+.risk-card-limit{display:block;font-size:13px;color:#FC4C02;margin-bottom:12px}
+.risk-card410.selected .risk-card-limit{color:#fff}
+.risk-card-hint{display:inline-block;font-size:12px;background:#eaf6f8;border-radius:999px;padding:6px 10px;color:#003D4C}
+.risk-card410.selected .risk-card-hint{background:#fff;color:#003D4C}
+.help-dot{position:absolute;right:14px;top:14px;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#e8f6f8;color:#004b55;font-size:13px;font-weight:900;border:1px solid #cbe8ee;cursor:help}
+.help-dot.inline{position:static;margin-left:8px;vertical-align:top}
+.risk-table410{border:1px solid #d6edf1;border-radius:18px;overflow:hidden;background:#fff}
+.risk-row410{display:grid;grid-template-columns:1.35fr .9fr .7fr 1.8fr 110px;gap:12px;padding:14px;border-bottom:1px solid #e4f1f4;align-items:start}
+.risk-row410:last-child{border-bottom:0}
+.risk-row410 label{display:block;font-size:12px;color:#56707a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;font-weight:900}
+.risk-row410 textarea{width:100%;min-height:58px;border:1px solid #d6edf1;border-radius:14px;padding:12px;font-weight:750;color:#003D4C;background:#fff;resize:vertical;box-sizing:border-box}
+.risk-row410 .tall{min-height:84px}
+.risk-name-cell410{position:relative}
+.risk-title410{padding-right:38px!important}
+.spec410 textarea{min-height:92px}
+.risk-actions410{display:flex;align-items:center;justify-content:center;padding-top:26px}
+.admin-wide-table textarea{min-height:56px}
+.admin-wide-table .tall{min-height:90px}
+@media(max-width:1200px){.risk-row410{grid-template-columns:1fr}.risk-actions410{justify-content:flex-start;padding-top:0}}
