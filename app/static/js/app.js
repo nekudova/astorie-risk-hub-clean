@@ -1,4 +1,4 @@
-const VERSION = '3.5.1b';
+const VERSION = '4.0.1';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -817,7 +817,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 3.5.1b – Request Cards Stabilization
+   Business Risk Hub 4.0.1 – Platform Identity & Release Control
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1045,7 +1045,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 3.5.1b – Request Cards Stabilization
+   Business Risk Hub 4.0.1 – Platform Identity & Release Control
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1053,7 +1053,7 @@ window.tabRisks=tabRisks;
    - Doporučená varianta má viditelný a zrušitelný stav.
    ========================================================== */
 (function(){
-  const VERSION_351 = '3.5.1b';
+  const VERSION_351 = '4.0.1';
 
   function riskId351(r){
     return String((r && (r.risk_key || r.key || r.id || r.name)) || '').trim();
@@ -1202,7 +1202,7 @@ window.tabRisks=tabRisks;
 })();
 
 
-/* BRH 3.5.1b – deployment identity runtime check */
+/* BRH 4.0.1 – deployment identity runtime check */
 (function(){
   async function refreshBuildIdentity(){
     try{
@@ -1222,7 +1222,7 @@ window.tabRisks=tabRisks;
 })();
 
 
-/* BRH 3.5.1b – Request Cards Stabilization
+/* BRH 4.0.1 – Request Cards Stabilization
    Cíl: jedna karta poptávky pro jednu pojišťovnu, bez duplicitních kódů/názvů,
    profesionální kompaktní zobrazení a bezpečné zachování exportů. */
 (function(){

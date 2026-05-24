@@ -1,0 +1,10 @@
+{
+  "app": "ASTORIE Business Risk Hub",
+  "version": "4.0.1",
+  "release_name": "Platform Identity & Release Control",
+  "base": "stable functional branch 3.5.1b + 4.0.0 identity layer",
+  "db_destructive": false,
+  "env_control": "APP_ENV=TEST or APP_ENV=PROD",
+  "version_endpoint": "/version",
+  "generated_at": "2026-05-24T20:37:48.664103Z"
+}

@@ -14,10 +14,10 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-APP_VERSION = "3.5.1b"
-APP_RELEASE_NAME = "Request Cards Stabilization"
+APP_VERSION = "4.0.1"
+APP_RELEASE_NAME = "Platform Identity & Release Control"
 APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "UNSET")).strip().upper() or "UNSET"
-BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-3.5.1b"))[:12]
+BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-4.0.1"))[:12]
 
 app = FastAPI(title="ASTORIE Business Risk Hub", version=APP_VERSION)
 app.add_middleware(
@@ -28,6 +28,20 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
+@app.middleware("http")
+async def add_release_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-ASTORIE-BRH-Version"] = APP_VERSION
+    response.headers["X-ASTORIE-BRH-Release"] = APP_RELEASE_NAME
+    response.headers["X-ASTORIE-BRH-Environment"] = APP_ENV
+    # HTML a JS/CSS assety při testování nesmí zůstat zamrzlé v prohlížeči.
+    if request.url.path == "/" or request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 
 
 def _connect():
