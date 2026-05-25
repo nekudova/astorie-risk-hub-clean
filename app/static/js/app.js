@@ -1,4 +1,4 @@
-const VERSION = '4.8.0';
+const VERSION = '4.8.1';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.8.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.8.1 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.8.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.8.1 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.8.0 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.8.1 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.8.0 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.8.1 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2501,5 +2501,123 @@ window.tabRisks=tabRisks;
     state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
     return oldTabRecommendation480();
   };
+
+})();
+
+
+/* BRH 4.8.1 – Cards According to Advisor Specification SAFE */
+window.BRH481 = true;
+
+(function(){
+function esc481(v){
+ return String(v ?? '').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+}
+
+window.tabClient = function(){
+ state.client = state.client || {};
+ state.client.contact_persons = state.client.contact_persons || [];
+ state.client.signing_persons = state.client.signing_persons || [];
+
+ return `<p class="eyebrow">1. KARTA KLIENTA</p>
+ <div class="pro-card-hero">
+   <div><h2>Profesionální karta klienta</h2></div>
+   <div class="pro-case-badge">CASE<br>${esc481(state.id||'nový')}</div>
+ </div>
+
+ <div class="section-soft pro-section">
+  <div class="grid3">
+   <label>IČ<input id="client_ico" value="${esc481(state.client.ico||'')}"></label>
+   <label>Obchodní název<input id="client_name" value="${esc481(state.client.name||'')}"></label>
+   <label>Právní forma<input id="client_legal_form" value="${esc481(state.client.legal_form||'')}"></label>
+  </div>
+
+  <label>Sídlo<input id="client_address" value="${esc481(state.client.address||'')}"></label>
+
+  <div class="grid4">
+   <label>Spisová značka<input id="client_file_no" value="${esc481(state.client.file_no||'')}"></label>
+   <label>Datová schránka<input id="client_data_box" value="${esc481(state.client.data_box||'')}"></label>
+   <label>Web<input id="client_website" value="${esc481(state.client.website||'')}"></label>
+   <label>Forma podpisu
+    <select id="client_sign_type">
+      <option>Ručně</option>
+      <option>Elektronicky</option>
+    </select>
+   </label>
+  </div>
+ </div>
+
+ <div class="section-soft pro-section">
+  <h3>Kontaktní osoby</h3>
+  ${(state.client.contact_persons||[]).map((p,i)=>`
+    <div class="pro-contact-row">
+      <label>Jméno<input value="${esc481(p.name||'')}"></label>
+      <label>E-mail<input value="${esc481(p.email||'')}"></label>
+      <label>Telefon<input value="${esc481(p.phone||'')}"></label>
+      <label>Oblast<input value="${esc481(p.area||'')}"></label>
+    </div>
+  `).join('')}
+ </div>
+
+ <div class="section-soft pro-section">
+  <h3>Podepisující osoby</h3>
+  ${(state.client.signing_persons||[]).map((p,i)=>`
+    <div class="pro-contact-row">
+      <label>Jméno<input value="${esc481(p.name||'')}"></label>
+      <label>Funkce<input value="${esc481(p.role||'')}"></label>
+      <label>E-mail<input value="${esc481(p.email||'')}"></label>
+      <label>Telefon<input value="${esc481(p.phone||'')}"></label>
+    </div>
+  `).join('')}
+ </div>`;
+};
+
+window.tabInsurance = function(){
+ state.questionnaire = state.questionnaire || {};
+
+ return `<p class="eyebrow">2. KARTA PRO POJIŠTĚNÍ</p>
+
+ <div class="pro-card-hero">
+   <div><h2>Profesionální karta pro pojištění</h2></div>
+   <div class="pro-case-badge">UW<br>${esc481(state.id||'nový')}</div>
+ </div>
+
+ <div class="section-soft pro-section">
+   <div class="grid3">
+     <label>Hlavní činnost<input id="q_main_activity" value="${esc481(state.questionnaire.main_activity||'')}"></label>
+     <label>Vedlejší činnost<input id="q_side_activity" value="${esc481(state.questionnaire.side_activity||'')}"></label>
+     <label>Územní rozsah<input id="q_territory" value="${esc481(state.questionnaire.territory||'')}"></label>
+   </div>
+   <label>Detail činnosti<textarea id="q_activity_detail">${esc481(state.questionnaire.activity_detail||'')}</textarea></label>
+ </div>
+
+ <div class="section-soft pro-section">
+   <div class="grid4">
+     <label>Obrat<input id="q_turnover" value="${esc481(state.questionnaire.turnover||'')}"></label>
+     <label>Payroll<input id="q_payroll" value="${esc481(state.questionnaire.payroll||'')}"></label>
+     <label>Počet zaměstnanců<input id="q_employees" value="${esc481(state.questionnaire.employees||'')}"></label>
+     <label>Měna<input id="q_currency" value="${esc481(state.questionnaire.currency||'CZK')}"></label>
+   </div>
+
+   <div class="grid2">
+     <label>Účetní období OD<input type="date" id="q_acc_from"></label>
+     <label>Účetní období DO<input type="date" id="q_acc_to"></label>
+   </div>
+ </div>
+
+ <div class="section-soft pro-section">
+   <div class="grid4">
+     <label>Počátek pojištění<input type="date" id="q_insurance_start"></label>
+     <label>Konec pojištění<input type="date" id="q_insurance_end"></label>
+     <label>Pojistné období<input id="q_insurance_period"></label>
+     <label>Splatnost<input id="q_payment_frequency"></label>
+   </div>
+ </div>
+
+ <div class="section-soft pro-section">
+   <label>Škodní průběh<textarea id="q_claims_history"></textarea></label>
+   <label>Zabezpečení<textarea id="q_security"></textarea></label>
+   <label>Provozovny a majetek<textarea id="q_locations"></textarea></label>
+ </div>`;
+};
 
 })();
