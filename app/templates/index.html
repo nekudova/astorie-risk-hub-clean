@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASTORIE Business Risk Hub {{ app_version }}</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=461?v={{ app_version|replace(".", "") }}">
+  <link rel="stylesheet" href="/static/css/style.css?v={{ app_version|replace(".", "") }}">
 </head>
 <body>
   <header class="topbar">
@@ -50,6 +50,7 @@
           <div class="readiness"><b id="readyScore">0%</b><span>připravenost</span></div>
         </div>
         <div class="tabs">
+          <button class="tab" data-tab="advisor">0. Karta poradce</button>
           <button class="tab active" data-tab="client">1. Karta klienta</button>
           <button class="tab" data-tab="insurance">2. Karta pro pojištění</button>
           <button class="tab" data-tab="liability">3. Modul odpovědnosti</button>
@@ -74,6 +75,6 @@
   </main>
 
   <div id="toast" class="toast hidden"></div>
-  <script src="/static/js/app.js?v=461?v={{ app_version|replace(".", "") }}"></script>
+  <script src="/static/js/app.js?v={{ app_version|replace(".", "") }}"></script>
 </body>
 </html>
