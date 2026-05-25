@@ -70,7 +70,7 @@
 .request-card-351b .badge{font-weight:800;text-transform:lowercase;background:#eaf5f7;color:#003D4C;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;white-space:nowrap}
 @media(max-width:900px){.request-summary-351b{flex-direction:column}.request-summary-351b:after{align-self:flex-start}.request-body-351b{padding:0 16px 18px}}
 
-/* BRH 4.3.0 – Professional Cards Engine UX */
+/* BRH 4.3.1 – Professional Cards SAFE HOTFIX UX */
 .risk-grid410{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
 .risk-card410{position:relative;text-align:left;border:1px solid #d6edf1;background:#fff;border-radius:18px;padding:16px 46px 16px 16px;min-height:118px;color:#003D4C;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,61,76,.05);transition:.16s ease;white-space:normal}
 .risk-card410:hover{transform:translateY(-1px);border-color:#FC4C02;box-shadow:0 12px 28px rgba(0,61,76,.10)}
@@ -97,7 +97,7 @@
 @media(max-width:1200px){.risk-row410{grid-template-columns:1fr}.risk-actions410{justify-content:flex-start;padding-top:0}}
 
 
-/* BRH 4.3.0 – Professional Cards Engine */
+/* BRH 4.3.1 – Professional Cards SAFE HOTFIX */
 .admin-safe-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
 .admin-tabs-safe{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 20px}
 .admin-tabs-safe .chip.active{background:#ff4b0b;color:#fff;border-color:#ff4b0b;box-shadow:0 12px 28px rgba(252,76,2,.18)}
@@ -114,30 +114,28 @@
 .json-box{width:100%;min-height:520px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45}
 
 
-/* BRH 4.3.0 – Professional Cards Engine */
-.hero430{background:linear-gradient(135deg,#004b57,#00636d);color:#fff;border-radius:26px;padding:28px 32px;margin:18px 0 22px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 18px 44px rgba(0,61,76,.18)}
-.hero430 h2{font-size:32px;margin:6px 0 8px;color:#fff}
-.hero430 p{margin:0;max-width:980px;color:#eefbfc}
-.case-badge430{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);border-radius:18px;padding:16px 20px;text-align:center;font-weight:900;letter-spacing:.04em;min-width:92px}
-.card430{background:#fff;border:1px solid #d8edf0;border-radius:22px;padding:22px;margin:16px 0;box-shadow:0 10px 28px rgba(0,61,76,.06)}
-.card430-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px}
-.card430 h3{margin:4px 0 6px;font-size:24px;color:#003d4c}
-.grid430{display:grid;gap:14px;margin-bottom:14px}
-.grid430.two{grid-template-columns:2fr 1fr}
-.grid430.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-.grid430.four{grid-template-columns:repeat(4,minmax(0,1fr))}
-.field430 span,.contact-row430 span,.row430 span{display:block;font-weight:800;color:#003d4c;margin:0 0 6px}
-.field430 input,.field430 textarea,.contact-row430 input,.row430 input{width:100%;box-sizing:border-box;border:1px solid #cfe7eb;border-radius:14px;padding:13px 14px;font-weight:700;color:#003d4c;background:#fff}
-.field430 textarea{min-height:74px;resize:vertical}
-.info430{border:1px solid #d8edf0;border-radius:16px;background:#f6fbfc;padding:14px}
-.info430 span{display:block;color:#607986;font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.04em}
-.info430 b{display:block;color:#003d4c;margin-top:4px}
-.advisor-badge430{background:#ff4b0b;color:#fff;border-radius:16px;padding:12px 16px;font-weight:900;box-shadow:0 12px 26px rgba(252,76,2,.2)}
-.contact-list430{display:grid;gap:12px}
-.contact-row430,.row430{display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1.1fr auto;gap:12px;align-items:end;border:1px solid #e2f1f3;background:#fafdfe;border-radius:18px;padding:14px}
-.row430{grid-template-columns:1.6fr 1fr 1fr auto}
-.empty430{border:1px dashed #cfe7eb;border-radius:18px;background:#fafdfe;padding:18px;text-align:center;font-weight:800;color:#617986}
+/* BRH 4.3.1 – Professional Cards SAFE HOTFIX */
+.hero431{background:linear-gradient(135deg,#004b57,#00636d);color:#fff;border-radius:26px;padding:26px 30px;margin:18px 0 22px;box-shadow:0 18px 44px rgba(0,61,76,.18)}
+.hero431 h2{font-size:32px;margin:6px 0 8px;color:#fff}
+.hero431 p{color:#eefbfc;margin:0}
+.card431{background:#fff;border:1px solid #d8edf0;border-radius:22px;padding:22px;margin:16px 0;box-shadow:0 10px 28px rgba(0,61,76,.06)}
+.card431head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px}
+.card431 h3{margin:4px 0 6px;font-size:24px;color:#003d4c}
+.grid431{display:grid;gap:14px;margin-bottom:14px}
+.two431{grid-template-columns:2fr 1fr}
+.three431{grid-template-columns:repeat(3,minmax(0,1fr))}
+.four431{grid-template-columns:repeat(4,minmax(0,1fr))}
+.field431 span,.row431 span{display:block;font-weight:800;color:#003d4c;margin:0 0 6px}
+.field431 input,.field431 textarea,.row431 input{width:100%;box-sizing:border-box;border:1px solid #cfe7eb;border-radius:14px;padding:13px 14px;font-weight:700;color:#003d4c;background:#fff}
+.field431 textarea{min-height:74px;resize:vertical}
+.wide431{grid-column:1/-1}
+.info431{border:1px solid #d8edf0;border-radius:16px;background:#f6fbfc;padding:14px}
+.info431 span{display:block;color:#607986;font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.04em}
+.info431 b{display:block;color:#003d4c;margin-top:4px}
+.badge431{background:#ff4b0b;color:#fff;border-radius:16px;padding:12px 16px;font-weight:900;box-shadow:0 12px 26px rgba(252,76,2,.2)}
+.row431{display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1.1fr auto;gap:12px;align-items:end;border:1px solid #e2f1f3;background:#fafdfe;border-radius:18px;padding:14px;margin:10px 0}
+.premise431{grid-template-columns:1.8fr 1fr 1fr auto}
+.empty431{border:1px dashed #cfe7eb;border-radius:18px;background:#fafdfe;padding:18px;text-align:center;font-weight:800;color:#617986}
 @media(max-width:1100px){
-  .grid430.two,.grid430.three,.grid430.four,.contact-row430,.row430{grid-template-columns:1fr}
-  .hero430{flex-direction:column;align-items:flex-start}
+  .two431,.three431,.four431,.row431,.premise431{grid-template-columns:1fr}
 }

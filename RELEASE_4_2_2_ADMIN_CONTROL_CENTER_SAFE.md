@@ -1,4 +1,4 @@
-# Business Risk Hub 4.3.0 – Professional Cards Engine
+# Business Risk Hub 4.3.1 – Professional Cards SAFE HOTFIX
 
 ## Účel
 Bezpečná vývojová verze po návratu na stabilní 4.2.1.

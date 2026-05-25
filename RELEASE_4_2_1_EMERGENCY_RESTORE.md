@@ -1,4 +1,4 @@
-# Business Risk Hub 4.3.0 – Professional Cards Engine
+# Business Risk Hub 4.3.1 – Professional Cards SAFE HOTFIX
 
 ## Účel
 Toto je bezpečný opravný balík po chybné verzi 4.2.0.
@@ -8,7 +8,7 @@ Balík je postavený nad poslední funkční verzí:
 - Business Risk Hub 4.1.0 – Liability Dynamic Engine PRO
 
 ## Co se mění
-- pouze identita buildu na 4.3.0,
+- pouze identita buildu na 4.3.1,
 - viditelné označení emergency restore,
 - žádné změny databáze,
 - žádné destruktivní změny workflow,

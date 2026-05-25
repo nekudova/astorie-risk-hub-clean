@@ -1,4 +1,4 @@
-# Business Risk Hub 4.3.0 – Professional Cards Engine
+# Business Risk Hub 4.3.1 – Professional Cards SAFE HOTFIX
 
 ## Obsah
 - Kompletní katalog odpovědnostních rizik podle původního Excelu poradce: 32 položek.
