@@ -1,5 +1,5 @@
 
-# Business Risk Hub 4.0.0 – Liability Professional Core
+# Business Risk Hub 4.8.0 – Liability Professional Core
 
 ## Hlavní změny
 - CORE vs MODULE architektura

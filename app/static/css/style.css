@@ -141,7 +141,7 @@
 }
 
 
-/* BRH 4.7.0 – Professional Cards Integration SAFE */
+/* BRH 4.8.0 – Professional Cards Integration SAFE */
 .advisor-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -171,4 +171,65 @@
 }
 @media(max-width:900px){
   .advisor-hero{flex-direction:column;align-items:flex-start}
+}
+
+
+/* BRH 4.8.0 – Real Professional Cards SAFE */
+.pro-card-hero{
+  background:linear-gradient(135deg,#004b57,#00636d);
+  color:#fff;
+  border-radius:26px;
+  padding:28px 32px;
+  margin:10px 0 22px;
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:center;
+  box-shadow:0 18px 44px rgba(0,61,76,.12);
+}
+.pro-card-hero h2{color:#fff;margin:0 0 8px;font-size:32px}
+.pro-card-hero p{color:#eefbfc;margin:0;max-width:980px}
+.pro-case-badge{
+  min-width:92px;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:18px;
+  padding:14px 18px;
+  text-align:center;
+  font-weight:900;
+  letter-spacing:.05em;
+  background:rgba(255,255,255,.12);
+}
+.pro-section{
+  margin:18px 0;
+  padding:22px;
+  border-radius:22px;
+}
+.pro-section h3{margin:0 0 6px}
+.pro-search{margin:16px 0 18px}
+.pro-contact-row{
+  display:grid;
+  grid-template-columns:1.25fr 1.2fr .9fr 1.1fr auto;
+  gap:12px;
+  align-items:end;
+  padding:14px;
+  border:1px solid #d6ebef;
+  border-radius:18px;
+  background:#fff;
+  margin-bottom:10px;
+}
+.pro-contact-row label span,
+.pro-section label{
+  font-weight:800;
+}
+.pro-contact-row input,
+.pro-section input,
+.pro-section textarea{
+  font-weight:700;
+}
+.pro-section input[readonly]{
+  background:#f2fafb;
+}
+@media(max-width:1050px){
+  .pro-contact-row{grid-template-columns:1fr}
+  .pro-card-hero{flex-direction:column;align-items:flex-start}
 }

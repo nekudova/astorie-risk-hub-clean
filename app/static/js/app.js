@@ -1,4 +1,4 @@
-const VERSION = '4.7.0';
+const VERSION = '4.8.0';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.0.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.8.0 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.0.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.8.0 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.4.0 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.8.0 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2115,4 +2115,391 @@ window.tabRisks=tabRisks;
     brh431RefreshCards(isInsurance ? 'insurance' : 'client');
     return true;
   };
+})();
+
+
+/* ======================================================================
+   BRH 4.8.0 – REAL PROFESSIONAL CARDS SAFE
+   Poslední přebíjecí vrstva načtená až na konci souboru.
+   Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
+   a duplicity pojišťoven v nabídkách/porovnání.
+   Bez DB migrace a bez změny API.
+   ====================================================================== */
+(function(){
+  window.BRH_RENDER_VERSION = '480';
+  window.BRH_REAL_PRO_CARDS_SAFE = true;
+
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function E(v){ return String(v ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+  function byId(id){ return document.getElementById(id); }
+
+  window.brhUniqueInsurerCodes480 = function(arr){
+    const seen = new Set(), out = [];
+    (arr || []).forEach(x => {
+      let c = String(x || '').trim();
+      if(!c) return;
+      const k = c.toLowerCase();
+      if(!seen.has(k)){ seen.add(k); out.push(c); }
+    });
+    return out;
+  };
+
+  window.selectedInsurerCodes = selectedInsurerCodes = function(){
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+    return state.selected_insurers;
+  };
+
+  function ensureCardsState480(){
+    state.adviser = Object.assign({
+      company:'ASTORIE a.s.',
+      company_ico:'48293776',
+      name:'Administrátor ASTORIE',
+      email:'admin@astorie.local',
+      phone:'',
+      role:'Poradce / zpracovatel',
+      note:''
+    }, state.adviser || {});
+
+    state.client = Object.assign({
+      ico:'', name:'', legal_form:'', address:'', data_box:'',
+      contact_person:'', contact_email:'', contact_phone:'',
+      website:'', registered_office:'', billing_email:'',
+      contact_persons:[],
+      signing_persons:[]
+    }, state.client || {});
+
+    if(!Array.isArray(state.client.contact_persons)){
+      state.client.contact_persons = [];
+      if(state.client.contact_person || state.client.contact_email || state.client.contact_phone){
+        state.client.contact_persons.push({
+          name: state.client.contact_person || '',
+          email: state.client.contact_email || '',
+          phone: state.client.contact_phone || '',
+          area: 'Jednání o pojistné smlouvě'
+        });
+      }
+    }
+
+    if(!Array.isArray(state.client.signing_persons)){
+      state.client.signing_persons = [];
+    }
+
+    state.questionnaire = Object.assign({
+      main_activity_detail:'', side_activities:'', turnover:'', payroll:'', employees:'',
+      territory:'Česká republika', locations:'', property_description:'', security:'',
+      insurance_start:'', insurance_period:'1 rok', payment_frequency:'ročně',
+      annual_revenue_breakdown:'', current_insurance:'', deductible_preference:'',
+      requested_scope:'', claims_history:'', attachments_note:'', special_notes:''
+    }, state.questionnaire || {});
+
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+  }
+
+  window.brh480AddContactPerson = function(){
+    ensureCardsState480();
+    state.client.contact_persons.push({name:'', email:'', phone:'', area:'Jednání o pojistné smlouvě'});
+    renderWorkspace();
+  };
+  window.brh480RemoveContactPerson = function(i){
+    ensureCardsState480();
+    state.client.contact_persons.splice(i,1);
+    renderWorkspace();
+  };
+  window.brh480AddSigningPerson = function(){
+    ensureCardsState480();
+    state.client.signing_persons.push({name:'', role:'', email:'', phone:''});
+    renderWorkspace();
+  };
+  window.brh480RemoveSigningPerson = function(i){
+    ensureCardsState480();
+    state.client.signing_persons.splice(i,1);
+    renderWorkspace();
+  };
+
+  function contactRows480(){
+    ensureCardsState480();
+    return state.client.contact_persons.map((p,i)=>`
+      <div class="pro-contact-row">
+        <label>Příjmení a jméno<input id="cp_${i}_name" value="${E(p.name)}" placeholder="Jméno a příjmení"></label>
+        <label>E-mail<input id="cp_${i}_email" value="${E(p.email)}" placeholder="e-mail"></label>
+        <label>Telefon<input id="cp_${i}_phone" value="${E(p.phone)}" placeholder="telefon"></label>
+        <label>Oblast pojištění<input id="cp_${i}_area" value="${E(p.area)}" placeholder="např. odpovědnost, majetek, flotila"></label>
+        <button class="btn danger small" onclick="brh480RemoveContactPerson(${i})">Smazat</button>
+      </div>
+    `).join('') || `<div class="empty">Zatím není doplněna žádná kontaktní osoba.</div>`;
+  }
+
+  function signingRows480(){
+    ensureCardsState480();
+    return state.client.signing_persons.map((p,i)=>`
+      <div class="pro-contact-row">
+        <label>Příjmení a jméno<input id="sp_${i}_name" value="${E(p.name)}" placeholder="Podepisující osoba"></label>
+        <label>Funkce / oprávnění<input id="sp_${i}_role" value="${E(p.role)}" placeholder="jednatel / prokurista / pověřená osoba"></label>
+        <label>E-mail<input id="sp_${i}_email" value="${E(p.email)}"></label>
+        <label>Telefon<input id="sp_${i}_phone" value="${E(p.phone)}"></label>
+        <button class="btn danger small" onclick="brh480RemoveSigningPerson(${i})">Smazat</button>
+      </div>
+    `).join('') || `<div class="empty">Podepisující osoby zatím nejsou doplněny.</div>`;
+  }
+
+  window.tabAdvisor = tabAdvisor = function(){
+    ensureCardsState480();
+    return `<p class="eyebrow">0. KARTA PORADCE</p>
+    <div class="pro-card-hero">
+      <div>
+        <h2>Karta poradce</h2>
+        <p>Údaje poradce a jeho vazba na obchodní případ. Tyto údaje se používají pro pracovní řízení případu, poptávky a výstupy.</p>
+      </div>
+      <div class="pro-case-badge">CASE<br>${E(state.id || 'nový')}</div>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Vazba na společnost</h3><p class="muted">Poradce vystupuje pod ASTORIE a.s.</p></div></div>
+      <div class="grid2">
+        <label>Společnost<input id="adviser_company" value="ASTORIE a.s." readonly></label>
+        <label>IČO společnosti<input id="adviser_company_ico" value="48293776" readonly></label>
+      </div>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Poradce / vlastník případu</h3><p class="muted">Později lze napojit automaticky z přihlášení.</p></div></div>
+      <div class="grid4">
+        <label>Jméno poradce<input id="adviser_name" value="${E(state.adviser.name)}" placeholder="Jméno poradce"></label>
+        <label>E-mail poradce<input id="adviser_email" value="${E(state.adviser.email)}" placeholder="e-mail poradce"></label>
+        <label>Telefon<input id="adviser_phone" value="${E(state.adviser.phone)}" placeholder="telefon"></label>
+        <label>Role v případu<input id="adviser_role" value="${E(state.adviser.role)}" placeholder="např. poradce / zpracovatel"></label>
+      </div>
+      <label>Poznámka poradce<textarea id="adviser_note" placeholder="Interní poznámka k případu, doporučení, další postup...">${E(state.adviser.note)}</textarea></label>
+    </div>
+
+    <div class="tools">
+      <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu poradce</button>
+      <button class="btn secondary" onclick="readCurrentTab();currentTab='client';renderWorkspace()">Pokračovat na kartu klienta</button>
+    </div>`;
+  };
+
+  window.tabClient = tabClient = function(){
+    ensureCardsState480();
+    const clientRows = clients.length ? `<div class="client-results">${clients.map((c,i)=>`<div class="case-row"><div><strong>${E(c.name)}</strong><small>IČO: ${E(c.ico||'neuvedeno')} · ${E(c.address||'')}</small></div><button class="btn secondary" onclick="useClient(${i})">Použít klienta</button></div>`).join('')}</div>` : '';
+    return `<p class="eyebrow">1. KARTA KLIENTA</p>
+    <div class="pro-card-hero">
+      <div>
+        <h2>Profesionální karta klienta</h2>
+        <p>Identifikace klienta, kontakty pro jednání o pojistné smlouvě, osoby podepisující dokumenty a obchodní vazby.</p>
+      </div>
+      <div class="pro-case-badge">CASE<br>${E(state.id || 'nový')}</div>
+    </div>
+
+    <div class="tools pro-search">
+      <input id="clientSearch" class="grow" placeholder="Vyhledat klienta v DB podle názvu nebo IČO">
+      <button class="btn secondary" onclick="searchClients()">Načíst klienta z DB</button>
+    </div>
+    ${clientRows}
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Identifikace klienta</h3><p class="muted">Základní obchodní a právní identifikace klienta.</p></div></div>
+      <div class="grid3">
+        <label>Název klienta<input id="client_name" value="${E(state.client.name)}"></label>
+        <label>IČO<div class="inline-field"><input id="client_ico" value="${E(state.client.ico)}"><button class="btn secondary small" onclick="loadAres()">ARES</button></div></label>
+        <label>Právní forma<input id="client_legal_form" value="${E(state.client.legal_form)}"></label>
+      </div>
+      <label>Sídlo / adresa<input id="client_address" value="${E(state.client.address)}"></label>
+      <div class="grid4">
+        <label>Datová schránka<input id="client_data_box" value="${E(state.client.data_box)}"></label>
+        <label>Web<input id="client_website" value="${E(state.client.website)}"></label>
+        <label>Fakturační / obecný e-mail<input id="client_billing_email" value="${E(state.client.billing_email)}"></label>
+        <label>Další adresa / poznámka<input id="client_registered_office" value="${E(state.client.registered_office)}"></label>
+      </div>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head">
+        <div><h3>Kontaktní osoby pro jednání o pojistné smlouvě</h3><p class="muted">Každá osoba může mít vlastní oblast pojištění.</p></div>
+        <button class="btn secondary" onclick="brh480AddContactPerson()">+ Přidat kontaktní osobu</button>
+      </div>
+      ${contactRows480()}
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head">
+        <div><h3>Osoby podepisující dokumenty</h3><p class="muted">Zachováno jako samostatná část karty klienta.</p></div>
+        <button class="btn secondary" onclick="brh480AddSigningPerson()">+ Přidat podepisující osobu</button>
+      </div>
+      ${signingRows480()}
+    </div>
+
+    <div class="tools">
+      <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu klienta</button>
+      <button class="btn secondary" onclick="readCurrentTab();currentTab='insurance';renderWorkspace()">Pokračovat na kartu pro pojištění</button>
+    </div>`;
+  };
+
+  window.tabInsurance = tabInsurance = function(){
+    ensureCardsState480();
+    return `<p class="eyebrow">2. KARTA PRO POJIŠTĚNÍ</p>
+    <div class="pro-card-hero">
+      <div>
+        <h2>Profesionální karta pro pojištění</h2>
+        <p>Odborná underwriting data pro poptávku pojišťovnám, nabídky, porovnání a klientský výstup. Nejde o identifikační kartu klienta.</p>
+      </div>
+      <div class="pro-case-badge">CASE<br>${E(state.id || 'nový')}</div>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Činnost klienta</h3><p class="muted">Popis skutečné činnosti je klíčový pro pojistitele.</p></div></div>
+      <div class="grid3">
+        <label>Typ činnosti<input id="activity_name" list="activityList" value="${E(state.activity?.name||'')}" placeholder="např. Bezpečnostní agentura"><datalist id="activityList">${activityOptions()}</datalist></label>
+        <label>Kód činnosti<input id="activity_code" value="${E(state.activity?.code||'')}"></label>
+        <label>Území<input id="q_territory" value="${E(state.questionnaire.territory)}"></label>
+      </div>
+      <label>Detail hlavní činnosti<textarea id="q_main_activity_detail" placeholder="Co klient skutečně dělá, jaký je provoz, služby, výrobky, dodavatelé, odběratelé...">${E(state.questionnaire.main_activity_detail)}</textarea></label>
+      <label>Vedlejší činnosti<textarea id="q_side_activities" placeholder="Vedlejší nebo okrajové činnosti, které mají být zahrnuty do poptávky...">${E(state.questionnaire.side_activities)}</textarea></label>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Ekonomické a provozní údaje</h3><p class="muted">Údaje se propisují do poptávek a pracovních výstupů.</p></div></div>
+      <div class="grid4">
+        <label>Obrat<input id="q_turnover" value="${E(state.questionnaire.turnover)}" placeholder="např. 10 000 000 Kč"></label>
+        <label>Mzdy / payroll<input id="q_payroll" value="${E(state.questionnaire.payroll)}"></label>
+        <label>Zaměstnanci<input id="q_employees" value="${E(state.questionnaire.employees)}"></label>
+        <label>Pojistné období<input id="q_insurance_period" value="${E(state.questionnaire.insurance_period)}"></label>
+        <label>Frekvence placení<input id="q_payment_frequency" value="${E(state.questionnaire.payment_frequency || 'ročně')}"></label>
+      </div>
+      <label>Členění obratu / export / zahraničí<textarea id="q_annual_revenue_breakdown" placeholder="Tuzemsko, EU, mimo EU, obrat podle činností...">${E(state.questionnaire.annual_revenue_breakdown || state.questionnaire.export_info)}</textarea></label>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Majetek, provozovny a zabezpečení</h3><p class="muted">Důležité pro majetek, odpovědnost i zvláštní ujednání.</p></div></div>
+      <label>Provozovny / místa pojištění<textarea id="q_locations" placeholder="Adresy provozoven, sklady, kanceláře, výrobní prostory...">${E(state.questionnaire.locations)}</textarea></label>
+      <label>Popis majetku / vybavení / zásob<textarea id="q_property_description" placeholder="Budovy, stroje, technologie, zásoby, vybavení...">${E(state.questionnaire.property_description)}</textarea></label>
+      <label>Zabezpečení<textarea id="q_security" placeholder="EPS, EZS, ostraha, kamerový systém, požární ochrana...">${E(state.questionnaire.security)}</textarea></label>
+    </div>
+
+    <div class="section-soft pro-section">
+      <div class="section-head"><div><h3>Požadovaný rozsah a podklady</h3><p class="muted">Základ pro samostatné poptávky pojišťovnám.</p></div></div>
+      <div class="grid3">
+        <label>Počátek pojištění<input id="q_insurance_start" type="date" value="${E(state.questionnaire.insurance_start)}"></label>
+        <label>Preferovaná spoluúčast<input id="q_deductible_preference" value="${E(state.questionnaire.deductible_preference)}"></label>
+        <label>Současné pojištění<input id="q_current_insurance" value="${E(state.questionnaire.current_insurance)}"></label>
+      </div>
+      <label>Požadovaný rozsah pojištění<textarea id="q_requested_scope" placeholder="Co má být určitě poptáno, limity, připojištění, požadované klauzule...">${E(state.questionnaire.requested_scope)}</textarea></label>
+      <label>Škodní průběh<textarea id="q_claims_history" placeholder="Škody za poslední roky, frekvence, výše, poznámky...">${E(state.questionnaire.claims_history)}</textarea></label>
+      <label>Přílohy / podklady<textarea id="q_attachments_note" placeholder="Dotazníky, revize, smlouvy, stávající pojistky, výpisy, fotodokumentace...">${E(state.questionnaire.attachments_note)}</textarea></label>
+      <label>Speciální poznámka pro poptávku<textarea id="q_special_notes">${E(state.questionnaire.special_notes || state.questionnaire.export_info)}</textarea></label>
+    </div>
+
+    <div class="tools">
+      <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu pro pojištění</button>
+      <button class="btn secondary" onclick="readCurrentTab();currentTab='liability';renderWorkspace()">Pokračovat na modul odpovědnosti</button>
+    </div>`;
+  };
+
+  function readContacts480(){
+    ensureCardsState480();
+    state.client.contact_persons = state.client.contact_persons.map((p,i)=>({
+      name: byId(`cp_${i}_name`)?.value || '',
+      email: byId(`cp_${i}_email`)?.value || '',
+      phone: byId(`cp_${i}_phone`)?.value || '',
+      area: byId(`cp_${i}_area`)?.value || ''
+    }));
+    if(state.client.contact_persons[0]){
+      state.client.contact_person = state.client.contact_persons[0].name || '';
+      state.client.contact_email = state.client.contact_persons[0].email || '';
+      state.client.contact_phone = state.client.contact_persons[0].phone || '';
+    }
+    state.client.signing_persons = state.client.signing_persons.map((p,i)=>({
+      name: byId(`sp_${i}_name`)?.value || '',
+      role: byId(`sp_${i}_role`)?.value || '',
+      email: byId(`sp_${i}_email`)?.value || '',
+      phone: byId(`sp_${i}_phone`)?.value || ''
+    }));
+  }
+
+  window.readCurrentTab = readCurrentTab = function(){
+    ensureCardsState480();
+
+    if(currentTab === 'advisor'){
+      ['name','email','phone','role','company','company_ico','note'].forEach(k => {
+        const el = byId('adviser_' + k);
+        if(el) state.adviser[k] = el.value;
+      });
+    }
+
+    if(currentTab === 'client'){
+      ['ico','name','legal_form','address','data_box','contact_person','contact_email','contact_phone','website','registered_office','billing_email'].forEach(k => {
+        const el = byId('client_' + k);
+        if(el) state.client[k] = el.value;
+      });
+      readContacts480();
+    }
+
+    if(currentTab === 'insurance'){
+      ['name','code'].forEach(k => {
+        const el = byId('activity_' + k);
+        if(el) state.activity[k] = el.value;
+      });
+      ['turnover','employees','territory','insurance_start','insurance_period','payment_frequency','export_info','main_activity_detail','side_activities','annual_revenue_breakdown','payroll','locations','property_description','security','claims_history','current_insurance','requested_scope','deductible_preference','special_notes','attachments_note'].forEach(k => {
+        const el = byId('q_' + k);
+        if(el) state.questionnaire[k] = el.value;
+      });
+    }
+
+    if(currentTab === 'attachments'){
+      const el = byId('q_attachments_note');
+      if(el) state.questionnaire.attachments_note = el.value;
+    }
+
+    if(currentTab === 'recommendation'){
+      state.report.advisor_note = byId('advisor_note')?.value || '';
+      state.report.client_selected_offer = byId('selected_offer')?.value || state.report.client_selected_offer || '';
+      state.report.client_choice_reason = byId('choice_reason')?.value || '';
+    }
+
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+  };
+
+  // Přepis finálních rendererů po starších patch vrstvách.
+  window.renderWorkspace = renderWorkspace = function(){
+    ensureCardsState480();
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === currentTab));
+    const map = {
+      advisor: tabAdvisor,
+      client: tabClient,
+      insurance: tabInsurance,
+      liability: tabLiability,
+      risks: tabRisks,
+      insurers: tabInsurers,
+      attachments: tabAttachments,
+      requests: tabInsurerRequests,
+      offers: tabOffers,
+      comparison: tabComparison,
+      recommendation: tabRecommendation,
+      output: tabOutput,
+      audit: tabAudit
+    };
+    const box = byId('tabContent');
+    if(box) box.innerHTML = (map[currentTab] || tabClient)();
+    renderHeader();
+  };
+
+  // Oprava nabídek/porovnání: vždy jen unikátní pojišťovny.
+  const oldTabOffers480 = tabOffers;
+  window.tabOffers = tabOffers = function(){
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+    return oldTabOffers480();
+  };
+
+  const oldTabComparison480 = tabComparison;
+  window.tabComparison = tabComparison = function(){
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+    return oldTabComparison480();
+  };
+
+  const oldTabRecommendation480 = tabRecommendation;
+  window.tabRecommendation = tabRecommendation = function(){
+    state.selected_insurers = brhUniqueInsurerCodes480(state.selected_insurers || []);
+    return oldTabRecommendation480();
+  };
+
 })();
