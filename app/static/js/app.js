@@ -1,4 +1,4 @@
-const VERSION = '4.9.0';
+const VERSION = '4.9.1';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -335,7 +335,7 @@ function insurerRequestHtml(code, forPrint=false){
   const ins=insurerByCode(code); const req=ensureInsurerRequest(code); const rows=requestDataRows();
   const risks=(state.risks||[]).map(r=>`<tr><td>${esc(r.risk_key||'')}</td><td>${esc(r.name||'')}</td><td>${esc(r.requested_limit||'')}</td><td>${esc(r.deductible||'')}</td><td>${esc(r.note||'')}</td></tr>`).join('');
   const agreements=liabilityAgreementRows().map(a=>`<tr><td>${esc(a.title||'')}</td><td>${esc(a.limit||'')}</td><td>${esc(a.text||'')}</td></tr>`).join('');
-  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Risk key</th><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Poznámka</th></tr></thead><tbody>${risks||'<tr><td colspan="5">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Poznámka</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table><h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted">Tento výstup je pracovní poptávka pro pojišťovnu. Zdrojem dat je jeden obchodní případ v Business Risk Hubu.</p></div>`;
+  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Risk key</th><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Poznámka</th></tr></thead><tbody>${risks||'<tr><td colspan="5">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Poznámka</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table><h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted"></p></div>`;
 }
 function printInsurerRequest(code){
   readCurrentTab();
@@ -459,7 +459,7 @@ function insurerRequestHtml(code, forPrint=false){
   const risks=(state.risks||[]).map(r=>`<tr><td>${esc(r.risk_key||'')}</td><td>${esc(r.name||'')}</td><td>${esc(r.requested_limit||'')}</td><td>${esc(r.deductible||'')}</td><td>${esc(riskSpecification(r))}</td></tr>`).join('');
   const agreements=liabilityAgreementRows().map(a=>`<tr><td>${esc(a.title||'')}</td><td>${esc(a.limit||'')}</td><td>${esc(a.text||'')}</td></tr>`).join('');
   const texts=selectedTextations('request').map(t=>`<h4>${esc(t.title||'Textace')}</h4><p>${esc(textationContent(t)).replace(/\n/g,'<br>')}</p>`).join('');
-  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Risk key</th><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="5">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}<h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted">Tento výstup je pracovní poptávka pro pojišťovnu. Zdrojem dat je jeden obchodní případ v Business Risk Hubu.</p></div>`;
+  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Risk key</th><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="5">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}<h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted"></p></div>`;
 }
 function setOfferRiskStatus(code,k,status){
   const risk=(state.risks||[]).find(r=>String(r.risk_key||riskKey(r))===String(k))||{};
@@ -616,7 +616,7 @@ function insurerRequestHtml(code, forPrint=false){
   const risks=(state.risks||[]).map(r=>`<tr><td>${esc(r.name||'')}</td><td>${esc(r.requested_limit||'')}</td><td>${esc(r.deductible||'')}</td><td>${esc(riskSpecification(r))}</td></tr>`).join('');
   const agreements=liabilityAgreementRows().map(a=>`<tr><td>${esc(a.title||'')}</td><td>${esc(a.limit||'')}</td><td>${esc(a.text||'')}</td></tr>`).join('');
   const texts=(typeof selectedTextations==='function'?selectedTextations('request'):[]).map(t=>`<h4>${esc(t.title||'Textace')}</h4><p>${esc(textationContent(t)).replace(/\n/g,'<br>')}</p>`).join('');
-  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="4">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}<h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted">Tento výstup je pracovní poptávka pro pojišťovnu. Zdrojem dat je jeden obchodní případ v Business Risk Hubu.</p></div>`;
+  return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${esc(ins.name||code)}</b><br>${esc(code)}<br>${esc(ins.email||ins.request_email||'')}</div></div><h2>${esc(state.client.name||'Klient')}</h2><p><b>CASE_ID:</b> ${esc(state.id||'nový případ')} · <b>Poradce:</b> ${esc(state.adviser?.name||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="4">Rizika nejsou doplněna.</td></tr>'}</tbody></table><h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}<h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted"></p></div>`;
 }
 window.toggleLiabilityRisk=toggleLiabilityRisk;
 window.addLiabilityRisk=addLiabilityRisk;
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.1 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.1 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1211,7 +1211,7 @@ window.tabRisks=tabRisks;
       <h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="4">Rizika nejsou doplněna.</td></tr>'}</tbody></table>
       <h3>Zvláštní ujednání / požadované doložky odpovědnosti</h3><table><thead><tr><th>Ujednání</th><th>Limit / sublimit</th><th>Specifikace / požadavek</th></tr></thead><tbody>${agreements||'<tr><td colspan="3">Zvláštní ujednání nejsou doplněna.</td></tr>'}</tbody></table>
       ${attachmentSummary351()}${texts?`<h3>Doplněné textace pro pojišťovnu</h3>${texts}`:''}
-      <h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted">Tento výstup je pracovní poptávka pro pojišťovnu. Zdrojem dat je jeden obchodní případ v Business Risk Hubu.</p></div>`;
+      <h3>Doprovodná poznámka</h3><p>${esc(req.email_note||defaultEmailNote(code)).replace(/\n/g,'<br>')}</p><p class="muted"></p></div>`;
   };
 
   window.printInsurerRequest = printInsurerRequest = function(code){
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.0 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.9.1 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.0 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.9.1 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.0 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 4.9.1 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.0 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 4.9.1 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.0 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 4.9.1 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2938,4 +2938,402 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     }
     return readBefore490();
   };
+})();
+
+/* ======================================================================
+   BRH 4.9.1 – SAFE STABILIZATION RELEASE
+   Stabilizace bez mazání funkčního jádra:
+   - profesionální tisk poptávky bez interních textů,
+   - podpis poradce, nikoli obecný podpis ASTORIE,
+   - karta 8 doplněna o rizikový underwriting blok,
+   - dokumenty jako pracovní knihovna CASE,
+   - textace doplněny o 6 profesionálních vzorů,
+   - admin tabulky stabilizovány CSS vrstvou.
+   ====================================================================== */
+(function(){
+  window.BRH_RENDER_VERSION = '491';
+  window.BRH_SAFE_STABILIZATION_491 = true;
+
+  function E491(v){
+    return String(v ?? '').replace(/[&<>'"]/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m];
+    });
+  }
+  function q491(id){ return document.getElementById(id); }
+
+  function uniq491(arr){
+    const seen = new Set(), out = [];
+    (arr || []).forEach(x => {
+      const v = String(x || '').trim();
+      const k = v.toLowerCase();
+      if(v && !seen.has(k)){ seen.add(k); out.push(v); }
+    });
+    return out;
+  }
+
+  function adviser491(){
+    state.adviser = state.adviser || {};
+    return {
+      name: state.adviser.name || state.adviser.full_name || 'Administrátor ASTORIE',
+      email: state.adviser.email || 'admin@astorie.local',
+      phone: state.adviser.phone || '',
+      role: state.adviser.role || 'Poradce',
+      company: state.adviser.company || 'ASTORIE a.s.',
+      company_ico: state.adviser.company_ico || '48293776'
+    };
+  }
+
+  function insurerName491(code){
+    try{
+      const i = insurerByCode(code);
+      return i ? (i.name || i.shortcut || i.code || code) : code;
+    }catch(e){ return code; }
+  }
+
+  function selectedCodes491(){
+    state.selected_insurers = uniq491(state.selected_insurers || []);
+    return state.selected_insurers;
+  }
+
+  function offer491(code){
+    state.offers = state.offers || {};
+    state.offers[code] = state.offers[code] || {status:'rozpracováno', risks:{}};
+    state.offers[code].risks = state.offers[code].risks || {};
+    return state.offers[code];
+  }
+
+  function liabilityItems491(){
+    const items = Array.isArray(state.liability_items) ? state.liability_items : [];
+    if(items.length) return items;
+    return [
+      {name:'Provozní odpovědnost', limit:'', deductible:'', specification:''},
+      {name:'Škody způsobené zaměstnanci', limit:'', deductible:'', specification:''},
+      {name:'Čistá finanční škoda', limit:'', deductible:'', specification:''},
+      {name:'Vadná práce po předání', limit:'', deductible:'', specification:''},
+      {name:'Věci převzaté', limit:'', deductible:'', specification:''}
+    ];
+  }
+
+  function statusClass491(v){
+    const s = String(v || '').toLowerCase();
+    if(s.includes('splně') || s.includes('doporu') || s.includes('ano')) return 'ok';
+    if(s.includes('nespl') || s.includes('ne ') || s.includes('výluka') || s.includes('odmít')) return 'bad';
+    return 'mid';
+  }
+
+  function requestPrintHtml491(code){
+    const a = adviser491();
+    const client = state.client || {};
+    const q = state.questionnaire || {};
+    const activity = state.activity || {};
+    const risks = liabilityItems491();
+
+    const riskRows = risks.map(r => `
+      <tr>
+        <td>${E491(r.name || r.title || '')}</td>
+        <td>${E491(r.limit || r.default_limit || '')}</td>
+        <td>${E491(r.deductible || '')}</td>
+        <td>${E491(r.specification || r.note || '')}</td>
+      </tr>`).join('');
+
+    const contacts = (client.contact_persons || []).map(p => 
+      `${E491(p.name || '')}${p.email ? ' · ' + E491(p.email) : ''}${p.phone ? ' · ' + E491(p.phone) : ''}`
+    ).filter(Boolean).join('<br>') || E491(client.contact_person || '');
+
+    return `<!doctype html><html><head><meta charset="utf-8">
+      <title>Poptávka pojištění podnikatelských rizik</title>
+      <style>
+        body{font-family:Arial,sans-serif;color:#003D4C;margin:28px;font-size:14px}
+        h1{letter-spacing:.28em;font-size:24px;margin:0 0 8px}
+        h2{font-size:22px;margin:26px 0 8px}
+        h3{font-size:17px;margin:24px 0 10px}
+        .top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+        .orange{height:4px;background:#FC4C02;margin:28px 0}
+        .meta{font-weight:700;margin-bottom:14px}
+        table{width:100%;border-collapse:collapse;margin:10px 0 20px}
+        th{background:#003D4C;color:#fff;text-align:left;padding:9px}
+        td{border:1px solid #d7e9ed;padding:9px;vertical-align:top}
+        .label{background:#003D4C;color:#fff;font-weight:700;width:28%}
+        .signature{margin-top:30px;line-height:1.55}
+        .footer{margin-top:26px;border-top:2px solid #FC4C02;padding-top:12px;color:#607783}
+        @media print{button{display:none}body{margin:16px}}
+      </style></head><body>
+      <div class="top">
+        <div><h1>ASTORIE a.s.</h1><div>Poptávka pojištění podnikatelských rizik</div></div>
+        <div><strong>${E491(insurerName491(code))}</strong><br>${E491(code || '')}</div>
+      </div>
+      <div class="orange"></div>
+
+      <h2>${E491(client.name || 'Klient')}</h2>
+      <div class="meta">CASE_ID: ${E491(state.id || '')} · Datum: ${new Date().toLocaleDateString('cs-CZ')}</div>
+
+      <h3>Údaje o poradci</h3>
+      <table>
+        <tr><td class="label">Poradce</td><td>${E491(a.name)}</td></tr>
+        <tr><td class="label">E-mail</td><td>${E491(a.email)}</td></tr>
+        <tr><td class="label">Telefon</td><td>${E491(a.phone)}</td></tr>
+        <tr><td class="label">Společnost</td><td>${E491(a.company)} · IČO ${E491(a.company_ico)}</td></tr>
+      </table>
+
+      <h3>Základní údaje pro pojištění</h3>
+      <table>
+        <tr><td class="label">Klient</td><td>${E491(client.name || '')}</td></tr>
+        <tr><td class="label">IČO / DIČ</td><td>${E491(client.ico || '')}${client.dic ? ' / ' + E491(client.dic) : ''}</td></tr>
+        <tr><td class="label">Adresa</td><td>${E491(client.address || '')}</td></tr>
+        <tr><td class="label">Kontaktní osoby</td><td>${contacts}</td></tr>
+        <tr><td class="label">Typ činnosti</td><td>${E491(activity.name || '')}</td></tr>
+        <tr><td class="label">Detail činnosti</td><td>${E491(q.main_activity_detail || '')}</td></tr>
+        <tr><td class="label">Obrat</td><td>${E491(q.turnover || '')}</td></tr>
+        <tr><td class="label">Zaměstnanci</td><td>${E491(q.employees || '')}</td></tr>
+        <tr><td class="label">Území</td><td>${E491(q.territory || '')}</td></tr>
+        <tr><td class="label">Počátek pojištění</td><td>${E491(q.insurance_start || '')}</td></tr>
+        <tr><td class="label">Pojistné období</td><td>${E491(q.insurance_period || '')}</td></tr>
+        <tr><td class="label">Frekvence placení</td><td>${E491(q.payment_frequency || '')}</td></tr>
+        <tr><td class="label">Export / zahraničí</td><td>${E491(q.export_info || q.annual_revenue_breakdown || '')}</td></tr>
+      </table>
+
+      <h3>Požadovaná rizika a limity</h3>
+      <table>
+        <thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead>
+        <tbody>${riskRows || '<tr><td colspan="4">Rizika zatím nejsou doplněna.</td></tr>'}</tbody>
+      </table>
+
+      <h3>Zvláštní požadavky a podklady</h3>
+      <table>
+        <tr><td class="label">Požadovaný rozsah</td><td>${E491(q.requested_scope || '')}</td></tr>
+        <tr><td class="label">Škodní průběh</td><td>${E491(q.claims_history || '')}</td></tr>
+        <tr><td class="label">Přílohy / podklady</td><td>${E491(q.attachments_note || '')}</td></tr>
+        <tr><td class="label">Poznámka</td><td>${E491(q.special_notes || '')}</td></tr>
+      </table>
+
+      <h3>Doprovodná zpráva</h3>
+      <p>Dobrý den,</p>
+      <p>prosíme o zpracování nabídky pojištění podnikatelských rizik dle výše uvedených údajů a přiložených podkladů pro klienta <strong>${E491(client.name || '')}</strong>.</p>
+      <p>V případě potřeby doplnění informací prosím kontaktujte přímo poradce uvedeného v této poptávce.</p>
+      <div class="signature">
+        Děkujeme.<br><br>
+        <strong>${E491(a.name)}</strong><br>
+        ${E491(a.role)}<br>
+        ${E491(a.company)}<br>
+        ${a.email ? 'E-mail: ' + E491(a.email) + '<br>' : ''}
+        ${a.phone ? 'Telefon: ' + E491(a.phone) : ''}
+      </div>
+      <div class="footer">ASTORIE a.s. · IČO 48293776</div>
+      <button onclick="window.print()">Tisk / uložit jako PDF</button>
+      </body></html>`;
+  }
+
+  window.brh491PrintRequest = function(code){
+    const w = window.open('', '_blank');
+    if(!w){ alert('Prohlížeč zablokoval otevření tiskového okna.'); return; }
+    w.document.open();
+    w.document.write(requestPrintHtml491(code || selectedCodes491()[0] || ''));
+    w.document.close();
+  };
+
+  // Karta 7: profesionální tisk poptávky, bez interních poznámek.
+  if(typeof tabRequests === 'function'){
+    const oldRequests491 = tabRequests;
+    window.tabRequests = tabRequests = function(){
+      let h = oldRequests491();
+      h = h.replaceAll('', '');
+      const codes = selectedCodes491();
+      const buttons = codes.map(c => `<button class="btn secondary" onclick="brh491PrintRequest('${E491(c)}')">Tisk poptávky – ${E491(insurerName491(c))}</button>`).join('');
+      return h + `<div class="executive-panel request-print-panel">
+        <div class="section-head">
+          <div>
+            <h3>Tisk poptávky pojišťovně</h3>
+            <p class="muted">Poptávka obsahuje údaje o klientovi, požadovaných rizicích, podkladech a kontakt na poradce.</p>
+          </div>
+        </div>
+        <div class="quick-actions">${buttons || '<span class="muted">Nejprve vyberte pojišťovny.</span>'}</div>
+      </div>`;
+    };
+  }
+
+  // Karta 8: vrácení rizikové části + zachování nové nabídkové matice.
+  if(typeof tabOffers === 'function'){
+    const oldOffers491 = tabOffers;
+    window.tabOffers = tabOffers = function(){
+      const h = oldOffers491();
+      const codes = selectedCodes491();
+      const risks = liabilityItems491();
+      const riskRows = risks.map((r,ri) => `<tr>
+        <th>${E491(r.name || r.title || '')}<small>${E491(r.limit || r.default_limit || '')}</small></th>
+        ${codes.map(c => {
+          const o = offer491(c);
+          o.risks = o.risks || {};
+          o.risks[ri] = o.risks[ri] || {};
+          const rv = o.risks[ri];
+          return `<td>
+            <select data-risk-offer="${E491(c)}" data-risk="${ri}" data-risk-field="status">
+              <option value="rozpracováno" ${rv.status==='rozpracováno'?'selected':''}>Rozpracováno</option>
+              <option value="splněno" ${rv.status==='splněno'?'selected':''}>Splněno</option>
+              <option value="částečně" ${rv.status==='částečně'?'selected':''}>Částečně</option>
+              <option value="nesplněno" ${rv.status==='nesplněno'?'selected':''}>Nesplněno</option>
+            </select>
+            <input data-risk-offer="${E491(c)}" data-risk="${ri}" data-risk-field="limit" value="${E491(rv.limit || '')}" placeholder="nabídnutý limit">
+            <input data-risk-offer="${E491(c)}" data-risk="${ri}" data-risk-field="deductible" value="${E491(rv.deductible || '')}" placeholder="spoluúčast">
+            <textarea data-risk-offer="${E491(c)}" data-risk="${ri}" data-risk-field="note" placeholder="výluky, omezení, poznámka">${E491(rv.note || '')}</textarea>
+          </td>`;
+        }).join('')}
+      </tr>`).join('');
+
+      const riskBlock = `<div class="executive-panel underwriting-risk-matrix">
+        <div class="section-head">
+          <div>
+            <h3>Rizika, limity a underwriting rozdíly</h3>
+            <p class="muted">Tato část doplňuje nabídky o vyhodnocení rizik, limitů, spoluúčastí, výluk a rozdílů mezi pojišťovnami.</p>
+          </div>
+          <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit rizikové vyhodnocení</button>
+        </div>
+        <div class="comparison-scroll">
+          <table class="broker-matrix risk-offer-matrix">
+            <thead><tr><th>Riziko / požadavek</th>${codes.map(c => `<th><strong>${E491(insurerName491(c))}</strong><small>${E491(c)}</small></th>`).join('')}</tr></thead>
+            <tbody>${riskRows || '<tr><td>Nejsou vybrána rizika.</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>`;
+      return h + riskBlock;
+    };
+  }
+
+  // Dokumenty: vrácení pracovní dokumentové knihovny místo placeholderu.
+  window.tabDocuments = tabDocuments = function(){
+    state.documents = Array.isArray(state.documents) ? state.documents : [];
+    const cats = ['Plná moc','Výpis z OR','Nabídka pojišťovny','Smlouva','Stávající pojistka','Fotodokumentace','Doložka','VPP / pojistné podmínky','Interní podklad'];
+    const rows = state.documents.map((d,i) => `<tr>
+      <td><input id="doc_${i}_name" value="${E491(d.name || '')}" placeholder="Název dokumentu"></td>
+      <td><select id="doc_${i}_category">${cats.map(c => `<option ${d.category===c?'selected':''}>${E491(c)}</option>`).join('')}</select></td>
+      <td><select id="doc_${i}_status"><option ${d.status==='chybí'?'selected':''}>chybí</option><option ${d.status==='dodáno'?'selected':''}>dodáno</option><option ${d.status==='ke kontrole'?'selected':''}>ke kontrole</option></select></td>
+      <td><input id="doc_${i}_note" value="${E491(d.note || '')}" placeholder="Poznámka / odkaz na soubor"></td>
+      <td><button class="btn danger small" onclick="brh491RemoveDocument(${i})">Smazat</button></td>
+    </tr>`).join('');
+
+    return `<p class="eyebrow">DOKUMENTOVÁ KNIHOVNA</p>
+    <div class="executive-panel">
+      <div class="section-head">
+        <div>
+          <h2>Dokumenty</h2>
+          <p class="muted">Evidence podkladů k obchodnímu případu, poptávkám, nabídkám a klientskému výstupu.</p>
+        </div>
+        <button class="btn secondary" onclick="brh491AddDocument()">+ Přidat dokument</button>
+      </div>
+      <div class="comparison-scroll">
+        <table class="admin-stable-table">
+          <thead><tr><th>Dokument</th><th>Kategorie</th><th>Stav</th><th>Poznámka / soubor</th><th></th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="5">Zatím není evidován žádný dokument.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit dokumenty</button></div>
+    </div>`;
+  };
+
+  window.brh491AddDocument = function(){
+    state.documents = Array.isArray(state.documents) ? state.documents : [];
+    state.documents.push({name:'', category:'Plná moc', status:'chybí', note:''});
+    renderWorkspace();
+  };
+  window.brh491RemoveDocument = function(i){
+    state.documents = Array.isArray(state.documents) ? state.documents : [];
+    state.documents.splice(i,1);
+    renderWorkspace();
+  };
+
+  const textTemplates491 = [
+    {
+      title:'Poptávka podnikatelských rizik',
+      body:'Dobrý den,\n\nprosíme o zpracování nabídky pojištění podnikatelských rizik pro klienta [KLIENT]. Podklady a požadovaný rozsah pojištění zasíláme v návaznosti na obchodní případ [CASE_ID].\n\nV případě potřeby doplnění informací prosím kontaktujte poradce: [PORADCE], [EMAIL], [TELEFON].\n\nDěkujeme.\n[PORADCE]'
+    },
+    {
+      title:'Výzva k doplnění podkladů',
+      body:'Dobrý den,\n\npro dokončení posouzení pojištění klienta [KLIENT] prosíme o doplnění následujících podkladů:\n\n– [PODKLADY]\n\nPo obdržení podkladů budeme pokračovat ve zpracování nabídky.\n\nDěkujeme za spolupráci.\n[PORADCE]'
+    },
+    {
+      title:'Upomínka pojišťovně',
+      body:'Dobrý den,\n\nnavazujeme na naši poptávku k obchodnímu případu [CASE_ID] pro klienta [KLIENT]. Prosíme o informaci, zda je nabídka již připravena, případně jaké doplňující údaje potřebujete.\n\nDěkujeme.\n[PORADCE]'
+    },
+    {
+      title:'Předání nabídky klientovi',
+      body:'Dobrý den,\n\nzasíláme Vám souhrn zpracovaných nabídek pojištění podnikatelských rizik. Doporučená varianta byla vybrána s ohledem na rozsah krytí, limity, výluky, spoluúčast a cenu.\n\nV případě dotazů jsme Vám k dispozici.\n\nS pozdravem\n[PORADCE]'
+    },
+    {
+      title:'Doporučení poradce',
+      body:'Na základě porovnání nabídek doporučujeme variantu [POJIŠŤOVNA], protože nejlépe odpovídá požadovanému rozsahu pojištění, nabízí vhodné limity a má přijatelné podmínky z pohledu výluk a spoluúčastí.'
+    },
+    {
+      title:'Zamítnutí / nepojistitelné riziko',
+      body:'Dobrý den,\n\nna základě posouzení dostupných podkladů a vyjádření pojišťovny není možné za aktuálních podmínek riziko pojistit v požadovaném rozsahu. Doporučujeme doplnit podklady, upravit rozsah požadavku nebo prověřit alternativní řešení.\n\nS pozdravem\n[PORADCE]'
+    }
+  ];
+
+  window.tabTexts = tabTexts = function(){
+    state.texts = Array.isArray(state.texts) ? state.texts : [];
+    if(!state.texts.length) state.texts = JSON.parse(JSON.stringify(textTemplates491));
+    const rows = state.texts.map((t,i) => `<div class="text-template-card">
+      <label>Název textace<input id="txt_${i}_title" value="${E491(t.title || '')}"></label>
+      <label>Text<textarea id="txt_${i}_body">${E491(t.body || '')}</textarea></label>
+      <button class="btn danger small" onclick="brh491RemoveText(${i})">Smazat</button>
+    </div>`).join('');
+
+    return `<p class="eyebrow">CENTRÁLNÍ TEXTACE</p>
+    <div class="executive-panel">
+      <div class="section-head">
+        <div>
+          <h2>Textace</h2>
+          <p class="muted">Profesionální vzory pro komunikaci s pojišťovnami a klienty.</p>
+        </div>
+        <div class="quick-actions">
+          <button class="btn secondary" onclick="brh491ResetTextTemplates()">Načíst 6 vzorů</button>
+          <button class="btn secondary" onclick="brh491AddText()">+ Přidat textaci</button>
+        </div>
+      </div>
+      <div class="text-template-grid">${rows}</div>
+      <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit textace</button></div>
+    </div>`;
+  };
+
+  window.brh491ResetTextTemplates = function(){ state.texts = JSON.parse(JSON.stringify(textTemplates491)); renderWorkspace(); };
+  window.brh491AddText = function(){ state.texts = Array.isArray(state.texts) ? state.texts : []; state.texts.push({title:'', body:''}); renderWorkspace(); };
+  window.brh491RemoveText = function(i){ state.texts.splice(i,1); renderWorkspace(); };
+
+  const readBefore491 = readCurrentTab;
+  window.readCurrentTab = readCurrentTab = function(){
+    if(currentTab === 'offers'){
+      if(typeof readBefore491 === 'function') readBefore491();
+      document.querySelectorAll('[data-risk-offer][data-risk][data-risk-field]').forEach(el => {
+        const c = el.getAttribute('data-risk-offer');
+        const ri = el.getAttribute('data-risk');
+        const f = el.getAttribute('data-risk-field');
+        const o = offer491(c);
+        o.risks = o.risks || {};
+        o.risks[ri] = o.risks[ri] || {};
+        o.risks[ri][f] = el.value;
+      });
+      return;
+    }
+
+    if(currentTab === 'documents'){
+      state.documents = Array.isArray(state.documents) ? state.documents : [];
+      state.documents = state.documents.map((d,i) => ({
+        name: q491(`doc_${i}_name`)?.value || '',
+        category: q491(`doc_${i}_category`)?.value || '',
+        status: q491(`doc_${i}_status`)?.value || '',
+        note: q491(`doc_${i}_note`)?.value || ''
+      }));
+      return;
+    }
+
+    if(currentTab === 'texts'){
+      state.texts = Array.isArray(state.texts) ? state.texts : [];
+      state.texts = state.texts.map((t,i) => ({
+        title: q491(`txt_${i}_title`)?.value || '',
+        body: q491(`txt_${i}_body`)?.value || ''
+      }));
+      return;
+    }
+
+    return readBefore491();
+  };
+
 })();
