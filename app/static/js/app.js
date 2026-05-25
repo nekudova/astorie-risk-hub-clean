@@ -1341,7 +1341,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.2.1 – Emergency Restore Stable 4.1.0 Core
+   Business Risk Hub 4.3.0 – Professional Cards Engine
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -1349,7 +1349,7 @@ window.tabRisks=tabRisks;
    - interní metodika jako tooltip, neexportuje se
    ========================================================== */
 (function(){
-  window.BRH_VERSION = '4.2.1';
+  window.BRH_VERSION = '4.3.0';
   const LIABILITY_RISKS_410_DEFAULT = [{"risk_key": "obecna_provozni_odpovednosti_za_ujmu_skodu", "name": "Obecná (provozní) odpovědnosti za újmu (škodu)", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "společný limit na smlouvě pro odpovědnost z činnosti, odp. za výrobek a stažení výrobku z trhu", "recommended_deductible": "10 000 Kč", "internal_note": "2 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 1, "active": true}, {"risk_key": "pojisteni_odpovednosti_za_ujmu_skodu_zpuso", "name": "Pojištění odpovědnosti za újmu (škodu) způsobenou vadou výrobku a vadou práce po předání", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit z celkového limitu", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 2, "active": true}, {"risk_key": "nasledna_financni_skoda_vcetne_skod_zpusob", "name": "Následná finanční škoda - včetně škod způsobených vadou výrobku a vadou práce po předání", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit z celkového limitu", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 3, "active": true}, {"risk_key": "ciste_financni_skody_vcetne_skod_zpusobeny", "name": "Čisté finanční škody - včetně škod způsobených vadou výrobku a vadou práce po předání", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 4, "active": true}, {"risk_key": "nemajetkova_ujma_neopravnenym_zasahem_do_p", "name": "Nemajetková újma neoprávněným zásahem do práva na ochranu osobnosti (psychická újma)", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 5, "active": true}, {"risk_key": "skoda_na_uzivane_nemovitostti", "name": "Škoda na užívané nemovitostti", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 6, "active": true}, {"risk_key": "cizi_veci_prevzate_a_majetkova_ujma_v_souv", "name": "Cizí věci převzaté a Majetková újma v souvislostí s vykonávanou objednanou činností", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 7, "active": true}, {"risk_key": "cizi_veci_uzivane_movite", "name": "Cizí věci užívané movité", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 8, "active": true}, {"risk_key": "regresy_zdravotni_pojistovny_a_regresy_dav", "name": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - zaměstnanci", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 9, "active": true}, {"risk_key": "regresy_zdravotni_pojistovny_a_regresy_dav", "name": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - třetí osoby", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 10, "active": true}, {"risk_key": "znecisteni_zivotniho_prostredi", "name": "Znečištění životního prostředí", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 11, "active": true}, {"risk_key": "regres_pojistovny_pov_v_pripade_ze_ridic_p", "name": "Regres pojišťovny POV v případě, že řidič pojištěného požil aplkohol, nebo se odmítl podrobit dechové zkoušce, nebo odjel z místa nehody", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 12, "active": true}, {"risk_key": "odpojednost_za_skody_zpusobene_pri_nakladc", "name": "Odpojednost za škody způsobené při nakládce a vykládce", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 13, "active": true}, {"risk_key": "odpovednost_za_skodu_na_veci_odlozene_a_vn", "name": "Odpovědnost za škodu na věci odložené a vnesené", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 14, "active": true}, {"risk_key": "odpovednost_obchodni_korporace_za_ujmu_cle", "name": "Odpovědnost obchodní korporace za újmu členům statutárních orgánů v souvislosti s výkonem jejich funkce", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 15, "active": true}, {"risk_key": "odpovednosti_clenu_statutarnich_organu_za_", "name": "Odpovědnosti členů statutárních orgánů za jinou než čistou finanční škodu způsobenou organizaci", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 16, "active": true}, {"risk_key": "skody_na_vecech_zamestnancu", "name": "Škody na věcech zaměstnanců", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 17, "active": true}, {"risk_key": "krizova_odpovednost_mezi_spolupojistenymi", "name": "Křížová odpovědnost mezi spolupojištěnými", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 18, "active": true}, {"risk_key": "odpovednost_za_skodu_zpusobenou_majetkove_", "name": "Odpovědnost za škodu způsobenou majetkově propojené osobě", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 19, "active": true}, {"risk_key": "skoda_zpusobena_vadne_vyrobenym_strojem_pj", "name": "Škoda způsobená vadně vyrobeným strojem pjištěného", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 20, "active": true}, {"risk_key": "nahrada_smluvni_pokuty_do_vyse_skutecne_sk", "name": "Náhrada smluvní pokuty do výše skutečné škody", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 21, "active": true}, {"risk_key": "pokuty_a_penale", "name": "Pokuty a penále", "recommended_limit": "", "recommended_sublimit": "", "recommended_deductible": "", "internal_note": "", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 22, "active": true}, {"risk_key": "cista_financni_skoda_v_souvislosti_s_posky", "name": "Čistá finanční škoda v souvislostí s poskytnutím rady", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 23, "active": true}, {"risk_key": "ujma_zpusobena_motorovymi_vozidly_nad_rame", "name": "Újma způsobená motorovými vozidly nad rámec POV", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 24, "active": true}, {"risk_key": "ujma_vznikla_na_opravnene_uzivanem_dopravn", "name": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 25, "active": true}, {"risk_key": "stazeni_vyrobku_z_trhu_organizovane_prvni_", "name": "Stažení výrobku z trhu organizované první stranou", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 26, "active": true}, {"risk_key": "stazeni_vyrobku_z_trhu_organizovane_treti_", "name": "Stažení výrobku z trhu organizované třetí stranou", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 27, "active": true}, {"risk_key": "spojeni_nebo_smiseni_vadneho_vyrobku_s_jin", "name": "Spojení nebo smísení vadného výrobku s jinou bezvadnou věcí", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 28, "active": true}, {"risk_key": "naklady_na_demontaz_vadneho_vyrobku_a_mont", "name": "Náklady na demontáž vadného výrobku a montáž bezvadného výrobku", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 29, "active": true}, {"risk_key": "skoda_vznikla_dalsim_opracovanim_vadneho_v", "name": "Škoda vzniklá dalším opracováním vadného výrobku dodaného pojištěným, aniž došlo k jeho spojení či smísení, nebo montáží s dalšími výrobky.", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 30, "active": true}, {"risk_key": "naklady_na_kontrolu_zkouseni_a_trideni_vad", "name": "Náklady na kontrolu, zkoušení a třídění vadných výrobků", "recommended_limit": "100 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 31, "active": true}, {"risk_key": "naklady_na_reklamaci_u_zakaznika_pojistene", "name": "Náklady na reklamaci u zákazníka pojištěného", "recommended_limit": "100 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 32, "active": true}];
   const LIABILITY_AGREEMENTS_410_DEFAULT = [{"id": "veci_prevzate_a_uzivane", "title": "Věci převzaté a užívané:", "text": "Pojištění se vztahuje i na následnou finanční újmu vyplývající z poškození veci převzaté nebo užívané.  Pojištění se nevztahuje na újmu vzniklou ztrátou věci.", "limit": "", "module": "liability", "order": 1, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_vznikla_na_opravnene_uzivanem_dopravn", "title": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle", "text": "Pojištění se vztahuje na újmu vzniklou na oprávněně užívaném dopravním prostředku. Pojištění se nevztahuje na škody na vozidle, které nemá sjednáno havarijní pojištění. Pojištění se dále nevztahuje na odpovědnost za škodu vzniklou na pneumatikách, discích a kolových šroubech nebo přepravovaných věcech. Pro škodu na vozidle pojistitel poskytne pojistné plnění jen v případě, že událost bude šetřena policií.", "limit": "", "module": "liability", "order": 2, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "majetkova_ujma_v_souvislosti_s_vykonavanou", "title": "Majetková újma v souvislostí s vykonávanou objednanou činností", "text": "Pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému majetkovou újmu vzniklou na věci, na které pojištěný vykonával objednanou činnost, pokud k poškození nebo zničení věci došlo tím, že objednaná činnost byla provedena vadně. Pojištění se vztahuje i na následnou finanční újmu z toho vyplývající.", "limit": "", "module": "liability", "order": 3, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "prirozena_prava_cloveka", "title": "Přirozená práva člověka", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému újmu vzniklou na přirozených právech člověka případně i způsobené duševní útrapy, nesouvisející s újmou při ublížení na zdraví a při usmrcení. Pojistné plnění bude poskytnuto pouze na základě pravomocného rozhodnutí soudu.", "limit": "", "module": "liability", "order": 4, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_zpusobena_motorovymi_vozidly_nad_rame", "title": "Újma způsobená motorovými vozidly nad rámec POV", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu způsobenou motorovými vozidly ve vlastnictví pojistníka nebo vozidly, které pojištěný po právu užívá na základě smlouvy, vzniklou při dopravní nehodě šetřené policií. Pojištění se vztahuje rovněž na újmu způsobenou při práci vozidla jako pracovního stroje, včetně stacionárního pracovního stroje. Pojistitel neposkytne pojistné plnění za újmu způsobenou provozem motorových vozidel v rozsahu, v jakém vznikl nárok na pojistné plnění z povinně smluvního pojištění odpovědnosti za újmu způsobenou provozem vozidla. Pojištění dle tohoto ujednání se nevztahuje na újmu způsobenou na samotném vozidle, jimž byla újma způsobena a na újmu způsobenou provozem motorových vozidel při jejich účasti na organizovaném motoristickém závodu .", "limit": "", "module": "liability", "order": 5, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_zpusobena_zaku_studentu_ke_ktere_dosl", "title": "Újma způsobená žáku/studentu, ke které došlo při praktickém vyučování", "text": "pojištění se vztahuje i na odpovědnost za újmu způsobenou žáku/studentu, ke které došlo při praktickém vyučování u pojištěného nebo v přímé souvislosti s ním, příp. k této škodě došlo v souvislosti s jeho účastí na zájmovém vzdělávání. Ujednává se, že pojištění se vztahuje i na odpovědnost studenta/žáka za újmu způsobenou jakékoliv třetí osobě při praktickém vyučování u právnické nebo fyzické osoby anebo v přímé souvislosti s ním. Pojištění se vztahuje i na újmy způsobené pojistníkovi.", "limit": "", "module": "liability", "order": 6, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "cista_financni_skoda", "title": "Čistá finanční škoda", "text": "pojištění obecné odpovědnosti a pojištění odpovědnosti za újmu způsobenou vadou poskytnuté práce, jež se projeví po jejím předání a pojištění odpovědnosti za újmu způsobenou vadou výrobku se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající.", "limit": "", "module": "liability", "order": 7, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pokuty_a_penale", "title": "Pokuty a penále", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu vzniklou tím, že v důsledku vady pojištěným poskytnuté odborné služby nebo dodáním vadného výrobku byly poškozenému uloženy nebo proti němu uplatňovány pokuty, penále nebo jiné správní sankce k tomu oprávněným orgánem přímo na základě právního předpisu.", "limit": "", "module": "liability", "order": 8, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "montaz_a_demontaz", "title": "Montáž a demontáž", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, spočívající v nákladech na odstranění, demontáž, vyjmutí nebo uvolnění vadného výrobku a v nákladech na montáž, připevnění nebo osazení bezvadného výrobku, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající. Pojištění se vztahuje také na náhradu nákladů na přepravu výrobku bez vad určeného k výměně za vadný výrobek, náhradu nákladů na přepravu vadného výrobku a na náhradu nákladů na přepravu jiné věci, která obsahuje vadný výrobek.", "limit": "", "module": "liability", "order": 9, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "spojeni_smiseni", "title": "Spojení, smísení", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích nastalou v důsledku toho, že věc vzniklá spojením nebo smísením jiné věci s vadným výrobkem vyrobeným nebo dodaným pojištěným je vadná, nebo nastalou v důsledku toho, že věc vzniklá v důsledku dalšího zpracování nebo opracování vadného výrobku vyrobeného nebo dodaného pojištěným je vadná (dále jen „vyrobená vadná věc“).", "limit": "", "module": "liability", "order": 10, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "cinnosti_bez_zivnostenskeho_opravneni", "title": "Činnosti bez živnostenského oprávnění", "text": "Pojištění se sjednává i pro případ povinnosti pojištěného uhradit škodu a v případě ublížení na zdraví nebo při usmrcení též újmu vzniklou jinému v souvislosti s činnostmi, pro jejichž výkon se živnostenské oprávnění nevyžaduje.", "limit": "", "module": "liability", "order": 11, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "propojene_osoby_krizova_odpovednost", "title": "Propojené osoby, křížová odpovědnost", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit újmu vzniklou: - spolupojištěné osobě; - právnické osobě, ve které má pojištěný nebo osoby jemu blízké majetkovou účast; - právnické osobě, ve které pojištěný vykonává funkci statutárního orgánu; - osobě, která je v pozici společníka pojištěného.", "limit": "", "module": "liability", "order": 12, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "naklady_na_reklamaci_u_zakaznika_pojistene", "title": "Náklady  na reklamaci u zákazníka pojištěného", "text": "Pojišťovna zaplatí  administrativní náklady zákazníka pojištěného s dokladováním škody, které požaduje poškozený zákazník po pojištěném, pokud tyto náklady souvisí s dokladováním pojistné události.", "limit": "", "module": "liability", "order": 13, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "smluvni_ujednani_k_ruceni_vlastnika_pozemn", "title": "Smluvní ujednání k ručení vlastníka pozemní komunikace za správce pozemní komunikace", "text": "Pojištění se vztahuje i na povinnost pojištěného uhradit poškozenému peněžní částku, pokud mu tato povinnost vznikla ve smyslu § 27 odst.6 zákona č. 13/1997 Sb., o pozemních komunikacích, z důvodu ručení pojištěného za splnění povinnosti správce pozemní komunikace nahradit škodu (újmu). Pojistitel však poskytne pojistné plnění maximálně v rozsahu, v jakém by je poskytl v případě, kdy by výkon správy pozemní komunikace nebyl zajišťován prostřednictvím správce, ale přímo pojištěným.", "limit": "", "module": "liability", "order": 14, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pojisteni_nakladu_na_kontrolu_nebo_zkousen", "title": "Pojištění nákladů na kontrolu nebo zkoušení výrobku poškozeného", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit škodu (újmu na jmění) spočívající výlučně v nákladech vzniklých při kontrole nebo zkoušení výrobků poškozeného, která vznikla jinému.", "limit": "", "module": "liability", "order": 15, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pripojisteni_odpovednosti_za_ujmu_zpusoben", "title": "Připojištění odpovědnosti za újmu způsobenou vyrobením vadné věci pomocí vadného stroje", "text": "připojištění se vztahuje na právním předpisem stanovenou povinnost pojištěného nahradit újmu na jmění (škodu) vzniklou v důsledku toho, že věc vzniklá vyrobením/zpracováním/opracováním pomocí vadného stroje, který vadně vyrobil, dodal, (s)montoval nebo vadně udržoval či opravil pojištěný (dále jen \"vadný stroj\") je vadná (dále jen \"vyrobená vadná věc\").", "limit": "", "module": "liability", "order": 16, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}];
 
@@ -1383,7 +1383,7 @@ window.tabRisks=tabRisks;
       specification: '',
       method_note: risk410Help(r),
       recommended_sublimit: safeText(r.recommended_sublimit || ''),
-      source: safeText(r.source || 'Emergency Restore Stable 4.1.0 Core 4.2.1')
+      source: safeText(r.source || 'Professional Cards Engine 4.3.0')
     };
   }
 
@@ -1421,7 +1421,7 @@ window.tabRisks=tabRisks;
   window.addAllLiabilityAgreements = addAllLiabilityAgreements = function(){
     state.liability_agreements = arr(state.liability_agreements);
     const existing=new Set(state.liability_agreements.map(a=>safeText(a.title).toLowerCase()));
-    agreement410List().forEach(a=>{ const k=safeText(a.title).toLowerCase(); if(k && !existing.has(k)) state.liability_agreements.push({title:a.title, limit:a.limit||'', text:a.text||'', source:a.source||'Emergency Restore Stable 4.1.0 Core 4.2.1'}); });
+    agreement410List().forEach(a=>{ const k=safeText(a.title).toLowerCase(); if(k && !existing.has(k)) state.liability_agreements.push({title:a.title, limit:a.limit||'', text:a.text||'', source:a.source||'Professional Cards Engine 4.3.0'}); });
     renderWorkspace(); toast('Doplněna kompletní sada zvláštních ujednání odpovědnosti.');
   };
 
@@ -1462,8 +1462,8 @@ window.tabRisks=tabRisks;
     const cards=risk410List().map(riskTile410).join('');
     const selected=selectedLiabilityRisks410();
     const agre=(state.liability_agreements||[]).map((a,i)=>`<tr><td><textarea class="fit" onchange="state.liability_agreements[${i}].title=this.value">${esc(a.title||'')}</textarea></td><td><textarea class="fit" onchange="state.liability_agreements[${i}].limit=this.value" placeholder="limit / sublimit">${esc(a.limit||'')}</textarea></td><td><textarea class="fit tall" onchange="state.liability_agreements[${i}].text=this.value">${esc(a.text||'')}</textarea></td><td><button class="btn danger" onclick="removeLiabilityAgreement(${i})">Smazat</button></td></tr>`).join('');
-    return `<p class="eyebrow">3. Modul pojištění odpovědnosti PROFI · 4.2.1</p>
-      <h2>Emergency Restore Stable 4.1.0 Core</h2>
+    return `<p class="eyebrow">3. Modul pojištění odpovědnosti PROFI · 4.3.0</p>
+      <h2>Professional Cards Engine</h2>
       <p class="muted">Katalog odpovědnosti vychází z původního Excelu poradce. Interní metodika je dostupná přes malou ikonku „i“ a nikdy se neexportuje. Do poptávky jde pouze pole Specifikace / doplnění pro pojišťovnu.</p>
       <div class="section-soft"><div class="section-head"><div><h3>Katalog rizik odpovědnosti</h3><p class="muted">Kliknutím riziko přidáte, dalším kliknutím odeberete. Katalog obsahuje ${risk410List().length} položek.</p></div><div class="tools"><button class="btn primary" onclick="addAllLiabilityRisks()">+ Přidat celou sadu</button><button class="btn danger" onclick="clearAllLiabilityRisks()">Odebrat všechna rizika</button></div></div><div class="risk-grid410">${cards}</div></div>
       <div class="section-soft"><div class="section-head"><div><h3>Vybraná rizika odpovědnosti</h3><p class="muted">Bez technického risk key. Všechna textová pole jsou viditelná a použitelná pro práci poradce.</p></div><button class="btn secondary" onclick="addCustomRisk()">+ Vlastní riziko</button></div>${riskEditorTable410(selected,'Zatím není vybrané žádné riziko odpovědnosti.')}</div>
@@ -1524,4 +1524,618 @@ window.tabRisks=tabRisks;
 
   // Aktivace katalogu při načtení bez přepisování existujících dat případu.
   risk410List(); agreement410List();
+})();
+
+
+/* =====================================================================
+   BRH 4.3.0 – Professional Cards Engine
+   Nedestruktivní oprava viditelnosti Adminu.
+   - Nemění DB schéma.
+   - Nezasahuje do pracovního prostoru, případů ani modulu odpovědnosti.
+   - Přidává pouze finální bezpečné vykreslení Adminu s přehlednými záložkami.
+   ===================================================================== */
+(function(){
+  window.BRH_VERSION = '4.3.0';
+
+  function brh422Arr(x){ return Array.isArray(x) ? x : []; }
+  function brh422Esc(v){
+    return String(v ?? '').replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function brh422EnsureCatalog(){
+    window.CATALOG = window.CATALOG || {};
+    CATALOG.users = brh422Arr(CATALOG.users);
+    CATALOG.roleProfiles = brh422Arr(CATALOG.roleProfiles);
+    CATALOG.modulePermissions = brh422Arr(CATALOG.modulePermissions);
+    CATALOG.insurers = brh422Arr(CATALOG.insurers);
+    CATALOG.attachmentTypes = brh422Arr(CATALOG.attachmentTypes);
+    CATALOG.textTemplates = brh422Arr(CATALOG.textTemplates);
+    CATALOG.liabilityRisks = brh422Arr(CATALOG.liabilityRisks);
+    CATALOG.liabilityAgreements = brh422Arr(CATALOG.liabilityAgreements);
+    if(!CATALOG.roleProfiles.length){
+      CATALOG.roleProfiles = [
+        {code:'PORADCE', name:'Poradce', description:'Práce s případy a klienty.'},
+        {code:'SPECIALISTA', name:'Specialista', description:'Odborné posouzení a nabídky.'},
+        {code:'BACKOFFICE', name:'Backoffice', description:'Podpora a kontrola.'},
+        {code:'MANAGEMENT', name:'Management', description:'Přehled a kontrola.'},
+        {code:'ADMIN', name:'Administrátor', description:'Správa systému.'}
+      ];
+    }
+    if(!CATALOG.users.length){
+      CATALOG.users.push({id:'admin', name:'Administrátor ASTORIE', email:'admin@astorie.local', position:'Administrátor', roles:['ADMIN'], active:true});
+    }
+  }
+  function brh422TabButton(key, label){
+    return `<button class="chip" data-admin-tab="${brh422Esc(key)}" onclick="adminPanel('${brh422Esc(key)}')">${brh422Esc(label)}</button>`;
+  }
+  function brh422SetActiveTab(key){
+    document.querySelectorAll('[data-admin-tab]').forEach(b => b.classList.toggle('active', b.dataset.adminTab === key));
+  }
+  function brh422RoleCheckboxes(u, idx){
+    return CATALOG.roleProfiles.map(r => {
+      const code = r.code || r.name || '';
+      const checked = brh422Arr(u.roles).includes(code) ? 'checked' : '';
+      return `<label class="role-pill"><input type="checkbox" ${checked} onchange="brh422ToggleUserRole(${idx},'${brh422Esc(code)}',this.checked)"> ${brh422Esc(code)}</label>`;
+    }).join('');
+  }
+  window.brh422ToggleUserRole = function(idx, role, checked){
+    brh422EnsureCatalog();
+    const u = CATALOG.users[idx];
+    if(!u) return;
+    u.roles = brh422Arr(u.roles);
+    if(checked && !u.roles.includes(role)) u.roles.push(role);
+    if(!checked) u.roles = u.roles.filter(r => r !== role);
+  };
+  window.brh422SetPerm = function(mi, role, action, checked){
+    brh422EnsureCatalog();
+    const m = CATALOG.modulePermissions[mi];
+    if(!m) return;
+    m[role] = m[role] || {};
+    m[role][action] = checked;
+  };
+
+  window.renderAdmin = function(){
+    brh422EnsureCatalog();
+    const box = document.getElementById('adminBox');
+    if(!box) return;
+    box.innerHTML = `
+      <div class="admin-safe-head">
+        <div>
+          <p class="eyebrow">Administrace · 4.3.0 SAFE</p>
+          <h2>Admin Control Center</h2>
+          <p class="muted">Bezpečné zobrazení všech správcovských sekcí. Tato verze nemění databázové schéma ani pracovní workflow.</p>
+        </div>
+      </div>
+      <div class="metric-grid">
+        <div><b>${CATALOG.users.length}</b><span>uživatelů</span></div>
+        <div><b>${CATALOG.roleProfiles.length}</b><span>pozic</span></div>
+        <div><b>${CATALOG.modulePermissions.length}</b><span>modulů práv</span></div>
+        <div><b>${CATALOG.insurers.length}</b><span>pojišťoven</span></div>
+        <div><b>${CATALOG.attachmentTypes.length}</b><span>typů příloh</span></div>
+        <div><b>${CATALOG.liabilityRisks.length}</b><span>rizik odpovědnosti</span></div>
+      </div>
+      <div class="admin-tabs admin-tabs-safe">
+        ${brh422TabButton('users','Uživatelé')}
+        ${brh422TabButton('permissions','Oprávnění / pozice')}
+        ${brh422TabButton('insurers','Pojišťovny')}
+        ${brh422TabButton('attachments','Přílohy')}
+        ${brh422TabButton('texts','Textace')}
+        ${brh422TabButton('liabilityRisks','Rizika odpovědnosti')}
+        ${brh422TabButton('liabilityAgreements','Ujednání odpovědnosti')}
+        ${brh422TabButton('json','Import / export JSON')}
+      </div>
+      <div id="adminPanel"></div>
+    `;
+    adminPanel('users');
+  };
+
+  window.adminPanel = function(type){
+    brh422EnsureCatalog();
+    brh422SetActiveTab(type);
+    const box = document.getElementById('adminPanel');
+    if(!box) return;
+
+    if(type === 'users'){
+      box.innerHTML = `
+        <h2>Uživatelé a role</h2>
+        <p class="muted">Správa oprávněných osob. Jeden uživatel může mít více rolí.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>ID</th><th>Jméno</th><th>E-mail</th><th>Pozice</th><th>Role</th><th>Aktivní</th><th>Akce</th></tr></thead>
+          <tbody>${CATALOG.users.map((u,idx)=>`
+            <tr>
+              <td><input value="${brh422Esc(u.id||'')}" onchange="CATALOG.users[${idx}].id=this.value"></td>
+              <td><input value="${brh422Esc(u.name||'')}" onchange="CATALOG.users[${idx}].name=this.value"></td>
+              <td><input value="${brh422Esc(u.email||'')}" onchange="CATALOG.users[${idx}].email=this.value"></td>
+              <td><input value="${brh422Esc(u.position||'')}" onchange="CATALOG.users[${idx}].position=this.value"></td>
+              <td><div class="role-checks">${brh422RoleCheckboxes(u,idx)}</div></td>
+              <td><input type="checkbox" ${u.active!==false?'checked':''} onchange="CATALOG.users[${idx}].active=this.checked"></td>
+              <td><button class="btn danger" onclick="CATALOG.users.splice(${idx},1);adminPanel('users')">Smazat</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.users.push({id:'u_'+Date.now(),name:'',email:'',position:'Poradce',roles:['PORADCE'],active:true});adminPanel('users')">+ Nový uživatel</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit uživatele</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'permissions'){
+      const actions = [['view','Vidí'],['edit','Upravuje'],['delete','Maže'],['export','Export'],['approve','Schvaluje']];
+      if(!CATALOG.modulePermissions.length){
+        ['dashboard','cases','workspace','documents','textations','riskModel','admin'].forEach(m => {
+          CATALOG.modulePermissions.push({module:m,label:m});
+        });
+      }
+      box.innerHTML = `
+        <h2>Oprávnění podle pozic</h2>
+        <p class="muted">Zaklikněte, co může daná pozice vidět a provádět. Administrátorská práva upravujte opatrně.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>Modul</th>${CATALOG.roleProfiles.map(r=>`<th>${brh422Esc(r.name||r.code)}</th>`).join('')}</tr></thead>
+          <tbody>${CATALOG.modulePermissions.map((m,mi)=>`
+            <tr>
+              <td><b>${brh422Esc(m.label||m.module)}</b><small>${brh422Esc(m.module||'')}</small></td>
+              ${CATALOG.roleProfiles.map(r=>{
+                const code = r.code || r.name || '';
+                return `<td>${actions.map(([a,l])=>`<label class="perm"><input type="checkbox" ${(m[code] && m[code][a])?'checked':''} onchange="brh422SetPerm(${mi},'${brh422Esc(code)}','${a}',this.checked)"> ${l}</label>`).join('')}</td>`;
+              }).join('')}
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.modulePermissions.push({module:'novy_modul',label:'Nový modul'});adminPanel('permissions')">+ Přidat modul práv</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit oprávnění</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'insurers'){
+      box.innerHTML = `
+        <h2>Pojišťovny v číselníku</h2>
+        <p class="muted">Rozšířený číselník pro poptávky. ARES napojení bude doplněno v samostatném kroku nad IČO.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>Zkratka</th><th>Název</th><th>IČO</th><th>Adresa</th><th>E-mail</th><th>Web / portál</th><th>Aktivní</th></tr></thead>
+          <tbody>${CATALOG.insurers.map((i,idx)=>`
+            <tr>
+              <td><input value="${brh422Esc(i.code||i.short||'')}" onchange="CATALOG.insurers[${idx}].code=this.value;CATALOG.insurers[${idx}].short=this.value"></td>
+              <td><input value="${brh422Esc(i.name||'')}" onchange="CATALOG.insurers[${idx}].name=this.value"></td>
+              <td><input value="${brh422Esc(i.ico||'')}" onchange="CATALOG.insurers[${idx}].ico=this.value"></td>
+              <td><input value="${brh422Esc(i.address||'')}" onchange="CATALOG.insurers[${idx}].address=this.value"></td>
+              <td><input value="${brh422Esc(i.email||i.request_email||'')}" onchange="CATALOG.insurers[${idx}].email=this.value;CATALOG.insurers[${idx}].request_email=this.value"></td>
+              <td><input value="${brh422Esc(i.portal||i.url||i.web||'')}" onchange="CATALOG.insurers[${idx}].portal=this.value;CATALOG.insurers[${idx}].web=this.value"></td>
+              <td><select onchange="CATALOG.insurers[${idx}].active=this.value==='ano'"><option ${i.active!==false?'selected':''}>ano</option><option ${i.active===false?'selected':''}>ne</option></select></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.insurers.push({code:'',short:'',name:'',ico:'',address:'',email:'',request_email:'',portal:'',web:'',active:true});adminPanel('insurers')">+ Přidat pojišťovnu</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit pojišťovny</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'attachments'){
+      box.innerHTML = `
+        <h2>Číselník příloh</h2>
+        <p class="muted">Základní přílohy i přílohy podle modulu. Poradce může v případu vždy doplnit vlastní přílohu.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>ID</th><th>Název</th><th>Kategorie</th><th>Rozsah</th><th>Povinná</th><th>Nápověda</th><th>Akce</th></tr></thead>
+          <tbody>${CATALOG.attachmentTypes.map((a,idx)=>`
+            <tr>
+              <td><input value="${brh422Esc(a.id||'')}" onchange="CATALOG.attachmentTypes[${idx}].id=this.value"></td>
+              <td><input value="${brh422Esc(a.title||a.name||'')}" onchange="CATALOG.attachmentTypes[${idx}].title=this.value;CATALOG.attachmentTypes[${idx}].name=this.value"></td>
+              <td><input value="${brh422Esc(a.category||'')}" onchange="CATALOG.attachmentTypes[${idx}].category=this.value"></td>
+              <td><select onchange="CATALOG.attachmentTypes[${idx}].scope=this.value"><option ${a.scope==='all'?'selected':''} value="all">obecné</option><option ${a.scope==='liability'?'selected':''} value="liability">odpovědnost</option><option ${a.scope==='property'?'selected':''} value="property">majetek</option><option ${a.scope==='custom'?'selected':''} value="custom">vlastní</option></select></td>
+              <td><input type="checkbox" ${a.required?'checked':''} onchange="CATALOG.attachmentTypes[${idx}].required=this.checked"></td>
+              <td><textarea onchange="CATALOG.attachmentTypes[${idx}].note=this.value">${brh422Esc(a.note||'')}</textarea></td>
+              <td><button class="btn danger" onclick="CATALOG.attachmentTypes.splice(${idx},1);adminPanel('attachments')">Smazat</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.attachmentTypes.push({id:'att_'+Date.now(),title:'Nová příloha',category:'Vlastní',scope:'custom',required:false,note:''});adminPanel('attachments')">+ Přidat přílohu</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit přílohy</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'texts'){
+      box.innerHTML = `
+        <h2>Textace</h2>
+        <p class="muted">Centrální textace pro poptávky, nabídky, zprávy klientovi a interní práci.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>Název</th><th>Typ</th><th>Kategorie</th><th>Text</th><th>Aktivní</th><th>Akce</th></tr></thead>
+          <tbody>${CATALOG.textTemplates.map((t,idx)=>`
+            <tr>
+              <td><input value="${brh422Esc(t.title||t.name||'')}" onchange="CATALOG.textTemplates[${idx}].title=this.value;CATALOG.textTemplates[${idx}].name=this.value"></td>
+              <td><input value="${brh422Esc(t.type||'')}" onchange="CATALOG.textTemplates[${idx}].type=this.value"></td>
+              <td><input value="${brh422Esc(t.category||'')}" onchange="CATALOG.textTemplates[${idx}].category=this.value"></td>
+              <td><textarea class="tall" onchange="CATALOG.textTemplates[${idx}].text=this.value">${brh422Esc(t.text||t.body||'')}</textarea></td>
+              <td><select onchange="CATALOG.textTemplates[${idx}].active=this.value==='ano'"><option ${t.active!==false?'selected':''}>ano</option><option ${t.active===false?'selected':''}>ne</option></select></td>
+              <td><button class="btn danger" onclick="CATALOG.textTemplates.splice(${idx},1);adminPanel('texts')">Smazat</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.textTemplates.push({title:'Nová textace',type:'poptávka',category:'obecné',text:'',active:true});adminPanel('texts')">+ Nová textace</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit textace</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'liabilityRisks'){
+      box.innerHTML = `
+        <h2>Modul Odpovědnost – rizika</h2>
+        <p class="muted">Dynamický číselník odpovědnostních rizik. Interní metodika slouží jako nápověda a neexportuje se do poptávky.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>Interní klíč</th><th>Název rizika</th><th>Doporučený limit</th><th>Sublimit</th><th>Interní metodika</th><th>Aktivní</th><th>Akce</th></tr></thead>
+          <tbody>${CATALOG.liabilityRisks.map((r,idx)=>`
+            <tr>
+              <td><input value="${brh422Esc(r.risk_key||r.key||'')}" onchange="CATALOG.liabilityRisks[${idx}].risk_key=this.value;CATALOG.liabilityRisks[${idx}].key=this.value"></td>
+              <td><textarea onchange="CATALOG.liabilityRisks[${idx}].name=this.value">${brh422Esc(r.name||'')}</textarea></td>
+              <td><input value="${brh422Esc(r.recommended_limit||r.limit||'')}" onchange="CATALOG.liabilityRisks[${idx}].recommended_limit=this.value"></td>
+              <td><input value="${brh422Esc(r.recommended_sublimit||'')}" onchange="CATALOG.liabilityRisks[${idx}].recommended_sublimit=this.value"></td>
+              <td><textarea class="tall" onchange="CATALOG.liabilityRisks[${idx}].internal_note=this.value">${brh422Esc(r.internal_note||r.description||'')}</textarea></td>
+              <td><select onchange="CATALOG.liabilityRisks[${idx}].active=this.value==='ano'"><option ${r.active!==false?'selected':''}>ano</option><option ${r.active===false?'selected':''}>ne</option></select></td>
+              <td><button class="btn danger" onclick="CATALOG.liabilityRisks.splice(${idx},1);adminPanel('liabilityRisks')">Smazat</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.liabilityRisks.push({risk_key:'custom_'+Date.now(),name:'Nové riziko',recommended_limit:'',recommended_sublimit:'',internal_note:'',module:'liability',active:true});adminPanel('liabilityRisks')">+ Přidat riziko</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit rizika</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'liabilityAgreements'){
+      box.innerHTML = `
+        <h2>Modul Odpovědnost – zvláštní ujednání</h2>
+        <p class="muted">Textace a doložky, které poradce může vložit do konkrétního obchodního případu.</p>
+        <div class="table-wrap admin-safe-table"><table>
+          <thead><tr><th>Název</th><th>Text ujednání</th><th>Limit / sublimit</th><th>Aktivní</th><th>Akce</th></tr></thead>
+          <tbody>${CATALOG.liabilityAgreements.map((a,idx)=>`
+            <tr>
+              <td><textarea onchange="CATALOG.liabilityAgreements[${idx}].title=this.value">${brh422Esc(a.title||a.name||'')}</textarea></td>
+              <td><textarea class="tall" onchange="CATALOG.liabilityAgreements[${idx}].text=this.value">${brh422Esc(a.text||'')}</textarea></td>
+              <td><input value="${brh422Esc(a.limit||'')}" onchange="CATALOG.liabilityAgreements[${idx}].limit=this.value"></td>
+              <td><select onchange="CATALOG.liabilityAgreements[${idx}].active=this.value==='ano'"><option ${a.active!==false?'selected':''}>ano</option><option ${a.active===false?'selected':''}>ne</option></select></td>
+              <td><button class="btn danger" onclick="CATALOG.liabilityAgreements.splice(${idx},1);adminPanel('liabilityAgreements')">Smazat</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.liabilityAgreements.push({id:'agr_'+Date.now(),title:'Nové ujednání',text:'',limit:'',module:'liability',active:true});adminPanel('liabilityAgreements')">+ Přidat ujednání</button>
+          <button class="btn primary" onclick="saveAdminCatalog()">Uložit ujednání</button>
+        </div>`;
+      return;
+    }
+
+    if(type === 'json'){
+      box.innerHTML = `
+        <h2>Import / export JSON</h2>
+        <p class="muted">Servisní náhled aktuálních číselníků. Slouží pro kontrolu, ne pro běžnou práci poradce.</p>
+        <textarea class="json-box" readonly>${brh422Esc(JSON.stringify(CATALOG, null, 2))}</textarea>`;
+      return;
+    }
+  };
+
+  const brh422OldSave = window.saveAdminCatalog;
+  window.saveAdminCatalog = async function(){
+    brh422EnsureCatalog();
+    if(typeof brh422OldSave === 'function'){
+      return brh422OldSave();
+    }
+    if(typeof fetchJson === 'function'){
+      const payload = {
+        insurers: CATALOG.insurers,
+        advisers: CATALOG.advisers,
+        activities: CATALOG.activities,
+        risks: CATALOG.risks,
+        riskModel: CATALOG.riskModel,
+        textTemplates: CATALOG.textTemplates,
+        attachmentTypes: CATALOG.attachmentTypes,
+        liabilityRisks: CATALOG.liabilityRisks,
+        liabilityAgreements: CATALOG.liabilityAgreements,
+        users: CATALOG.users,
+        modulePermissions: CATALOG.modulePermissions,
+        roleProfiles: CATALOG.roleProfiles,
+        actor_email: (window.state && state.adviser && state.adviser.email) || ''
+      };
+      const data = await fetchJson('/api/admin/catalogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(typeof toast === 'function') toast(data.message || 'Admin číselníky byly uloženy.');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(document.getElementById('adminBox') && document.querySelector('[data-view="admin"].active')){
+      renderAdmin();
+    }
+  });
+})();
+
+
+/* =====================================================================
+   BRH 4.3.0 – Professional Cards Engine
+   Bezpečné rozšíření karet:
+   - Karta poradce / zpracovatele
+   - Profesionální karta klienta s kontaktními osobami
+   - Karta pro pojištění oddělená od identifikace klienta
+   - Bez DB migrace, ukládá se do existujícího case JSON modelu.
+   ===================================================================== */
+(function(){
+  window.BRH_VERSION = '4.3.0';
+
+  function esc430(v){
+    return String(v ?? '').replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function arr430(x){ return Array.isArray(x) ? x : []; }
+  function st430(){ window.state = window.state || {}; return window.state; }
+  function case430(){ const s=st430(); s.currentCase = s.currentCase || {}; return s.currentCase; }
+  function client430(){
+    const c = case430();
+    c.client = c.client || {};
+    c.client.contacts = arr430(c.client.contacts);
+    c.client.signers = arr430(c.client.signers);
+    c.client.relatedPersons = arr430(c.client.relatedPersons);
+    return c.client;
+  }
+  function insurance430(){
+    const c = case430();
+    c.insuranceCard = c.insuranceCard || {};
+    const i = c.insuranceCard;
+    i.businessPremises = arr430(i.businessPremises);
+    i.activities = arr430(i.activities);
+    i.claimsHistory = arr430(i.claimsHistory);
+    i.specialNotes = arr430(i.specialNotes);
+    return i;
+  }
+  function adviser430(){
+    const s = st430();
+    const a = s.adviser || s.user || {};
+    return {
+      name: a.name || a.full_name || a.displayName || 'Administrátor ASTORIE',
+      email: a.email || 'admin@astorie.local',
+      phone: a.phone || a.tel || '',
+      role: a.role || a.position || 'Poradce / zpracovatel',
+      region: a.region || a.area || '',
+      source: 'Načítá se automaticky z přihlášení.'
+    };
+  }
+  function setObjPath430(obj, path, value){
+    const parts = path.split('.');
+    let cur = obj;
+    for(let i=0;i<parts.length-1;i++){
+      cur[parts[i]] = cur[parts[i]] || {};
+      cur = cur[parts[i]];
+    }
+    cur[parts[parts.length-1]] = value;
+  }
+  window.brh430SetClient = function(path, val){ setObjPath430(client430(), path, val); };
+  window.brh430SetInsurance = function(path, val){ setObjPath430(insurance430(), path, val); };
+  window.brh430AddContact = function(){
+    client430().contacts.push({name:'', email:'', phone:'', insurance_area:'', note:''});
+    if(typeof renderWorkspace === 'function') renderWorkspace(1); else renderClientCard430();
+  };
+  window.brh430RemoveContact = function(idx){
+    client430().contacts.splice(idx,1);
+    if(typeof renderWorkspace === 'function') renderWorkspace(1); else renderClientCard430();
+  };
+  window.brh430AddPremise = function(){
+    insurance430().businessPremises.push({address:'', use:'', owned:'', note:''});
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+  window.brh430RemovePremise = function(idx){
+    insurance430().businessPremises.splice(idx,1);
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+  window.brh430AddActivity = function(){
+    insurance430().activities.push({name:'', revenue_share:'', description:''});
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+  window.brh430RemoveActivity = function(idx){
+    insurance430().activities.splice(idx,1);
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+  window.brh430AddClaim = function(){
+    insurance430().claimsHistory.push({date:'', amount:'', description:'', status:''});
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+  window.brh430RemoveClaim = function(idx){
+    insurance430().claimsHistory.splice(idx,1);
+    if(typeof renderWorkspace === 'function') renderWorkspace(2); else renderInsuranceCard430();
+  };
+
+  function input430(label, value, onchange, cls=''){
+    return `<label class="field430 ${cls}"><span>${esc430(label)}</span><input value="${esc430(value)}" onchange="${onchange}=this.value"></label>`;
+  }
+  function textarea430(label, value, onchange, cls=''){
+    return `<label class="field430 ${cls}"><span>${esc430(label)}</span><textarea onchange="${onchange}=this.value">${esc430(value)}</textarea></label>`;
+  }
+
+  window.renderAdviserCard430 = function(){
+    const a = adviser430();
+    return `
+      <section class="card430 adviser430">
+        <div class="card430-head">
+          <div>
+            <p class="eyebrow">Karta poradce / zpracovatele</p>
+            <h3>${esc430(a.name)}</h3>
+            <p class="muted">${esc430(a.source)}</p>
+          </div>
+          <div class="advisor-badge430">ASTORIE</div>
+        </div>
+        <div class="grid430 four">
+          <div class="info430"><span>Role</span><b>${esc430(a.role)}</b></div>
+          <div class="info430"><span>E-mail</span><b>${esc430(a.email)}</b></div>
+          <div class="info430"><span>Telefon</span><b>${esc430(a.phone || 'není uveden')}</b></div>
+          <div class="info430"><span>Oblast / tým</span><b>${esc430(a.region || 'není uvedeno')}</b></div>
+        </div>
+      </section>`;
+  };
+
+  window.renderClientCard430 = function(){
+    const c = client430();
+    c.contacts = arr430(c.contacts);
+    return `
+      <section class="hero430">
+        <div>
+          <p class="eyebrow">1 · Profesionální karta klienta</p>
+          <h2>Karta klienta</h2>
+          <p>Identifikace klienta, kontakty pro jednání a vazby k případu. Odborná pojistná data jsou oddělena v kartě pro pojištění.</p>
+        </div>
+        <div class="case-badge430">CASE<br>${esc430(case430().id || case430().case_id || 'nový')}</div>
+      </section>
+      ${renderAdviserCard430()}
+      <section class="card430">
+        <div class="card430-head">
+          <div>
+            <p class="eyebrow">Identifikace klienta</p>
+            <h3>Základní údaje</h3>
+          </div>
+          <button class="btn secondary" onclick="if(typeof lookupAres==='function'){lookupAres()}">ARES</button>
+        </div>
+        <div class="grid430 three">
+          ${input430('Název klienta', c.name || c.client_name || '', "brh430SetClient('name'")}
+          ${input430('IČO', c.ico || c.ic || '', "brh430SetClient('ico'")}
+          ${input430('Právní forma', c.legal_form || '', "brh430SetClient('legal_form'")}
+        </div>
+        <div class="grid430 two">
+          ${input430('Sídlo / adresa', c.address || '', "brh430SetClient('address')", 'wide')}
+          ${input430('Datová schránka', c.data_box || '', "brh430SetClient('data_box')"}
+        </div>
+        <div class="grid430 three">
+          ${input430('Web', c.web || '', "brh430SetClient('web')")}
+          ${input430('Fakturační / obecný e-mail', c.general_email || '', "brh430SetClient('general_email')")}
+          ${input430('Další adresa / poznámka', c.other_address_note || '', "brh430SetClient('other_address_note')")}
+        </div>
+      </section>
+      <section class="card430">
+        <div class="card430-head">
+          <div>
+            <p class="eyebrow">Kontaktní osoby</p>
+            <h3>Kontaktní osoby pro jednání o pojistné smlouvě</h3>
+            <p class="muted">U každé osoby lze určit oblast pojištění, pro kterou komunikuje.</p>
+          </div>
+          <button class="btn secondary" onclick="brh430AddContact()">+ Přidat kontaktní osobu</button>
+        </div>
+        <div class="contact-list430">
+          ${c.contacts.length ? c.contacts.map((p,idx)=>`
+            <div class="contact-row430">
+              <label><span>Příjmení a jméno</span><input value="${esc430(p.name||'')}" onchange="client430().contacts[${idx}].name=this.value"></label>
+              <label><span>E-mail</span><input value="${esc430(p.email||'')}" onchange="client430().contacts[${idx}].email=this.value"></label>
+              <label><span>Telefon</span><input value="${esc430(p.phone||'')}" onchange="client430().contacts[${idx}].phone=this.value"></label>
+              <label><span>Oblast pojištění</span><input value="${esc430(p.insurance_area||'')}" onchange="client430().contacts[${idx}].insurance_area=this.value" placeholder="např. odpovědnost, majetek, vozidla"></label>
+              <button class="btn danger" onclick="brh430RemoveContact(${idx})">Smazat</button>
+            </div>
+          `).join('') : `<div class="empty430">Zatím není doplněna žádná kontaktní osoba.</div>`}
+        </div>
+      </section>
+      <section class="card430">
+        <div class="card430-head">
+          <div>
+            <p class="eyebrow">Vazby k případu</p>
+            <h3>Poradce a interní vazby</h3>
+          </div>
+        </div>
+        <div class="grid430 three">
+          ${input430('Poradce', c.adviser_name || adviser430().name, "brh430SetClient('adviser_name')")}
+          ${input430('E-mail poradce', c.adviser_email || adviser430().email, "brh430SetClient('adviser_email')")}
+          ${input430('Interní poznámka', c.internal_note || '', "brh430SetClient('internal_note')")}
+        </div>
+      </section>`;
+  };
+
+  window.renderInsuranceCard430 = function(){
+    const i = insurance430();
+    return `
+      <section class="hero430">
+        <div>
+          <p class="eyebrow">2 · Karta pro pojištění</p>
+          <h2>Údaje pro poptávku a pojišťovny</h2>
+          <p>Odborná data pro pojistný program. Tato část se používá pro poptávky, nabídky, porovnání a výstupy.</p>
+        </div>
+        <div class="case-badge430">POJIŠTĚNÍ</div>
+      </section>
+      <section class="card430">
+        <div class="card430-head"><div><p class="eyebrow">Základní pojistné parametry</p><h3>Společné údaje pro pojišťovny</h3></div></div>
+        <div class="grid430 four">
+          ${input430('Typ činnosti', i.activity_type || case430().activity_type || client430().activity_type || '', "brh430SetInsurance('activity_type')")}
+          ${input430('Kód činnosti', i.activity_code || '', "brh430SetInsurance('activity_code')")}
+          ${input430('Územní rozsah', i.territory || client430().territory || 'Česká republika', "brh430SetInsurance('territory')")}
+          ${input430('Pojistné období', i.insurance_period || client430().insurance_period || '1 rok', "brh430SetInsurance('insurance_period')")}
+          ${input430('Počátek pojištění', i.start_date || client430().start_date || '', "brh430SetInsurance('start_date')")}
+          ${input430('Frekvence placení', i.payment_frequency || client430().payment_frequency || 'ročně', "brh430SetInsurance('payment_frequency')")}
+          ${input430('Obrat', i.turnover || client430().turnover || '', "brh430SetInsurance('turnover')")}
+          ${input430('Počet zaměstnanců', i.employees || client430().employees || '', "brh430SetInsurance('employees')")}
+        </div>
+        ${textarea430('Export / zahraničí / poznámka', i.export_note || client430().export_note || '', "brh430SetInsurance('export_note')")}
+      </section>
+      <section class="card430">
+        <div class="card430-head">
+          <div><p class="eyebrow">Provozovny a místa pojištění</p><h3>Provozovny</h3></div>
+          <button class="btn secondary" onclick="brh430AddPremise()">+ Přidat provozovnu</button>
+        </div>
+        ${i.businessPremises.length ? i.businessPremises.map((p,idx)=>`
+          <div class="row430">
+            <label><span>Adresa</span><input value="${esc430(p.address||'')}" onchange="insurance430().businessPremises[${idx}].address=this.value"></label>
+            <label><span>Využití</span><input value="${esc430(p.use||'')}" onchange="insurance430().businessPremises[${idx}].use=this.value"></label>
+            <label><span>Vlastní / pronajaté</span><input value="${esc430(p.owned||'')}" onchange="insurance430().businessPremises[${idx}].owned=this.value"></label>
+            <button class="btn danger" onclick="brh430RemovePremise(${idx})">Smazat</button>
+          </div>`).join('') : `<div class="empty430">Zatím není doplněna žádná provozovna.</div>`}
+      </section>
+      <section class="card430">
+        <div class="card430-head">
+          <div><p class="eyebrow">Činnosti klienta</p><h3>Hlavní a vedlejší činnosti</h3></div>
+          <button class="btn secondary" onclick="brh430AddActivity()">+ Přidat činnost</button>
+        </div>
+        ${i.activities.length ? i.activities.map((a,idx)=>`
+          <div class="row430">
+            <label><span>Činnost</span><input value="${esc430(a.name||'')}" onchange="insurance430().activities[${idx}].name=this.value"></label>
+            <label><span>Podíl na obratu</span><input value="${esc430(a.revenue_share||'')}" onchange="insurance430().activities[${idx}].revenue_share=this.value"></label>
+            <label><span>Popis</span><input value="${esc430(a.description||'')}" onchange="insurance430().activities[${idx}].description=this.value"></label>
+            <button class="btn danger" onclick="brh430RemoveActivity(${idx})">Smazat</button>
+          </div>`).join('') : `<div class="empty430">Zatím není doplněna žádná odborná činnost.</div>`}
+      </section>
+      <section class="card430">
+        <div class="card430-head">
+          <div><p class="eyebrow">Škodní průběh</p><h3>Škodní události a historie</h3></div>
+          <button class="btn secondary" onclick="brh430AddClaim()">+ Přidat škodu</button>
+        </div>
+        ${i.claimsHistory.length ? i.claimsHistory.map((cl,idx)=>`
+          <div class="row430">
+            <label><span>Datum / období</span><input value="${esc430(cl.date||'')}" onchange="insurance430().claimsHistory[${idx}].date=this.value"></label>
+            <label><span>Výše škody</span><input value="${esc430(cl.amount||'')}" onchange="insurance430().claimsHistory[${idx}].amount=this.value"></label>
+            <label><span>Popis</span><input value="${esc430(cl.description||'')}" onchange="insurance430().claimsHistory[${idx}].description=this.value"></label>
+            <label><span>Stav</span><input value="${esc430(cl.status||'')}" onchange="insurance430().claimsHistory[${idx}].status=this.value"></label>
+            <button class="btn danger" onclick="brh430RemoveClaim(${idx})">Smazat</button>
+          </div>`).join('') : `<div class="empty430">Zatím není doplněn škodní průběh.</div>`}
+      </section>`;
+  };
+
+  const oldRenderWorkspace430 = window.renderWorkspace;
+  window.renderWorkspace = function(step){
+    if(step === 1){
+      const target = document.getElementById('workspaceBody') || document.getElementById('workspaceContent') || document.getElementById('appContent') || document.querySelector('.workspace-body');
+      if(target){ target.innerHTML = renderClientCard430(); return; }
+    }
+    if(step === 2){
+      const target = document.getElementById('workspaceBody') || document.getElementById('workspaceContent') || document.getElementById('appContent') || document.querySelector('.workspace-body');
+      if(target){ target.innerHTML = renderInsuranceCard430(); return; }
+    }
+    if(typeof oldRenderWorkspace430 === 'function') return oldRenderWorkspace430(step);
+  };
+
+  document.addEventListener('click', function(e){
+    const txt = (e.target && e.target.textContent || '').trim();
+    if(txt.includes('1. Karta klienta')){
+      setTimeout(()=>{ if(typeof renderWorkspace==='function') renderWorkspace(1); },0);
+    }
+    if(txt.includes('2. Karta pro pojištění')){
+      setTimeout(()=>{ if(typeof renderWorkspace==='function') renderWorkspace(2); },0);
+    }
+  }, true);
 })();

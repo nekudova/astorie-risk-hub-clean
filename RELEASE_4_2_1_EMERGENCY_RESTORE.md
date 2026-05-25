@@ -1,4 +1,4 @@
-# Business Risk Hub 4.2.1 – Emergency Restore Stable 4.1.0 Core
+# Business Risk Hub 4.3.0 – Professional Cards Engine
 
 ## Účel
 Toto je bezpečný opravný balík po chybné verzi 4.2.0.
@@ -8,7 +8,7 @@ Balík je postavený nad poslední funkční verzí:
 - Business Risk Hub 4.1.0 – Liability Dynamic Engine PRO
 
 ## Co se mění
-- pouze identita buildu na 4.2.1,
+- pouze identita buildu na 4.3.0,
 - viditelné označení emergency restore,
 - žádné změny databáze,
 - žádné destruktivní změny workflow,

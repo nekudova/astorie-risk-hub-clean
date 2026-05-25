@@ -70,7 +70,7 @@
 .request-card-351b .badge{font-weight:800;text-transform:lowercase;background:#eaf5f7;color:#003D4C;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;white-space:nowrap}
 @media(max-width:900px){.request-summary-351b{flex-direction:column}.request-summary-351b:after{align-self:flex-start}.request-body-351b{padding:0 16px 18px}}
 
-/* BRH 4.2.1 – Emergency Restore Stable 4.1.0 Core UX */
+/* BRH 4.3.0 – Professional Cards Engine UX */
 .risk-grid410{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
 .risk-card410{position:relative;text-align:left;border:1px solid #d6edf1;background:#fff;border-radius:18px;padding:16px 46px 16px 16px;min-height:118px;color:#003D4C;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,61,76,.05);transition:.16s ease;white-space:normal}
 .risk-card410:hover{transform:translateY(-1px);border-color:#FC4C02;box-shadow:0 12px 28px rgba(0,61,76,.10)}
@@ -95,3 +95,49 @@
 .admin-wide-table textarea{min-height:56px}
 .admin-wide-table .tall{min-height:90px}
 @media(max-width:1200px){.risk-row410{grid-template-columns:1fr}.risk-actions410{justify-content:flex-start;padding-top:0}}
+
+
+/* BRH 4.3.0 – Professional Cards Engine */
+.admin-safe-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.admin-tabs-safe{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 20px}
+.admin-tabs-safe .chip.active{background:#ff4b0b;color:#fff;border-color:#ff4b0b;box-shadow:0 12px 28px rgba(252,76,2,.18)}
+.admin-safe-table{max-width:100%;overflow:auto;border-radius:18px;border:1px solid #d6edf0;background:#fff}
+.admin-safe-table table{min-width:1100px;width:100%;border-collapse:separate;border-spacing:0}
+.admin-safe-table th{position:sticky;top:0;z-index:1;background:#004b57;color:#fff;text-align:left;padding:14px}
+.admin-safe-table td{vertical-align:top;padding:10px;border-bottom:1px solid #e2f1f3}
+.admin-safe-table input,.admin-safe-table select,.admin-safe-table textarea{width:100%;box-sizing:border-box}
+.admin-safe-table textarea{min-height:58px;resize:vertical}
+.admin-safe-table textarea.tall{min-height:96px}
+.role-checks{display:grid;grid-template-columns:repeat(2,minmax(90px,1fr));gap:8px}
+.role-pill,.perm{display:flex;align-items:center;gap:6px;background:#eef8fa;border:1px solid #d8edf0;border-radius:999px;padding:6px 9px;font-weight:700;white-space:nowrap}
+.perm{border-radius:12px;margin:4px 0}
+.json-box{width:100%;min-height:520px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45}
+
+
+/* BRH 4.3.0 – Professional Cards Engine */
+.hero430{background:linear-gradient(135deg,#004b57,#00636d);color:#fff;border-radius:26px;padding:28px 32px;margin:18px 0 22px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 18px 44px rgba(0,61,76,.18)}
+.hero430 h2{font-size:32px;margin:6px 0 8px;color:#fff}
+.hero430 p{margin:0;max-width:980px;color:#eefbfc}
+.case-badge430{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);border-radius:18px;padding:16px 20px;text-align:center;font-weight:900;letter-spacing:.04em;min-width:92px}
+.card430{background:#fff;border:1px solid #d8edf0;border-radius:22px;padding:22px;margin:16px 0;box-shadow:0 10px 28px rgba(0,61,76,.06)}
+.card430-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px}
+.card430 h3{margin:4px 0 6px;font-size:24px;color:#003d4c}
+.grid430{display:grid;gap:14px;margin-bottom:14px}
+.grid430.two{grid-template-columns:2fr 1fr}
+.grid430.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid430.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.field430 span,.contact-row430 span,.row430 span{display:block;font-weight:800;color:#003d4c;margin:0 0 6px}
+.field430 input,.field430 textarea,.contact-row430 input,.row430 input{width:100%;box-sizing:border-box;border:1px solid #cfe7eb;border-radius:14px;padding:13px 14px;font-weight:700;color:#003d4c;background:#fff}
+.field430 textarea{min-height:74px;resize:vertical}
+.info430{border:1px solid #d8edf0;border-radius:16px;background:#f6fbfc;padding:14px}
+.info430 span{display:block;color:#607986;font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.04em}
+.info430 b{display:block;color:#003d4c;margin-top:4px}
+.advisor-badge430{background:#ff4b0b;color:#fff;border-radius:16px;padding:12px 16px;font-weight:900;box-shadow:0 12px 26px rgba(252,76,2,.2)}
+.contact-list430{display:grid;gap:12px}
+.contact-row430,.row430{display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1.1fr auto;gap:12px;align-items:end;border:1px solid #e2f1f3;background:#fafdfe;border-radius:18px;padding:14px}
+.row430{grid-template-columns:1.6fr 1fr 1fr auto}
+.empty430{border:1px dashed #cfe7eb;border-radius:18px;background:#fafdfe;padding:18px;text-align:center;font-weight:800;color:#617986}
+@media(max-width:1100px){
+  .grid430.two,.grid430.three,.grid430.four,.contact-row430,.row430{grid-template-columns:1fr}
+  .hero430{flex-direction:column;align-items:flex-start}
+}

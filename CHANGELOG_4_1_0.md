@@ -1,4 +1,4 @@
-# Business Risk Hub 4.2.1 – Emergency Restore Stable 4.1.0 Core
+# Business Risk Hub 4.3.0 – Professional Cards Engine
 
 ## Obsah
 - Kompletní katalog odpovědnostních rizik podle původního Excelu poradce: 32 položek.
