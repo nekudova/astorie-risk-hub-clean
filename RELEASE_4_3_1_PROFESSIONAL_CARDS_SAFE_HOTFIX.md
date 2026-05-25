@@ -1,4 +1,4 @@
-# Business Risk Hub 4.3.1 – Professional Cards SAFE HOTFIX
+# Business Risk Hub 4.4.0 – Advisor Professional Cards Workflow SAFE
 
 ## Účel
 Oprava po verzi 4.3.0, kde přepsání hlavního renderování způsobilo nefunkční tlačítka.

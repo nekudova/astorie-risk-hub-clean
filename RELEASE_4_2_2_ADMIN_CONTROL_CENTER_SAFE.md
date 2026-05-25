@@ -1,4 +1,4 @@
-# Business Risk Hub 4.3.1 – Professional Cards SAFE HOTFIX
+# Business Risk Hub 4.4.0 – Advisor Professional Cards Workflow SAFE
 
 ## Účel
 Bezpečná vývojová verze po návratu na stabilní 4.2.1.
