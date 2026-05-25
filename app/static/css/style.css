@@ -141,7 +141,7 @@
 }
 
 
-/* BRH 4.8.1 – Professional Cards Integration SAFE */
+/* BRH 4.8.2 – Professional Cards Integration SAFE */
 .advisor-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -174,7 +174,7 @@
 }
 
 
-/* BRH 4.8.1 – Real Professional Cards SAFE */
+/* BRH 4.8.2 – Real Professional Cards SAFE */
 .pro-card-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -232,4 +232,29 @@
 @media(max-width:1050px){
   .pro-contact-row{grid-template-columns:1fr}
   .pro-card-hero{flex-direction:column;align-items:flex-start}
+}
+
+
+/* BRH 4.8.2 – Advisor Specification Repair SAFE */
+.pro-section .section-head{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+}
+.pro-section .section-head h3{
+  margin:0 0 4px;
+}
+.pro-section textarea{
+  min-height:104px;
+}
+.pro-section select{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid #cfe4e8;
+  border-radius:14px;
+  padding:12px;
+  font-weight:700;
+  color:#003D4C;
+  background:#fff;
 }
