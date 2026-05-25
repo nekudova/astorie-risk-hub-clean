@@ -1,4 +1,4 @@
-# Business Risk Hub 4.8.2 – Advisor Specification Repair SAFE
+# Business Risk Hub 4.8.3 – Advisor Specification Repair SAFE
 
 ## Co opravuje
 - Oprava po nepovedené verzi 4.8.1.
@@ -16,7 +16,7 @@
 
 ## Po nasazení
 V logu musí být:
-- /static/js/app.js?v=482
-- /static/css/style.css?v=482
+- /static/js/app.js?v=483
+- /static/css/style.css?v=483
 
 Build: 2026-05-25 10:11:06

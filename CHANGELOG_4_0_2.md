@@ -1,4 +1,4 @@
-# Business Risk Hub 4.8.2 – Release Identity Fix & Visible Build Check
+# Business Risk Hub 4.8.3 – Release Identity Fix & Visible Build Check
 
 ## Účel
 Oprava skutečného zobrazení verze po nasazení. Předchozí balík obsahoval části 4.0.2, ale hlavní zdroj verze v aplikaci zůstal na předchozí hodnotě.

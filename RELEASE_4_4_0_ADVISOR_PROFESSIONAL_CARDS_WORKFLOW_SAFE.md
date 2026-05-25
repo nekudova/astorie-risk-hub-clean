@@ -1,5 +1,5 @@
 
-# Business Risk Hub 4.8.2 – Advisor Professional Cards Workflow SAFE
+# Business Risk Hub 4.8.3 – Advisor Professional Cards Workflow SAFE
 
 ## Hlavní cíl
 Bezpečné rozšíření profesionálních karet bez destrukce systému.

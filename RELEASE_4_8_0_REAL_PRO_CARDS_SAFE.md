@@ -1,4 +1,4 @@
-# Business Risk Hub 4.8.2 – Real Professional Cards SAFE
+# Business Risk Hub 4.8.3 – Real Professional Cards SAFE
 
 ## Oprava proti 4.7.0
 - Karta poradce má skutečný formulář a je napojená na finální `renderWorkspace()`.
@@ -15,7 +15,7 @@
 
 ## Po nasazení
 V logu má být:
-- `/static/js/app.js?v=482`
-- `/static/css/style.css?v=482`
+- `/static/js/app.js?v=483`
+- `/static/css/style.css?v=483`
 
 Build: 2026-05-25 09:06:07
