@@ -1,4 +1,4 @@
-# Business Risk Hub 4.5.2 – Advisor Professional Cards Workflow SAFE
+# Business Risk Hub 4.6.0 – Advisor Professional Cards Workflow SAFE
 
 ## Účel
 Oprava po verzi 4.3.0, kde přepsání hlavního renderování způsobilo nefunkční tlačítka.

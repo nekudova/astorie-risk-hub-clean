@@ -817,7 +817,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.5.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.6.0 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1045,7 +1045,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.5.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.6.0 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1341,7 +1341,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.5.2 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.6.0 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -1349,7 +1349,7 @@ window.tabRisks=tabRisks;
    - interní metodika jako tooltip, neexportuje se
    ========================================================== */
 (function(){
-  window.BRH_VERSION = '4.5.2';
+  window.BRH_VERSION = '4.6.0';
   const LIABILITY_RISKS_410_DEFAULT = [{"risk_key": "obecna_provozni_odpovednosti_za_ujmu_skodu", "name": "Obecná (provozní) odpovědnosti za újmu (škodu)", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "společný limit na smlouvě pro odpovědnost z činnosti, odp. za výrobek a stažení výrobku z trhu", "recommended_deductible": "10 000 Kč", "internal_note": "2 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 1, "active": true}, {"risk_key": "pojisteni_odpovednosti_za_ujmu_skodu_zpuso", "name": "Pojištění odpovědnosti za újmu (škodu) způsobenou vadou výrobku a vadou práce po předání", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit z celkového limitu", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 2, "active": true}, {"risk_key": "nasledna_financni_skoda_vcetne_skod_zpusob", "name": "Následná finanční škoda - včetně škod způsobených vadou výrobku a vadou práce po předání", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit z celkového limitu", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 3, "active": true}, {"risk_key": "ciste_financni_skody_vcetne_skod_zpusobeny", "name": "Čisté finanční škody - včetně škod způsobených vadou výrobku a vadou práce po předání", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 4, "active": true}, {"risk_key": "nemajetkova_ujma_neopravnenym_zasahem_do_p", "name": "Nemajetková újma neoprávněným zásahem do práva na ochranu osobnosti (psychická újma)", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 5, "active": true}, {"risk_key": "skoda_na_uzivane_nemovitostti", "name": "Škoda na užívané nemovitostti", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 6, "active": true}, {"risk_key": "cizi_veci_prevzate_a_majetkova_ujma_v_souv", "name": "Cizí věci převzaté a Majetková újma v souvislostí s vykonávanou objednanou činností", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 7, "active": true}, {"risk_key": "cizi_veci_uzivane_movite", "name": "Cizí věci užívané movité", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 8, "active": true}, {"risk_key": "regresy_zdravotni_pojistovny_a_regresy_dav", "name": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - zaměstnanci", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 9, "active": true}, {"risk_key": "regresy_zdravotni_pojistovny_a_regresy_dav", "name": "Regresy zdravotní pojišťovny a regresy dávek nemocenského pojištění - třetí osoby", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 10, "active": true}, {"risk_key": "znecisteni_zivotniho_prostredi", "name": "Znečištění životního prostředí", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 11, "active": true}, {"risk_key": "regres_pojistovny_pov_v_pripade_ze_ridic_p", "name": "Regres pojišťovny POV v případě, že řidič pojištěného požil aplkohol, nebo se odmítl podrobit dechové zkoušce, nebo odjel z místa nehody", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 12, "active": true}, {"risk_key": "odpojednost_za_skody_zpusobene_pri_nakladc", "name": "Odpojednost za škody způsobené při nakládce a vykládce", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 13, "active": true}, {"risk_key": "odpovednost_za_skodu_na_veci_odlozene_a_vn", "name": "Odpovědnost za škodu na věci odložené a vnesené", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 14, "active": true}, {"risk_key": "odpovednost_obchodni_korporace_za_ujmu_cle", "name": "Odpovědnost obchodní korporace za újmu členům statutárních orgánů v souvislosti s výkonem jejich funkce", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 15, "active": true}, {"risk_key": "odpovednosti_clenu_statutarnich_organu_za_", "name": "Odpovědnosti členů statutárních orgánů za jinou než čistou finanční škodu způsobenou organizaci", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 16, "active": true}, {"risk_key": "skody_na_vecech_zamestnancu", "name": "Škody na věcech zaměstnanců", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 17, "active": true}, {"risk_key": "krizova_odpovednost_mezi_spolupojistenymi", "name": "Křížová odpovědnost mezi spolupojištěnými", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 18, "active": true}, {"risk_key": "odpovednost_za_skodu_zpusobenou_majetkove_", "name": "Odpovědnost za škodu způsobenou majetkově propojené osobě", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 19, "active": true}, {"risk_key": "skoda_zpusobena_vadne_vyrobenym_strojem_pj", "name": "Škoda způsobená vadně vyrobeným strojem pjištěného", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 20, "active": true}, {"risk_key": "nahrada_smluvni_pokuty_do_vyse_skutecne_sk", "name": "Náhrada smluvní pokuty do výše skutečné škody", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 21, "active": true}, {"risk_key": "pokuty_a_penale", "name": "Pokuty a penále", "recommended_limit": "", "recommended_sublimit": "", "recommended_deductible": "", "internal_note": "", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 22, "active": true}, {"risk_key": "cista_financni_skoda_v_souvislosti_s_posky", "name": "Čistá finanční škoda v souvislostí s poskytnutím rady", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 23, "active": true}, {"risk_key": "ujma_zpusobena_motorovymi_vozidly_nad_rame", "name": "Újma způsobená motorovými vozidly nad rámec POV", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 24, "active": true}, {"risk_key": "ujma_vznikla_na_opravnene_uzivanem_dopravn", "name": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle", "recommended_limit": "500 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1 x ročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 25, "active": true}, {"risk_key": "stazeni_vyrobku_z_trhu_organizovane_prvni_", "name": "Stažení výrobku z trhu organizované první stranou", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 26, "active": true}, {"risk_key": "stazeni_vyrobku_z_trhu_organizovane_treti_", "name": "Stažení výrobku z trhu organizované třetí stranou", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 27, "active": true}, {"risk_key": "spojeni_nebo_smiseni_vadneho_vyrobku_s_jin", "name": "Spojení nebo smísení vadného výrobku s jinou bezvadnou věcí", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 28, "active": true}, {"risk_key": "naklady_na_demontaz_vadneho_vyrobku_a_mont", "name": "Náklady na demontáž vadného výrobku a montáž bezvadného výrobku", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "v rámci celkového limitu PS", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 29, "active": true}, {"risk_key": "skoda_vznikla_dalsim_opracovanim_vadneho_v", "name": "Škoda vzniklá dalším opracováním vadného výrobku dodaného pojištěným, aniž došlo k jeho spojení či smísení, nebo montáží s dalšími výrobky.", "recommended_limit": "1 000 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "100 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 30, "active": true}, {"risk_key": "naklady_na_kontrolu_zkouseni_a_trideni_vad", "name": "Náklady na kontrolu, zkoušení a třídění vadných výrobků", "recommended_limit": "100 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 31, "active": true}, {"risk_key": "naklady_na_reklamaci_u_zakaznika_pojistene", "name": "Náklady na reklamaci u zákazníka pojištěného", "recommended_limit": "100 000 Kč", "recommended_sublimit": "sublimit", "recommended_deductible": "10 000 Kč", "internal_note": "1xročně", "source": "Excel poradce – Poptávka odpovědnost 20.04.2026", "module": "liability", "order": 32, "active": true}];
   const LIABILITY_AGREEMENTS_410_DEFAULT = [{"id": "veci_prevzate_a_uzivane", "title": "Věci převzaté a užívané:", "text": "Pojištění se vztahuje i na následnou finanční újmu vyplývající z poškození veci převzaté nebo užívané.  Pojištění se nevztahuje na újmu vzniklou ztrátou věci.", "limit": "", "module": "liability", "order": 1, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_vznikla_na_opravnene_uzivanem_dopravn", "title": "Újma vzniklá na oprávněně užívaném dopravním prostředku a vozidle", "text": "Pojištění se vztahuje na újmu vzniklou na oprávněně užívaném dopravním prostředku. Pojištění se nevztahuje na škody na vozidle, které nemá sjednáno havarijní pojištění. Pojištění se dále nevztahuje na odpovědnost za škodu vzniklou na pneumatikách, discích a kolových šroubech nebo přepravovaných věcech. Pro škodu na vozidle pojistitel poskytne pojistné plnění jen v případě, že událost bude šetřena policií.", "limit": "", "module": "liability", "order": 2, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "majetkova_ujma_v_souvislosti_s_vykonavanou", "title": "Majetková újma v souvislostí s vykonávanou objednanou činností", "text": "Pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému majetkovou újmu vzniklou na věci, na které pojištěný vykonával objednanou činnost, pokud k poškození nebo zničení věci došlo tím, že objednaná činnost byla provedena vadně. Pojištění se vztahuje i na následnou finanční újmu z toho vyplývající.", "limit": "", "module": "liability", "order": 3, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "prirozena_prava_cloveka", "title": "Přirozená práva člověka", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému újmu vzniklou na přirozených právech člověka případně i způsobené duševní útrapy, nesouvisející s újmou při ublížení na zdraví a při usmrcení. Pojistné plnění bude poskytnuto pouze na základě pravomocného rozhodnutí soudu.", "limit": "", "module": "liability", "order": 4, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_zpusobena_motorovymi_vozidly_nad_rame", "title": "Újma způsobená motorovými vozidly nad rámec POV", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu způsobenou motorovými vozidly ve vlastnictví pojistníka nebo vozidly, které pojištěný po právu užívá na základě smlouvy, vzniklou při dopravní nehodě šetřené policií. Pojištění se vztahuje rovněž na újmu způsobenou při práci vozidla jako pracovního stroje, včetně stacionárního pracovního stroje. Pojistitel neposkytne pojistné plnění za újmu způsobenou provozem motorových vozidel v rozsahu, v jakém vznikl nárok na pojistné plnění z povinně smluvního pojištění odpovědnosti za újmu způsobenou provozem vozidla. Pojištění dle tohoto ujednání se nevztahuje na újmu způsobenou na samotném vozidle, jimž byla újma způsobena a na újmu způsobenou provozem motorových vozidel při jejich účasti na organizovaném motoristickém závodu .", "limit": "", "module": "liability", "order": 5, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "ujma_zpusobena_zaku_studentu_ke_ktere_dosl", "title": "Újma způsobená žáku/studentu, ke které došlo při praktickém vyučování", "text": "pojištění se vztahuje i na odpovědnost za újmu způsobenou žáku/studentu, ke které došlo při praktickém vyučování u pojištěného nebo v přímé souvislosti s ním, příp. k této škodě došlo v souvislosti s jeho účastí na zájmovém vzdělávání. Ujednává se, že pojištění se vztahuje i na odpovědnost studenta/žáka za újmu způsobenou jakékoliv třetí osobě při praktickém vyučování u právnické nebo fyzické osoby anebo v přímé souvislosti s ním. Pojištění se vztahuje i na újmy způsobené pojistníkovi.", "limit": "", "module": "liability", "order": 6, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "cista_financni_skoda", "title": "Čistá finanční škoda", "text": "pojištění obecné odpovědnosti a pojištění odpovědnosti za újmu způsobenou vadou poskytnuté práce, jež se projeví po jejím předání a pojištění odpovědnosti za újmu způsobenou vadou výrobku se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající.", "limit": "", "module": "liability", "order": 7, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pokuty_a_penale", "title": "Pokuty a penále", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit poškozenému újmu vzniklou tím, že v důsledku vady pojištěným poskytnuté odborné služby nebo dodáním vadného výrobku byly poškozenému uloženy nebo proti němu uplatňovány pokuty, penále nebo jiné správní sankce k tomu oprávněným orgánem přímo na základě právního předpisu.", "limit": "", "module": "liability", "order": 8, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "montaz_a_demontaz", "title": "Montáž a demontáž", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích, spočívající v nákladech na odstranění, demontáž, vyjmutí nebo uvolnění vadného výrobku a v nákladech na montáž, připevnění nebo osazení bezvadného výrobku, která vznikla poškozenému jinak než při ublížení na zdraví, usmrcení nebo na jmění jeho poškozením, zničením nebo pohřešováním nebo následná finanční újma z toho vyplývající. Pojištění se vztahuje také na náhradu nákladů na přepravu výrobku bez vad určeného k výměně za vadný výrobek, náhradu nákladů na přepravu vadného výrobku a na náhradu nákladů na přepravu jiné věci, která obsahuje vadný výrobek.", "limit": "", "module": "liability", "order": 9, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "spojeni_smiseni", "title": "Spojení, smísení", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit poškozenému čistou finanční škodu, tj. majetkovou újmu na jmění vyjádřenou v penězích nastalou v důsledku toho, že věc vzniklá spojením nebo smísením jiné věci s vadným výrobkem vyrobeným nebo dodaným pojištěným je vadná, nebo nastalou v důsledku toho, že věc vzniklá v důsledku dalšího zpracování nebo opracování vadného výrobku vyrobeného nebo dodaného pojištěným je vadná (dále jen „vyrobená vadná věc“).", "limit": "", "module": "liability", "order": 10, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "cinnosti_bez_zivnostenskeho_opravneni", "title": "Činnosti bez živnostenského oprávnění", "text": "Pojištění se sjednává i pro případ povinnosti pojištěného uhradit škodu a v případě ublížení na zdraví nebo při usmrcení též újmu vzniklou jinému v souvislosti s činnostmi, pro jejichž výkon se živnostenské oprávnění nevyžaduje.", "limit": "", "module": "liability", "order": 11, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "propojene_osoby_krizova_odpovednost", "title": "Propojené osoby, křížová odpovědnost", "text": "pojištění se vztahuje i na právním předpisem stanovenou povinnost pojištěného nahradit újmu vzniklou: - spolupojištěné osobě; - právnické osobě, ve které má pojištěný nebo osoby jemu blízké majetkovou účast; - právnické osobě, ve které pojištěný vykonává funkci statutárního orgánu; - osobě, která je v pozici společníka pojištěného.", "limit": "", "module": "liability", "order": 12, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "naklady_na_reklamaci_u_zakaznika_pojistene", "title": "Náklady  na reklamaci u zákazníka pojištěného", "text": "Pojišťovna zaplatí  administrativní náklady zákazníka pojištěného s dokladováním škody, které požaduje poškozený zákazník po pojištěném, pokud tyto náklady souvisí s dokladováním pojistné události.", "limit": "", "module": "liability", "order": 13, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "smluvni_ujednani_k_ruceni_vlastnika_pozemn", "title": "Smluvní ujednání k ručení vlastníka pozemní komunikace za správce pozemní komunikace", "text": "Pojištění se vztahuje i na povinnost pojištěného uhradit poškozenému peněžní částku, pokud mu tato povinnost vznikla ve smyslu § 27 odst.6 zákona č. 13/1997 Sb., o pozemních komunikacích, z důvodu ručení pojištěného za splnění povinnosti správce pozemní komunikace nahradit škodu (újmu). Pojistitel však poskytne pojistné plnění maximálně v rozsahu, v jakém by je poskytl v případě, kdy by výkon správy pozemní komunikace nebyl zajišťován prostřednictvím správce, ale přímo pojištěným.", "limit": "", "module": "liability", "order": 14, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pojisteni_nakladu_na_kontrolu_nebo_zkousen", "title": "Pojištění nákladů na kontrolu nebo zkoušení výrobku poškozeného", "text": "pojištění se vztahuje i na povinnost pojištěného nahradit škodu (újmu na jmění) spočívající výlučně v nákladech vzniklých při kontrole nebo zkoušení výrobků poškozeného, která vznikla jinému.", "limit": "", "module": "liability", "order": 15, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}, {"id": "pripojisteni_odpovednosti_za_ujmu_zpusoben", "title": "Připojištění odpovědnosti za újmu způsobenou vyrobením vadné věci pomocí vadného stroje", "text": "připojištění se vztahuje na právním předpisem stanovenou povinnost pojištěného nahradit újmu na jmění (škodu) vzniklou v důsledku toho, že věc vzniklá vyrobením/zpracováním/opracováním pomocí vadného stroje, který vadně vyrobil, dodal, (s)montoval nebo vadně udržoval či opravil pojištěný (dále jen \"vadný stroj\") je vadná (dále jen \"vyrobená vadná věc\").", "limit": "", "module": "liability", "order": 16, "active": true, "source": "Excel poradce – Poptávka odpovědnost 20.04.2026"}];
 
@@ -1383,7 +1383,7 @@ window.tabRisks=tabRisks;
       specification: '',
       method_note: risk410Help(r),
       recommended_sublimit: safeText(r.recommended_sublimit || ''),
-      source: safeText(r.source || 'Advisor Professional Cards Workflow SAFE 4.5.2')
+      source: safeText(r.source || 'Advisor Professional Cards Workflow SAFE 4.6.0')
     };
   }
 
@@ -1421,7 +1421,7 @@ window.tabRisks=tabRisks;
   window.addAllLiabilityAgreements = addAllLiabilityAgreements = function(){
     state.liability_agreements = arr(state.liability_agreements);
     const existing=new Set(state.liability_agreements.map(a=>safeText(a.title).toLowerCase()));
-    agreement410List().forEach(a=>{ const k=safeText(a.title).toLowerCase(); if(k && !existing.has(k)) state.liability_agreements.push({title:a.title, limit:a.limit||'', text:a.text||'', source:a.source||'Advisor Professional Cards Workflow SAFE 4.5.2'}); });
+    agreement410List().forEach(a=>{ const k=safeText(a.title).toLowerCase(); if(k && !existing.has(k)) state.liability_agreements.push({title:a.title, limit:a.limit||'', text:a.text||'', source:a.source||'Advisor Professional Cards Workflow SAFE 4.6.0'}); });
     renderWorkspace(); toast('Doplněna kompletní sada zvláštních ujednání odpovědnosti.');
   };
 
@@ -1462,7 +1462,7 @@ window.tabRisks=tabRisks;
     const cards=risk410List().map(riskTile410).join('');
     const selected=selectedLiabilityRisks410();
     const agre=(state.liability_agreements||[]).map((a,i)=>`<tr><td><textarea class="fit" onchange="state.liability_agreements[${i}].title=this.value">${esc(a.title||'')}</textarea></td><td><textarea class="fit" onchange="state.liability_agreements[${i}].limit=this.value" placeholder="limit / sublimit">${esc(a.limit||'')}</textarea></td><td><textarea class="fit tall" onchange="state.liability_agreements[${i}].text=this.value">${esc(a.text||'')}</textarea></td><td><button class="btn danger" onclick="removeLiabilityAgreement(${i})">Smazat</button></td></tr>`).join('');
-    return `<p class="eyebrow">3. Modul pojištění odpovědnosti PROFI · 4.5.2</p>
+    return `<p class="eyebrow">3. Modul pojištění odpovědnosti PROFI · 4.6.0</p>
       <h2>Advisor Professional Cards Workflow SAFE</h2>
       <p class="muted">Katalog odpovědnosti vychází z původního Excelu poradce. Interní metodika je dostupná přes malou ikonku „i“ a nikdy se neexportuje. Do poptávky jde pouze pole Specifikace / doplnění pro pojišťovnu.</p>
       <div class="section-soft"><div class="section-head"><div><h3>Katalog rizik odpovědnosti</h3><p class="muted">Kliknutím riziko přidáte, dalším kliknutím odeberete. Katalog obsahuje ${risk410List().length} položek.</p></div><div class="tools"><button class="btn primary" onclick="addAllLiabilityRisks()">+ Přidat celou sadu</button><button class="btn danger" onclick="clearAllLiabilityRisks()">Odebrat všechna rizika</button></div></div><div class="risk-grid410">${cards}</div></div>
@@ -1528,14 +1528,14 @@ window.tabRisks=tabRisks;
 
 
 /* =====================================================================
-   BRH 4.5.2 – Advisor Professional Cards Workflow SAFE
+   BRH 4.6.0 – Advisor Professional Cards Workflow SAFE
    Nedestruktivní oprava viditelnosti Adminu.
    - Nemění DB schéma.
    - Nezasahuje do pracovního prostoru, případů ani modulu odpovědnosti.
    - Přidává pouze finální bezpečné vykreslení Adminu s přehlednými záložkami.
    ===================================================================== */
 (function(){
-  window.BRH_VERSION = '4.5.2';
+  window.BRH_VERSION = '4.6.0';
 
   function brh422Arr(x){ return Array.isArray(x) ? x : []; }
   function brh422Esc(v){
@@ -1602,7 +1602,7 @@ window.tabRisks=tabRisks;
     box.innerHTML = `
       <div class="admin-safe-head">
         <div>
-          <p class="eyebrow">Administrace · 4.5.2 SAFE</p>
+          <p class="eyebrow">Administrace · 4.6.0 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Bezpečné zobrazení všech správcovských sekcí. Tato verze nemění databázové schéma ani pracovní workflow.</p>
         </div>
@@ -1857,7 +1857,7 @@ window.tabRisks=tabRisks;
 
 
 /* =====================================================================
-   BRH 4.5.2 – Advisor Professional Cards Workflow SAFE
+   BRH 4.6.0 – Advisor Professional Cards Workflow SAFE
    Bezpečná oprava po 4.3.0:
    - NEPŘEPISUJE hlavní renderWorkspace.
    - NEPŘIDÁVÁ globální click listener.
@@ -1865,7 +1865,7 @@ window.tabRisks=tabRisks;
    - Přidává jen izolované funkce pro profesionální karty.
    ===================================================================== */
 (function(){
-  window.BRH_VERSION = '4.5.2';
+  window.BRH_VERSION = '4.6.0';
 
   function brh431Esc(v){
     return String(v ?? '').replace(/[&<>"']/g, function(m){
@@ -2036,7 +2036,7 @@ window.tabRisks=tabRisks;
 
     const isInsurance = kind === 'insurance';
     target.innerHTML =
-      '<section class="hero431"><div><p class="eyebrow">'+(isInsurance?'2 · Karta pro pojištění':'1 · Karta klienta')+'</p><h2>'+(isInsurance?'Karta pro pojištění':'Karta klienta')+'</h2><p>Bezpečný režim karet 4.5.2. Hlavní workflow ani tlačítka nejsou přepsána.</p></div></section>'+
+      '<section class="hero431"><div><p class="eyebrow">'+(isInsurance?'2 · Karta pro pojištění':'1 · Karta klienta')+'</p><h2>'+(isInsurance?'Karta pro pojištění':'Karta klienta')+'</h2><p>Bezpečný režim karet 4.6.0. Hlavní workflow ani tlačítka nejsou přepsána.</p></div></section>'+
       '<div id="brh431CardsBox"></div>';
 
     brh431RefreshCards(isInsurance ? 'insurance' : 'client');
@@ -2052,3 +2052,144 @@ window.tabRisks=tabRisks;
 */
 window.BRH_RENDER_VERSION = '452';
 window.BRH_WORKFLOW_SAFE = true;
+
+
+/* ============================================================
+   BRH 4.6.0 – INTEGRATED ADVISOR WORKSPACE SAFE
+   Bez přepisování původního workflow controlleru.
+   ============================================================ */
+
+window.BRH460_SAFE = true;
+
+(function(){
+
+  function qs(sel, root){
+    return (root || document).querySelector(sel);
+  }
+
+  function ensureAdvisorTab(){
+    const tabsWrap =
+      qs('.workflow-tabs') ||
+      qs('.tabs') ||
+      qs('.case-tabs') ||
+      qs('[data-tab="client"]')?.parentElement;
+
+    if(!tabsWrap) return;
+
+    if(!qs('[data-tab="advisor"]')){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab';
+      btn.setAttribute('data-tab','advisor');
+      btn.innerHTML = '0. Karta poradce';
+
+      const first = qs('[data-tab="client"]');
+      if(first){
+        tabsWrap.insertBefore(btn, first);
+      }else{
+        tabsWrap.prepend(btn);
+      }
+    }
+  }
+
+  function ensureAdvisorSection(){
+
+    if(document.getElementById('tab-advisor')) return;
+
+    const client = document.getElementById('tab-client');
+    if(!client || !client.parentElement) return;
+
+    const sec = document.createElement('section');
+    sec.id = 'tab-advisor';
+    sec.className = 'tab-content';
+    sec.style.display = 'none';
+
+    sec.innerHTML = `
+      <div class="brh460-panel">
+        <div class="brh460-hero">
+          <div>
+            <div class="brh460-eyebrow">0. KARTA PORADCE</div>
+            <h2>Profesionální karta poradce</h2>
+            <p>Poradce je navázán na obchodní případ a workflow ASTORIE.</p>
+          </div>
+        </div>
+
+        <div class="brh460-grid">
+          <label>
+            <span>Společnost</span>
+            <input value="ASTORIE a.s." readonly>
+          </label>
+
+          <label>
+            <span>IČO společnosti</span>
+            <input value="48293776" readonly>
+          </label>
+
+          <label>
+            <span>Jméno poradce</span>
+            <input placeholder="Jméno poradce">
+          </label>
+
+          <label>
+            <span>E-mail poradce</span>
+            <input placeholder="E-mail poradce">
+          </label>
+
+          <label>
+            <span>Telefon poradce</span>
+            <input placeholder="Telefon">
+          </label>
+
+          <label>
+            <span>Role v případu</span>
+            <input placeholder="Role v případu">
+          </label>
+        </div>
+
+        <label class="brh460-note">
+          <span>Poznámka poradce</span>
+          <textarea placeholder="Interní poznámka poradce..."></textarea>
+        </label>
+      </div>
+    `;
+
+    client.parentElement.insertBefore(sec, client);
+  }
+
+  function bindAdvisorTab(){
+
+    document.addEventListener('click', function(e){
+
+      const btn = e.target.closest('[data-tab="advisor"]');
+      if(!btn) return;
+
+      e.preventDefault();
+
+      document.querySelectorAll('.tab-content').forEach(function(s){
+        s.style.display = 'none';
+      });
+
+      const advisor = document.getElementById('tab-advisor');
+      if(advisor){
+        advisor.style.display = 'block';
+      }
+
+      document.querySelectorAll('[data-tab]').forEach(function(b){
+        b.classList.remove('active');
+      });
+
+      btn.classList.add('active');
+
+    });
+
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+
+    ensureAdvisorTab();
+    ensureAdvisorSection();
+    bindAdvisorTab();
+
+  });
+
+})();
