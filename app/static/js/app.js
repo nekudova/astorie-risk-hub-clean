@@ -1,4 +1,4 @@
-const VERSION = '4.9.1';
+const VERSION = '4.9.2';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.1 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.2 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.1 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.2 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.1 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.9.2 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.1 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.9.2 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.1 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 4.9.2 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.1 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 4.9.2 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.1 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 4.9.2 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.1 – SAFE STABILIZATION RELEASE
+   BRH 4.9.2 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3334,6 +3334,357 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     }
 
     return readBefore491();
+  };
+
+})();
+
+/* ======================================================================
+   BRH 4.9.2 – SMART OFFERS RESTORE SAFE
+   Vrací vychytávky v Nabídkách a Porovnání:
+   - pojišťovny normalizované bez duplicit,
+   - smart předvyplnění z poptávky,
+   - tlačítko "Tato pojišťovna splňuje vše",
+   - tlačítko "Všude nastavit splněno",
+   - při stavu splněno se doplní limit a spoluúčast,
+   - karta 9 Porovnání čte stejnou rizikovou strukturu jako karta 8.
+   ====================================================================== */
+(function(){
+  window.BRH_RENDER_VERSION = '492';
+  window.BRH_SMART_OFFERS_RESTORE_SAFE = true;
+
+  function E492(v){
+    return String(v ?? '').replace(/[&<>'"]/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m];
+    });
+  }
+
+  function insurerId492(raw){
+    const v = String(raw || '').trim();
+    if(!v) return '';
+    const k = v.toLowerCase();
+
+    const aliases = {
+      'koop':'koop',
+      'kooperativa':'koop',
+      'kooperativa pojišťovna, a.s.':'koop',
+      'kooperativa pojišťovna, a.s':'koop',
+      'gcp':'gcp',
+      'gčp':'gcp',
+      'generali':'gcp',
+      'generali česká pojišťovna a.s.':'gcp',
+      'generali česká pojišťovna a.s':'gcp',
+      'cpp':'cpp',
+      'čpp':'cpp',
+      'česká podnikatelská pojišťovna, a.s.':'cpp',
+      'česká podnikatelská pojišťovna, a.s':'cpp',
+      'allianz':'allianz',
+      'allianz pojišťovna, a.s.':'allianz',
+      'uniqa':'uniqa',
+      'uniqa pojišťovna, a.s.':'uniqa'
+    };
+    if(aliases[k]) return aliases[k];
+
+    const list = CATALOG.insurers || [];
+    const found = list.find(i => {
+      const vals = [i.id, i.code, i.short, i.shortcut, i.zkratka, i.key, i.name].filter(Boolean).map(x => String(x).toLowerCase());
+      return vals.includes(k);
+    });
+    return found ? (found.id || found.code || found.short || found.shortcut || found.name) : v;
+  }
+
+  function selectedCodes492(){
+    const seen = new Set(), out = [];
+    (state.selected_insurers || []).forEach(x => {
+      const id = insurerId492(x);
+      if(!id) return;
+      const key = String(id).toLowerCase();
+      if(!seen.has(key)){ seen.add(key); out.push(id); }
+    });
+    state.selected_insurers = out;
+    return out;
+  }
+
+  window.selectedInsurerCodes = selectedInsurerCodes = selectedCodes492;
+
+  window.insurerByCode = insurerByCode = function(code){
+    const id = insurerId492(code);
+    const list = CATALOG.insurers || [];
+    return list.find(i => {
+      const vals = [i.id, i.code, i.short, i.shortcut, i.zkratka, i.key, i.name].filter(Boolean).map(x => String(x).toLowerCase());
+      return vals.includes(String(id).toLowerCase());
+    }) || {id:id, code:id, short:id, name:code || id};
+  };
+
+  function insurerLabel492(code){
+    const i = insurerByCode(code);
+    return {
+      name: i.name || code,
+      short: i.short || i.shortcut || i.zkratka || i.code || i.id || code
+    };
+  }
+
+  function ensureOffer492(code){
+    state.offers = state.offers || {};
+    const id = insurerId492(code);
+    if(code !== id && state.offers[code] && !state.offers[id]){
+      state.offers[id] = state.offers[code];
+    }
+    state.offers[id] = state.offers[id] || {status:'rozpracováno', workflow_status:'rozpracováno', risks:{}};
+    state.offers[id].risks = state.offers[id].risks || {};
+    return state.offers[id];
+  }
+
+  window.ensureOffer = ensureOffer = ensureOffer492;
+
+  function riskKey492(r){
+    if(typeof riskKey === 'function') return riskKey(r);
+    return r.key || r.risk_key || String(r.name || 'RIZIKO').toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+  }
+
+  function riskSpec492(r){
+    if(typeof riskSpecification === 'function') return riskSpecification(r);
+    return r.specification || r.client_note || r.note || '';
+  }
+
+  function smartOfferDefaults492(code){
+    const o = ensureOffer492(code);
+    const q = state.questionnaire || {};
+    o.insurance_start = o.insurance_start || q.insurance_start || '';
+    o.insurance_period = o.insurance_period || q.insurance_period || '1 rok';
+    o.payment_frequency = o.payment_frequency || q.payment_frequency || 'ročně';
+    o.territory = o.territory || q.territory || 'Česká republika';
+    o.deductible = o.deductible || q.deductible_preference || '';
+    o.workflow_status = o.workflow_status || 'rozpracováno';
+
+    (state.risks || []).forEach(r => {
+      const k = riskKey492(r);
+      o.risks[k] = o.risks[k] || {status:'nutno ověřit', offered_limit:'', deductible:'', exclusions:'', sublimits:'', source_reference:'', note:''};
+    });
+    return o;
+  }
+
+  window.smartOfferDefaults = smartOfferDefaults492;
+
+  window.smartPrefillAllOffers = function(){
+    selectedCodes492().forEach(code => smartOfferDefaults492(code));
+    renderWorkspace();
+    if(typeof toast === 'function') toast('Nabídky byly předvyplněny z poptávky.');
+  };
+
+  window.fulfillAllRisksForInsurer = function(code){
+    const id = insurerId492(code);
+    const o = smartOfferDefaults492(id);
+    (state.risks || []).forEach(r => {
+      const k = riskKey492(r);
+      const x = o.risks[k] = o.risks[k] || {};
+      x.status = 'splněno';
+      x.offered_limit = r.requested_limit || x.offered_limit || '';
+      x.deductible = r.deductible || (state.questionnaire || {}).deductible_preference || x.deductible || '';
+    });
+    renderWorkspace();
+    if(typeof toast === 'function') toast('U pojišťovny bylo nastaveno splněno a převzaty požadavky z poptávky.');
+  };
+
+  window.fulfillAllRisksEverywhere = function(){
+    selectedCodes492().forEach(code => {
+      const o = smartOfferDefaults492(code);
+      (state.risks || []).forEach(r => {
+        const k = riskKey492(r);
+        const x = o.risks[k] = o.risks[k] || {};
+        x.status = 'splněno';
+        x.offered_limit = r.requested_limit || x.offered_limit || '';
+        x.deductible = r.deductible || (state.questionnaire || {}).deductible_preference || x.deductible || '';
+      });
+    });
+    renderWorkspace();
+    if(typeof toast === 'function') toast('Všechny pojišťovny byly nastaveny jako splněné a převzaly limity z poptávky.');
+  };
+
+  window.brh492SetRiskStatus = function(code, key, value){
+    const o = ensureOffer492(code);
+    const x = o.risks[key] = o.risks[key] || {};
+    x.status = value;
+
+    const r = (state.risks || []).find(rr => riskKey492(rr) === key) || {};
+    if(value === 'splněno'){
+      x.offered_limit = x.offered_limit || r.requested_limit || '';
+      x.deductible = x.deductible || r.deductible || (state.questionnaire || {}).deductible_preference || '';
+      const lim = document.querySelector(`[data-offer-code="${CSS.escape(insurerId492(code))}"][data-risk-key="${CSS.escape(key)}"][data-risk-field="offered_limit"]`);
+      const ded = document.querySelector(`[data-offer-code="${CSS.escape(insurerId492(code))}"][data-risk-key="${CSS.escape(key)}"][data-risk-field="deductible"]`);
+      if(lim) lim.value = x.offered_limit || '';
+      if(ded) ded.value = x.deductible || '';
+    }
+  };
+
+  window.offerWorkflowBadge = function(code){
+    const o = smartOfferDefaults492(code);
+    const st = o.workflow_status || 'rozpracováno';
+    return `<select class="mini-select" onchange="ensureOffer('${E492(code)}').workflow_status=this.value">
+      <option ${st==='rozpracováno'?'selected':''}>rozpracováno</option>
+      <option ${st==='nabídka přijata'?'selected':''}>nabídka přijata</option>
+      <option ${st==='nutné doplnění'?'selected':''}>nutné doplnění</option>
+      <option ${st==='finální nabídka'?'selected':''}>finální nabídka</option>
+      <option ${st==='zamítnuto'?'selected':''}>zamítnuto</option>
+    </select>`;
+  };
+
+  window.offerCell = offerCell = function(code, r, i){
+    const id = insurerId492(code);
+    const k = riskKey492(r);
+    const o = ensureOffer492(id);
+    o.risks[k] = o.risks[k] || {status:'nutno ověřit', offered_limit:'', deductible:'', exclusions:'', sublimits:'', source_reference:'', note:''};
+    const x = o.risks[k];
+
+    return `<td>
+      <select onchange="brh492SetRiskStatus('${E492(id)}','${E492(k)}',this.value)">
+        <option ${x.status==='splněno'?'selected':''}>splněno</option>
+        <option ${x.status==='omezeno'?'selected':''}>omezeno</option>
+        <option ${x.status==='výluka'?'selected':''}>výluka</option>
+        <option ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option>
+      </select>
+      <input data-offer-code="${E492(id)}" data-risk-key="${E492(k)}" data-risk-field="offered_limit" placeholder="Nabídnutý limit" value="${E492(x.offered_limit || '')}" onchange="ensureOffer('${E492(id)}').risks['${E492(k)}'].offered_limit=this.value">
+      <input data-offer-code="${E492(id)}" data-risk-key="${E492(k)}" data-risk-field="deductible" placeholder="Spoluúčast" value="${E492(x.deductible || '')}" onchange="ensureOffer('${E492(id)}').risks['${E492(k)}'].deductible=this.value">
+      <textarea data-offer-code="${E492(id)}" data-risk-key="${E492(k)}" data-risk-field="note" placeholder="Výluky / sublimity / zdroj VPP" onchange="ensureOffer('${E492(id)}').risks['${E492(k)}'].note=this.value">${E492(x.note || '')}</textarea>
+    </td>`;
+  };
+
+  window.tabOffers = tabOffers = function(){
+    const codes = selectedCodes492();
+
+    if(!codes.length){
+      return `<p class="eyebrow">8. NABÍDKY V JEDNÉ TABULCE</p>
+      <div class="executive-panel"><h2>Nejdříve vyberte pojišťovny</h2><p>Tabulka nabídek se zobrazí po výběru pojišťoven v kartě „Pojišťovny“.</p></div>`;
+    }
+
+    if(!state.risks || !state.risks.length){
+      return `<p class="eyebrow">8. NABÍDKY V JEDNÉ TABULCE</p>
+      <div class="executive-panel"><h2>Nejdříve vyplňte rizika</h2><p>Tabulka nabídek vychází z požadavků klienta. Doplňte rizika v modulu odpovědnosti nebo v ostatních rizicích.</p></div>`;
+    }
+
+    codes.forEach(code => smartOfferDefaults492(code));
+
+    const q = state.questionnaire || {};
+    const smartPanel = `<div class="section-soft smart-panel">
+      <div class="section-head">
+        <div>
+          <h3>Smart předvyplnění nabídek</h3>
+          <p class="muted">Počátek, období, frekvence, území, spoluúčast a rizika se přebírají z poptávky. Poradce doplňuje pouze rozdíly, výluky a specifika pojišťovny.</p>
+        </div>
+        <div class="tools">
+          <button class="btn secondary" onclick="smartPrefillAllOffers()">Předvyplnit společné údaje</button>
+          <button class="btn secondary" onclick="fulfillAllRisksEverywhere()">Všude nastavit splněno</button>
+        </div>
+      </div>
+      <div class="grid4">
+        <div class="stat"><span>Počátek</span><b>${E492(q.insurance_start || 'není uveden')}</b></div>
+        <div class="stat"><span>Pojistné období</span><b>${E492(q.insurance_period || 'není uvedeno')}</b></div>
+        <div class="stat"><span>Frekvence</span><b>${E492(q.payment_frequency || 'ročně')}</b></div>
+        <div class="stat"><span>Spoluúčast</span><b>${E492(q.deductible_preference || 'není uvedena')}</b></div>
+      </div>
+    </div>`;
+
+    const heads = codes.map(code => {
+      const o = smartOfferDefaults492(code);
+      const ins = insurerLabel492(code);
+      return `<th class="offer-head">
+        <div class="insurer-title">${E492(ins.name)}<div class="mini">${E492(ins.short)}</div></div>
+        ${offerWorkflowBadge(code)}
+        <button class="btn small secondary" onclick="fulfillAllRisksForInsurer('${E492(code)}')">Tato pojišťovna splňuje vše</button>
+        <input placeholder="Nabídnuté pojistné" onchange="ensureOffer('${E492(code)}').premium=this.value" value="${E492(o.premium || '')}">
+        <input placeholder="Počátek pojištění" onchange="ensureOffer('${E492(code)}').insurance_start=this.value" value="${E492(o.insurance_start || q.insurance_start || '')}">
+        <input placeholder="Frekvence placení" onchange="ensureOffer('${E492(code)}').payment_frequency=this.value" value="${E492(o.payment_frequency || q.payment_frequency || 'ročně')}">
+        <input placeholder="Celková spoluúčast / pozn." onchange="ensureOffer('${E492(code)}').deductible=this.value" value="${E492(o.deductible || q.deductible_preference || '')}">
+      </th>`;
+    }).join('');
+
+    const rows = (state.risks || []).map((r,i) => {
+      const k = riskKey492(r);
+      return `<tr>
+        <td class="risk-request">
+          <b>${E492(r.name || r.title || '')}</b><br>
+          <span class="badge">${E492(k)}</span><br>
+          Požadavek: ${E492(r.requested_limit || 'není uveden')}<br>
+          Spoluúčast: ${E492(r.deductible || q.deductible_preference || 'není uvedena')}
+          ${riskSpec492(r) ? `<br><small>Specifikace: ${E492(riskSpec492(r))}</small>` : ''}
+        </td>
+        ${codes.map(code => offerCell(code,r,i)).join('')}
+      </tr>`;
+    }).join('');
+
+    return `<p class="eyebrow">8. NABÍDKY V JEDNÉ TABULCE</p>
+    <div class="executive-panel">
+      <div class="section-head">
+        <div>
+          <h2>Požadavek klienta × nabídky pojišťoven</h2>
+          <p class="muted">Při volbě „splněno“ se automaticky doplní požadovaný limit a spoluúčast z poptávky. Poradce řeší pouze odchylky.</p>
+        </div>
+        <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button>
+      </div>
+      ${smartPanel}
+      <div class="table-wrap">
+        <table class="offer-table pro-table">
+          <thead><tr><th>Požadavek klienta</th>${heads}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="tools">
+        <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button>
+        <button class="btn secondary" onclick="currentTab='comparison';renderWorkspace()">Přejít na porovnání</button>
+      </div>
+    </div>`;
+  };
+
+  window.tabComparison = tabComparison = function(){
+    const codes = selectedCodes492();
+
+    if(!codes.length || !state.risks || !state.risks.length){
+      return `<p class="eyebrow">9. MAKLÉŘSKÉ POROVNÁNÍ</p>
+      <div class="executive-panel"><h2>Porovnání zatím nelze sestavit</h2><p>Nejdříve doplňte rizika, pojišťovny a nabídky.</p></div>`;
+    }
+
+    const rows = (state.risks || []).map(r => {
+      const k = riskKey492(r);
+      return `<tr>
+        <td class="risk-request"><b>${E492(r.name || r.title || '')}</b><br>${E492(r.requested_limit || 'limit neuveden')}</td>
+        ${codes.map(code => {
+          const x = (ensureOffer492(code).risks || {})[k] || {};
+          return `<td>
+            <span class="state-dot ${statusClass492(x.status)}">${E492(x.status || 'nutno ověřit')}</span><br>
+            <b>Limit:</b> ${E492(x.offered_limit || '–')}<br>
+            <b>Spoluúčast:</b> ${E492(x.deductible || '–')}<br>
+            ${x.note ? `<small>${E492(x.note)}</small>` : ''}
+          </td>`;
+        }).join('')}
+      </tr>`;
+    }).join('');
+
+    return `<p class="eyebrow">9. MAKLÉŘSKÉ POROVNÁNÍ</p>
+    <div class="executive-panel">
+      <h2>Rozdíly mezi nabídkami</h2>
+      <div class="warning">Systém zvýrazňuje rozdíly. Finální doporučení potvrzuje poradce.</div>
+      <div class="table-wrap">
+        <table class="offer-table pro-table comparison-table">
+          <thead><tr><th>Riziko / požadavek</th>${codes.map(c => {const ins=insurerLabel492(c); return `<th>${E492(ins.name)}<div class="mini">${E492(ins.short)}</div></th>`}).join('')}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  };
+
+  function statusClass492(v){
+    const s = String(v || '').toLowerCase();
+    if(s.includes('splněno')) return 'ok';
+    if(s.includes('výluka') || s.includes('nesplněno')) return 'bad';
+    return 'mid';
+  }
+
+  const readBefore492 = readCurrentTab;
+  window.readCurrentTab = readCurrentTab = function(){
+    if(currentTab === 'offers'){
+      selectedCodes492().forEach(code => smartOfferDefaults492(code));
+      return;
+    }
+    return readBefore492();
   };
 
 })();
