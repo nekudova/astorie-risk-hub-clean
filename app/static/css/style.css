@@ -141,7 +141,7 @@
 }
 
 
-/* BRH 4.8.3 – Professional Cards Integration SAFE */
+/* BRH 4.9.0 – Professional Cards Integration SAFE */
 .advisor-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -174,7 +174,7 @@
 }
 
 
-/* BRH 4.8.3 – Real Professional Cards SAFE */
+/* BRH 4.9.0 – Real Professional Cards SAFE */
 .pro-card-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -235,7 +235,7 @@
 }
 
 
-/* BRH 4.8.3 – Advisor Specification Repair SAFE */
+/* BRH 4.9.0 – Advisor Specification Repair SAFE */
 .pro-section .section-head{
   display:flex;
   justify-content:space-between;
@@ -259,7 +259,7 @@
   background:#fff;
 }
 
-/* BRH 4.8.3 – Cards UX and Advisor Fields SAFE */
+/* BRH 4.9.0 – Cards UX and Advisor Fields SAFE */
 .compact-grid label,.pro-contact-row label,.uw-section label,.pro-section label{font-size:13px;line-height:1.2;color:#003D4C}
 .compact-grid input,.compact-grid select,.uw-section input,.uw-section select,.uw-section textarea{margin-top:4px}
 .field-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-size:10px;line-height:1.4;font-weight:900;letter-spacing:.03em;background:#eaf8fb;color:#005C66;border:1px solid #cfe9ef;margin-left:6px;vertical-align:middle}
@@ -278,3 +278,27 @@
 .small-empty{padding:12px;font-size:13px}
 .additional-insured-row{grid-template-columns:1.2fr .9fr 1fr 1.2fr auto}
 @media(max-width:1000px){.custom-row,.additional-insured-row{grid-template-columns:1fr}.uw-section summary{flex-direction:column;align-items:flex-start}}
+
+/* BRH 4.9.0 – Enterprise Broker Underwriting Platform SAFE */
+.broker-workflow-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px}
+.broker-pill{background:#fff;border:1px solid #d7e9ed;border-radius:18px;padding:14px 16px;box-shadow:0 10px 26px rgba(0,61,76,.05)}
+.broker-pill strong{display:block;color:#003D4C;font-size:20px}.broker-pill span{display:block;color:#607783;font-size:11px;text-transform:uppercase;font-weight:900;margin-top:2px}
+.executive-panel{background:#fff;border:1px solid #d7e9ed;border-radius:24px;padding:24px;margin:18px 0;box-shadow:0 16px 42px rgba(0,61,76,.07)}
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.comparison-scroll{overflow:auto;border-radius:20px;border:1px solid #d7e9ed}
+.broker-matrix,.client-report-table{width:100%;min-width:980px;border-collapse:separate;border-spacing:0;background:#fff}
+.broker-matrix th,.broker-matrix td,.client-report-table th,.client-report-table td{padding:14px;border-bottom:1px solid #e3f0f3;vertical-align:top}
+.broker-matrix thead th,.client-report-table thead th{background:#003D4C;color:#fff;text-align:left;position:sticky;top:0;z-index:1}
+.broker-matrix th:first-child{width:220px;background:#f6fbfc;color:#003D4C;position:sticky;left:0;z-index:2}
+.broker-matrix thead th:first-child{background:#003D4C;color:#fff;z-index:3}
+.broker-matrix th small,.client-report-table td small{display:block;color:#FC4C02;letter-spacing:.18em;font-weight:900;margin-top:3px}
+.broker-matrix input,.broker-matrix select{width:100%;box-sizing:border-box;border:1px solid #cfe4e8;border-radius:14px;padding:10px 12px;font-weight:700;color:#003D4C}
+.recommend-row td{background:#fff8f3}
+.state-dot{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900;border:1px solid #d7e9ed}
+.state-dot.ok{background:#e8f7ee;color:#1d6b3a;border-color:#bde7ca}.state-dot.mid{background:#fff5df;color:#936300;border-color:#f0d89a}.state-dot.bad{background:#ffece8;color:#a3331f;border-color:#ffc9bd}
+.report-cover{background:linear-gradient(135deg,#003D4C,#00636d);color:#fff;border-radius:28px;padding:30px;display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px;box-shadow:0 22px 54px rgba(0,61,76,.18)}
+.report-cover h2{margin:4px 0 8px;color:#fff;font-size:34px}.report-cover p{color:#eaf8fb;margin:0}
+.report-badge{min-width:110px;text-align:center;border:1px solid rgba(255,255,255,.35);border-radius:22px;padding:18px;font-size:28px;font-weight:900;background:rgba(255,255,255,.12)}
+.report-badge span{display:block;font-size:12px;margin-top:4px}.report-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.report-card{background:#fff;border:1px solid #d7e9ed;border-radius:22px;padding:20px}.report-card h3{margin:0 0 10px}
+@media(max-width:1100px){.broker-workflow-strip,.report-grid{grid-template-columns:1fr}.report-cover{flex-direction:column;align-items:flex-start}}

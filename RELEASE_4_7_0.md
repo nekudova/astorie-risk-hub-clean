@@ -1,4 +1,4 @@
-# Business Risk Hub 4.8.3 – Professional Cards Integration SAFE
+# Business Risk Hub 4.9.0 – Professional Cards Integration SAFE
 
 ## Hlavní změna
 Karta poradce je integrována přímo do původního `renderWorkspace()` rendereru. Nejde o DOM hack ani nový globální click controller.
@@ -10,8 +10,8 @@ Karta poradce je integrována přímo do původního `renderWorkspace()` rendere
 - zachován původní tab engine,
 - přidán bezpečný `tabAttachments()` renderer,
 - deduplikace vybraných pojišťoven ve workflow,
-- verze aplikace 4.8.3,
-- assety generované přes template jako `v=483`.
+- verze aplikace 4.9.0,
+- assety generované přes template jako `v=490`.
 
 ## Bezpečnost
 - bez DB migrace,
