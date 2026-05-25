@@ -70,7 +70,7 @@
 .request-card-351b .badge{font-weight:800;text-transform:lowercase;background:#eaf5f7;color:#003D4C;border:1px solid #cfe4e9;border-radius:999px;padding:8px 12px;white-space:nowrap}
 @media(max-width:900px){.request-summary-351b{flex-direction:column}.request-summary-351b:after{align-self:flex-start}.request-body-351b{padding:0 16px 18px}}
 
-/* BRH 4.5.1 – Advisor Professional Cards Workflow SAFE UX */
+/* BRH 4.5.2 – Advisor Professional Cards Workflow SAFE UX */
 .risk-grid410{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
 .risk-card410{position:relative;text-align:left;border:1px solid #d6edf1;background:#fff;border-radius:18px;padding:16px 46px 16px 16px;min-height:118px;color:#003D4C;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,61,76,.05);transition:.16s ease;white-space:normal}
 .risk-card410:hover{transform:translateY(-1px);border-color:#FC4C02;box-shadow:0 12px 28px rgba(0,61,76,.10)}
@@ -97,7 +97,7 @@
 @media(max-width:1200px){.risk-row410{grid-template-columns:1fr}.risk-actions410{justify-content:flex-start;padding-top:0}}
 
 
-/* BRH 4.5.1 – Advisor Professional Cards Workflow SAFE */
+/* BRH 4.5.2 – Advisor Professional Cards Workflow SAFE */
 .admin-safe-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
 .admin-tabs-safe{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 20px}
 .admin-tabs-safe .chip.active{background:#ff4b0b;color:#fff;border-color:#ff4b0b;box-shadow:0 12px 28px rgba(252,76,2,.18)}
@@ -114,7 +114,7 @@
 .json-box{width:100%;min-height:520px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45}
 
 
-/* BRH 4.5.1 – Advisor Professional Cards Workflow SAFE */
+/* BRH 4.5.2 – Advisor Professional Cards Workflow SAFE */
 .hero431{background:linear-gradient(135deg,#004b57,#00636d);color:#fff;border-radius:26px;padding:26px 30px;margin:18px 0 22px;box-shadow:0 18px 44px rgba(0,61,76,.18)}
 .hero431 h2{font-size:32px;margin:6px 0 8px;color:#fff}
 .hero431 p{color:#eefbfc;margin:0}
@@ -138,70 +138,4 @@
 .empty431{border:1px dashed #cfe7eb;border-radius:18px;background:#fafdfe;padding:18px;text-align:center;font-weight:800;color:#617986}
 @media(max-width:1100px){
   .two431,.three431,.four431,.row431,.premise431{grid-template-columns:1fr}
-}
-
-
-/* BRH 4.5.1 – Professional Workflow Controller FIX SAFE */
-.tab-content[hidden]{display:none!important}
-.tab-content:not(.active){display:none}
-.tab-content.active{display:block}
-.brh451-hero{
-  background:linear-gradient(135deg,#004b57,#00636d);
-  color:#fff;
-  border-radius:26px;
-  padding:28px 32px;
-  margin:18px 0 22px;
-  display:flex;
-  justify-content:space-between;
-  gap:18px;
-  align-items:center;
-  box-shadow:0 18px 44px rgba(0,61,76,.18)
-}
-.brh451-hero h2{font-size:32px;margin:6px 0 8px;color:#fff}
-.brh451-hero p{margin:0;max-width:980px;color:#eefbfc}
-.brh451-case-badge{
-  border:1px solid rgba(255,255,255,.35);
-  background:rgba(255,255,255,.12);
-  border-radius:18px;
-  padding:16px 20px;
-  text-align:center;
-  font-weight:900;
-  letter-spacing:.04em;
-  min-width:92px
-}
-.brh451-advisor-card{
-  background:#fff;
-  border:1px solid #d8edf0;
-  border-radius:22px;
-  padding:22px;
-  margin:16px 0;
-  box-shadow:0 10px 28px rgba(0,61,76,.06)
-}
-.brh451-grid{display:grid;gap:14px;margin-bottom:14px}
-.brh451-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.brh451-field span{
-  display:block;
-  font-weight:800;
-  color:#003d4c;
-  margin:0 0 6px
-}
-.brh451-field input,
-.brh451-field textarea{
-  width:100%;
-  box-sizing:border-box;
-  border:1px solid #cfe7eb;
-  border-radius:14px;
-  padding:13px 14px;
-  font-weight:700;
-  color:#003d4c;
-  background:#fff
-}
-.brh451-field input[readonly]{
-  background:#f3fafb;
-  color:#003d4c
-}
-.brh451-field textarea{min-height:92px;resize:vertical}
-@media(max-width:1000px){
-  .brh451-cols-2{grid-template-columns:1fr}
-  .brh451-hero{flex-direction:column;align-items:flex-start}
 }
