@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.3 – Admin Professional Restore SAFE
+# Business Risk Hub 4.9.4 – Admin Direct Override SAFE
 
 ## Opraveno
 - Karta 8 vrací původní smart nabídky v jedné tabulce.
