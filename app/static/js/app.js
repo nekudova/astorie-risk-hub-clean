@@ -1,4 +1,4 @@
-const VERSION = '4.9.4';
+const VERSION = '4.9.5';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.4 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.5 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.4 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.5 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.4 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.9.5 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.4 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.9.5 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.4 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 4.9.5 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.4 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 4.9.5 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.4 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 4.9.5 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.4 – SAFE STABILIZATION RELEASE
+   BRH 4.9.5 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.4 – SMART OFFERS RESTORE SAFE
+   BRH 4.9.5 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3689,122 +3689,38 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 })();
 
-
-/* BRH 4.9.4 ADMIN PROFESSIONAL RESTORE SAFE */
-window.BRH_493_ADMIN = true;
-
-window.renderAdminTextations493 = function(){
-return `
-<div class="admin-pro-panel">
-<h2>Textace</h2>
-<p class="muted">Centrální textace pro poptávky, nabídky, zprávy klientovi a interní práci.</p>
-
-<div class="table-wrap">
-<table class="admin-grid-table">
-<thead>
-<tr>
-<th>Název</th>
-<th>Typ</th>
-<th>Kategorie</th>
-<th>Text</th>
-<th>Aktivní</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><input value="Úvod k odpovědnosti"></td>
-<td><input value="centrální"></td>
-<td><input value="obecné"></td>
-<td><textarea>Doporučujeme věnovat zvýšenou pozornost rozsahu odpovědnostního krytí.</textarea></td>
-<td><select><option>ano</option></select></td>
-</tr>
-
-<tr>
-<td><input value="Upozornění na výluky"></td>
-<td><input value="centrální"></td>
-<td><input value="výluky"></td>
-<td><textarea>Před sjednáním je nutné ověřit výluky uvedené ve VPP/DPP/ZPP.</textarea></td>
-<td><select><option>ano</option></select></td>
-</tr>
-</tbody>
-</table>
-</div>
-
-<div class="tools">
-<button class="btn secondary">+ Nová textace</button>
-<button class="btn primary">Uložit textace</button>
-</div>
-</div>`;
-};
-
-window.renderAdminDocuments493 = function(){
-return `
-<div class="admin-pro-panel">
-<h2>Dokumenty k obchodnímu případu</h2>
-<p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize a další podklady.</p>
-
-<div class="doc-grid-493">
-
-<div class="doc-card-493">
-<h3>VPP / DPP / ZPP</h3>
-<p>pojistné podmínky, doložky, zvláštní podmínky</p>
-</div>
-
-<div class="doc-card-493">
-<h3>Nabídky pojišťoven</h3>
-<p>PDF, e‑maily, přílohy k nabídce</p>
-</div>
-
-<div class="doc-card-493">
-<h3>Škodní průběh</h3>
-<p>historie škod, potvrzení, tabulky</p>
-</div>
-
-<div class="doc-card-493">
-<h3>Revize / technické podklady</h3>
-<p>revize elektro, BOZP, zabezpečení</p>
-</div>
-
-<div class="doc-card-493">
-<h3>Fotodokumentace</h3>
-<p>fotky provozu, zařízení, objektů</p>
-</div>
-
-<div class="doc-card-493">
-<h3>Dotazníky a ostatní</h3>
-<p>vyplněné dotazníky, komunikace, poznámky</p>
-</div>
-
-</div>
-</div>`;
-};
-
 /* ============================================================================
-   BRH 4.9.4 – ADMIN DIRECT OVERRIDE SAFE
-   Přímé přepsání renderAdmin/adminPanel.
-   Důvod: předchozí 4.9.3 přidala patch, ale starý Admin render jej nepoužil.
+   BRH 4.9.5 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 4.9.2, aby se nezdědilo poškození Adminu z 4.9.4.
+   Princip:
+   - NEmaže původní adminPanel.
+   - Pro běžné admin sekce používá původní plnohodnotné editory.
+   - Přepisuje pouze: Uživatelé, Dokumenty, Textace.
    ============================================================================ */
 (function(){
-  window.BRH_ADMIN_DIRECT_OVERRIDE_SAFE_494 = true;
-  window.BRH_RENDER_VERSION = '494';
+  window.BRH_ADMIN_EMERGENCY_RESTORE_SAFE_495 = true;
+  window.BRH_RENDER_VERSION = '495';
 
-  function A494(v){
+  const previousAdminPanel495 = window.adminPanel;
+  const previousRenderAdmin495 = window.renderAdmin;
+
+  function H495(v){
     return String(v ?? '').replace(/[&<>'"]/g, function(m){
       return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m];
     });
   }
-  function arr494(v){ return Array.isArray(v) ? v : []; }
-  function ensureCatalog494(){
+  function arr495(v){ return Array.isArray(v) ? v : []; }
+
+  function ensure495(){
     window.CATALOG = window.CATALOG || {};
-    CATALOG.users = arr494(CATALOG.users);
-    CATALOG.roleProfiles = arr494(CATALOG.roleProfiles);
-    CATALOG.modulePermissions = arr494(CATALOG.modulePermissions);
-    CATALOG.insurers = arr494(CATALOG.insurers);
-    CATALOG.attachmentTypes = arr494(CATALOG.attachmentTypes);
-    CATALOG.textTemplates = arr494(CATALOG.textTemplates);
-    CATALOG.liabilityRisks = arr494(CATALOG.liabilityRisks);
-    CATALOG.liabilityAgreements = arr494(CATALOG.liabilityAgreements);
-    CATALOG.adminDocuments = arr494(CATALOG.adminDocuments);
+    CATALOG.users = arr495(CATALOG.users);
+    CATALOG.roleProfiles = arr495(CATALOG.roleProfiles);
+    CATALOG.modulePermissions = arr495(CATALOG.modulePermissions);
+    CATALOG.insurers = arr495(CATALOG.insurers);
+    CATALOG.attachmentTypes = arr495(CATALOG.attachmentTypes);
+    CATALOG.textTemplates = arr495(CATALOG.textTemplates);
+    CATALOG.liabilityRisks = arr495(CATALOG.liabilityRisks);
+    CATALOG.liabilityAgreements = arr495(CATALOG.liabilityAgreements);
 
     if(!CATALOG.roleProfiles.length){
       CATALOG.roleProfiles = [
@@ -3821,57 +3737,99 @@ return `
         {id:'bo', name:'Backoffice ASTORIE', email:'backoffice@astorie.local', position:'Backoffice', roles:['BACKOFFICE'], active:true}
       ];
     }
-    if(!CATALOG.adminDocuments.length){
-      CATALOG.adminDocuments = [
-        {title:'VPP / DPP / ZPP', category:'Pojistné podmínky', note:'pojistné podmínky, doložky, zvláštní podmínky', active:true},
-        {title:'Nabídky pojišťoven', category:'Nabídky', note:'PDF, e-maily, přílohy k nabídce', active:true},
-        {title:'Škodní průběh', category:'Škody', note:'historie škod, potvrzení, tabulky', active:true},
-        {title:'Revize / technické podklady', category:'Technické podklady', note:'revize elektro, BOZP, zabezpečení, technika', active:true},
-        {title:'Fotodokumentace', category:'Fotodokumentace', note:'fotky provozu, zařízení, objektů', active:true},
-        {title:'Dotazníky a ostatní', category:'Ostatní', note:'vyplněné dotazníky, komunikace, poznámky', active:true}
-      ];
-    }
-    if(!CATALOG.textTemplates.length){
-      CATALOG.textTemplates = [
-        {title:'Odpovědnost z provozní činnosti – potvrzení rozsahu', type:'centrální', category:'Požadavky na pojišťovnu', text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce, včetně uvedení případných výluk, sublimitu nebo zvláštních podmínek.', active:true},
-        {title:'Věci převzaté / užívané – požadavek na krytí', type:'centrální', category:'Zvláštní ujednání', text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v dispozici klienta. Prosíme o uvedení limitu, sublimitu, spoluúčasti a případných omezení.', active:true},
-        {title:'Odpovědnost za výrobek / vadnou práci', type:'centrální', category:'Odpovědnost', text:'U nabídky je nutné ověřit, zda a v jakém rozsahu kryje odpovědnost za škodu způsobenou vadou výrobku nebo vadně provedenou prací po předání. Prosíme o uvedení všech omezení a výluk.', active:true},
-        {title:'Výzva k doplnění podkladů', type:'centrální', category:'Komunikace', text:'Pro dokončení posouzení pojištění klienta prosíme o doplnění chybějících podkladů uvedených v přehledu příloh. Po jejich obdržení budeme pokračovat ve zpracování nabídky.', active:true},
-        {title:'Předání nabídky klientovi', type:'centrální', category:'Klientský výstup', text:'Zasíláme Vám souhrn zpracovaných nabídek pojištění podnikatelských rizik. Doporučená varianta byla vybrána s ohledem na rozsah krytí, limity, výluky, spoluúčast a cenu.', active:true},
-        {title:'Doporučení poradce', type:'centrální', category:'Doporučení', text:'Na základě porovnání nabídek doporučujeme variantu, která nejlépe odpovídá požadovanému rozsahu pojištění, nabízí vhodné limity a má přijatelné podmínky z pohledu výluk a spoluúčastí.', active:true}
-      ];
-    }
+    seedTextTemplates495(false);
   }
 
-  function roleChecks494(u, idx){
-    const roles = arr494(u.roles);
-    return `<div class="roles-grid-494">${
-      CATALOG.roleProfiles.map(r => {
-        const code = r.code || r.name || '';
-        return `<label class="role-chip-494"><input type="checkbox" ${roles.includes(code)?'checked':''} onchange="brh494ToggleRole(${idx},'${A494(code)}',this.checked)"> ${A494(code)}</label>`;
-      }).join('')
-    }</div>`;
+  function sampleTexts495(){
+    return [
+      {
+        title:'Odpovědnost z provozní činnosti – potvrzení rozsahu',
+        type:'Poptávka pojišťovně',
+        category:'Požadavky na pojišťovnu',
+        text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce, včetně uvedení případných výluk, sublimitu nebo zvláštních podmínek.',
+        tags:['odpovědnost','pojišťovna'],
+        active:true
+      },
+      {
+        title:'Věci převzaté / užívané – požadavek na krytí',
+        type:'Poptávka / nabídka',
+        category:'Zvláštní ujednání',
+        text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v dispozici klienta. Prosíme o uvedení limitu, sublimitu, spoluúčasti a případných omezení.',
+        tags:['odpovědnost','převzaté věci'],
+        active:true
+      },
+      {
+        title:'Odpovědnost za výrobek / vadnou práci',
+        type:'Rizika / porovnání',
+        category:'Odpovědnost',
+        text:'U nabídky je nutné ověřit, zda a v jakém rozsahu kryje odpovědnost za škodu způsobenou vadou výrobku nebo vadně provedenou prací po předání. Prosíme o uvedení všech omezení, výluk, územního rozsahu a případných sublimitu.',
+        tags:['výrobek','vadná práce'],
+        active:true
+      },
+      {
+        title:'Výzva k doplnění podkladů',
+        type:'Komunikace',
+        category:'Podklady',
+        text:'Pro dokončení posouzení pojištění klienta prosíme o doplnění chybějících podkladů uvedených v přehledu příloh. Po jejich obdržení budeme pokračovat ve zpracování poptávky nebo nabídky.',
+        tags:['podklady','komunikace'],
+        active:true
+      },
+      {
+        title:'Předání nabídky klientovi',
+        type:'Klientský výstup',
+        category:'Zpráva klientovi',
+        text:'Zasíláme Vám souhrn zpracovaných nabídek pojištění podnikatelských rizik. Doporučená varianta byla vybrána s ohledem na rozsah krytí, limity, výluky, spoluúčast a cenu.',
+        tags:['klient','nabídka'],
+        active:true
+      },
+      {
+        title:'Doporučení poradce',
+        type:'Doporučení',
+        category:'Porovnání',
+        text:'Na základě porovnání nabídek doporučujeme variantu, která nejlépe odpovídá požadovanému rozsahu pojištění, nabízí vhodné limity a má přijatelné podmínky z pohledu výluk a spoluúčastí.',
+        tags:['doporučení','porovnání'],
+        active:true
+      }
+    ];
   }
 
-  window.brh494ToggleRole = function(idx, role, checked){
-    ensureCatalog494();
-    const u = CATALOG.users[idx]; if(!u) return;
-    u.roles = arr494(u.roles);
-    if(checked && !u.roles.includes(role)) u.roles.push(role);
-    if(!checked) u.roles = u.roles.filter(r => r !== role);
-  };
+  function seedTextTemplates495(force){
+    CATALOG.textTemplates = arr495(CATALOG.textTemplates);
+    const samples = sampleTexts495();
+    if(force){
+      CATALOG.textTemplates = samples;
+      return;
+    }
+    samples.forEach(s => {
+      const exists = CATALOG.textTemplates.some(t => String(t.title || t.name || '').trim().toLowerCase() === s.title.toLowerCase());
+      if(!exists) CATALOG.textTemplates.push(s);
+    });
+  }
+
+  function setActive495(type){
+    document.querySelectorAll('[data-admin-tab], [data-admin-tab-495], .admin-tabs .chip').forEach(b => {
+      const key = b.getAttribute('data-admin-tab') || b.getAttribute('data-admin-tab-495') || '';
+      b.classList.toggle('active', key === type);
+    });
+  }
+
+  function tab495(type,label){
+    return `<button class="chip" data-admin-tab="${H495(type)}" data-admin-tab-495="${H495(type)}" onclick="adminPanel('${H495(type)}')">${H495(label)}</button>`;
+  }
 
   window.renderAdmin = function(){
-    ensureCatalog494();
+    ensure495();
     const box = document.getElementById('adminBox');
-    if(!box) return;
-
+    if(!box){
+      if(typeof previousRenderAdmin495 === 'function') return previousRenderAdmin495();
+      return;
+    }
     box.innerHTML = `
-      <div class="admin-494-head">
+      <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 4.9.4 SAFE</p>
+          <p class="eyebrow">Administrace · 4.9.5 SAFE</p>
           <h2>Admin Control Center</h2>
-          <p class="muted">Profesionální správa číselníků, dokumentů, textací, oprávnění a uživatelů.</p>
+          <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
       </div>
 
@@ -3884,165 +3842,172 @@ return `
         <div><b>${CATALOG.liabilityRisks.length}</b><span>rizik odpovědnosti</span></div>
       </div>
 
-      <div class="admin-tabs admin-tabs-494">
-        ${tabBtn494('users','Uživatelé')}
-        ${tabBtn494('permissions','Oprávnění / pozice')}
-        ${tabBtn494('insurers','Pojišťovny')}
-        ${tabBtn494('attachments','Přílohy')}
-        ${tabBtn494('documents','Dokumenty')}
-        ${tabBtn494('texts','Textace')}
-        ${tabBtn494('liabilityRisks','Rizika odpovědnosti')}
-        ${tabBtn494('liabilityAgreements','Ujednání odpovědnosti')}
-        ${tabBtn494('json','Import / export JSON')}
+      <div class="admin-tabs admin-tabs-safe admin-tabs-495">
+        ${tab495('users','Uživatelé')}
+        ${tab495('permissions','Oprávnění / pozice')}
+        ${tab495('insurers','Pojišťovny')}
+        ${tab495('attachments','Přílohy')}
+        ${tab495('documents','Dokumenty')}
+        ${tab495('texts','Textace')}
+        ${tab495('liabilityRisks','Rizika odpovědnosti')}
+        ${tab495('liabilityAgreements','Ujednání odpovědnosti')}
+        ${tab495('json','Import / export JSON')}
       </div>
       <div id="adminPanel"></div>
     `;
-    window.adminPanel('texts');
+    window.adminPanel('users');
   };
 
-  function tabBtn494(type,label){
-    return `<button class="chip" data-admin-tab-494="${A494(type)}" onclick="adminPanel('${A494(type)}')">${A494(label)}</button>`;
-  }
-
-  function active494(type){
-    document.querySelectorAll('[data-admin-tab-494]').forEach(b => b.classList.toggle('active', b.getAttribute('data-admin-tab-494') === type));
-  }
-
   window.adminPanel = function(type){
-    ensureCatalog494();
-    active494(type);
+    ensure495();
+    setActive495(type);
     const box = document.getElementById('adminPanel');
     if(!box) return;
 
     if(type === 'users'){
-      box.innerHTML = `
-        <div class="admin-pro-panel-494">
-          <div class="section-head">
-            <div>
-              <h2>Uživatelé a role</h2>
-              <p class="muted">Přehledná správa oprávněných osob. Jeden uživatel může mít více rolí.</p>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="users-table-494">
-              <thead><tr><th>ID</th><th>Jméno</th><th>E-mail</th><th>Pozice</th><th>Role</th><th>Aktivní</th><th>Akce</th></tr></thead>
-              <tbody>
-                ${CATALOG.users.map((u,idx)=>`
-                  <tr>
-                    <td><input value="${A494(u.id||'')}" onchange="CATALOG.users[${idx}].id=this.value"></td>
-                    <td><input value="${A494(u.name||'')}" onchange="CATALOG.users[${idx}].name=this.value"></td>
-                    <td><input value="${A494(u.email||'')}" onchange="CATALOG.users[${idx}].email=this.value"></td>
-                    <td><input value="${A494(u.position||'')}" onchange="CATALOG.users[${idx}].position=this.value"></td>
-                    <td>${roleChecks494(u,idx)}</td>
-                    <td><select onchange="CATALOG.users[${idx}].active=this.value==='ano'"><option ${u.active!==false?'selected':''}>ano</option><option ${u.active===false?'selected':''}>ne</option></select></td>
-                    <td><button class="btn danger small" onclick="CATALOG.users.splice(${idx},1);adminPanel('users')">Smazat</button></td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <div class="tools">
-            <button class="btn secondary" onclick="CATALOG.users.push({id:'u_'+Date.now(),name:'',email:'',position:'Poradce',roles:['PORADCE'],active:true});adminPanel('users')">+ Nový uživatel</button>
-            <button class="btn primary" onclick="saveAdminCatalog && saveAdminCatalog()">Uložit uživatele</button>
-          </div>
-        </div>`;
+      box.innerHTML = renderUsers495();
       return;
     }
-
     if(type === 'documents'){
-      box.innerHTML = `
-        <div class="admin-pro-panel-494">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">DOKUMENTOVÝ MODUL</p>
-              <h2>Dokumenty k obchodnímu případu</h2>
-              <p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady.</p>
-            </div>
-            <button class="btn secondary" onclick="CATALOG.adminDocuments.push({title:'Nový typ dokumentu',category:'Vlastní',note:'',active:true});adminPanel('documents')">+ Přidat dokument</button>
-          </div>
-
-          <div class="doc-grid-494">
-            ${CATALOG.adminDocuments.map((d,idx)=>`
-              <div class="doc-card-494">
-                <input class="doc-title-494" value="${A494(d.title||'')}" onchange="CATALOG.adminDocuments[${idx}].title=this.value">
-                <input value="${A494(d.category||'')}" onchange="CATALOG.adminDocuments[${idx}].category=this.value" placeholder="Kategorie">
-                <textarea onchange="CATALOG.adminDocuments[${idx}].note=this.value" placeholder="Popis / účel">${A494(d.note||'')}</textarea>
-                <div class="tools compact">
-                  <select onchange="CATALOG.adminDocuments[${idx}].active=this.value==='ano'"><option ${d.active!==false?'selected':''}>ano</option><option ${d.active===false?'selected':''}>ne</option></select>
-                  <button class="btn danger small" onclick="CATALOG.adminDocuments.splice(${idx},1);adminPanel('documents')">Smazat</button>
-                </div>
-              </div>`).join('')}
-          </div>
-
-          <div class="tools">
-            <button class="btn primary" onclick="saveAdminCatalog && saveAdminCatalog()">Uložit dokumenty</button>
-          </div>
-        </div>`;
+      box.innerHTML = renderDocuments495();
       return;
     }
-
     if(type === 'texts'){
-      box.innerHTML = `
-        <div class="admin-pro-panel-494">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">CENTRÁLNÍ KNIHOVNA TEXTACÍ</p>
-              <h2>Textace</h2>
-              <p class="muted">Profesionální textace pro poptávky, nabídky, zprávy klientovi a interní práci.</p>
-            </div>
-            <button class="btn secondary" onclick="CATALOG.textTemplates.push({title:'Nová textace',type:'centrální',category:'obecné',text:'',active:true});adminPanel('texts')">+ Přidat textaci</button>
-          </div>
-
-          <div class="textation-toolbar-494">
-            <input id="txtSearch494" placeholder="Hledat textaci..." oninput="adminPanel('texts')">
-            <select id="txtCategory494" onchange="adminPanel('texts')">
-              <option value="">Všechny kategorie</option>
-              ${[...new Set(CATALOG.textTemplates.map(t=>t.category).filter(Boolean))].map(c=>`<option>${A494(c)}</option>`).join('')}
-            </select>
-            <button class="btn secondary" onclick="brh494ResetTextTemplates()">Obnovit vzorové</button>
-          </div>
-
-          <div class="table-wrap">
-            <table class="textation-table-494">
-              <thead><tr><th>Název</th><th>Kategorie</th><th>Použití</th><th>Text</th><th>Tagy / stav</th><th>Akce</th></tr></thead>
-              <tbody>
-                ${CATALOG.textTemplates.map((t,idx)=>`
-                  <tr>
-                    <td><input value="${A494(t.title||t.name||'')}" onchange="CATALOG.textTemplates[${idx}].title=this.value;CATALOG.textTemplates[${idx}].name=this.value"></td>
-                    <td><input value="${A494(t.category||'')}" onchange="CATALOG.textTemplates[${idx}].category=this.value"></td>
-                    <td><input value="${A494(t.type||'')}" onchange="CATALOG.textTemplates[${idx}].type=this.value"></td>
-                    <td><textarea onchange="CATALOG.textTemplates[${idx}].text=this.value;CATALOG.textTemplates[${idx}].body=this.value">${A494(t.text||t.body||'')}</textarea></td>
-                    <td>
-                      <input value="${A494((arr494(t.tags)).join(', '))}" onchange="CATALOG.textTemplates[${idx}].tags=this.value.split(',').map(x=>x.trim()).filter(Boolean)" placeholder="tagy">
-                      <select onchange="CATALOG.textTemplates[${idx}].active=this.value==='ano'"><option ${t.active!==false?'selected':''}>ano</option><option ${t.active===false?'selected':''}>ne</option></select>
-                    </td>
-                    <td>
-                      <button class="btn secondary small" onclick="navigator.clipboard && navigator.clipboard.writeText(CATALOG.textTemplates[${idx}].text || CATALOG.textTemplates[${idx}].body || '')">Kopírovat</button>
-                      <button class="btn danger small" onclick="CATALOG.textTemplates.splice(${idx},1);adminPanel('texts')">Smazat</button>
-                    </td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="tools">
-            <button class="btn primary" onclick="saveAdminCatalog && saveAdminCatalog()">Uložit textace</button>
-          </div>
-        </div>`;
+      box.innerHTML = renderTexts495();
       return;
     }
 
-    // Fallback to původní jednoduché správy, ale bez pádu aplikace.
-    box.innerHTML = `
-      <div class="admin-pro-panel-494">
-        <h2>${A494(type)}</h2>
-        <p class="muted">Sekce je zachována pro stávající číselníky. Detailní enterprise editor bude dopracován v další dílčí verzi.</p>
-      </div>`;
+    // DŮLEŽITÉ: všechny ostatní sekce vracíme původnímu plnohodnotnému Adminu.
+    if(typeof previousAdminPanel495 === 'function'){
+      previousAdminPanel495(type);
+      setActive495(type);
+      return;
+    }
+
+    box.innerHTML = `<h2>${H495(type)}</h2><p class="muted">Sekce není dostupná.</p>`;
   };
 
-  window.brh494ResetTextTemplates = function(){
-    CATALOG.textTemplates = [];
-    ensureCatalog494();
-    window.adminPanel('texts');
+  function renderUsers495(){
+    return `
+      <div class="admin-pro-panel-495">
+        <h2>Uživatelé a role</h2>
+        <p class="muted">Přehledná správa oprávněných osob. Jeden uživatel může mít více rolí.</p>
+        <div class="table-wrap">
+          <table class="users-table-495">
+            <thead><tr><th>ID</th><th>Jméno</th><th>E-mail</th><th>Pozice</th><th>Role</th><th>Aktivní</th><th>Akce</th></tr></thead>
+            <tbody>${CATALOG.users.map((u,idx)=>`
+              <tr>
+                <td><input value="${H495(u.id||'')}" onchange="CATALOG.users[${idx}].id=this.value"></td>
+                <td><input value="${H495(u.name||'')}" onchange="CATALOG.users[${idx}].name=this.value"></td>
+                <td><input value="${H495(u.email||'')}" onchange="CATALOG.users[${idx}].email=this.value"></td>
+                <td><input value="${H495(u.position||'')}" onchange="CATALOG.users[${idx}].position=this.value"></td>
+                <td>${roleChecks495(u,idx)}</td>
+                <td><select onchange="CATALOG.users[${idx}].active=this.value==='ano'"><option ${u.active!==false?'selected':''}>ano</option><option ${u.active===false?'selected':''}>ne</option></select></td>
+                <td><button class="btn danger" onclick="CATALOG.users.splice(${idx},1);adminPanel('users')">Smazat</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.users.push({id:'u_'+Date.now(),name:'',email:'',position:'Poradce',roles:['PORADCE'],active:true});adminPanel('users')">+ Nový uživatel</button>
+          <button class="btn primary" onclick="saveAdminCatalog && saveAdminCatalog()">Uložit uživatele</button>
+        </div>
+      </div>`;
+  }
+
+  function roleChecks495(u,idx){
+    const userRoles = arr495(u.roles);
+    return `<div class="roles-grid-495">${
+      CATALOG.roleProfiles.map(r => {
+        const code = r.code || r.name || '';
+        return `<label class="role-chip-495"><input type="checkbox" ${userRoles.includes(code)?'checked':''} onchange="brh495ToggleRole(${idx},'${H495(code)}',this.checked)"> ${H495(code)}</label>`;
+      }).join('')
+    }</div>`;
+  }
+
+  window.brh495ToggleRole = function(idx, role, checked){
+    const u = CATALOG.users[idx]; if(!u) return;
+    u.roles = arr495(u.roles);
+    if(checked && !u.roles.includes(role)) u.roles.push(role);
+    if(!checked) u.roles = u.roles.filter(r => r !== role);
+  };
+
+  function renderDocuments495(){
+    const docs = [
+      ['VPP / DPP / ZPP','pojistné podmínky, doložky, zvláštní podmínky'],
+      ['Nabídky pojišťoven','PDF, e-maily, přílohy k nabídce'],
+      ['Škodní průběh','historie škod, potvrzení, tabulky'],
+      ['Revize / technické podklady','revize elektro, BOZP, zabezpečení, technika'],
+      ['Fotodokumentace','fotky provozu, zařízení, objektů'],
+      ['Dotazníky a ostatní','vyplněné dotazníky, komunikace, poznámky']
+    ];
+    return `
+      <div class="admin-pro-panel-495">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">DOKUMENTOVÝ MODUL</p>
+            <h2>Dokumenty k obchodnímu případu</h2>
+            <p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady.</p>
+          </div>
+          <button class="btn secondary">+ Přidat dokument</button>
+        </div>
+        <div class="doc-grid-495">
+          ${docs.map(([title,note])=>`<div class="doc-card-495"><h3>${H495(title)}</h3><p>${H495(note)}</p></div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function renderTexts495(){
+    seedTextTemplates495(false);
+    return `
+      <div class="admin-pro-panel-495">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">CENTRÁLNÍ DATABÁZE · TEXTACE</p>
+            <h2>Správa knihovny textací</h2>
+            <p class="muted">Centrální pracovní správa textací pro poradce. Textace lze kopírovat, upravit, smazat nebo doplnit.</p>
+          </div>
+          <button class="btn secondary" onclick="CATALOG.textTemplates.push({title:'Nová textace',type:'Poptávka',category:'Obecné',text:'',tags:[],active:true});adminPanel('texts')">+ Přidat textaci</button>
+        </div>
+
+        <div class="textation-toolbar-495">
+          <input placeholder="Hledat textaci..." disabled>
+          <select disabled><option>Všechny kategorie</option></select>
+          <button class="btn secondary" onclick="brh495ResetTextTemplates()">Obnovit vzorové</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="textation-table-495">
+            <thead><tr><th>Název</th><th>Kategorie</th><th>Použití</th><th>Text</th><th>Tagy / stav</th><th>Akce</th></tr></thead>
+            <tbody>${CATALOG.textTemplates.map((t,idx)=>`
+              <tr>
+                <td><input value="${H495(t.title||t.name||'')}" onchange="CATALOG.textTemplates[${idx}].title=this.value;CATALOG.textTemplates[${idx}].name=this.value"></td>
+                <td><input value="${H495(t.category||'')}" onchange="CATALOG.textTemplates[${idx}].category=this.value"></td>
+                <td><input value="${H495(t.type||'')}" onchange="CATALOG.textTemplates[${idx}].type=this.value"></td>
+                <td><textarea onchange="CATALOG.textTemplates[${idx}].text=this.value;CATALOG.textTemplates[${idx}].body=this.value">${H495(t.text||t.body||'')}</textarea></td>
+                <td>
+                  <input value="${H495(arr495(t.tags).join(', '))}" onchange="CATALOG.textTemplates[${idx}].tags=this.value.split(',').map(x=>x.trim()).filter(Boolean)" placeholder="tagy">
+                  <select onchange="CATALOG.textTemplates[${idx}].active=this.value==='ano'"><option ${t.active!==false?'selected':''}>ano</option><option ${t.active===false?'selected':''}>ne</option></select>
+                </td>
+                <td>
+                  <button class="btn secondary small" onclick="navigator.clipboard && navigator.clipboard.writeText(CATALOG.textTemplates[${idx}].text || CATALOG.textTemplates[${idx}].body || '')">Kopírovat</button>
+                  <button class="btn danger small" onclick="CATALOG.textTemplates.splice(${idx},1);adminPanel('texts')">Smazat</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tools">
+          <button class="btn secondary" onclick="CATALOG.textTemplates.push({title:'Nová textace',type:'Poptávka',category:'Obecné',text:'',tags:[],active:true});adminPanel('texts')">+ Nová textace</button>
+          <button class="btn primary" onclick="saveAdminCatalog && saveAdminCatalog()">Uložit textace</button>
+        </div>
+      </div>`;
+  }
+
+  window.brh495ResetTextTemplates = function(){
+    seedTextTemplates495(true);
+    adminPanel('texts');
   };
 
 })();
