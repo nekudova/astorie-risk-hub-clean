@@ -1,4 +1,4 @@
-const VERSION = '5.0.2';
+const VERSION = '5.0.4';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.3 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 5.0.2 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.3 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.2 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 5.0.3 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.2 – REAL PROFESSIONAL CARDS SAFE
+   BRH 5.0.3 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.2 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 5.0.3 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 5.0.2 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 5.0.3 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 5.0.2 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 5.0.3 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.2 – SAFE STABILIZATION RELEASE
+   BRH 5.0.3 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.2 – SMART OFFERS RESTORE SAFE
+   BRH 5.0.3 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,8 +3690,8 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.2 – ADMIN EMERGENCY RESTORE SAFE
-   Zdrojová báze: 5.0.2, aby se nezdědilo poškození Adminu z 5.0.2.
+   BRH 5.0.3 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 5.0.3, aby se nezdědilo poškození Adminu z 5.0.3.
    Princip:
    - NEmaže původní adminPanel.
    - Pro běžné admin sekce používá původní plnohodnotné editory.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 5.0.2 SAFE</p>
+          <p class="eyebrow">Administrace · 5.0.3 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4014,7 +4014,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 
 /* ============================================================================
-   BRH 5.0.2 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
+   BRH 5.0.3 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
    - Nabídky/Porovnání převzaty z poslední nalezené funkční větve 3.5.1b.
    - Textace/Dokumenty doplněny ve stylu 2.6.1 bez zásahu do ostatních částí.
    ============================================================================ */
@@ -4112,7 +4112,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.2 – SMART OFFER TOGGLE SAFE
+   BRH 5.0.3 – SMART OFFER TOGGLE SAFE
    Oprava karty 8 Nabídky:
    - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač
    - po použití je viditelně zvýrazněné
@@ -4313,7 +4313,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.2 – SMART PREFILL + TEXTACE VISUAL SAFE
+   BRH 5.0.3 – SMART PREFILL + TEXTACE VISUAL SAFE
    Cíl:
    - Karta 8: tlačítko „Tato pojišťovna splňuje vše“ funguje jako přepínač.
    - Po zapnutí se do nabídky propíší limity / pojistné částky / spoluúčasti
@@ -4693,7 +4693,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.2 – DATA BINDINGS + PRODUCTION MODULES SAFE
+   BRH 5.0.3 – DATA BINDINGS + PRODUCTION MODULES SAFE
    Důvod opravy:
    1) Karta 8 musí viditelně propsat data z poptávky do nabídky při kliknutí
       „Tato pojišťovna splňuje vše“.
@@ -5054,7 +5054,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.2 – SELECTION + TEXTACE + REQUEST BINDINGS SAFE
+   BRH 5.0.3 – SELECTION + TEXTACE + REQUEST BINDINGS SAFE
    Oprava:
    - Pojišťovny v poptávkách se generují pouze ze skutečně zaškrtnutých pojišťoven.
    - Sjednocení kódů KOOP/koop, GČP/gcp, ČPP/cpp, aby checkbox i karta poptávky
@@ -5274,7 +5274,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   },true);
 })();
 
-/* BRH 5.0.2 – TEXTACE VISIBILITY + DELETE + STATUS COLORS SAFE */
+/* BRH 5.0.3 – TEXTACE VISIBILITY + DELETE + STATUS COLORS SAFE */
 (function(){
   window.BRH_502_TEXTACE_VISIBILITY_STATUS_COLORS_SAFE=true;
   window.BRH_RENDER_VERSION='502';
@@ -5320,4 +5320,56 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   document.addEventListener('click',function(ev){const b=ev.target&&ev.target.closest?ev.target.closest('button,a'):null;if(!b)return;const t=C(b.textContent);if(t==='textace'){ev.preventDefault();ev.stopPropagation();renderProductionTextace502('central');}},true);
   window.applyStatusColors502=function(){document.querySelectorAll('#tabContent td,#tabContent span,#tabContent div,#tabContent b').forEach(el=>{const txt=C(el.textContent);if(!txt)return;if(txt.includes('splneno'))el.classList.add('status-ok-502');else if(txt.includes('nutno overit')||txt.includes('overit'))el.classList.add('status-warn-502');else if(txt.includes('rozpracovano'))el.classList.add('status-work-502');else if(txt.includes('odmitnuto')||txt.includes('nesplneno'))el.classList.add('status-bad-502');});};
   document.addEventListener('change',function(){setTimeout(applyStatusColors502,50)},true);
+})();
+
+
+/* ============================================================================
+   BRH 5.0.3 – USABILITY SAVE STATUS ADMIN SAFE
+   ============================================================================ */
+(function(){
+  window.BRH_503_USABILITY_SAVE_STATUS_ADMIN_SAFE = true;
+  window.BRH_RENDER_VERSION = '504';
+  function st(){ return (typeof state !== 'undefined' && state) ? state : (window.state = window.state || {}); }
+  function arr(v){ return Array.isArray(v) ? v : []; }
+  function esc(v){ return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function clean(v){ return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function toastX(msg){ if(typeof toast==='function') toast(msg); else console.log(msg); }
+  function caseId(){ const s=st(); return s.activeCaseId||s.active_case_id||s.case_id||(s.activeCase&&(s.activeCase.id||s.activeCase.case_id))||'draft'; }
+  function improve(root){
+    root=root||document;
+    root.querySelectorAll('textarea').forEach(t=>{ t.classList.add('brh-readable-503'); if(!t.dataset.grow503){t.dataset.grow503='1'; t.addEventListener('input',()=>{t.style.height='auto';t.style.height=Math.min(160,Math.max(54,t.scrollHeight))+'px';});} setTimeout(()=>{t.style.height='auto';t.style.height=Math.min(160,Math.max(54,t.scrollHeight))+'px';},0); });
+    root.querySelectorAll('input,select').forEach(e=>e.classList.add('brh-readable-503'));
+    root.querySelectorAll('table').forEach(e=>e.classList.add('brh-table-readable-503'));
+  }
+  function statusColors(root){
+    root=root||document;
+    root.querySelectorAll('select').forEach(sel=>{ const v=clean(sel.value); sel.classList.remove('brh-status-sent-503','brh-status-ready-503','brh-status-work-503','brh-status-ok-503','brh-status-warn-503'); const c=sel.closest('.card,.request-card,.panel,.form-card,td,section');
+      if(v.includes('odeslano')){sel.classList.add('brh-status-sent-503'); c&&c.classList.add('brh-status-sent-card-503');}
+      else if(v.includes('pripraveno')) sel.classList.add('brh-status-ready-503');
+      else if(v.includes('rozpracovano')) sel.classList.add('brh-status-work-503');
+      else if(v.includes('splneno')) sel.classList.add('brh-status-ok-503');
+      else if(v.includes('nutno overit')) sel.classList.add('brh-status-warn-503');
+    });
+    root.querySelectorAll('td,span,div,b').forEach(el=>{ const t=clean(el.textContent); if(t==='splneno'||t.startsWith('splneno ')) el.classList.add('brh-inline-ok-503'); else if(t.includes('nutno overit')) el.classList.add('brh-inline-warn-503'); else if(t.includes('rozpracovano')) el.classList.add('brh-inline-work-503'); else if(t.includes('odeslano')) el.classList.add('brh-inline-sent-503'); });
+  }
+  window.saveAttachments503=function(){
+    const rows=[]; const box=document.getElementById('tabContent')||document;
+    box.querySelectorAll('section,.card,.attachment-row,.doc-row,.form-card,.panel').forEach((r,idx)=>{ const txt=clean(r.textContent); if(!(txt.includes('plna moc')||txt.includes('vypis z or')||txt.includes('skodni prubeh')||txt.includes('seznam cinnosti')||txt.includes('priloha'))) return; const vals=[]; r.querySelectorAll('input,textarea,select').forEach(i=>vals.push({name:i.name||i.placeholder||'',value:i.type==='checkbox'?i.checked:i.value})); if(vals.length) rows.push({idx,values:vals}); });
+    st().attachments_saved_503=rows; try{localStorage.setItem('brh_case_attachments_503_'+caseId(),JSON.stringify(rows));}catch(e){} toastX('Přílohy byly uloženy k aktivnímu případu.');
+  };
+  document.addEventListener('click',ev=>{ const b=ev.target.closest&&ev.target.closest('button,a'); if(!b) return; const t=clean(b.textContent); if(t.includes('ulozit prilohy')) setTimeout(window.saveAttachments503,0); },true);
+  function demand(row){ const m=(row?.textContent||'').match(/Požadavek:\s*([0-9\s]+(?:Kč|CZK)?)/i); return m?m[1].trim():''; }
+  window.toggleInsurerFulfilled503=function(btn){ const col=btn.closest('.insurer-column,.offer-col,.offer-insurer,.matrix-col,.insurer-card,td,section'); const active=!btn.classList.contains('brh-active-fulfilled-503'); btn.classList.toggle('brh-active-fulfilled-503',active); btn.textContent=active?'✓ Splňuje vše – vrátit zpět':'Tato pojišťovna splňuje vše'; if(col){ col.classList.toggle('brh-offer-fulfilled-503',active); col.querySelectorAll('select').forEach(s=>{ if(active) s.value='splněno'; else if(clean(s.value).includes('splneno')) s.value='rozpracováno'; }); col.querySelectorAll('input,textarea').forEach(inp=>{ const ph=clean(inp.placeholder); if(active&&(ph.includes('limit')||ph.includes('castka')||ph.includes('nabidnuty'))&&!inp.value){ inp.value=demand(inp.closest('tr,.risk-row,.offer-risk-row,.matrix-row')||inp.parentElement)||inp.value; inp.dataset.auto503='1'; } if(!active&&inp.dataset.auto503==='1'){ inp.value=''; delete inp.dataset.auto503; } }); } statusColors(document); toastX(active?'Pojišťovna nastavena jako splněná.':'Označení splněno bylo zrušeno.'); };
+  document.addEventListener('click',ev=>{ const b=ev.target.closest&&ev.target.closest('button'); if(!b) return; const t=clean(b.textContent); if(t.includes('tato pojistovna splnuje vse')||t.includes('splnuje vse vratit zpet')){ ev.preventDefault(); ev.stopPropagation(); window.toggleInsurerFulfilled503(b); } },true);
+  function renderDocs(){ const box=document.getElementById('tabContent')||document.getElementById('workspace')||document.querySelector('main'); if(!box) return; box.innerHTML=`<p class="eyebrow">DOKUMENTOVÁ KNIHOVNA</p><h2>Dokumenty k obchodnímu případu</h2><p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady.</p><div class="doc-grid-503">${['VPP / DPP / ZPP','Nabídky pojišťoven','Škodní průběh','Revize / technické podklady','Fotodokumentace','Dotazníky a ostatní'].map(x=>`<div class="doc-card-503"><h3>${x}</h3><p>Podklady vázané na aktivní obchodní případ.</p></div>`).join('')}</div><section class="doc-evidence-503"><h3>Evidence dokumentů</h3><button class="btn secondary" onclick="addDocRow503()">+ Přidat dokument</button><div id="docRows503">${renderDocRows503()}</div></section>`; improve(box); };
+  function dk(){return 'brh_case_docs_503_'+caseId()} function docs(){try{return JSON.parse(localStorage.getItem(dk())||'[]')}catch(e){return[]}} function saveDocs(r){localStorage.setItem(dk(),JSON.stringify(r))}
+  window.renderDocRows503=function(){ const rows=docs(); if(!rows.length) return '<div class="empty">Zatím nejsou evidovány žádné dokumenty.</div>'; return rows.map((r,i)=>`<div class="doc-row-503"><input value="${esc(r.name||'')}" placeholder="Název dokumentu" onchange="updateDoc503(${i},'name',this.value)"><input value="${esc(r.category||'')}" placeholder="Kategorie" onchange="updateDoc503(${i},'category',this.value)"><select onchange="updateDoc503(${i},'status',this.value)">${['chybí','dodáno','není potřeba','čekáme'].map(x=>`<option ${r.status===x?'selected':''}>${x}</option>`).join('')}</select><textarea placeholder="Poznámka / soubor" onchange="updateDoc503(${i},'note',this.value)">${esc(r.note||'')}</textarea><button class="btn danger small" onclick="deleteDoc503(${i})">Smazat</button></div>`).join('') };
+  window.addDocRow503=function(){const r=docs(); r.push({name:'Nový dokument',category:'Ostatní',status:'chybí',note:''}); saveDocs(r); renderDocs();}; window.updateDoc503=function(i,k,v){const r=docs(); if(r[i]){r[i][k]=v; saveDocs(r); toastX('Dokument uložen.')}}; window.deleteDoc503=function(i){const r=docs(); r.splice(i,1); saveDocs(r); renderDocs();}; window.renderDocumentsProduction503=renderDocs;
+  const oldShow=window.showView; window.showView=function(view){ const v=clean(view); if(v.includes('textace')){ if(typeof renderProductionTextace502==='function') renderProductionTextace502('central'); else if(typeof renderProductionTextace500==='function') renderProductionTextace500('central'); return; } if(v.includes('dokument')){renderDocs();return;} return oldShow?oldShow.apply(this,arguments):undefined; };
+  document.addEventListener('click',ev=>{ const b=ev.target.closest&&ev.target.closest('button,a'); if(!b) return; const t=clean(b.textContent); if(t==='textace'){ if(typeof renderProductionTextace502==='function') {ev.preventDefault();ev.stopPropagation();renderProductionTextace502('central');} } if(t==='dokumenty'){ev.preventDefault();ev.stopPropagation();renderDocs();} },true);
+  function advisor(){const s=st(),a=s.advisor||s.poradce||s.currentAdvisor||{};return {name:a.name||a.full_name||a.jmeno||s.advisor_name||s.poradce_name||'Poradce',email:a.email||s.advisor_email||s.poradce_email||'',phone:a.phone||a.telefon||s.advisor_phone||s.poradce_phone||''}}
+  function fixPrint(doc){try{const a=advisor();const b=doc.body||doc;b.innerHTML=b.innerHTML.replace(/Děkujeme\.\s*<br>\s*Administrátor ASTORIE\s*<br>\s*ASTORIE a\.s\./gi,`Děkujeme.<br>${esc(a.name)}${a.email?'<br>'+esc(a.email):''}${a.phone?'<br>'+esc(a.phone):''}`).replace(/Administrátor ASTORIE\s*<br>\s*ASTORIE a\.s\./gi,`${esc(a.name)}${a.email?'<br>'+esc(a.email):''}${a.phone?'<br>'+esc(a.phone):''}`).replace(/ASTORIE a\.s\.\s*<br>\s*ASTORIE a\.s\./gi,'ASTORIE a.s.')}catch(e){}}
+  const oldOpen=window.open; window.open=function(){const w=oldOpen.apply(window,arguments); try{setTimeout(()=>w&&w.document&&fixPrint(w.document),300);setTimeout(()=>w&&w.document&&fixPrint(w.document),1000)}catch(e){} return w;}
+  const oldRender=window.renderWorkspace; if(oldRender&&!oldRender.__brh503){ const wrap=function(){const r=oldRender.apply(this,arguments); setTimeout(()=>{improve(document);statusColors(document)},80); return r}; wrap.__brh503=true; window.renderWorkspace=wrap; }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{improve(document);statusColors(document)},150)); document.addEventListener('change',()=>statusColors(document),true); setInterval(()=>{improve(document);statusColors(document)},1800);
 })();
