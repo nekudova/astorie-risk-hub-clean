@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.6 – Textace Documents Button Restore SAFE
+# Business Risk Hub 4.9.7 – Functional Offers Textace Restore SAFE
 
 ## Co je opraveno
 - Vrácen Admin na stabilní bázi 4.9.2.
@@ -17,7 +17,7 @@
 
 ## Kontrola po nasazení
 V logu musí být:
-- `/static/js/app.js?v=496`
-- `/static/css/style.css?v=496`
+- `/static/js/app.js?v=497`
+- `/static/css/style.css?v=497`
 
 Build: 2026-05-26 07:12:10

@@ -1,11 +1,11 @@
-# Business Risk Hub 4.9.6 – Advisor Professional Cards Workflow SAFE
+# Business Risk Hub 4.9.7 – Advisor Professional Cards Workflow SAFE
 
 ## Účel
 Toto je bezpečný opravný balík po chybné verzi 4.2.0.
 
 ## Základ
 Balík je postavený nad poslední funkční verzí:
-- Business Risk Hub 4.9.6 – Liability Dynamic Engine PRO
+- Business Risk Hub 4.9.7 – Liability Dynamic Engine PRO
 
 ## Co se mění
 - pouze identita buildu na 4.4.0,
