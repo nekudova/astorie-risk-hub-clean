@@ -3688,3 +3688,93 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   };
 
 })();
+
+
+/* BRH 4.9.3 ADMIN PROFESSIONAL RESTORE SAFE */
+window.BRH_493_ADMIN = true;
+
+window.renderAdminTextations493 = function(){
+return `
+<div class="admin-pro-panel">
+<h2>Textace</h2>
+<p class="muted">Centrální textace pro poptávky, nabídky, zprávy klientovi a interní práci.</p>
+
+<div class="table-wrap">
+<table class="admin-grid-table">
+<thead>
+<tr>
+<th>Název</th>
+<th>Typ</th>
+<th>Kategorie</th>
+<th>Text</th>
+<th>Aktivní</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input value="Úvod k odpovědnosti"></td>
+<td><input value="centrální"></td>
+<td><input value="obecné"></td>
+<td><textarea>Doporučujeme věnovat zvýšenou pozornost rozsahu odpovědnostního krytí.</textarea></td>
+<td><select><option>ano</option></select></td>
+</tr>
+
+<tr>
+<td><input value="Upozornění na výluky"></td>
+<td><input value="centrální"></td>
+<td><input value="výluky"></td>
+<td><textarea>Před sjednáním je nutné ověřit výluky uvedené ve VPP/DPP/ZPP.</textarea></td>
+<td><select><option>ano</option></select></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tools">
+<button class="btn secondary">+ Nová textace</button>
+<button class="btn primary">Uložit textace</button>
+</div>
+</div>`;
+};
+
+window.renderAdminDocuments493 = function(){
+return `
+<div class="admin-pro-panel">
+<h2>Dokumenty k obchodnímu případu</h2>
+<p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize a další podklady.</p>
+
+<div class="doc-grid-493">
+
+<div class="doc-card-493">
+<h3>VPP / DPP / ZPP</h3>
+<p>pojistné podmínky, doložky, zvláštní podmínky</p>
+</div>
+
+<div class="doc-card-493">
+<h3>Nabídky pojišťoven</h3>
+<p>PDF, e‑maily, přílohy k nabídce</p>
+</div>
+
+<div class="doc-card-493">
+<h3>Škodní průběh</h3>
+<p>historie škod, potvrzení, tabulky</p>
+</div>
+
+<div class="doc-card-493">
+<h3>Revize / technické podklady</h3>
+<p>revize elektro, BOZP, zabezpečení</p>
+</div>
+
+<div class="doc-card-493">
+<h3>Fotodokumentace</h3>
+<p>fotky provozu, zařízení, objektů</p>
+</div>
+
+<div class="doc-card-493">
+<h3>Dotazníky a ostatní</h3>
+<p>vyplněné dotazníky, komunikace, poznámky</p>
+</div>
+
+</div>
+</div>`;
+};

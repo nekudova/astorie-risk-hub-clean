@@ -406,3 +406,85 @@
 .comparison-table td{
   min-width:220px;
 }
+
+
+/* BRH 4.9.3 ADMIN PROFESSIONAL RESTORE SAFE */
+
+.admin-pro-panel{
+background:#fff;
+border:1px solid #d8e6ea;
+border-radius:28px;
+padding:28px;
+margin:18px 0;
+}
+
+.admin-grid-table{
+width:100%;
+min-width:1200px;
+border-collapse:collapse;
+}
+
+.admin-grid-table th{
+background:#004c5a;
+color:#fff;
+padding:16px;
+text-align:left;
+}
+
+.admin-grid-table td{
+padding:14px;
+border-bottom:1px solid #edf3f5;
+vertical-align:top;
+}
+
+.admin-grid-table input,
+.admin-grid-table textarea,
+.admin-grid-table select{
+width:100%;
+box-sizing:border-box;
+padding:12px;
+border-radius:16px;
+border:1px solid #d4e4e8;
+font-weight:600;
+}
+
+.admin-grid-table textarea{
+min-height:120px;
+}
+
+.doc-grid-493{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:18px;
+margin-top:24px;
+}
+
+.doc-card-493{
+border:1px solid #d6e5e9;
+border-radius:24px;
+padding:24px;
+background:#fff;
+}
+
+.doc-card-493 h3{
+margin:0 0 12px;
+font-size:30px;
+color:#003D4C;
+}
+
+.doc-card-493 p{
+margin:0;
+font-size:18px;
+color:#5f767d;
+}
+
+/* users fix */
+table{
+table-layout:auto !important;
+}
+
+td,th{
+overflow:visible !important;
+white-space:normal !important;
+}
+
