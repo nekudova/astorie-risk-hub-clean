@@ -1,4 +1,4 @@
-const VERSION = '5.0.4';
+const VERSION = '5.0.3';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -5328,7 +5328,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
    ============================================================================ */
 (function(){
   window.BRH_503_USABILITY_SAVE_STATUS_ADMIN_SAFE = true;
-  window.BRH_RENDER_VERSION = '504';
+  window.BRH_RENDER_VERSION = '503';
   function st(){ return (typeof state !== 'undefined' && state) ? state : (window.state = window.state || {}); }
   function arr(v){ return Array.isArray(v) ? v : []; }
   function esc(v){ return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
