@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.9 – Smart Prefill Textace Visual SAFE
+# Business Risk Hub 5.0.1 – Selection Textace Request Bindings SAFE
 
 ## Opraveno
 - Karta 8: „Tato pojišťovna splňuje vše“ zůstává přepínací a zvýrazněné.
@@ -8,7 +8,7 @@
 - Admin > Textace má vrácen profesionální card/list vzhled jako ve verzi 2.6.1.
 
 ## Kontrola po nasazení
-- `/static/js/app.js?v=499`
-- `/static/css/style.css?v=499`
+- `/static/js/app.js?v=501`
+- `/static/css/style.css?v=501`
 
 Build: 2026-05-26 09:26:10

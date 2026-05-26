@@ -1,4 +1,4 @@
-const VERSION = '5.0.0';
+const VERSION = '5.0.1';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.1 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 5.0.0 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.1 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.0 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 5.0.1 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.0 – REAL PROFESSIONAL CARDS SAFE
+   BRH 5.0.1 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.0 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 5.0.1 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 5.0.0 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 5.0.1 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 5.0.0 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 5.0.1 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.0 – SAFE STABILIZATION RELEASE
+   BRH 5.0.1 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.0 – SMART OFFERS RESTORE SAFE
+   BRH 5.0.1 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,8 +3690,8 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.0 – ADMIN EMERGENCY RESTORE SAFE
-   Zdrojová báze: 5.0.0, aby se nezdědilo poškození Adminu z 5.0.0.
+   BRH 5.0.1 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 5.0.1, aby se nezdědilo poškození Adminu z 5.0.1.
    Princip:
    - NEmaže původní adminPanel.
    - Pro běžné admin sekce používá původní plnohodnotné editory.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 5.0.0 SAFE</p>
+          <p class="eyebrow">Administrace · 5.0.1 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4014,7 +4014,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 
 /* ============================================================================
-   BRH 5.0.0 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
+   BRH 5.0.1 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
    - Nabídky/Porovnání převzaty z poslední nalezené funkční větve 3.5.1b.
    - Textace/Dokumenty doplněny ve stylu 2.6.1 bez zásahu do ostatních částí.
    ============================================================================ */
@@ -4112,7 +4112,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.0 – SMART OFFER TOGGLE SAFE
+   BRH 5.0.1 – SMART OFFER TOGGLE SAFE
    Oprava karty 8 Nabídky:
    - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač
    - po použití je viditelně zvýrazněné
@@ -4313,7 +4313,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.0 – SMART PREFILL + TEXTACE VISUAL SAFE
+   BRH 5.0.1 – SMART PREFILL + TEXTACE VISUAL SAFE
    Cíl:
    - Karta 8: tlačítko „Tato pojišťovna splňuje vše“ funguje jako přepínač.
    - Po zapnutí se do nabídky propíší limity / pojistné částky / spoluúčasti
@@ -4693,7 +4693,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.0 – DATA BINDINGS + PRODUCTION MODULES SAFE
+   BRH 5.0.1 – DATA BINDINGS + PRODUCTION MODULES SAFE
    Důvod opravy:
    1) Karta 8 musí viditelně propsat data z poptávky do nabídky při kliknutí
       „Tato pojišťovna splňuje vše“.
@@ -5051,4 +5051,225 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(markOfferButtons500,300));
   setTimeout(markOfferButtons500,500);
+})();
+
+/* ============================================================================
+   BRH 5.0.1 – SELECTION + TEXTACE + REQUEST BINDINGS SAFE
+   Oprava:
+   - Pojišťovny v poptávkách se generují pouze ze skutečně zaškrtnutých pojišťoven.
+   - Sjednocení kódů KOOP/koop, GČP/gcp, ČPP/cpp, aby checkbox i karta poptávky
+     ukazovaly stejný stav.
+   - Textace v produkci nyní vkládá text opravdu do poptávky / nabídky /
+     klientského výstupu přes state.case_textations.
+   - Poradce má v každé poptávce volný text a interní poznámku.
+   - Dokumenty produkce zůstávají napojené na aktivní CASE.
+   ============================================================================ */
+(function(){
+  window.BRH_501_SELECTION_TEXTACE_REQUEST_BINDINGS_SAFE = true;
+  window.BRH_RENDER_VERSION = '501';
+
+  function e501(v){ if(typeof esc==='function') return esc(v); return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+  function a501(v){ return Array.isArray(v)?v:[]; }
+  function s501(){ return (typeof state!=='undefined' && state) ? state : (window.state=window.state||{}); }
+  function n501(v){
+    v=String(v||'').trim().toLowerCase().replace(/\s+/g,'');
+    if(v.includes('koop')||v.includes('kooperativa')) return 'koop';
+    if(v.includes('gcp')||v.includes('gčp')||v.includes('generali')) return 'gcp';
+    if(v.includes('cpp')||v.includes('čpp')||v.includes('podnikatelsk')) return 'cpp';
+    return v;
+  }
+  function clean501(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+  function insurerName501(code){
+    code=n501(code);
+    try{
+      const found=(CATALOG.insurers||[]).find(i=>n501(i.code||i.shortcut||i.zkratka||i.key||i.name)===code);
+      if(found) return found.name||found.code||code;
+    }catch(e){}
+    return {koop:'Kooperativa pojišťovna, a.s.',gcp:'Generali Česká pojišťovna a.s.',cpp:'Česká podnikatelská pojišťovna, a.s.'}[code]||code;
+  }
+  function insurerEmail501(code){
+    code=n501(code);
+    try{
+      const found=(CATALOG.insurers||[]).find(i=>n501(i.code||i.shortcut||i.zkratka||i.key||i.name)===code);
+      return found ? (found.email||found.request_email||'') : '';
+    }catch(e){return '';}
+  }
+  function selectedCodesStrict501(){
+    const st=s501();
+    st.selected_insurers = [...new Set(a501(st.selected_insurers).map(n501).filter(Boolean))];
+    return st.selected_insurers;
+  }
+  window.selectedCodesStrict501 = selectedCodesStrict501;
+
+  window.toggleInsurer = function(code,on){
+    const st=s501(); const c=n501(code);
+    st.selected_insurers = selectedCodesStrict501();
+    if(on && !st.selected_insurers.includes(c)) st.selected_insurers.push(c);
+    if(!on) st.selected_insurers = st.selected_insurers.filter(x=>x!==c);
+    st.selected_insurers = [...new Set(st.selected_insurers)];
+    if(typeof renderHeader==='function') renderHeader();
+  };
+
+  window.addManualInsurer = function(){
+    const code=prompt('Zkratka pojišťovny mimo seznam:');
+    if(!code) return;
+    window.toggleInsurer(code,true);
+    if(typeof renderWorkspace==='function') renderWorkspace();
+  };
+
+  function ensureRequest501(code){
+    const st=s501(); const c=n501(code);
+    st.insurer_requests = st.insurer_requests || {};
+    st.insurer_requests[c] = st.insurer_requests[c] || {status:'připraveno',sent_at:'',subject:'',email_note:'',advisor_free_text:'',internal_note:''};
+    return st.insurer_requests[c];
+  }
+  window.ensureInsurerRequest = ensureRequest501;
+
+  function caseTexts501(target){
+    const st=s501(); st.case_textations=a501(st.case_textations);
+    return st.case_textations.filter(t=>!target || a501(t.targets).includes(target));
+  }
+  function textBlock501(target){
+    const items=caseTexts501(target);
+    if(!items.length) return '';
+    return `<div class="section-soft case-texts-501"><h3>Vložené textace</h3>${items.map((t,i)=>`<div class="case-text-row-501"><b>${e501(t.title||'Textace')}</b><p>${e501(t.text||'')}</p><button class="btn secondary small" onclick="removeCaseTextation501('${e501(t.id)}')">Odebrat</button></div>`).join('')}</div>`;
+  }
+  window.removeCaseTextation501=function(id){
+    const st=s501(); st.case_textations=a501(st.case_textations).filter(t=>String(t.id)!==String(id));
+    if(typeof renderWorkspace==='function') renderWorkspace();
+  };
+
+  // Opravuje stávající textační tlačítka: už nejde jen o lokální poznámku, ale o vložení do případu.
+  window.insertText500Target = window.insertText501Target = function(i,target){
+    const items=(typeof textStore500==='function') ? textStore500() : (window.DEFAULT_TEXTS_500||[]);
+    const t=items[i]; if(!t) return;
+    const st=s501(); st.case_textations=a501(st.case_textations);
+    st.case_textations.push({
+      id:'tx_'+Date.now()+'_'+Math.random().toString(16).slice(2),
+      title:t.title||t.name||'Textace',
+      category:t.category||'',
+      usage:t.usage||'',
+      tags:t.tags||[],
+      text:t.text||t.body||'',
+      targets:[target]
+    });
+    if(target==='request') st.request_extra_text = (st.request_extra_text||'') + ((st.request_extra_text||'')?'\n\n':'') + (t.text||t.body||'');
+    if(target==='offer') st.offer_extra_text = (st.offer_extra_text||'') + ((st.offer_extra_text||'')?'\n\n':'') + (t.text||t.body||'');
+    if(target==='output') st.textation_notes = (st.textation_notes||'') + ((st.textation_notes||'')?'\n\n':'') + (t.text||t.body||'');
+    if(typeof toast==='function') toast('Textace vložena do '+(target==='request'?'poptávky':target==='offer'?'nabídky':'klientského výstupu')+'.');
+    if(typeof renderWorkspace==='function' && (typeof currentTab!=='undefined') && (currentTab==='requests'||currentTab==='offers'||currentTab==='output')) renderWorkspace();
+  };
+
+  // Přepíše produkční textace tak, aby tlačítka mířila do reálných bloků.
+  window.renderProductionTextace501 = function(){
+    const box=document.getElementById('tabContent') || document.getElementById('workspace') || document.querySelector('main');
+    if(!box) return;
+    const items=(typeof textStore500==='function') ? textStore500() : (window.DEFAULT_TEXTS_500||[]);
+    const cards=items.map((t,i)=>`<article class="text-card-500" data-search="${e501(clean501([t.title,t.category,t.usage,(t.tags||[]).join(' '),t.text].join(' ')))}">
+      <div class="text-card-top-500"><h4>${e501(t.title||'Textace')}</h4><span>Centrální</span></div>
+      <div class="text-card-meta-500">${e501(t.category||'')} · ${e501(t.usage||'')} · ${a501(t.tags).map(x=>e501(x)).join(' · ')}</div>
+      <p>${e501(t.text||'')}</p>
+      <div class="tools">
+        <button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText((textStore500()[${i}]||{}).text||'')">Kopírovat</button>
+        <button class="btn primary small" onclick="insertText501Target(${i},'request')">Do poptávky</button>
+        <button class="btn secondary small" onclick="insertText501Target(${i},'offer')">Do nabídky</button>
+        <button class="btn secondary small" onclick="insertText501Target(${i},'output')">Do klientského výstupu</button>
+      </div>
+    </article>`).join('');
+    box.innerHTML=`<p class="eyebrow">PRACOVNÍ REŽIM</p><h2>Knihovna textací</h2>
+      <p class="muted">Textace lze kopírovat nebo vložit přímo do poptávky, nabídky či klientského výstupu aktivního případu.</p>
+      <div class="tools text-tools-500"><button class="btn secondary" onclick="saveTextStore500&&saveTextStore500(DEFAULT_TEXTS_500.slice());renderProductionTextace501()">Obnovit vzorové textace</button><button class="btn primary" onclick="addOwnText500&&addOwnText500()">+ Přidat textaci</button></div>
+      <div class="text-filter-500"><input placeholder="např. odpovědnost, výluka, drony, FVE, výrobek..." oninput="filterTextCards500&&filterTextCards500(this.value)"><select><option>Všechny kategorie</option></select><select><option>Všechny tagy</option></select></div>
+      <div class="text-tabs-500"><button class="active">Centrální databáze</button><button>Moje textace</button><button>Návrhy ke schválení</button></div>
+      <section class="text-section-500"><h3>Centrální databáze textací</h3><div class="text-card-grid-500">${cards}</div></section>
+      <section class="text-section-500"><h3>Textace vložené do aktivního případu</h3>${textBlock501('request')||'<div class="empty">Do poptávky zatím není vložena žádná textace.</div>'}${textBlock501('offer')||''}${textBlock501('output')||''}</section>`;
+  };
+
+  function tabInsurers501(){
+    const st=s501(); const selected=selectedCodesStrict501();
+    const list=(CATALOG.insurers||[]).map(ins=>{
+      const code=n501(ins.code||ins.shortcut||ins.zkratka||ins.key||ins.name);
+      const checked=selected.includes(code)?'checked':'';
+      return `<label class="form-card check-card"><input type="checkbox" ${checked} onchange="toggleInsurer('${e501(code)}',this.checked)"> <b>${e501((ins.code||code).toUpperCase())}</b><br>${e501(ins.name||code)}<br><span class="muted">${e501(ins.email||ins.request_email||'e-mail není doplněn')}</span></label>`;
+    }).join('');
+    return `<p class="eyebrow">5. Pojišťovny v poptávce</p><h2>Komu se bude poptávka posílat</h2>
+      <p class="muted">Poptávky se budou generovat pouze pro zaškrtnuté pojišťovny. Nezaškrtnuté pojišťovny se do karty 7 ani do nabídek nepřenášejí.</p>
+      <div class="grid3">${list||'<div class="empty">V číselníku nejsou pojišťovny.</div>'}</div>
+      <div class="tools"><button class="btn secondary" onclick="addManualInsurer()">+ Pojišťovna mimo seznam</button><button class="btn primary" onclick="currentTab='requests';renderWorkspace()">Pokračovat na poptávky pojišťovnám</button></div>`;
+  }
+
+  window.defaultEmailNote = function(code){
+    const st=s501(); const req=ensureRequest501(code);
+    const base=`Dobrý den,\n\nprosíme o zpracování nabídky pojištění podnikatelských rizik dle přiložené poptávky pro klienta ${st.client?.name||''}.\n\nV případě potřeby doplnění podkladů nás prosím kontaktujte.`;
+    const extra=[st.request_extra_text, ...caseTexts501('request').map(t=>t.text), req.advisor_free_text].filter(Boolean).join('\n\n');
+    return `${base}${extra?'\n\n'+extra:''}\n\nDěkujeme.\n${st.adviser?.name||'Poradce'}\nASTORIE a.s.`;
+  };
+
+  function tabInsurerRequests501(){
+    const st=s501(); const selected=selectedCodesStrict501();
+    const missing=[]; if(!st.client?.name) missing.push('klient'); if(!a501(st.risks).length) missing.push('rizika'); if(!selected.length) missing.push('pojišťovny');
+    if(missing.length){
+      return `<p class="eyebrow">7. Smart poptávky pojišťovnám</p><h2>Nejdříve doplňte povinné části</h2><div class="info-box">Pro generování poptávek chybí: ${e501(missing.join(', '))}.</div>`;
+    }
+    const globalText=textBlock501('request');
+    const cards=selected.map(code=>{
+      const req=ensureRequest501(code);
+      return `<div class="request-card request-card-501"><div class="section-head"><div><p class="eyebrow">Pojišťovna</p><h2>${e501(insurerName501(code))}</h2><p class="muted"><b>${e501(code.toUpperCase())}</b> · ${e501(insurerEmail501(code)||'e-mail není doplněn')}</p></div><span class="badge">${e501(req.status||'připraveno')}</span></div>
+        <div class="grid3"><label>Předmět e-mailu<input value="${e501(req.subject||'Poptávka pojištění podnikatelských rizik')}" onchange="ensureInsurerRequest('${e501(code)}').subject=this.value"></label><label>Stav poptávky<select onchange="ensureInsurerRequest('${e501(code)}').status=this.value"><option ${req.status==='připraveno'?'selected':''}>připraveno</option><option ${req.status==='odesláno'?'selected':''}>odesláno</option><option ${req.status==='čekáme na nabídku'?'selected':''}>čekáme na nabídku</option><option ${req.status==='nabídka přijata'?'selected':''}>nabídka přijata</option></select></label><label>Datum odeslání<input type="date" value="${e501(req.sent_at||'')}" onchange="ensureInsurerRequest('${e501(code)}').sent_at=this.value"></label></div>
+        <label>Doprovodný text pro pojišťovnu<textarea onchange="ensureInsurerRequest('${e501(code)}').email_note=this.value" placeholder="Doprovodný text pro tuto pojišťovnu...">${e501(req.email_note||window.defaultEmailNote(code))}</textarea></label>
+        <label>Volné doplnění poradce do poptávky<textarea onchange="ensureInsurerRequest('${e501(code)}').advisor_free_text=this.value" placeholder="Sem může poradce doplnit vlastní požadavky, specifika, termín pro nabídku, poznámky k rizikům nebo komunikaci s pojišťovnou.">${e501(req.advisor_free_text||'')}</textarea></label>
+        <label>Interní poznámka – neexportuje se<textarea onchange="ensureInsurerRequest('${e501(code)}').internal_note=this.value" placeholder="Interní pracovní poznámka poradce / BO.">${e501(req.internal_note||'')}</textarea></label>
+        <div class="tools"><button class="btn primary" onclick="printInsurerRequest('${e501(code)}')">PDF / tisk poptávky</button><button class="btn secondary" onclick="exportInsurerRequestExcel('${e501(code)}')">Excel pro pojišťovnu</button><button class="btn secondary" onclick="copyInsurerEmail('${e501(code)}')">Kopírovat e-mail</button><button class="btn ghost" onclick="ensureInsurerRequest('${e501(code)}').status='odesláno';ensureInsurerRequest('${e501(code)}').sent_at=new Date().toISOString().slice(0,10);readCurrentTab&&readCurrentTab();saveCase&&saveCase();renderWorkspace()">Označit jako odesláno</button></div>
+      </div>`;
+    }).join('');
+    return `<p class="eyebrow">7. Smart poptávky pojišťovnám</p><h2>Samostatná poptávka pro každou vybranou pojišťovnu</h2>
+      <p class="muted">Zobrazují se pouze pojišťovny zaškrtnuté v kartě 5. Poradce má vždy volné pole pro vlastní doplnění.</p>
+      ${globalText}${cards}
+      <div class="tools"><button class="btn primary" onclick="readCurrentTab&&readCurrentTab();saveCase&&saveCase()">Uložit stav poptávek</button><button class="btn secondary" onclick="currentTab='offers';renderWorkspace()">Pokračovat na nabídky</button></div>`;
+  }
+
+  // Přímé přepsání tiskového výstupu, aby obsahoval poradce a volný text poradce.
+  window.insurerRequestHtml501=function(code){
+    const st=s501(); const req=ensureRequest501(code);
+    const q=st.questionnaire||{}, c=st.client||{};
+    const rows=[['Klient',c.name],['IČO',c.ico],['DIČ',c.dic],['Adresa',c.address],['Kontaktní osoba',c.contact_person],['E-mail',c.contact_email],['Telefon',c.contact_phone],['Typ činnosti',st.activity?.name],['Detail činnosti',q.main_activity_detail],['Obrat',q.turnover],['Zaměstnanci',q.employees],['Území',q.territory],['Počátek pojištění',q.insurance_start],['Pojistné období',q.insurance_period],['Frekvence placení',q.payment_frequency],['Požadovaný rozsah',q.requested_scope],['Preferovaná spoluúčast',q.deductible_preference],['Speciální poznámka',q.special_notes]].filter(r=>String(r[1]||'').trim());
+    const risks=a501(st.risks).map(r=>`<tr><td>${e501(r.name||r.title||r.risk_key||'')}</td><td>${e501(r.requested_limit||r.limit||'')}</td><td>${e501(r.deductible||'')}</td><td>${e501(r.specification||r.client_note||r.note||'')}</td></tr>`).join('');
+    const textace=caseTexts501('request').map(t=>`<p><b>${e501(t.title)}:</b><br>${e501(t.text).replace(/\n/g,'<br>')}</p>`).join('');
+    return `<div class="request-print"><div class="print-head"><div><h1>ASTORIE a.s.</h1><p>Poptávka pojištění podnikatelských rizik</p></div><div><b>${e501(insurerName501(code))}</b><br>${e501(code.toUpperCase())}<br>${e501(insurerEmail501(code))}</div></div><h2>${e501(c.name||'Klient')}</h2><p><b>CASE_ID:</b> ${e501(st.id||'nový případ')} · <b>Poradce:</b> ${e501(st.adviser?.name||'')} · <b>E-mail poradce:</b> ${e501(st.adviser?.email||'')} · <b>Telefon:</b> ${e501(st.adviser?.phone||'')} · <b>Datum:</b> ${new Date().toLocaleDateString('cs-CZ')}</p><h3>Základní údaje pro pojištění</h3><table>${rows.map(([k,v])=>`<tr><th>${e501(k)}</th><td>${e501(v)}</td></tr>`).join('')}</table><h3>Požadovaná rizika a limity</h3><table><thead><tr><th>Riziko</th><th>Požadovaný limit</th><th>Spoluúčast</th><th>Specifikace / doplnění</th></tr></thead><tbody>${risks||'<tr><td colspan="4">Rizika nejsou doplněna.</td></tr>'}</tbody></table>${textace?'<h3>Textace a požadavky poradce</h3>'+textace:''}<h3>Doprovodná poznámka</h3><p>${e501(req.email_note||window.defaultEmailNote(code)).replace(/\n/g,'<br>')}</p>${req.advisor_free_text?'<h3>Volné doplnění poradce</h3><p>'+e501(req.advisor_free_text).replace(/\n/g,'<br>')+'</p>':''}<p><b>${e501(st.adviser?.name||'Poradce')}</b><br>ASTORIE a.s.</p></div>`;
+  };
+  window.printInsurerRequest=function(code){
+    const w=window.open('', '_blank'); if(!w){ if(typeof toast==='function') toast('Prohlížeč zablokoval otevření tisku.'); return; }
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Poptávka</title><style>body{font-family:Arial,sans-serif;color:#073E4A;margin:30px}.print-head{display:flex;justify-content:space-between;gap:20px;border-bottom:4px solid #FC4C02;padding-bottom:18px;margin-bottom:20px}h1{letter-spacing:8px;margin:0;color:#003D4C}h2,h3{color:#003D4C}table{border-collapse:collapse;width:100%;margin:12px 0 22px}th{background:#003D4C;color:white;text-align:left}th,td{border:1px solid #D7E8EC;padding:9px;vertical-align:top}@media print{button{display:none}}</style></head><body>${window.insurerRequestHtml501(code)}<button onclick="window.print()">Tisk / uložit jako PDF</button></body></html>`);
+    w.document.close();
+  };
+
+  // Render override – používá opravené karty 5/7 a produkční Textace/Dokumenty.
+  const prevRenderWorkspace501 = window.renderWorkspace;
+  window.renderWorkspace=function(){
+    try{
+      if(typeof currentTab !== 'undefined'){
+        const box=document.getElementById('tabContent');
+        document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+        if(box && currentTab==='insurers'){ box.innerHTML=tabInsurers501(); if(typeof renderHeader==='function') renderHeader(); return; }
+        if(box && currentTab==='requests'){ box.innerHTML=tabInsurerRequests501(); if(typeof renderHeader==='function') renderHeader(); return; }
+        if(box && currentTab==='output' && typeof renderClientOutput500==='function'){ renderClientOutput500(); if(typeof renderHeader==='function') renderHeader(); return; }
+      }
+    }catch(e){console.log('BRH501 render override',e);}
+    const res = prevRenderWorkspace501 ? prevRenderWorkspace501.apply(this, arguments) : undefined;
+    return res;
+  };
+
+  const oldShowView501=window.showView;
+  window.showView=function(view){
+    const v=clean501(view);
+    if(v.includes('text')){ currentView=view; document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active',clean501(b.textContent).includes('textace'))); renderProductionTextace501(); return; }
+    if(v.includes('doc')||v.includes('dokument')){ currentView=view; document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active',clean501(b.textContent).includes('dokument'))); if(typeof renderProductionDocuments500==='function') renderProductionDocuments500(); return; }
+    return oldShowView501 ? oldShowView501(view) : undefined;
+  };
+  document.addEventListener('click',function(ev){
+    const b=ev.target&&ev.target.closest?ev.target.closest('button,a'):null; if(!b) return;
+    const t=clean501(b.textContent);
+    if(t==='textace'){ev.preventDefault();ev.stopPropagation();renderProductionTextace501();return;}
+    if(t==='dokumenty'){ev.preventDefault();ev.stopPropagation(); if(typeof renderProductionDocuments500==='function') renderProductionDocuments500(); return;}
+  },true);
 })();

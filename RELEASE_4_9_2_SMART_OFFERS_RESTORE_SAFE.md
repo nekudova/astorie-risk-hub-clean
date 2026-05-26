@@ -1,4 +1,4 @@
-# Business Risk Hub 5.0.0 – Data Bindings Production Modules SAFE
+# Business Risk Hub 5.0.1 – Selection Textace Request Bindings SAFE
 
 ## Opraveno
 - Karta 8 vrací původní smart nabídky v jedné tabulce.
@@ -9,7 +9,7 @@
 - Normalizace pojišťoven: KOOP/GČP/ČPP se nemíchají s názvem pojišťovny jako duplicitní sloupec.
 
 ## Zachováno
-- Verze 5.0.0: tisk poptávky, dokumenty, textace, admin stabilizace.
+- Verze 5.0.1: tisk poptávky, dokumenty, textace, admin stabilizace.
 - Bez DB migrace.
 - Bez změny API.
 - Bez mazání dat.
