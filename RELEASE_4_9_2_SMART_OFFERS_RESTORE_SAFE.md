@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.7 – Functional Offers Textace Restore SAFE
+# Business Risk Hub 4.9.8 – Smart Offer Toggle SAFE
 
 ## Opraveno
 - Karta 8 vrací původní smart nabídky v jedné tabulce.
@@ -9,7 +9,7 @@
 - Normalizace pojišťoven: KOOP/GČP/ČPP se nemíchají s názvem pojišťovny jako duplicitní sloupec.
 
 ## Zachováno
-- Verze 4.9.1: tisk poptávky, dokumenty, textace, admin stabilizace.
+- Verze 4.9.8: tisk poptávky, dokumenty, textace, admin stabilizace.
 - Bez DB migrace.
 - Bez změny API.
 - Bez mazání dat.

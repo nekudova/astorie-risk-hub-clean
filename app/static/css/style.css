@@ -141,7 +141,7 @@
 }
 
 
-/* BRH 4.9.7 – Professional Cards Integration SAFE */
+/* BRH 4.9.8 – Professional Cards Integration SAFE */
 .advisor-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -174,7 +174,7 @@
 }
 
 
-/* BRH 4.9.7 – Real Professional Cards SAFE */
+/* BRH 4.9.8 – Real Professional Cards SAFE */
 .pro-card-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -235,7 +235,7 @@
 }
 
 
-/* BRH 4.9.7 – Advisor Specification Repair SAFE */
+/* BRH 4.9.8 – Advisor Specification Repair SAFE */
 .pro-section .section-head{
   display:flex;
   justify-content:space-between;
@@ -259,7 +259,7 @@
   background:#fff;
 }
 
-/* BRH 4.9.7 – Cards UX and Advisor Fields SAFE */
+/* BRH 4.9.8 – Cards UX and Advisor Fields SAFE */
 .compact-grid label,.pro-contact-row label,.uw-section label,.pro-section label{font-size:13px;line-height:1.2;color:#003D4C}
 .compact-grid input,.compact-grid select,.uw-section input,.uw-section select,.uw-section textarea{margin-top:4px}
 .field-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-size:10px;line-height:1.4;font-weight:900;letter-spacing:.03em;background:#eaf8fb;color:#005C66;border:1px solid #cfe9ef;margin-left:6px;vertical-align:middle}
@@ -279,7 +279,7 @@
 .additional-insured-row{grid-template-columns:1.2fr .9fr 1fr 1.2fr auto}
 @media(max-width:1000px){.custom-row,.additional-insured-row{grid-template-columns:1fr}.uw-section summary{flex-direction:column;align-items:flex-start}}
 
-/* BRH 4.9.7 – Enterprise Broker Underwriting Platform SAFE */
+/* BRH 4.9.8 – Enterprise Broker Underwriting Platform SAFE */
 .broker-workflow-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px}
 .broker-pill{background:#fff;border:1px solid #d7e9ed;border-radius:18px;padding:14px 16px;box-shadow:0 10px 26px rgba(0,61,76,.05)}
 .broker-pill strong{display:block;color:#003D4C;font-size:20px}.broker-pill span{display:block;color:#607783;font-size:11px;text-transform:uppercase;font-weight:900;margin-top:2px}
@@ -303,7 +303,7 @@
 .report-card{background:#fff;border:1px solid #d7e9ed;border-radius:22px;padding:20px}.report-card h3{margin:0 0 10px}
 @media(max-width:1100px){.broker-workflow-strip,.report-grid{grid-template-columns:1fr}.report-cover{flex-direction:column;align-items:flex-start}}
 
-/* BRH 4.9.7 – SAFE Stabilization Release */
+/* BRH 4.9.8 – SAFE Stabilization Release */
 .request-print-panel .quick-actions{
   justify-content:flex-start;
 }
@@ -368,7 +368,7 @@
   .text-template-grid{grid-template-columns:1fr}
 }
 
-/* BRH 4.9.7 – Functional Offers Textace Restore SAFE */
+/* BRH 4.9.8 – Smart Offer Toggle SAFE */
 .offer-table.pro-table th.offer-head{
   min-width:250px;
 }
@@ -407,7 +407,7 @@
   min-width:220px;
 }
 
-/* BRH 4.9.7 – Textace/Dokumenty stabilně podle 2.6.1 */
+/* BRH 4.9.8 – Textace/Dokumenty stabilně podle 2.6.1 */
 .textation-layout-497{display:grid;grid-template-columns:380px 1fr;gap:20px;margin-top:18px}
 .textation-item-497{display:block;width:100%;text-align:left;border:1px solid #d7e9ed;border-radius:18px;background:#fff;padding:16px;margin:0 0 10px;color:#003D4C}
 .textation-item-497 span{display:block;color:#FC4C02;font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
