@@ -1,4 +1,4 @@
-const VERSION = '5.0.1';
+const VERSION = '5.0.2';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.1 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.2 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 5.0.1 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.2 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 5.0.1 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 5.0.2 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.1 – REAL PROFESSIONAL CARDS SAFE
+   BRH 5.0.2 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 5.0.1 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 5.0.2 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 5.0.1 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 5.0.2 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 5.0.1 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 5.0.2 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.1 – SAFE STABILIZATION RELEASE
+   BRH 5.0.2 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 5.0.1 – SMART OFFERS RESTORE SAFE
+   BRH 5.0.2 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,8 +3690,8 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.1 – ADMIN EMERGENCY RESTORE SAFE
-   Zdrojová báze: 5.0.1, aby se nezdědilo poškození Adminu z 5.0.1.
+   BRH 5.0.2 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 5.0.2, aby se nezdědilo poškození Adminu z 5.0.2.
    Princip:
    - NEmaže původní adminPanel.
    - Pro běžné admin sekce používá původní plnohodnotné editory.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 5.0.1 SAFE</p>
+          <p class="eyebrow">Administrace · 5.0.2 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4014,7 +4014,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 
 /* ============================================================================
-   BRH 5.0.1 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
+   BRH 5.0.2 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
    - Nabídky/Porovnání převzaty z poslední nalezené funkční větve 3.5.1b.
    - Textace/Dokumenty doplněny ve stylu 2.6.1 bez zásahu do ostatních částí.
    ============================================================================ */
@@ -4112,7 +4112,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.1 – SMART OFFER TOGGLE SAFE
+   BRH 5.0.2 – SMART OFFER TOGGLE SAFE
    Oprava karty 8 Nabídky:
    - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač
    - po použití je viditelně zvýrazněné
@@ -4313,7 +4313,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.1 – SMART PREFILL + TEXTACE VISUAL SAFE
+   BRH 5.0.2 – SMART PREFILL + TEXTACE VISUAL SAFE
    Cíl:
    - Karta 8: tlačítko „Tato pojišťovna splňuje vše“ funguje jako přepínač.
    - Po zapnutí se do nabídky propíší limity / pojistné částky / spoluúčasti
@@ -4693,7 +4693,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.1 – DATA BINDINGS + PRODUCTION MODULES SAFE
+   BRH 5.0.2 – DATA BINDINGS + PRODUCTION MODULES SAFE
    Důvod opravy:
    1) Karta 8 musí viditelně propsat data z poptávky do nabídky při kliknutí
       „Tato pojišťovna splňuje vše“.
@@ -5054,7 +5054,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 5.0.1 – SELECTION + TEXTACE + REQUEST BINDINGS SAFE
+   BRH 5.0.2 – SELECTION + TEXTACE + REQUEST BINDINGS SAFE
    Oprava:
    - Pojišťovny v poptávkách se generují pouze ze skutečně zaškrtnutých pojišťoven.
    - Sjednocení kódů KOOP/koop, GČP/gcp, ČPP/cpp, aby checkbox i karta poptávky
@@ -5272,4 +5272,52 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     if(t==='textace'){ev.preventDefault();ev.stopPropagation();renderProductionTextace501();return;}
     if(t==='dokumenty'){ev.preventDefault();ev.stopPropagation(); if(typeof renderProductionDocuments500==='function') renderProductionDocuments500(); return;}
   },true);
+})();
+
+/* BRH 5.0.2 – TEXTACE VISIBILITY + DELETE + STATUS COLORS SAFE */
+(function(){
+  window.BRH_502_TEXTACE_VISIBILITY_STATUS_COLORS_SAFE=true;
+  window.BRH_RENDER_VERSION='502';
+  function E(v){if(typeof esc==='function')return esc(v);return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
+  function A(v){return Array.isArray(v)?v:[];}
+  function S(){return (typeof state!=='undefined'&&state)?state:(window.state=window.state||{});}
+  function C(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+  function ownKey(){return 'brh_own_textations_502';}
+  function ownTexts(){try{return JSON.parse(localStorage.getItem(ownKey())||'[]')}catch(e){return []}}
+  function saveOwnTexts(x){localStorage.setItem(ownKey(),JSON.stringify(A(x)));}
+  function centralTexts(){if(typeof textStore500==='function')return A(textStore500());return A(window.DEFAULT_TEXTS_500);}
+  function allItems(){return centralTexts().map((t,i)=>Object.assign({source:'central',sourceIndex:i},t)).concat(ownTexts().map((t,i)=>Object.assign({source:'own',sourceIndex:i},t)));}
+  function targetName(t){return t==='request'?'poptávky':t==='offer'?'nabídky':'klientského výstupu'}
+  function caseTexts(target){const st=S();st.case_textations=A(st.case_textations);return st.case_textations.filter(x=>!target||A(x.targets).includes(target));}
+  window.allTextItems502=allItems;
+  window.addCaseTextation502=function(item,target){
+    const st=S(); st.case_textations=A(st.case_textations); item=item||{};
+    st.case_textations.push({id:'tx_'+Date.now()+'_'+Math.random().toString(16).slice(2),title:item.title||item.name||'Textace',category:item.category||'',usage:item.usage||'',tags:A(item.tags),text:item.text||item.body||'',targets:[target],source:item.source||'central'});
+    st.request_extra_text=caseTexts('request').map(x=>x.text).join('\n\n');
+    st.offer_extra_text=caseTexts('offer').map(x=>x.text).join('\n\n');
+    st.textation_notes=caseTexts('output').map(x=>x.text).join('\n\n');
+    if(typeof toast==='function')toast('Textace vložena do '+targetName(target)+'.');
+    if(typeof renderWorkspace==='function' && typeof currentTab!=='undefined' && ['requests','offers','output'].includes(currentTab))renderWorkspace();
+  };
+  window.removeCaseTextation502=function(id){
+    const st=S(); st.case_textations=A(st.case_textations).filter(x=>String(x.id)!==String(id));
+    st.request_extra_text=caseTexts('request').map(x=>x.text).join('\n\n'); st.offer_extra_text=caseTexts('offer').map(x=>x.text).join('\n\n'); st.textation_notes=caseTexts('output').map(x=>x.text).join('\n\n');
+    if(typeof toast==='function')toast('Textace odebrána z aktivního případu.'); if(typeof renderWorkspace==='function')renderWorkspace();
+  };
+  window.addOwnText502=function(){const title=prompt('Název vlastní textace:','Nová textace');if(title===null)return;const text=prompt('Textace:','Sem doplňte vlastní formulaci.');if(text===null)return;const items=ownTexts();items.unshift({title:title||'Nová textace',category:'Vlastní',usage:'Pracovní poznámka',tags:['vlastní'],text:text||'',source:'own'});saveOwnTexts(items);renderProductionTextace502('own');};
+  window.deleteOwnTextation502=function(i){const items=ownTexts();items.splice(Number(i),1);saveOwnTexts(items);renderProductionTextace502('own');if(typeof toast==='function')toast('Vlastní textace byla smazána.');};
+  window.editOwnTextation502=function(i){const items=ownTexts();const t=items[Number(i)]||{};const title=prompt('Název textace:',t.title||'Vlastní textace');if(title===null)return;const text=prompt('Textace:',t.text||'');if(text===null)return;items[Number(i)]=Object.assign({},t,{title,text,source:'own'});saveOwnTexts(items);renderProductionTextace502('own');};
+  function insertedBox(target){const items=caseTexts(target);const title=target==='request'?'Textace vložené do poptávky':target==='offer'?'Textace vložené do nabídky':'Textace vložené do klientského výstupu';if(!items.length)return `<div class="inserted-box-502 empty"><b>${E(title)}</b><br>Zatím není vložena žádná textace.</div>`;return `<div class="inserted-box-502"><h3>${E(title)}</h3>${items.map(x=>`<div class="inserted-row-502"><div><b>${E(x.title||'Textace')}</b><p>${E(x.text||'').replace(/\n/g,'<br>')}</p></div><button class="btn secondary small" onclick="removeCaseTextation502('${E(x.id)}')">Odebrat</button></div>`).join('')}</div>`;}
+  window.insertedBox502=insertedBox;
+  function card(t,idx,mode){const own=t.source==='own';return `<article class="text-card-500 text-card-502" data-search="${E(C([t.title,t.category,t.usage,A(t.tags).join(' '),t.text].join(' ')))}"><div class="text-card-top-500"><h4>${E(t.title||'Textace')}</h4><span>${own?'Vlastní':'Centrální'}</span></div><div class="text-card-meta-500">${E(t.category||'')} · ${E(t.usage||'')} · ${A(t.tags).map(E).join(' · ')}</div><p>${E(t.text||'')}</p><div class="tools"><button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText((allTextItems502()[${idx}]||{}).text||'')">Kopírovat</button><button class="btn primary small" onclick="addCaseTextation502(allTextItems502()[${idx}], 'request');renderProductionTextace502('${mode}')">Do poptávky</button><button class="btn secondary small" onclick="addCaseTextation502(allTextItems502()[${idx}], 'offer');renderProductionTextace502('${mode}')">Do nabídky</button><button class="btn secondary small" onclick="addCaseTextation502(allTextItems502()[${idx}], 'output');renderProductionTextace502('${mode}')">Do klientského výstupu</button>${own?`<button class="btn secondary small" onclick="editOwnTextation502(${t.sourceIndex})">Upravit</button><button class="btn danger small" onclick="deleteOwnTextation502(${t.sourceIndex})">Smazat</button>`:''}</div></article>`;}
+  window.renderProductionTextace502=function(mode){mode=mode||'central';const box=document.getElementById('tabContent')||document.getElementById('workspace')||document.querySelector('main');if(!box)return;const all=allItems();const list=mode==='own'?all.filter(x=>x.source==='own'):mode==='approvals'?[]:all.filter(x=>x.source!=='own');box.innerHTML=`<p class="eyebrow">PRACOVNÍ REŽIM</p><h2>Knihovna textací</h2><p class="muted">Textace lze kopírovat nebo vložit přímo do poptávky, nabídky či klientského výstupu aktivního případu. Vložené textace jsou níže viditelné a lze je odebrat.</p><div class="tools text-tools-500"><button class="btn secondary" onclick="saveTextStore500&&saveTextStore500(DEFAULT_TEXTS_500.slice());renderProductionTextace502('central')">Obnovit vzorové textace</button><button class="btn primary" onclick="addOwnText502()">+ Přidat textaci</button></div><div class="text-filter-500"><input placeholder="např. odpovědnost, výluka, drony, FVE, výrobek..." oninput="filterTextCards502(this.value)"><select><option>Všechny kategorie</option></select><select><option>Všechny tagy</option></select></div><div class="text-tabs-500"><button class="${mode==='central'?'active':''}" onclick="renderProductionTextace502('central')">Centrální databáze</button><button class="${mode==='own'?'active':''}" onclick="renderProductionTextace502('own')">Moje textace</button><button class="${mode==='approvals'?'active':''}" onclick="renderProductionTextace502('approvals')">Návrhy ke schválení</button></div><section class="text-section-500"><h3>${mode==='central'?'Centrální databáze textací':mode==='own'?'Moje textace':'Návrhy ke schválení'}</h3>${mode==='approvals'?'<div class="empty">Zatím nejsou žádné textace navržené ke schválení.</div>':`<div class="text-card-grid-500">${list.map(x=>card(x,all.indexOf(x),mode)).join('')||'<div class="empty">Zatím nejsou žádné položky.</div>'}</div>`}</section><section class="text-section-500 text-visible-targets-502"><h3>Textace vložené do aktivního případu</h3><div class="grid3">${insertedBox('request')}${insertedBox('offer')}${insertedBox('output')}</div></section>`;};
+  window.filterTextCards502=function(q){q=C(q);document.querySelectorAll('.text-card-502').forEach(c=>c.style.display=!q||c.dataset.search.includes(q)?'':'none');};
+  window.insertText501Target=function(i,target){const it=allItems()[i]||(typeof textStore500==='function'?textStore500()[i]:null);if(it)addCaseTextation502(it,target);}; window.insertText500Target=window.insertText501Target;
+  const prev=window.renderWorkspace;
+  window.renderWorkspace=function(){const r=prev?prev.apply(this,arguments):undefined;try{const box=document.getElementById('tabContent');if(!box||typeof currentTab==='undefined')return r;if(currentTab==='requests'&&!box.querySelector('.inserted-box-502')){const d=document.createElement('div');d.innerHTML=insertedBox('request');const first=box.querySelector('.request-card,.request-card-501');if(first)box.insertBefore(d.firstElementChild,first);}if(currentTab==='offers'&&!box.querySelector('.inserted-box-502')){const d=document.createElement('div');d.innerHTML=insertedBox('offer');const table=box.querySelector('table,.offer-table,.offers-matrix');if(table)table.parentNode.insertBefore(d.firstElementChild,table);}if(currentTab==='comparison')applyStatusColors502();}catch(e){console.log('BRH502 workspace postrender',e)}return r;};
+  const oldShow=window.showView;
+  window.showView=function(view){const v=C(view);if(v.includes('text')){try{currentView=view}catch(e){}document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active',C(b.textContent).includes('textace')));renderProductionTextace502('central');return;}return oldShow?oldShow.apply(this,arguments):undefined;};
+  document.addEventListener('click',function(ev){const b=ev.target&&ev.target.closest?ev.target.closest('button,a'):null;if(!b)return;const t=C(b.textContent);if(t==='textace'){ev.preventDefault();ev.stopPropagation();renderProductionTextace502('central');}},true);
+  window.applyStatusColors502=function(){document.querySelectorAll('#tabContent td,#tabContent span,#tabContent div,#tabContent b').forEach(el=>{const txt=C(el.textContent);if(!txt)return;if(txt.includes('splneno'))el.classList.add('status-ok-502');else if(txt.includes('nutno overit')||txt.includes('overit'))el.classList.add('status-warn-502');else if(txt.includes('rozpracovano'))el.classList.add('status-work-502');else if(txt.includes('odmitnuto')||txt.includes('nesplneno'))el.classList.add('status-bad-502');});};
+  document.addEventListener('change',function(){setTimeout(applyStatusColors502,50)},true);
 })();

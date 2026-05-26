@@ -1,4 +1,4 @@
-# Business Risk Hub 5.0.1 – Cards UX and Advisor Fields SAFE
+# Business Risk Hub 5.0.2 – Cards UX and Advisor Fields SAFE
 
 - DIČ v kartě klienta.
 - Menší popisky polí.
