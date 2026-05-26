@@ -1,4 +1,4 @@
-# Business Risk Hub 5.0.3 – SAFE Stabilization Release
+# Business Risk Hub 5.0.2 – SAFE Stabilization Release
 
 ## Opravy
 - Profesionální tisk poptávky pojišťovně.
@@ -17,7 +17,7 @@
 - Bez změny CASE_ID.
 
 ## Po nasazení
-- /static/js/app.js?v=503
-- /static/css/style.css?v=503
+- /static/js/app.js?v=502
+- /static/css/style.css?v=502
 
 Build: 2026-05-25 19:08:47
