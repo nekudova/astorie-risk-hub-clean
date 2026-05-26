@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.2 – Advisor Professional Cards Workflow SAFE
+# Business Risk Hub 4.9.3 – Advisor Professional Cards Workflow SAFE
 
 ## Obsah
 - Kompletní katalog odpovědnostních rizik podle původního Excelu poradce: 32 položek.
