@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.4 – Cards UX and Advisor Fields SAFE
+# Business Risk Hub 4.9.6 – Cards UX and Advisor Fields SAFE
 
 - DIČ v kartě klienta.
 - Menší popisky polí.

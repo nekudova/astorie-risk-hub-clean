@@ -1,3 +1,3 @@
-Business Risk Hub 4.9.2 – Release Identity Fix & Visible Build Check
+Business Risk Hub 4.9.6 – Release Identity Fix & Visible Build Check
 Jeden ZIP pro TEST i PROD. Rozlišení prostředí přes APP_ENV. Centrální APP_VERSION v app/main.py a /version endpoint.
 DB beze změn.

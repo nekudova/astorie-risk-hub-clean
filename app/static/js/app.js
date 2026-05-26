@@ -1,4 +1,4 @@
-const VERSION = '4.9.5';
+const VERSION = '4.9.6';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.5 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.6 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.5 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.6 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.5 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.9.6 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.5 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.9.6 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.5 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 4.9.6 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.5 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 4.9.6 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.5 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 4.9.6 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.5 – SAFE STABILIZATION RELEASE
+   BRH 4.9.6 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.5 – SMART OFFERS RESTORE SAFE
+   BRH 4.9.6 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,7 +3690,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.5 – ADMIN EMERGENCY RESTORE SAFE
+   BRH 4.9.6 – ADMIN EMERGENCY RESTORE SAFE
    Zdrojová báze: 4.9.2, aby se nezdědilo poškození Adminu z 4.9.4.
    Princip:
    - NEmaže původní adminPanel.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 4.9.5 SAFE</p>
+          <p class="eyebrow">Administrace · 4.9.6 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4008,6 +4008,315 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   window.brh495ResetTextTemplates = function(){
     seedTextTemplates495(true);
     adminPanel('texts');
+  };
+
+})();
+
+/* ============================================================================
+   BRH 4.9.6 – TEXTACE / DOCUMENTS / OFFER BUTTON RESTORE SAFE
+   Scope:
+   1) Opravuje tlačítko "Tato pojišťovna splňuje vše" tak, aby okamžitě změnilo
+      stavy, limity a spoluúčasti ve viditelné tabulce i ve state.
+   2) Přidává produkční knihovnu Textace ve stylu 2.6.1 pro poradce.
+   3) Přidává produkční Dokumenty ve stylu 2.6.1 pro poradce.
+   4) Admin: zachovává původní editory pro ostatní sekce, profesionálně řeší
+      Textace a Dokumenty. Nic jiného nepřepisuje.
+   ============================================================================ */
+(function(){
+  window.BRH_496_SAFE = true;
+  window.BRH_RENDER_VERSION = '496';
+
+  const previousAdminPanel496 = window.adminPanel;
+  const previousRenderWorkspace496 = window.renderWorkspace;
+
+  function E496(v){
+    return String(v ?? '').replace(/[&<>'"]/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m];
+    });
+  }
+  function arr496(v){ return Array.isArray(v) ? v : []; }
+  function getState496(){ return (typeof state !== 'undefined' && state) ? state : (window.state = window.state || {}); }
+
+  function riskKey496(r){
+    return String((r && (r.risk_key || r.key || r.code || r.name || r.title)) || '').trim();
+  }
+  function normCode496(code){
+    const v = String(code || '').trim().toLowerCase();
+    if(['koop','kooperativa','kooperativa pojišťovna, a.s.','kooperativa pojišťovna, a.s'].includes(v)) return 'koop';
+    if(['gcp','gčp','generali','generali česká pojišťovna a.s.','generali česká pojišťovna a.s'].includes(v)) return 'gcp';
+    if(['cpp','čpp','ceska podnikatelska','česká podnikatelská pojišťovna, a.s.','česká podnikatelská pojišťovna, a.s'].includes(v)) return 'cpp';
+    return v || code;
+  }
+  function offer496(code){
+    const st = getState496();
+    st.offers = arr496(st.offers);
+    const id = normCode496(code);
+    let o = st.offers.find(x => normCode496(x.insurer_code || x.code || x.insurer) === id);
+    if(!o){
+      o = {insurer_code:id, code:id, risks:{}};
+      st.offers.push(o);
+    }
+    o.insurer_code = id;
+    o.code = id;
+    o.risks = o.risks || {};
+    return o;
+  }
+
+  function updateVisibleColumn496(code){
+    const id = normCode496(code);
+    // 1) Primárně prvky s data atributy z 4.9.2
+    document.querySelectorAll(`[data-offer-code="${CSS.escape(id)}"]`).forEach(el => {
+      const field = el.getAttribute('data-risk-field');
+      const key = el.getAttribute('data-risk-key');
+      if(!key || !field) return;
+      const st = getState496();
+      const r = arr496(st.risks).find(x => riskKey496(x) === key) || {};
+      const o = offer496(id);
+      const cell = o.risks[key] = o.risks[key] || {};
+      if(field === 'status'){
+        el.value = 'splněno';
+      }
+      if(field === 'offered_limit'){
+        el.value = cell.offered_limit || r.requested_limit || '';
+      }
+      if(field === 'deductible'){
+        el.value = cell.deductible || r.deductible || (st.questionnaire||{}).deductible_preference || '';
+      }
+    });
+
+    // 2) Fallback pro tabulkové sloupce bez data atributů – najít hlavičku podle názvu/kódu
+    const allTables = Array.from(document.querySelectorAll('table'));
+    allTables.forEach(table => {
+      const headers = Array.from(table.querySelectorAll('thead th'));
+      let col = -1;
+      headers.forEach((th,i) => {
+        const txt = (th.textContent || '').toLowerCase();
+        if(txt.includes(id) || (id==='koop' && txt.includes('kooperativa')) || (id==='gcp' && txt.includes('generali')) || (id==='cpp' && txt.includes('podnikatelsk'))) col = i;
+      });
+      if(col < 0) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const st = getState496();
+      rows.forEach((tr,ri) => {
+        const td = Array.from(tr.children)[col];
+        const r = arr496(st.risks)[ri] || {};
+        if(!td) return;
+        const sel = td.querySelector('select');
+        if(sel) sel.value = 'splněno';
+        const inputs = td.querySelectorAll('input, textarea');
+        if(inputs[0] && !inputs[0].value) inputs[0].value = r.requested_limit || '';
+        if(inputs[1] && !inputs[1].value) inputs[1].value = r.deductible || (st.questionnaire||{}).deductible_preference || '';
+      });
+    });
+  }
+
+  window.fulfillAllRisksForInsurer = function(code){
+    const st = getState496();
+    st.risks = arr496(st.risks);
+    const id = normCode496(code);
+    const o = offer496(id);
+    o.workflow_status = 'splněno';
+    st.risks.forEach(r => {
+      const k = riskKey496(r);
+      if(!k) return;
+      const x = o.risks[k] = o.risks[k] || {};
+      x.status = 'splněno';
+      x.offered_limit = r.requested_limit || x.offered_limit || '';
+      x.deductible = r.deductible || (st.questionnaire||{}).deductible_preference || x.deductible || '';
+      x.note = x.note || '';
+    });
+    updateVisibleColumn496(id);
+    if(typeof toast === 'function') toast('Pojišťovna nastavena jako splněná. Limity a spoluúčasti byly převzaty z požadavku klienta.');
+  };
+
+  window.fulfillAllRisksEverywhere = function(){
+    const st = getState496();
+    const codes = arr496(st.selected_insurers).length ? st.selected_insurers : arr496(st.offers).map(o=>o.insurer_code||o.code);
+    codes.forEach(c => window.fulfillAllRisksForInsurer(c));
+    if(typeof toast === 'function') toast('Všechny pojišťovny byly nastaveny jako splněné.');
+  };
+
+  // Zachycení kliknutí i kdyby inline onclick selhal nebo byl přepsán.
+  document.addEventListener('click', function(ev){
+    const btn = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+    if(!btn) return;
+    const txt = (btn.textContent || '').replace(/\s+/g,' ').trim().toLowerCase();
+    if(txt === 'tato pojišťovna splňuje vše'){
+      const th = btn.closest('th');
+      let code = '';
+      if(th){
+        const mini = th.querySelector('.mini');
+        code = mini ? mini.textContent.trim() : '';
+        if(!code) code = (th.textContent || '').split('\n').slice(0,3).join(' ');
+      }
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.fulfillAllRisksForInsurer(code);
+    }
+  }, true);
+
+  // ---------- Textace podle 2.6.1 – datová knihovna ----------
+  function defaultTextations496(){
+    return [
+      {id:'central-odp-provoz', title:'Odpovědnost z provozní činnosti – potvrzení rozsahu', category:'Požadavky na pojišťovnu', usage:'Poptávka pojišťovně', text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce, včetně uvedení případných výluk, sublimitu nebo zvláštních podmínek.', tags:['odpovědnost','pojišťovna']},
+      {id:'central-veci-prevzate', title:'Věci převzaté / užívané – požadavek na krytí', category:'Zvláštní ujednání', usage:'Poptávka / nabídka', text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v dispozici klienta. Prosíme o uvedení limitu, sublimitu, spoluúčasti a případných omezení.', tags:['převzaté věci','odpovědnost']},
+      {id:'central-vyrobek-vadna-prace', title:'Odpovědnost za výrobek / vadnou práci', category:'Odpovědnost', usage:'Rizika / porovnání', text:'U nabídky je nutné ověřit, zda a v jakém rozsahu kryje odpovědnost za škodu způsobenou vadou výrobku nebo vadně provedenou prací po předání. Prosíme o uvedení všech omezení, výluk, územního rozsahu a případných sublimitu.', tags:['výrobek','vadná práce']},
+      {id:'central-doplneni-podkladu', title:'Výzva k doplnění podkladů', category:'Podklady', usage:'Komunikace', text:'Pro dokončení posouzení pojištění klienta prosíme o doplnění chybějících podkladů uvedených v přehledu příloh. Po jejich obdržení budeme pokračovat ve zpracování poptávky nebo nabídky.', tags:['podklady','komunikace']},
+      {id:'central-predani-nabidky', title:'Předání nabídky klientovi', category:'Zpráva klientovi', usage:'Klientský výstup', text:'Zasíláme Vám souhrn zpracovaných nabídek pojištění podnikatelských rizik. Doporučená varianta byla vybrána s ohledem na rozsah krytí, limity, výluky, spoluúčast a cenu.', tags:['klient','nabídka']},
+      {id:'central-doporuceni-poradce', title:'Doporučení poradce', category:'Porovnání', usage:'Doporučení', text:'Na základě porovnání nabídek doporučujeme variantu, která nejlépe odpovídá požadovanému rozsahu pojištění, nabízí vhodné limity a má přijatelné podmínky z pohledu výluk a spoluúčastí.', tags:['doporučení','porovnání']}
+    ];
+  }
+  function textStore496(){
+    const st = getState496();
+    st.textTemplates = arr496(st.textTemplates);
+    window.CATALOG = window.CATALOG || {};
+    CATALOG.textTemplates = arr496(CATALOG.textTemplates);
+    let list = st.textTemplates.length ? st.textTemplates : CATALOG.textTemplates;
+    if(!list.length) list = defaultTextations496();
+    defaultTextations496().forEach(d => {
+      if(!list.some(x => (x.id || x.title) === d.id || (x.title||x.name) === d.title)) list.push(d);
+    });
+    st.textTemplates = list;
+    CATALOG.textTemplates = list;
+    return list;
+  }
+  function docStore496(){
+    const st = getState496();
+    st.documents = arr496(st.documents);
+    if(!st.documents.length){
+      st.documents = [
+        {name:'Plná moc', category:'Základní', required:'ano', status:'chybí', note:'Plná moc klienta pro jednání s pojišťovnami a získání podkladů.'},
+        {name:'Výpis z OR', category:'Základní', required:'ano', status:'chybí', note:'Aktuální výpis z obchodního rejstříku nebo obdobný identifikační doklad.'},
+        {name:'VPP / DPP / ZPP', category:'Pojistné podmínky', required:'ne', status:'k doplnění', note:'Pojistné podmínky, doložky, zvláštní podmínky.'},
+        {name:'Nabídky pojišťoven', category:'Nabídky', required:'ne', status:'k doplnění', note:'PDF, e-maily a přílohy k nabídce.'},
+        {name:'Škodní průběh', category:'Škody', required:'ne', status:'k doplnění', note:'Historie škod, potvrzení, tabulky.'},
+        {name:'Fotodokumentace', category:'Fotodokumentace', required:'ne', status:'k doplnění', note:'Fotky provozu, zařízení a objektů.'}
+      ];
+    }
+    return st.documents;
+  }
+
+  window.renderTextaceProduction496 = function(){
+    const items = textStore496();
+    const mine = items.filter(i => String(i.id||'').startsWith('custom-'));
+    const central = items.filter(i => !String(i.id||'').startsWith('custom-'));
+    const card = i => `<button type="button" class="saved-textation-item" onclick="brh496ShowTextation('${E496(i.id||i.title)}')">
+        <span class="textation-source">${String(i.id||'').startsWith('custom-')?'Moje':'Centrální'}</span>
+        <b>${E496(i.title||i.name||'')}</b>
+        <span>${E496(i.category||'')}</span>
+        <small>${E496(i.usage||i.type||'')}${arr496(i.tags).length?' · '+E496(arr496(i.tags).join(' · ')):''}</small>
+      </button>`;
+    return `<p class="eyebrow">TEXTACE</p>
+      <h2>Knihovna textací</h2>
+      <p class="muted">Textace pro poptávky, nabídky, zprávy klientovi a interní práci poradce.</p>
+      <div class="textation-actions-496">
+        <button class="btn primary" onclick="brh496OpenTextEditor()">+ Přidat textaci</button>
+      </div>
+      <div id="textationEditor496" class="textation-editor-496 hidden"></div>
+      <div class="textation-tabs-496">
+        <button class="chip active">Moje textace</button>
+        <button class="chip">Centrální databáze</button>
+        <button class="chip">Návrhy ke schválení</button>
+      </div>
+      <div class="textation-grid-496">
+        <div><h3>Moje textace</h3><div>${mine.length?mine.map(card).join(''):'<div class="empty">Zatím nemáte žádnou vlastní textaci.</div>'}</div></div>
+        <div><h3>Centrální databáze</h3><div>${central.map(card).join('')}</div></div>
+        <div id="textationDetail496" class="textation-detail-496"><h3>Detail textace</h3><p class="muted">Vyberte textaci ze seznamu.</p></div>
+      </div>
+      <div class="section-soft"><h3>Pracovní poznámky k aktivnímu případu</h3><textarea id="caseTextationNotes496" placeholder="Zde se budou skládat vybrané textace pro poptávku, nabídku nebo zprávu klientovi...">${E496((getState496().case_text_notes)||'')}</textarea><button class="btn secondary" onclick="brh496CopyNotes()">Zkopírovat poznámky</button></div>`;
+  };
+
+  window.brh496ShowTextation = function(id){
+    const i = textStore496().find(x => String(x.id||x.title) === String(id));
+    const box = document.getElementById('textationDetail496');
+    if(!i || !box) return;
+    box.innerHTML = `<p class="eyebrow">${E496(i.category||'')}</p><h3>${E496(i.title||i.name||'')}</h3>
+      <p><b>Použití:</b> ${E496(i.usage||i.type||'obecně')}</p>
+      <div class="textation-fulltext-496">${E496(i.text||i.body||'').replace(/\n/g,'<br>')}</div>
+      <div class="textation-tags-496">${arr496(i.tags).map(t=>`<span>${E496(t)}</span>`).join('')}</div>
+      <div class="tools"><button class="btn primary" onclick="brh496InsertText('${E496(i.id||i.title)}')">Vložit do poznámek</button><button class="btn secondary" onclick="navigator.clipboard&&navigator.clipboard.writeText(${JSON.stringify(i.text||i.body||'')})">Zkopírovat</button></div>`;
+  };
+  window.brh496InsertText = function(id){
+    const i = textStore496().find(x => String(x.id||x.title) === String(id));
+    const area = document.getElementById('caseTextationNotes496');
+    if(!i || !area) return;
+    area.value = (area.value ? area.value + '\n\n' : '') + (i.text || i.body || '');
+    getState496().case_text_notes = area.value;
+  };
+  window.brh496CopyNotes = function(){
+    const area = document.getElementById('caseTextationNotes496');
+    if(area && navigator.clipboard) navigator.clipboard.writeText(area.value || '');
+  };
+  window.brh496OpenTextEditor = function(){
+    const box = document.getElementById('textationEditor496');
+    if(!box) return;
+    box.classList.remove('hidden');
+    box.innerHTML = `<p class="eyebrow">EDITOR TEXTACE</p><h2>Nová textace</h2>
+      <div class="grid4"><label>Název textace<input id="newTxt496Title"></label><label>Kategorie<input id="newTxt496Cat"></label><label>Typ použití<input id="newTxt496Usage"></label><label>Tagy<input id="newTxt496Tags"></label></div>
+      <label>Textace<textarea id="newTxt496Text" placeholder="Sem napište vlastní formulaci..."></textarea></label>
+      <div class="tools"><button class="btn primary" onclick="brh496SaveNewText()">Uložit textaci</button><button class="btn secondary" onclick="document.getElementById('textationEditor496').classList.add('hidden')">Zrušit</button></div>`;
+  };
+  window.brh496SaveNewText = function(){
+    const t = {id:'custom-'+Date.now(), title:document.getElementById('newTxt496Title').value, category:document.getElementById('newTxt496Cat').value, usage:document.getElementById('newTxt496Usage').value, tags:(document.getElementById('newTxt496Tags').value||'').split(',').map(x=>x.trim()).filter(Boolean), text:document.getElementById('newTxt496Text').value};
+    textStore496().unshift(t);
+    if(typeof renderWorkspace === 'function') renderWorkspace();
+  };
+
+  window.renderDocumentsProduction496 = function(){
+    const docs = docStore496();
+    return `<p class="eyebrow">DOKUMENTOVÝ MODUL</p>
+      <h2>Dokumenty k obchodnímu případu</h2>
+      <p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady.</p>
+      <div class="doc-module-grid-496">
+        ${['VPP / DPP / ZPP','Nabídky pojišťoven','Škodní průběh','Revize / technické podklady','Fotodokumentace','Dotazníky a ostatní'].map(x=>`<div class="doc-card-496"><h3>${E496(x)}</h3><p>Podklady vázané na aktivní obchodní případ.</p></div>`).join('')}
+      </div>
+      <div class="section-soft"><div class="section-head"><h3>Evidence dokumentů</h3><button class="btn secondary" onclick="brh496AddDocument()">+ Přidat dokument</button></div>
+      <table class="doc-table-496"><thead><tr><th>Příloha</th><th>Kategorie</th><th>Povinná</th><th>Stav</th><th>Poznámka / soubor</th><th>Akce</th></tr></thead><tbody>
+      ${docs.map((d,i)=>`<tr><td><input value="${E496(d.name||'')}" onchange="state.documents[${i}].name=this.value"></td><td><input value="${E496(d.category||'')}" onchange="state.documents[${i}].category=this.value"></td><td><select onchange="state.documents[${i}].required=this.value"><option ${d.required==='ano'?'selected':''}>ano</option><option ${d.required!=='ano'?'selected':''}>ne</option></select></td><td><select onchange="state.documents[${i}].status=this.value"><option ${d.status==='chybí'?'selected':''}>chybí</option><option ${d.status==='doplněno'?'selected':''}>doplněno</option><option ${d.status==='není potřeba'?'selected':''}>není potřeba</option><option ${d.status==='k doplnění'?'selected':''}>k doplnění</option></select></td><td><textarea onchange="state.documents[${i}].note=this.value">${E496(d.note||'')}</textarea></td><td><button class="btn danger small" onclick="state.documents.splice(${i},1);renderWorkspace()">Smazat</button></td></tr>`).join('')}
+      </tbody></table></div>`;
+  };
+  window.brh496AddDocument = function(){
+    getState496().documents = docStore496();
+    getState496().documents.push({name:'Nový dokument', category:'Vlastní', required:'ne', status:'chybí', note:''});
+    if(typeof renderWorkspace === 'function') renderWorkspace();
+  };
+
+  // Produkční menu Textace/Dokumenty – pokud starý renderer vrací placeholder, přepíšeme obsah.
+  window.renderWorkspace = function(){
+    const result = previousRenderWorkspace496 ? previousRenderWorkspace496.apply(this, arguments) : undefined;
+    setTimeout(function(){
+      try{
+        const st = getState496();
+        const ws = document.getElementById('workspace') || document.getElementById('main') || document.querySelector('.workspace,.content');
+        const activeText = document.querySelector('.sidebar .active, nav .active, .menu .active');
+        const activeLabel = activeText ? (activeText.textContent||'').toLowerCase() : '';
+        if(ws && activeLabel.includes('textace') && !document.getElementById('textationDetail496')){
+          ws.innerHTML = window.renderTextaceProduction496();
+        }
+        if(ws && activeLabel.includes('dokument') && !ws.querySelector('.doc-module-grid-496')){
+          ws.innerHTML = window.renderDocumentsProduction496();
+        }
+      }catch(e){ console.log('BRH496 production patch:', e); }
+    }, 50);
+    return result;
+  };
+
+  // Admin Textace/Dokumenty – profesionální UI, ostatní sekce původní.
+  window.adminPanel = function(type){
+    if(type === 'texts' || type === 'textace'){
+      const box = document.getElementById('adminPanel'); if(!box) return;
+      const items = textStore496();
+      box.innerHTML = `<div class="admin-pro-panel-496"><div class="section-head"><div><p class="eyebrow">CENTRÁLNÍ DATABÁZE · TEXTACE</p><h2>Správa knihovny textací</h2><p class="muted">Admin může textace měnit, mazat a doplňovat.</p></div><button class="btn secondary" onclick="CATALOG.textTemplates.unshift({id:'central-'+Date.now(),title:'Nová textace',category:'Obecné',usage:'Poptávka',text:'',tags:[]});adminPanel('texts')">+ Přidat textaci</button></div>
+      <div class="table-wrap"><table class="admin-texts-496"><thead><tr><th>Název</th><th>Kategorie</th><th>Použití</th><th>Text</th><th>Tagy</th><th>Akce</th></tr></thead><tbody>
+      ${items.map((t,i)=>`<tr><td><input value="${E496(t.title||t.name||'')}" onchange="CATALOG.textTemplates[${i}].title=this.value;state.textTemplates[${i}].title=this.value"></td><td><input value="${E496(t.category||'')}" onchange="CATALOG.textTemplates[${i}].category=this.value;state.textTemplates[${i}].category=this.value"></td><td><input value="${E496(t.usage||t.type||'')}" onchange="CATALOG.textTemplates[${i}].usage=this.value;state.textTemplates[${i}].usage=this.value"></td><td><textarea onchange="CATALOG.textTemplates[${i}].text=this.value;state.textTemplates[${i}].text=this.value">${E496(t.text||t.body||'')}</textarea></td><td><input value="${E496(arr496(t.tags).join(', '))}" onchange="CATALOG.textTemplates[${i}].tags=this.value.split(',').map(x=>x.trim()).filter(Boolean);state.textTemplates[${i}].tags=CATALOG.textTemplates[${i}].tags"></td><td><button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText(CATALOG.textTemplates[${i}].text||'')">Kopírovat</button><button class="btn danger small" onclick="CATALOG.textTemplates.splice(${i},1);state.textTemplates=CATALOG.textTemplates;adminPanel('texts')">Smazat</button></td></tr>`).join('')}
+      </tbody></table></div><div class="tools"><button class="btn primary" onclick="saveAdminCatalog&&saveAdminCatalog()">Uložit textace</button></div></div>`;
+      return;
+    }
+    if(type === 'documents'){
+      const box = document.getElementById('adminPanel'); if(!box) return;
+      box.innerHTML = `<div class="admin-pro-panel-496">${window.renderDocumentsProduction496()}<div class="tools"><button class="btn primary" onclick="saveAdminCatalog&&saveAdminCatalog()">Uložit dokumenty</button></div></div>`;
+      return;
+    }
+    if(typeof previousAdminPanel496 === 'function') return previousAdminPanel496(type);
   };
 
 })();

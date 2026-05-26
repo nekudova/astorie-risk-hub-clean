@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.4 – Admin Direct Override SAFE
+# Business Risk Hub 4.9.6 – Textace Documents Button Restore SAFE
 
 ## Opraveno
 - Karta 8 vrací původní smart nabídky v jedné tabulce.
