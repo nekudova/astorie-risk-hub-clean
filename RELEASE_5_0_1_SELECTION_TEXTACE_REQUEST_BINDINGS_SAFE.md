@@ -1,4 +1,4 @@
-# Business Risk Hub 5.0.2 – Textace Visibility Status Colors SAFE
+# Business Risk Hub 5.0.3 – Usability Save Status Admin SAFE
 
 ## Opravy
 - Karta 7 generuje poptávky pouze pro pojišťovny skutečně zaškrtnuté v kartě 5.
@@ -9,7 +9,7 @@
 - Bez změny databázového schématu.
 
 Kontrola po nasazení:
-- /static/js/app.js?v=502
-- /static/css/style.css?v=502
+- /static/js/app.js?v=503
+- /static/css/style.css?v=503
 
 Build: 2026-05-26 13:07:26

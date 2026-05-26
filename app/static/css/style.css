@@ -141,7 +141,7 @@
 }
 
 
-/* BRH 5.0.2 – Professional Cards Integration SAFE */
+/* BRH 5.0.3 – Professional Cards Integration SAFE */
 .advisor-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -174,7 +174,7 @@
 }
 
 
-/* BRH 5.0.2 – Real Professional Cards SAFE */
+/* BRH 5.0.3 – Real Professional Cards SAFE */
 .pro-card-hero{
   background:linear-gradient(135deg,#004b57,#00636d);
   color:#fff;
@@ -235,7 +235,7 @@
 }
 
 
-/* BRH 5.0.2 – Advisor Specification Repair SAFE */
+/* BRH 5.0.3 – Advisor Specification Repair SAFE */
 .pro-section .section-head{
   display:flex;
   justify-content:space-between;
@@ -259,7 +259,7 @@
   background:#fff;
 }
 
-/* BRH 5.0.2 – Cards UX and Advisor Fields SAFE */
+/* BRH 5.0.3 – Cards UX and Advisor Fields SAFE */
 .compact-grid label,.pro-contact-row label,.uw-section label,.pro-section label{font-size:13px;line-height:1.2;color:#003D4C}
 .compact-grid input,.compact-grid select,.uw-section input,.uw-section select,.uw-section textarea{margin-top:4px}
 .field-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-size:10px;line-height:1.4;font-weight:900;letter-spacing:.03em;background:#eaf8fb;color:#005C66;border:1px solid #cfe9ef;margin-left:6px;vertical-align:middle}
@@ -279,7 +279,7 @@
 .additional-insured-row{grid-template-columns:1.2fr .9fr 1fr 1.2fr auto}
 @media(max-width:1000px){.custom-row,.additional-insured-row{grid-template-columns:1fr}.uw-section summary{flex-direction:column;align-items:flex-start}}
 
-/* BRH 5.0.2 – Enterprise Broker Underwriting Platform SAFE */
+/* BRH 5.0.3 – Enterprise Broker Underwriting Platform SAFE */
 .broker-workflow-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px}
 .broker-pill{background:#fff;border:1px solid #d7e9ed;border-radius:18px;padding:14px 16px;box-shadow:0 10px 26px rgba(0,61,76,.05)}
 .broker-pill strong{display:block;color:#003D4C;font-size:20px}.broker-pill span{display:block;color:#607783;font-size:11px;text-transform:uppercase;font-weight:900;margin-top:2px}
@@ -303,7 +303,7 @@
 .report-card{background:#fff;border:1px solid #d7e9ed;border-radius:22px;padding:20px}.report-card h3{margin:0 0 10px}
 @media(max-width:1100px){.broker-workflow-strip,.report-grid{grid-template-columns:1fr}.report-cover{flex-direction:column;align-items:flex-start}}
 
-/* BRH 5.0.2 – SAFE Stabilization Release */
+/* BRH 5.0.3 – SAFE Stabilization Release */
 .request-print-panel .quick-actions{
   justify-content:flex-start;
 }
@@ -368,7 +368,7 @@
   .text-template-grid{grid-template-columns:1fr}
 }
 
-/* BRH 5.0.2 – Textace Visibility Status Colors SAFE */
+/* BRH 5.0.3 – Usability Save Status Admin SAFE */
 .offer-table.pro-table th.offer-head{
   min-width:250px;
 }
@@ -407,7 +407,7 @@
   min-width:220px;
 }
 
-/* BRH 5.0.2 – Textace/Dokumenty stabilně podle 2.6.1 */
+/* BRH 5.0.3 – Textace/Dokumenty stabilně podle 2.6.1 */
 .textation-layout-497{display:grid;grid-template-columns:380px 1fr;gap:20px;margin-top:18px}
 .textation-item-497{display:block;width:100%;text-align:left;border:1px solid #d7e9ed;border-radius:18px;background:#fff;padding:16px;margin:0 0 10px;color:#003D4C}
 .textation-item-497 span{display:block;color:#FC4C02;font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
@@ -423,7 +423,7 @@
 @media(max-width:1100px){.textation-layout-497{grid-template-columns:1fr}}
 
 /* ============================================================================
-   BRH 5.0.2 – Smart Prefill + Textace Visual SAFE
+   BRH 5.0.3 – Smart Prefill + Textace Visual SAFE
    ============================================================================ */
 .offer-fulfilled-toggle-499.is-active,
 .offer-head-fulfilled-499 .offer-fulfilled-toggle-499{
@@ -545,7 +545,7 @@
 }
 
 /* ============================================================================
-   BRH 5.0.2 – Data Bindings + Production Modules SAFE
+   BRH 5.0.3 – Data Bindings + Production Modules SAFE
    ============================================================================ */
 .offer-toggle-500.is-active{
   background:#FC4C02!important;color:#fff!important;border-color:#FC4C02!important;
@@ -577,7 +577,7 @@
 @media(max-width:1100px){.text-card-grid-500,.doc-grid-500,.text-filter-500{grid-template-columns:1fr}}
 
 /* ============================================================================
-   BRH 5.0.2 – Selection + Textace + Request Bindings SAFE
+   BRH 5.0.3 – Selection + Textace + Request Bindings SAFE
    ============================================================================ */
 .request-card-501 label textarea{min-height:120px}
 .case-texts-501{border-left:6px solid #FC4C02}
@@ -587,5 +587,8 @@
 .text-card-500 .btn.small{margin:3px}
 .request-card-501 .grid3{align-items:start}
 
-/* BRH 5.0.2 – Textace Visibility + Delete + Status Colors SAFE */
+/* BRH 5.0.3 – Textace Visibility + Delete + Status Colors SAFE */
 .text-visible-targets-502 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.inserted-box-502{border:1px solid #d7e9ed;border-left:6px solid #FC4C02;border-radius:18px;background:#fff;padding:16px;margin:14px 0;color:#003D4C}.inserted-box-502.empty{border-left-color:#d7e9ed;background:#f7fbfc}.inserted-row-502{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-top:1px solid #e4f0f3;padding:12px 0}.inserted-row-502:first-of-type{border-top:0}.inserted-row-502 p{white-space:pre-wrap;margin:6px 0 0}.text-card-502 .tools{display:flex;flex-wrap:wrap;gap:8px}.btn.danger,.danger{background:#fff1ec!important;border:1px solid #ffb199!important;color:#b33418!important}.status-ok-502{background:#e7f7ef!important;color:#075333!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-warn-502{background:#fff3d6!important;color:#7a4a00!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-work-502{background:#e9f7fb!important;color:#00485a!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-bad-502{background:#ffe6e0!important;color:#9b260d!important;border-radius:14px;padding:3px 8px;font-weight:800}@media(max-width:1100px){.text-visible-targets-502 .grid3{grid-template-columns:1fr}}
+
+/* BRH 5.0.3 – Usability Save Status Admin SAFE - visual controls */
+.brh-readable-503{min-height:46px!important;font-size:15px!important;line-height:1.35!important;padding:12px 14px!important;overflow:auto!important;text-overflow:clip!important;white-space:normal!important}textarea.brh-readable-503{min-height:58px!important;resize:vertical!important}.brh-table-readable-503{table-layout:auto!important;width:100%!important}.brh-table-readable-503 td,.brh-table-readable-503 th{vertical-align:top!important;padding:12px!important;min-width:140px!important}.brh-table-readable-503 textarea{min-width:210px!important}.brh-status-sent-503{background:#e7f7ef!important;border-color:#7fc8a4!important;color:#075333!important;font-weight:800!important}.brh-status-ready-503{background:#eef8fb!important;border-color:#c8e5eb!important;color:#003D4C!important;font-weight:800!important}.brh-status-work-503{background:#fff7e7!important;border-color:#f1ca77!important;color:#705000!important;font-weight:800!important}.brh-status-ok-503{background:#e7f7ef!important;border-color:#7fc8a4!important;color:#075333!important;font-weight:800!important}.brh-status-warn-503{background:#fff3d6!important;border-color:#e8bd65!important;color:#7a4a00!important;font-weight:800!important}.brh-status-sent-card-503{box-shadow:inset 5px 0 0 #7fc8a4!important}.brh-inline-ok-503{background:#e7f7ef!important;color:#075333!important;border-radius:999px!important;padding:3px 9px!important;font-weight:800!important}.brh-inline-warn-503{background:#fff3d6!important;color:#7a4a00!important;border-radius:999px!important;padding:3px 9px!important;font-weight:800!important}.brh-inline-work-503{background:#eef8fb!important;color:#003D4C!important;border-radius:999px!important;padding:3px 9px!important;font-weight:800!important}.brh-inline-sent-503{background:#e7f7ef!important;color:#075333!important;border-radius:999px!important;padding:3px 9px!important;font-weight:800!important}.brh-offer-fulfilled-503{background:linear-gradient(180deg,#eefaf4,#ffffff)!important;outline:2px solid #7fc8a4!important;outline-offset:-2px!important}.brh-active-fulfilled-503{background:#e7f7ef!important;border-color:#7fc8a4!important;color:#075333!important;font-weight:900!important}.doc-grid-503{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.doc-card-503,.doc-evidence-503{border:1px solid #d6e9ee;border-radius:18px;background:#fff;padding:18px}.doc-card-503 h3{margin:0 0 8px;color:#003D4C}.doc-row-503{display:grid;grid-template-columns:1.2fr 1fr .8fr 1.6fr auto;gap:12px;align-items:start;border-top:1px solid #e4f0f3;padding:14px 0}.doc-row-503:first-child{border-top:0}.btn.danger,.danger{background:#fff1ec!important;color:#b33418!important;border:1px solid #ffb199!important}@media(max-width:1200px){.doc-grid-503{grid-template-columns:1fr 1fr}.doc-row-503{grid-template-columns:1fr 1fr}}@media(max-width:760px){.doc-grid-503,.doc-row-503{grid-template-columns:1fr}}
