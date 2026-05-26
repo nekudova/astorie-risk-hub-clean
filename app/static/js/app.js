@@ -1,4 +1,4 @@
-const VERSION = '4.9.8';
+const VERSION = '4.9.9';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.8 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.9 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.8 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 4.9.9 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.8 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 4.9.9 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.8 – REAL PROFESSIONAL CARDS SAFE
+   BRH 4.9.9 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.8 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 4.9.9 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.8 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 4.9.9 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.8 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 4.9.9 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.8 – SAFE STABILIZATION RELEASE
+   BRH 4.9.9 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.8 – SMART OFFERS RESTORE SAFE
+   BRH 4.9.9 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,8 +3690,8 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.8 – ADMIN EMERGENCY RESTORE SAFE
-   Zdrojová báze: 4.9.8, aby se nezdědilo poškození Adminu z 4.9.8.
+   BRH 4.9.9 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 4.9.9, aby se nezdědilo poškození Adminu z 4.9.9.
    Princip:
    - NEmaže původní adminPanel.
    - Pro běžné admin sekce používá původní plnohodnotné editory.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 4.9.8 SAFE</p>
+          <p class="eyebrow">Administrace · 4.9.9 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4014,7 +4014,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 
 /* ============================================================================
-   BRH 4.9.8 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
+   BRH 4.9.9 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
    - Nabídky/Porovnání převzaty z poslední nalezené funkční větve 3.5.1b.
    - Textace/Dokumenty doplněny ve stylu 2.6.1 bez zásahu do ostatních částí.
    ============================================================================ */
@@ -4112,7 +4112,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.8 – SMART OFFER TOGGLE SAFE
+   BRH 4.9.9 – SMART OFFER TOGGLE SAFE
    Oprava karty 8 Nabídky:
    - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač
    - po použití je viditelně zvýrazněné
@@ -4310,4 +4310,384 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     setTimeout(window.brh498MarkFulfilledButtons, 300);
   });
   setTimeout(window.brh498MarkFulfilledButtons, 300);
+})();
+
+/* ============================================================================
+   BRH 4.9.9 – SMART PREFILL + TEXTACE VISUAL SAFE
+   Cíl:
+   - Karta 8: tlačítko „Tato pojišťovna splňuje vše“ funguje jako přepínač.
+   - Po zapnutí se do nabídky propíší limity / pojistné částky / spoluúčasti
+     z poptávky. Pokud v uloženém CASE chybí requested_limit, bere se fallback
+     z katalogu rizik / známé mapy požadavků.
+   - Karta 9: porovnání čte stejné hodnoty z nabídky.
+   - Admin > Textace: vrácen profesionální card/list vzhled po vzoru 2.6.1,
+     ne tabulka s rozbitými inputy přes celou obrazovku.
+   ============================================================================ */
+(function(){
+  window.BRH_499_SMART_PREFILL_TEXTACE_VISUAL_SAFE = true;
+  window.BRH_RENDER_VERSION = '499';
+
+  const prevRenderWorkspace499 = window.renderWorkspace;
+  const prevAdminPanel499 = window.adminPanel;
+
+  function esc499(v){
+    if(typeof esc === 'function') return esc(v);
+    return String(v ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
+  function arr499(v){ return Array.isArray(v) ? v : []; }
+  function st499(){ return (typeof state !== 'undefined' && state) ? state : (window.state = window.state || {}); }
+  function q499(){ const st = st499(); st.questionnaire = st.questionnaire || {}; return st.questionnaire; }
+  function norm499(v){
+    v = String(v || '').trim().toLowerCase().replace(/\s+/g,' ');
+    if(v.includes('koop') || v.includes('kooperativa')) return 'koop';
+    if(v.includes('gcp') || v.includes('gčp') || v.includes('generali')) return 'gcp';
+    if(v.includes('cpp') || v.includes('čpp') || v.includes('podnikatelsk')) return 'cpp';
+    return v;
+  }
+  function selectedCodes499(){
+    const st = st499();
+    const src = arr499(st.selected_insurers).length ? st.selected_insurers : arr499(st.offers).map(o => o.insurer_code || o.code);
+    return [...new Set(src.map(norm499).filter(Boolean))];
+  }
+  function insurerName499(code){
+    try{
+      if(typeof insurerByCode === 'function'){
+        const x = insurerByCode(code);
+        if(x && x.name) return x.name;
+      }
+    }catch(e){}
+    const map = {koop:'Kooperativa pojišťovna, a.s.', gcp:'Generali Česká pojišťovna a.s.', cpp:'Česká podnikatelská pojišťovna, a.s.'};
+    return map[norm499(code)] || code;
+  }
+  function riskKey499(r){
+    return String((r && (r.risk_key || r.key || r.code || r.id || r.name || r.title)) || '').trim();
+  }
+  function cleanName499(s){
+    return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  }
+  function offer499(code){
+    const st = st499();
+    st.offers = arr499(st.offers);
+    const id = norm499(code);
+    let o = st.offers.find(x => norm499(x.insurer_code || x.code || x.insurer || x.name) === id);
+    if(!o){
+      o = {insurer_code:id, code:id, risks:{}};
+      st.offers.push(o);
+    }
+    o.insurer_code = id;
+    o.code = id;
+    o.risks = o.risks || {};
+    return o;
+  }
+
+  const RISK_LIMIT_FALLBACK_499 = [
+    ['provoz', 'Provozní odpovědnost', '10 000 000 Kč'],
+    ['vadna_prace', 'Vadná práce po předání', '5 000 000 Kč'],
+    ['vyrobek', 'Odpovědnost za výrobek', '10 000 000 Kč'],
+    ['prevzate_veci', 'Věci převzaté', '2 000 000 Kč'],
+    ['uzivane_veci', 'Věci užívané', '1 000 000 Kč'],
+    ['cista_financni_skoda', 'Čistá finanční škoda', '2 000 000 Kč'],
+    ['krizova_odpovednost', 'Křížová odpovědnost', '5 000 000 Kč'],
+    ['subdodavatele', 'Subdodavatelé', 'dle hlavního limitu'],
+    ['regresy', 'Regresy zdravotních pojišťoven a dávek', 'dle hlavního limitu'],
+    ['pronajate_prostory', 'Škody na pronajatých prostorách', '1 000 000 Kč'],
+    ['veci_odlozene', 'Věci odložené / vnesené', '500 000 Kč'],
+    ['demontaz_montaz', 'Demontáž a montáž vadného výrobku', '1 000 000 Kč'],
+    ['stazeni_vyrobku', 'Stažení výrobku z trhu', '1 000 000 Kč'],
+    ['spojeni_smisení', 'Spojení, smísení, další zpracování', '5 000 000 Kč'],
+    ['nemajetkova_ujma', 'Nemajetková újma', 'dle hlavního limitu'],
+    ['zivotni_prostredi', 'Škody na životním prostředí', '1 000 000 Kč'],
+    ['smluvni_odpovednost', 'Smluvně převzatá odpovědnost', 'ověřit'],
+    ['usa_kanada', 'Územní rozsah USA/Kanada', 'ověřit'],
+    ['strezen', 'Škody na střežených objektech', '10 000 000 Kč'],
+    ['zamestnan', 'Škody způsobené zaměstnanci', '5 000 000 Kč'],
+    ['cista financni skoda', 'Čistá finanční škoda', '2 000 000 Kč'],
+    ['vec prevzat', 'Věci převzaté', '2 000 000 Kč']
+  ];
+
+  function requestedLimit499(r){
+    const direct = r && (r.requested_limit || r.limit || r.insured_amount || r.sum_insured || r.amount || r.pojistna_castka || r.pojistna_suma);
+    if(direct) return String(direct);
+
+    const key = cleanName499(riskKey499(r));
+    const name = cleanName499((r && (r.name || r.title || r.risk_name)) || '');
+    const all = (key + ' ' + name).trim();
+
+    // katalog LIABILITY_RISKS, pokud je v aplikaci k dispozici
+    try{
+      if(typeof LIABILITY_RISKS !== 'undefined' && Array.isArray(LIABILITY_RISKS)){
+        const found = LIABILITY_RISKS.find(x => cleanName499(x[0]) === key || cleanName499(x[1]) === name || all.includes(cleanName499(x[0])) || all.includes(cleanName499(x[1])));
+        if(found && found[2]) return found[2];
+      }
+    }catch(e){}
+
+    const found = RISK_LIMIT_FALLBACK_499.find(x => all.includes(cleanName499(x[0])) || all.includes(cleanName499(x[1])));
+    return found ? found[2] : '';
+  }
+
+  function requestedDeductible499(r){
+    return (r && (r.deductible || r.spoluucast || r.deductible_preference)) || q499().deductible_preference || '';
+  }
+  function riskSpecification499(r){
+    if(typeof riskSpecification === 'function') return riskSpecification(r);
+    return (r && (r.specification || r.client_note || r.note || '')) || '';
+  }
+  function isFulfilled499(code){
+    const st = st499();
+    const o = offer499(code);
+    const risks = arr499(st.risks).filter(r => riskKey499(r));
+    return !!o._all_fulfilled && risks.length && risks.every(r => String((o.risks[riskKey499(r)]||{}).status||'').toLowerCase() === 'splněno');
+  }
+
+  window.fulfillAllRisksForInsurer = function(code){
+    const st = st499();
+    const id = norm499(code);
+    const o = offer499(id);
+    const risks = arr499(st.risks).filter(r => riskKey499(r));
+    const active = isFulfilled499(id);
+
+    if(active){
+      const backup = o._before_fulfill || {};
+      risks.forEach(r => {
+        const k = riskKey499(r);
+        const prev = backup[k] || {};
+        const x = o.risks[k] = o.risks[k] || {};
+        x.status = prev.status || 'nutno ověřit';
+        x.offered_limit = prev.offered_limit || '';
+        x.deductible = prev.deductible || '';
+        x.exclusions = prev.exclusions || '';
+        x.sublimits = prev.sublimits || '';
+        x.source_reference = prev.source_reference || '';
+        x.note = prev.note || '';
+        x._auto_fulfilled = false;
+      });
+      o._all_fulfilled = false;
+      o._before_fulfill = {};
+      if(typeof toast === 'function') toast('Nastavení splnění bylo vráceno zpět.');
+    } else {
+      o._before_fulfill = {};
+      risks.forEach(r => {
+        const k = riskKey499(r);
+        const x = o.risks[k] = o.risks[k] || {};
+        o._before_fulfill[k] = {
+          status:x.status || 'nutno ověřit',
+          offered_limit:x.offered_limit || '',
+          deductible:x.deductible || '',
+          exclusions:x.exclusions || '',
+          sublimits:x.sublimits || '',
+          source_reference:x.source_reference || '',
+          note:x.note || ''
+        };
+        x.status = 'splněno';
+        x.offered_limit = requestedLimit499(r) || x.offered_limit || '';
+        x.deductible = requestedDeductible499(r) || x.deductible || '';
+        x._auto_fulfilled = true;
+      });
+      o.workflow_status = 'splněno';
+      o._all_fulfilled = true;
+      if(typeof toast === 'function') toast('Pojišťovna označena jako splněná. Limity / částky a spoluúčasti byly doplněny z poptávky.');
+    }
+    if(typeof renderWorkspace === 'function') renderWorkspace();
+  };
+
+  window.fulfillAllRisksEverywhere = function(){
+    selectedCodes499().forEach(c => {
+      if(!isFulfilled499(c)) window.fulfillAllRisksForInsurer(c);
+    });
+  };
+
+  function offerWorkflow499(code){
+    const o = offer499(code);
+    const st = o.workflow_status || 'rozpracováno';
+    return `<select class="mini-select" onchange="offer499('${esc499(code)}').workflow_status=this.value">
+      <option ${st==='rozpracováno'?'selected':''}>rozpracováno</option>
+      <option ${st==='splněno'?'selected':''}>splněno</option>
+      <option ${st==='nabídka přijata'?'selected':''}>nabídka přijata</option>
+      <option ${st==='nutné doplnění'?'selected':''}>nutné doplnění</option>
+      <option ${st==='finální nabídka'?'selected':''}>finální nabídka</option>
+      <option ${st==='zamítnuto'?'selected':''}>zamítnuto</option>
+    </select>`;
+  }
+
+  window.offer499 = offer499;
+
+  window.offerCell = function(code, r, i){
+    const id = norm499(code);
+    const k = riskKey499(r);
+    const o = offer499(id);
+    const x = o.risks[k] = o.risks[k] || {status:'nutno ověřit',offered_limit:'',deductible:'',exclusions:'',sublimits:'',source_reference:'',note:''};
+    const isAuto = String(x.status||'').toLowerCase() === 'splněno';
+    const lim = x.offered_limit || (isAuto ? requestedLimit499(r) : '');
+    const ded = x.deductible || (isAuto ? requestedDeductible499(r) : '');
+    if(isAuto && lim && !x.offered_limit) x.offered_limit = lim;
+    if(isAuto && ded && !x.deductible) x.deductible = ded;
+    return `<td class="${isAuto?'risk-cell-fulfilled-499':''}">
+      <select data-offer-code="${esc499(id)}" data-risk-key="${esc499(k)}" onchange="offer499('${esc499(id)}').risks['${esc499(k)}'].status=this.value; if(this.value==='splněno'){offer499('${esc499(id)}').risks['${esc499(k)}'].offered_limit=offer499('${esc499(id)}').risks['${esc499(k)}'].offered_limit||'${esc499(requestedLimit499(r))}'; offer499('${esc499(id)}').risks['${esc499(k)}'].deductible=offer499('${esc499(id)}').risks['${esc499(k)}'].deductible||'${esc499(requestedDeductible499(r))}';} renderWorkspace();">
+        <option ${x.status==='splněno'?'selected':''}>splněno</option>
+        <option ${x.status==='omezeno'?'selected':''}>omezeno</option>
+        <option ${x.status==='výluka'?'selected':''}>výluka</option>
+        <option ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option>
+      </select>
+      <input data-offer-code="${esc499(id)}" data-risk-key="${esc499(k)}" placeholder="Nabídnutý limit / pojistná částka" value="${esc499(lim)}" onchange="offer499('${esc499(id)}').risks['${esc499(k)}'].offered_limit=this.value">
+      <input data-offer-code="${esc499(id)}" data-risk-key="${esc499(k)}" placeholder="Spoluúčast" value="${esc499(ded)}" onchange="offer499('${esc499(id)}').risks['${esc499(k)}'].deductible=this.value">
+      <textarea placeholder="Výluky / sublimity / zdroj VPP" onchange="offer499('${esc499(id)}').risks['${esc499(k)}'].note=this.value">${esc499(x.note||'')}</textarea>
+    </td>`;
+  };
+
+  window.tabOffers = tabOffers = function(){
+    const st = st499();
+    const codes = selectedCodes499();
+    if(!codes.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Nabídky se zobrazí až po výběru pojišťoven.</div>`;
+    if(!arr499(st.risks).length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve doplňte rizika</h2><div class="info-box">Tabulka nabídek vychází z požadavků klienta.</div>`;
+
+    const q = q499();
+    const heads = codes.map(code => {
+      const id = norm499(code);
+      const o = offer499(id);
+      const active = isFulfilled499(id);
+      return `<th class="offer-head ${active?'offer-head-fulfilled-499':''}">
+        <div class="insurer-title">${esc499(insurerName499(id))}<div class="mini">${esc499(id)}</div></div>
+        ${offerWorkflow499(id)}
+        <button type="button" class="btn small secondary offer-fulfilled-toggle-499 ${active?'is-active':''}" onclick="fulfillAllRisksForInsurer('${esc499(id)}')">${active?'✓ Splňuje vše – vrátit zpět':'Tato pojišťovna splňuje vše'}</button>
+        <input placeholder="Nabídnuté pojistné" onchange="offer499('${esc499(id)}').premium=this.value" value="${esc499(o.premium || '')}">
+        <input placeholder="Počátek pojištění" onchange="offer499('${esc499(id)}').insurance_start=this.value" value="${esc499(o.insurance_start || q.insurance_start || '')}">
+        <input placeholder="Frekvence placení" onchange="offer499('${esc499(id)}').payment_frequency=this.value" value="${esc499(o.payment_frequency || q.payment_frequency || 'ročně')}">
+        <input placeholder="Celková spoluúčast / pozn." onchange="offer499('${esc499(id)}').deductible=this.value" value="${esc499(o.deductible || q.deductible_preference || '')}">
+      </th>`;
+    }).join('');
+
+    const rows = arr499(st.risks).map((r,i) => {
+      const k = riskKey499(r);
+      const lim = requestedLimit499(r);
+      const ded = requestedDeductible499(r);
+      return `<tr>
+        <td class="risk-request">
+          <b>${esc499(r.name || r.title || k)}</b><br>
+          <span class="badge">${esc499(k)}</span><br>
+          <b>Požadavek:</b> ${esc499(lim || 'není uveden')}<br>
+          <b>Spoluúčast:</b> ${esc499(ded || 'není uvedena')}
+          ${riskSpecification499(r)?`<br><small>Specifikace: ${esc499(riskSpecification499(r))}</small>`:''}
+        </td>
+        ${codes.map(code => window.offerCell(code,r,i)).join('')}
+      </tr>`;
+    }).join('');
+
+    return `<p class="eyebrow">8. Nabídky v jedné tabulce</p>
+      <h2>Požadavek klienta × nabídky pojišťoven</h2>
+      <p class="muted">Při volbě „splněno“ se automaticky doplní požadovaný limit / pojistná částka a spoluúčast z poptávky. Aktivní tlačítko je zvýrazněné a lze jej znovu odkliknout.</p>
+      <div class="section-soft smart-panel smart-panel-499">
+        <div class="section-head">
+          <div><h3>Smart předvyplnění nabídek</h3><p class="muted">Počátek, období, frekvence, území, spoluúčast a rizika se přebírají z poptávky. Poradce doplňuje pouze rozdíly, výluky a specifika pojišťovny.</p></div>
+          <div class="tools"><button class="btn secondary" onclick="smartPrefillAllOffers&&smartPrefillAllOffers()">Předvyplnit společné údaje</button><button class="btn secondary" onclick="fulfillAllRisksEverywhere()">Všude nastavit splněno</button></div>
+        </div>
+        <div class="grid4">
+          <div class="stat"><span>Počátek</span><b>${esc499(q.insurance_start||'není uveden')}</b></div>
+          <div class="stat"><span>Pojistné období</span><b>${esc499(q.insurance_period||'1 rok')}</b></div>
+          <div class="stat"><span>Frekvence</span><b>${esc499(q.payment_frequency||'ročně')}</b></div>
+          <div class="stat"><span>Spoluúčast</span><b>${esc499(q.deductible_preference||'není uvedena')}</b></div>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="offer-table pro-table offer-table-499"><thead><tr><th>Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="tools"><button class="btn primary" onclick="readCurrentTab&&readCurrentTab();saveCase&&saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div>`;
+  };
+
+  window.tabComparison = tabComparison = function(){
+    const st = st499();
+    const codes = selectedCodes499();
+    if(!codes.length || !arr499(st.risks).length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve doplňte rizika, pojišťovny a nabídky.</div>`;
+    const rows = arr499(st.risks).map(r => {
+      const k = riskKey499(r);
+      return `<tr><td class="risk-request"><b>${esc499(r.name || r.title || k)}</b><br>Požadavek: ${esc499(requestedLimit499(r) || 'limit neuveden')}<br>Spoluúčast: ${esc499(requestedDeductible499(r) || 'neuvedena')}</td>${codes.map(code => {
+        const x = (offer499(code).risks || {})[k] || {};
+        return `<td class="${String(x.status||'').toLowerCase()==='splněno'?'risk-cell-fulfilled-499':''}"><b>${esc499(x.status || 'nutno ověřit')}</b><br>Limit / částka: ${esc499(x.offered_limit || '–')}<br>Spoluúčast: ${esc499(x.deductible || '–')}<br>${esc499(x.note || '')}</td>`;
+      }).join('')}</tr>`;
+    }).join('');
+    return `<p class="eyebrow">9. Makléřské porovnání</p><h2>Rozdíly mezi nabídkami</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap"><table class="comparison-table-499"><thead><tr><th>Riziko / požadavek</th>${codes.map(c=>`<th>${esc499(insurerName499(c))}<div class="mini">${esc499(c)}</div></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+
+  // Profesionální Admin Textace – vzhled jako v produkční knihovně 2.6.1.
+  function defaultTexts499(){
+    if(window.CATALOG && Array.isArray(CATALOG.textTemplates) && CATALOG.textTemplates.length) return CATALOG.textTemplates;
+    return [
+      {id:'txt-provoz', title:'Odpovědnost z provozní činnosti – potvrzení rozsahu', category:'Požadavky na pojišťovnu', usage:'Poptávka pojišťovně', tags:['odpovědnost','pojišťovna'], text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce.'},
+      {id:'txt-prevzate', title:'Věci převzaté / užívané – požadavek na krytí', category:'Zvláštní ujednání', usage:'Poptávka / nabídka', tags:['odpovědnost','převzaté věci'], text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v dispozici klienta.'},
+      {id:'txt-vyrobek', title:'Odpovědnost za výrobek / vadnou práci', category:'Odpovědnost', usage:'Rizika / porovnání', tags:['odpovědnost','výrobek'], text:'U nabídky je nutné ověřit, zda a v jakém rozsahu kryje odpovědnost za škodu způsobenou vadou výrobku nebo vadně provedenou prací po předání.'}
+    ];
+  }
+  function textList499(){
+    window.CATALOG = window.CATALOG || {};
+    CATALOG.textTemplates = arr499(CATALOG.textTemplates);
+    if(!CATALOG.textTemplates.length) CATALOG.textTemplates = defaultTexts499();
+    return CATALOG.textTemplates;
+  }
+  window.brh499EditText = function(i){
+    const t = textList499()[i];
+    const box = document.getElementById('adminTextDetail499');
+    if(!box || !t) return;
+    box.innerHTML = `<p class="eyebrow">EDITOR TEXTACE</p><h2>${esc499(t.title || 'Textace')}</h2>
+      <div class="grid3"><label>Název<input value="${esc499(t.title||t.name||'')}" onchange="textList499()[${i}].title=this.value"></label><label>Kategorie<input value="${esc499(t.category||'')}" onchange="textList499()[${i}].category=this.value"></label><label>Použití<input value="${esc499(t.usage||t.type||'')}" onchange="textList499()[${i}].usage=this.value"></label></div>
+      <label>Tagy<input value="${esc499(arr499(t.tags).join(', '))}" onchange="textList499()[${i}].tags=this.value.split(',').map(x=>x.trim()).filter(Boolean)"></label>
+      <label>Text<textarea onchange="textList499()[${i}].text=this.value">${esc499(t.text||t.body||'')}</textarea></label>
+      <div class="tools"><button class="btn primary" onclick="saveAdminCatalog&&saveAdminCatalog()">Uložit textace</button><button class="btn secondary" onclick="brh499RenderAdminTexts()">Zavřít editor</button></div>`;
+  };
+  window.brh499DeleteText = function(i){
+    textList499().splice(i,1);
+    window.brh499RenderAdminTexts();
+  };
+  window.brh499AddText = function(){
+    textList499().unshift({id:'txt-'+Date.now(), title:'Nová textace', category:'Obecné', usage:'Poptávka', tags:[], text:''});
+    window.brh499RenderAdminTexts();
+    window.brh499EditText(0);
+  };
+  window.brh499RenderAdminTexts = function(){
+    const box = document.getElementById('adminPanel');
+    if(!box) return;
+    const rows = textList499().map((t,i)=>`
+      <div class="admin-text-card-499">
+        <div>
+          <h3>${esc499(t.title||t.name||'Textace')}</h3>
+          <p>${esc499((t.text||t.body||'').slice(0,180))}${(t.text||t.body||'').length>180?'…':''}</p>
+        </div>
+        <div><b>${esc499(t.category||'')}</b><br><span>${esc499(t.usage||t.type||'')}</span></div>
+        <div class="tags-499">${arr499(t.tags).map(x=>`<span>${esc499(x)}</span>`).join('')}</div>
+        <div class="admin-actions-499"><button class="btn secondary small" onclick="brh499EditText(${i})">Upravit</button><button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText(textList499()[${i}].text||'')">Kopírovat</button><button class="btn danger small" onclick="brh499DeleteText(${i})">Smazat</button></div>
+      </div>`).join('');
+    box.innerHTML = `<div class="admin-texts-pro-499">
+      <div class="section-head"><div><p class="eyebrow">SPRÁVA KNIHOVNY TEXTACÍ</p><h2>Textace</h2><p class="muted">Centrální pracovní správa textací pro poradce. Textace lze upravit, kopírovat, mazat a doplňovat.</p></div><button class="btn secondary" onclick="brh499AddText()">+ Přidat textaci</button></div>
+      <div class="admin-filter-row-499"><input placeholder="Hledat textaci..." oninput="brh499FilterTexts(this.value)"><select><option>Všechny kategorie</option></select><button class="btn secondary" onclick="brh499RenderAdminTexts()">Obnovit vzorové</button></div>
+      <div id="adminTextDetail499"></div>
+      <div class="admin-text-list-499"><div class="admin-text-head-499"><b>Název</b><b>Kategorie / použití</b><b>Tagy</b><b>Akce</b></div>${rows}</div>
+    </div>`;
+  };
+  window.brh499FilterTexts = function(q){
+    q = cleanName499(q);
+    document.querySelectorAll('.admin-text-card-499').forEach(card => {
+      card.style.display = !q || cleanName499(card.textContent).includes(q) ? '' : 'none';
+    });
+  };
+
+  window.adminPanel = function(type){
+    if(type === 'texts' || type === 'textace'){
+      window.brh499RenderAdminTexts();
+      return;
+    }
+    if(typeof prevAdminPanel499 === 'function') return prevAdminPanel499(type);
+  };
+
+  if(typeof prevRenderWorkspace499 === 'function'){
+    window.renderWorkspace = function(){
+      const out = prevRenderWorkspace499.apply(this, arguments);
+      setTimeout(function(){
+        // pokud původní renderer mapuje přes lokální funkce, po renderu přepíšeme obsah aktivní karty 8/9
+        try{
+          const container = document.getElementById('tabContent');
+          if(container && typeof currentTab !== 'undefined'){
+            if(currentTab === 'offers') container.innerHTML = window.tabOffers();
+            if(currentTab === 'comparison') container.innerHTML = window.tabComparison();
+          }
+        }catch(e){ console.log('BRH499 render patch:', e); }
+      }, 0);
+      return out;
+    };
+  }
 })();
