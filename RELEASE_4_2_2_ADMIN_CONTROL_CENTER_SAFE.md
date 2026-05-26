@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.9 – Advisor Professional Cards Workflow SAFE
+# Business Risk Hub 5.0.0 – Advisor Professional Cards Workflow SAFE
 
 ## Účel
 Bezpečná vývojová verze po návratu na stabilní 4.2.1.

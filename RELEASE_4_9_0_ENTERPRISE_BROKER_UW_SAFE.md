@@ -1,4 +1,4 @@
-# Business Risk Hub 4.9.9 – Enterprise Broker Underwriting Platform SAFE
+# Business Risk Hub 5.0.0 – Enterprise Broker Underwriting Platform SAFE
 
 - Enterprise UX vrstva bez zásahu do DB.
 - Profesionální karta 8 – srovnávací matice nabídek.

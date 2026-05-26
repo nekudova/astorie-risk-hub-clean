@@ -1,4 +1,4 @@
-const VERSION = '4.9.9';
+const VERSION = '5.0.0';
 let CATALOG = {insurers:[], risks:[], riskModel:[], activities:[], textTemplates:[]};
 let cases = [];
 let clients = [];
@@ -890,7 +890,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.9 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.0 – Release Identity Fix & Visible Build Check
    Bezpečný patch nad funkční větví: nepřepisuje DB destruktivně,
    pouze rozšiřuje klientský payload a Admin číselníky.
    ========================================================== */
@@ -1118,7 +1118,7 @@ window.tabRisks=tabRisks;
 })();
 
 /* ==========================================================
-   Business Risk Hub 4.9.9 – Release Identity Fix & Visible Build Check
+   Business Risk Hub 5.0.0 – Release Identity Fix & Visible Build Check
    Cíl: opravit regresi poptávek/porovnání/exportů bez zásahu do DB.
    - Porovnání renderuje pouze compare engine, ne poptávky.
    - Poptávky mají jen jeden vizuální blok pro každou pojišťovnu.
@@ -1414,7 +1414,7 @@ window.tabRisks=tabRisks;
 
 
 /* ==========================================================
-   Business Risk Hub 4.9.9 – Advisor Professional Cards Workflow SAFE
+   Business Risk Hub 5.0.0 – Advisor Professional Cards Workflow SAFE
    Bezpečný nedestruktivní vývoj nad 4.0.2.
    - kompletní katalog odpovědnosti z původního Excelu poradce
    - admin editace rizik a ujednání
@@ -2119,7 +2119,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.9 – REAL PROFESSIONAL CARDS SAFE
+   BRH 5.0.0 – REAL PROFESSIONAL CARDS SAFE
    Poslední přebíjecí vrstva načtená až na konci souboru.
    Opravuje: Karta poradce bez formuláře, stará karta klienta, stará karta pojištění,
    a duplicity pojišťoven v nabídkách/porovnání.
@@ -2506,7 +2506,7 @@ window.tabRisks=tabRisks;
 
 
 /* ======================================================================
-   BRH 4.9.9 – ADVISOR SPECIFICATION REPAIR SAFE
+   BRH 5.0.0 – ADVISOR SPECIFICATION REPAIR SAFE
    Oprava po chybné 4.8.1. Základ je stabilní 4.8.0.
    - Kontaktní osoby ponechány v původní dynamické architektuře.
    - Podepisující osoby ponechány v původní dynamické architektuře.
@@ -2840,7 +2840,7 @@ window.tabRisks=tabRisks;
 
 })();
 
-/* BRH 4.9.9 – CARDS UX AND ADVISOR FIELDS SAFE */
+/* BRH 5.0.0 – CARDS UX AND ADVISOR FIELDS SAFE */
 (function(){
 window.BRH_RENDER_VERSION='483';
 function E483(v){return String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
@@ -2869,7 +2869,7 @@ window.tabInsurance=tabInsurance=function(){ensure483();return `<p class="eyebro
 window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='advisor'){['name','email','phone','role','company','company_ico','note'].forEach(k=>{const el=q483('adviser_'+k);if(el)state.adviser[k]=el.value;});}if(currentTab==='client'){['ico','dic','name','legal_form','address','data_box','website','billing_email','registered_office','file_no','relation','internal_note','sign_type'].forEach(k=>{const el=q483('client_'+k);if(el)state.client[k]=el.value;});state.client.contact_persons=state.client.contact_persons.map((p,i)=>({name:q483(`cp_${i}_name`)?.value||'',email:q483(`cp_${i}_email`)?.value||'',phone:q483(`cp_${i}_phone`)?.value||'',area:q483(`cp_${i}_area`)?.value||''}));state.client.signing_persons=state.client.signing_persons.map((p,i)=>({name:q483(`sp_${i}_name`)?.value||'',role:q483(`sp_${i}_role`)?.value||'',email:q483(`sp_${i}_email`)?.value||'',phone:q483(`sp_${i}_phone`)?.value||''}));if(state.client.contact_persons[0]){state.client.contact_person=state.client.contact_persons[0].name||'';state.client.contact_email=state.client.contact_persons[0].email||'';state.client.contact_phone=state.client.contact_persons[0].phone||'';}}if(currentTab==='insurance'){['name','code'].forEach(k=>{const el=q483('activity_'+k);if(el)state.activity[k]=el.value;});['territory','main_activity_detail','side_activities','customers','suppliers','export_info','turnover','payroll','employees','currency','accounting_from','accounting_to','insurance_start','insurance_end','insurance_period','payment_frequency','collection','claim_discount','long_term_discount','locations','property_description','security','requested_scope','claims_history','deductible_preference','current_insurance','attachments_note','special_notes'].forEach(k=>{const el=q483('q_'+k);if(el)state.questionnaire[k]=el.value;});const ind=q483('q_insurance_indefinite');if(ind)state.questionnaire.insurance_indefinite=ind.value==='ano';state.questionnaire.additional_insured=state.questionnaire.additional_insured.map((p,i)=>({name:q483(`ai_${i}_name`)?.value||'',ico:q483(`ai_${i}_ico`)?.value||'',relation:q483(`ai_${i}_relation`)?.value||'',note:q483(`ai_${i}_note`)?.value||''}));state.questionnaire.custom_fields=state.questionnaire.custom_fields.map((x,i)=>({section:x.section||'',label:q483(`cf_${i}_label`)?.value||x.label||'',value:q483(`cf_${i}_value`)?.value||x.value||''}));state.questionnaire.annual_revenue_breakdown=state.questionnaire.export_info||state.questionnaire.annual_revenue_breakdown||'';}if(currentTab==='recommendation'){state.report.advisor_note=q483('advisor_note')?.value||'';state.report.client_selected_offer=q483('selected_offer')?.value||state.report.client_selected_offer||'';state.report.client_choice_reason=q483('choice_reason')?.value||'';}if(window.brhUniqueInsurerCodes480)state.selected_insurers=window.brhUniqueInsurerCodes480(state.selected_insurers||[]);};
 })();
 
-/* BRH 4.9.9 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
+/* BRH 5.0.0 – ENTERPRISE BROKER UNDERWRITING PLATFORM SAFE */
 (function(){
   window.BRH_RENDER_VERSION = '490';
   window.BRH_ENTERPRISE_BROKER_UW_SAFE = true;
@@ -2941,7 +2941,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.9 – SAFE STABILIZATION RELEASE
+   BRH 5.0.0 – SAFE STABILIZATION RELEASE
    Stabilizace bez mazání funkčního jádra:
    - profesionální tisk poptávky bez interních textů,
    - podpis poradce, nikoli obecný podpis ASTORIE,
@@ -3339,7 +3339,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ======================================================================
-   BRH 4.9.9 – SMART OFFERS RESTORE SAFE
+   BRH 5.0.0 – SMART OFFERS RESTORE SAFE
    Vrací vychytávky v Nabídkách a Porovnání:
    - pojišťovny normalizované bez duplicit,
    - smart předvyplnění z poptávky,
@@ -3690,8 +3690,8 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.9 – ADMIN EMERGENCY RESTORE SAFE
-   Zdrojová báze: 4.9.9, aby se nezdědilo poškození Adminu z 4.9.9.
+   BRH 5.0.0 – ADMIN EMERGENCY RESTORE SAFE
+   Zdrojová báze: 5.0.0, aby se nezdědilo poškození Adminu z 5.0.0.
    Princip:
    - NEmaže původní adminPanel.
    - Pro běžné admin sekce používá původní plnohodnotné editory.
@@ -3827,7 +3827,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
     box.innerHTML = `
       <div class="admin-safe-head admin-head-495">
         <div>
-          <p class="eyebrow">Administrace · 4.9.9 SAFE</p>
+          <p class="eyebrow">Administrace · 5.0.0 SAFE</p>
           <h2>Admin Control Center</h2>
           <p class="muted">Obnovený Admin. Běžné číselníky běží přes původní editory, upraveny jsou pouze Textace, Dokumenty a Uživatelé.</p>
         </div>
@@ -4014,7 +4014,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 
 
 /* ============================================================================
-   BRH 4.9.9 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
+   BRH 5.0.0 – FUNCTIONAL OFFERS + TEXTACE/DOCUMENTS RESTORE SAFE
    - Nabídky/Porovnání převzaty z poslední nalezené funkční větve 3.5.1b.
    - Textace/Dokumenty doplněny ve stylu 2.6.1 bez zásahu do ostatních částí.
    ============================================================================ */
@@ -4112,7 +4112,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.9 – SMART OFFER TOGGLE SAFE
+   BRH 5.0.0 – SMART OFFER TOGGLE SAFE
    Oprava karty 8 Nabídky:
    - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač
    - po použití je viditelně zvýrazněné
@@ -4313,7 +4313,7 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
 })();
 
 /* ============================================================================
-   BRH 4.9.9 – SMART PREFILL + TEXTACE VISUAL SAFE
+   BRH 5.0.0 – SMART PREFILL + TEXTACE VISUAL SAFE
    Cíl:
    - Karta 8: tlačítko „Tato pojišťovna splňuje vše“ funguje jako přepínač.
    - Po zapnutí se do nabídky propíší limity / pojistné částky / spoluúčasti
@@ -4690,4 +4690,365 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
       return out;
     };
   }
+})();
+
+/* ============================================================================
+   BRH 5.0.0 – DATA BINDINGS + PRODUCTION MODULES SAFE
+   Důvod opravy:
+   1) Karta 8 musí viditelně propsat data z poptávky do nabídky při kliknutí
+      „Tato pojišťovna splňuje vše“.
+   2) Textace v produkci musí být samostatný pracovní modul po vzoru 2.6.1.
+   3) Dokumenty v produkci musí být samostatný pracovní modul po vzoru 2.6.1.
+   4) Klientský výstup musí číst data z nabídek a předchozích karet.
+   ============================================================================ */
+(function(){
+  window.BRH_500_DATA_BINDINGS_PRODUCTION_MODULES_SAFE = true;
+  window.BRH_RENDER_VERSION = '500';
+
+  function esc500(v){
+    if(typeof esc === 'function') return esc(v);
+    return String(v ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
+  function arr500(v){ return Array.isArray(v) ? v : []; }
+  function st500(){ return (typeof state !== 'undefined' && state) ? state : (window.state = window.state || {}); }
+  function q500(){ const st=st500(); st.questionnaire = st.questionnaire || {}; return st.questionnaire; }
+  function norm500(v){
+    v=String(v||'').toLowerCase().trim().replace(/\s+/g,' ');
+    if(v.includes('koop')||v.includes('kooperativa')) return 'koop';
+    if(v.includes('gcp')||v.includes('gčp')||v.includes('generali')) return 'gcp';
+    if(v.includes('cpp')||v.includes('čpp')||v.includes('podnikatelsk')) return 'cpp';
+    return v;
+  }
+  function clean500(v){ return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function selectedCodes500(){
+    const st=st500();
+    const src=arr500(st.selected_insurers).length ? st.selected_insurers : arr500(st.offers).map(o=>o.insurer_code||o.code||o.insurer||o.name);
+    return [...new Set(src.map(norm500).filter(Boolean))];
+  }
+  function riskKey500(r){ return String((r&&(r.risk_key||r.key||r.code||r.id||r.name||r.title))||'').trim(); }
+  function offer500(code){
+    const st=st500(); st.offers=arr500(st.offers);
+    const id=norm500(code);
+    let o=st.offers.find(x=>norm500(x.insurer_code||x.code||x.insurer||x.name)===id);
+    if(!o){ o={insurer_code:id,code:id,risks:{}}; st.offers.push(o); }
+    o.insurer_code=id; o.code=id; o.risks=o.risks||{};
+    return o;
+  }
+  window.offer500 = offer500;
+
+  const LIMITS500 = [
+    ['provoz','Provozní odpovědnost','10 000 000 Kč'],
+    ['vadna prace','Vadná práce po předání','5 000 000 Kč'],
+    ['vyrobek','Odpovědnost za výrobek','10 000 000 Kč'],
+    ['prevzate veci','Věci převzaté','2 000 000 Kč'],
+    ['uzivane veci','Věci užívané','1 000 000 Kč'],
+    ['cista financni skoda','Čistá finanční škoda','2 000 000 Kč'],
+    ['krizova odpovednost','Křížová odpovědnost','5 000 000 Kč'],
+    ['subdodavatele','Subdodavatelé','dle hlavního limitu'],
+    ['regresy','Regresy zdravotních pojišťoven a dávek','dle hlavního limitu'],
+    ['pronajate prostory','Škody na pronajatých prostorách','1 000 000 Kč'],
+    ['odlozene vnesene','Věci odložené / vnesené','500 000 Kč'],
+    ['demontaz montaz','Demontáž a montáž vadného výrobku','1 000 000 Kč'],
+    ['stazeni vyrobku','Stažení výrobku z trhu','1 000 000 Kč'],
+    ['spojeni smiseni','Spojení, smísení, další zpracování','5 000 000 Kč'],
+    ['nemajetkova ujma','Nemajetková újma','dle hlavního limitu'],
+    ['zivotni prostredi','Škody na životním prostředí','1 000 000 Kč'],
+    ['smluvne prevzata odpovednost','Smluvně převzatá odpovědnost','ověřit'],
+    ['strezenych objektech','Škody na střežených objektech','10 000 000 Kč'],
+    ['skody zpusobene zamestnanci','Škody způsobené zaměstnanci','5 000 000 Kč']
+  ];
+  function requestedLimit500(r, rowText){
+    const direct = r && (r.requested_limit||r.limit||r.insured_amount||r.sum_insured||r.amount||r.pojistna_castka||r.pojistna_suma);
+    if(direct) return String(direct);
+    const txt = clean500([riskKey500(r), r&&r.name, r&&r.title, r&&r.risk_name, rowText].filter(Boolean).join(' '));
+    try{
+      if(typeof LIABILITY_RISKS !== 'undefined' && Array.isArray(LIABILITY_RISKS)){
+        const f=LIABILITY_RISKS.find(x=>txt.includes(clean500(x[0]))||txt.includes(clean500(x[1])));
+        if(f&&f[2]) return f[2];
+      }
+    }catch(e){}
+    const f=LIMITS500.find(x=>txt.includes(clean500(x[0]))||txt.includes(clean500(x[1])));
+    return f ? f[2] : '';
+  }
+  function requestedDeductible500(r, rowText){
+    return (r&&(r.deductible||r.spoluucast||r.deductible_preference)) || q500().deductible_preference || '';
+  }
+
+  function isColumnFulfilled500(code){
+    const st=st500(), o=offer500(code), risks=arr500(st.risks).filter(r=>riskKey500(r));
+    return !!o._all_fulfilled && risks.length && risks.every(r=>String((o.risks[riskKey500(r)]||{}).status||'').toLowerCase()==='splněno');
+  }
+
+  function setInputVal500(el,val){
+    if(!el || !val) return;
+    el.value = val;
+    el.setAttribute('value', val);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+
+  function updateVisibleOfferColumn500(code, active){
+    // Přímé propsání do aktuálně zobrazené tabulky – nezávisle na původním rendereru.
+    const id = norm500(code);
+    const heads = Array.from(document.querySelectorAll('.offer-table th, table th'));
+    let colIndex = -1;
+    heads.forEach((th,i)=>{
+      const t=clean500(th.textContent);
+      if(colIndex<0 && (t.includes(id)||t.includes(clean500(id==='koop'?'Kooperativa':id==='gcp'?'Generali':id==='cpp'?'Česká podnikatelská':id)))) colIndex=i;
+    });
+    if(colIndex < 1) return;
+
+    const rows = Array.from(document.querySelectorAll('.offer-table tbody tr, table tbody tr'));
+    rows.forEach((tr,ri)=>{
+      const cells = Array.from(tr.children);
+      const requestCell = cells[0];
+      const offerCell = cells[colIndex];
+      if(!requestCell || !offerCell) return;
+
+      const r = arr500(st500().risks)[ri] || {};
+      const k = riskKey500(r) || clean500(requestCell.textContent).slice(0,50) || ('risk_'+ri);
+      const o = offer500(id);
+      const x = o.risks[k] = o.risks[k] || {};
+      const previous = Object.assign({}, x);
+
+      const limit = requestedLimit500(r, requestCell.textContent);
+      const ded = requestedDeductible500(r, requestCell.textContent);
+
+      const select = offerCell.querySelector('select');
+      const inputs = offerCell.querySelectorAll('input');
+
+      if(active){
+        x._prev_before_toggle = previous;
+        x.status = 'splněno';
+        x.offered_limit = limit || x.offered_limit || '';
+        x.deductible = ded || x.deductible || '';
+        if(select) setInputVal500(select,'splněno');
+        if(inputs[0]) setInputVal500(inputs[0], x.offered_limit);
+        if(inputs[1]) setInputVal500(inputs[1], x.deductible);
+        offerCell.classList.add('risk-cell-fulfilled-500');
+      }else{
+        const prev = x._prev_before_toggle || {};
+        x.status = prev.status || 'nutno ověřit';
+        x.offered_limit = prev.offered_limit || '';
+        x.deductible = prev.deductible || '';
+        if(select) setInputVal500(select,x.status);
+        if(inputs[0]) setInputVal500(inputs[0], x.offered_limit);
+        if(inputs[1]) setInputVal500(inputs[1], x.deductible);
+        offerCell.classList.remove('risk-cell-fulfilled-500');
+      }
+    });
+  }
+
+  window.fulfillAllRisksForInsurer = function(code){
+    const id = norm500(code);
+    const o = offer500(id);
+    const risks = arr500(st500().risks).filter(r=>riskKey500(r));
+    const activeNow = !isColumnFulfilled500(id);
+
+    if(activeNow){
+      o._before_fulfill = {};
+      risks.forEach(r=>{
+        const k=riskKey500(r), x=o.risks[k]=o.risks[k]||{};
+        o._before_fulfill[k]=Object.assign({},x);
+        x.status='splněno';
+        x.offered_limit = requestedLimit500(r,'') || x.offered_limit || '';
+        x.deductible = requestedDeductible500(r,'') || x.deductible || '';
+        x._auto_fulfilled=true;
+      });
+      o.workflow_status='splněno';
+      o._all_fulfilled=true;
+      updateVisibleOfferColumn500(id,true);
+      if(typeof toast==='function') toast('Doplněny limity / pojistné částky a spoluúčasti z poptávky.');
+    }else{
+      const backup=o._before_fulfill||{};
+      risks.forEach(r=>{
+        const k=riskKey500(r), prev=backup[k]||{}, x=o.risks[k]=o.risks[k]||{};
+        x.status=prev.status||'nutno ověřit';
+        x.offered_limit=prev.offered_limit||'';
+        x.deductible=prev.deductible||'';
+        x.note=prev.note||x.note||'';
+        x._auto_fulfilled=false;
+      });
+      o._all_fulfilled=false;
+      updateVisibleOfferColumn500(id,false);
+      if(typeof toast==='function') toast('Nastavení splnění bylo vráceno zpět.');
+    }
+    setTimeout(markOfferButtons500, 50);
+  };
+
+  window.fulfillAllRisksEverywhere = function(){
+    selectedCodes500().forEach(c=>{ if(!isColumnFulfilled500(c)) window.fulfillAllRisksForInsurer(c); });
+  };
+
+  function markOfferButtons500(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const txt=clean500(btn.textContent);
+      if(!txt.includes('pojistovna splnuje vse') && !txt.includes('splnuje vse vratit zpet')) return;
+      let code='';
+      const th=btn.closest('th');
+      if(th){
+        const mini=th.querySelector('.mini');
+        code = mini ? mini.textContent : th.textContent;
+      }
+      const oc=btn.getAttribute('onclick')||'';
+      const m=oc.match(/fulfillAllRisksForInsurer\(['"]([^'"]+)['"]\)/);
+      if(m) code=m[1];
+      code=norm500(code);
+      const active=isColumnFulfilled500(code);
+      btn.classList.add('offer-toggle-500');
+      btn.classList.toggle('is-active',active);
+      btn.textContent = active ? '✓ Splňuje vše – vrátit zpět' : 'Tato pojišťovna splňuje vše';
+    });
+  }
+
+  document.addEventListener('click', function(ev){
+    const btn = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+    if(!btn) return;
+    const txt=clean500(btn.textContent);
+    if(!txt.includes('pojistovna splnuje vse') && !txt.includes('splnuje vse vratit zpet')) return;
+    let code='';
+    const th=btn.closest('th');
+    if(th){
+      const mini=th.querySelector('.mini');
+      code = mini ? mini.textContent : th.textContent;
+    }
+    const oc=btn.getAttribute('onclick')||'';
+    const m=oc.match(/fulfillAllRisksForInsurer\(['"]([^'"]+)['"]\)/);
+    if(m) code=m[1];
+    if(code){
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.fulfillAllRisksForInsurer(code);
+    }
+  }, true);
+
+  // ---------- PRODUKČNÍ TEXTACE ----------
+  const DEFAULT_TEXTS_500 = [
+    {title:'Odpovědnost z provozní činnosti – potvrzení rozsahu',category:'Požadavky na pojišťovnu',usage:'Poptávka pojišťovně',tags:['odpovědnost','pojišťovna'],text:'Prosíme o výslovné potvrzení, zda se nabízené pojištění vztahuje na odpovědnost za újmu způsobenou provozní činností klienta v rozsahu uvedeném v poptávce, včetně uvedení případných výluk, sublimitů nebo zvláštních podmínek.'},
+    {title:'Věci převzaté / užívané – požadavek na krytí',category:'Zvláštní ujednání',usage:'Poptávka / nabídka',tags:['odpovědnost','převzaté věci'],text:'Klient požaduje posouzení a případné zahrnutí odpovědnosti za škody na věcech převzatých, užívaných nebo jinak nacházejících se v jeho dispozici.'},
+    {title:'Upozornění na výluky',category:'Klientský výstup',usage:'Zpráva klientovi',tags:['výluky','klient'],text:'Před sjednáním je nutné ověřit výluky uvedené ve VPP/DPP/ZPP a jejich dopad na konkrétní činnost klienta.'},
+    {title:'Škodní průběh – doplnění',category:'Podklady',usage:'Poptávka pojišťovně',tags:['škody','podklady'],text:'Prosíme o zohlednění doloženého škodního průběhu a případné uvedení, zda má vliv na pojistné, spoluúčast nebo rozsah krytí.'},
+    {title:'Požadavek na sublimity',category:'Nabídka',usage:'Porovnání',tags:['sublimity','limity'],text:'U nabídky prosíme o jasné uvedení všech sublimitů, které se vztahují k požadovaným rizikům.'},
+    {title:'Doporučení k porovnání',category:'Klientský výstup',usage:'Zpráva klientovi',tags:['doporučení'],text:'Doporučení vychází z porovnání rozsahu krytí, výluk, spoluúčastí, limitů a celkové použitelnosti nabídky pro konkrétní činnost klienta.'}
+  ];
+  function textStore500(){
+    try{
+      const stored=JSON.parse(localStorage.getItem('brh_textations_500')||'null');
+      if(Array.isArray(stored) && stored.length) return stored;
+    }catch(e){}
+    try{
+      if(window.CATALOG && Array.isArray(CATALOG.textTemplates) && CATALOG.textTemplates.length) return CATALOG.textTemplates;
+    }catch(e){}
+    return DEFAULT_TEXTS_500.slice();
+  }
+  function saveTextStore500(items){
+    try{ localStorage.setItem('brh_textations_500', JSON.stringify(items)); }catch(e){}
+    window.CATALOG = window.CATALOG || {};
+    CATALOG.textTemplates = items;
+  }
+  window.renderProductionTextace500 = function(){
+    const box=document.getElementById('tabContent') || document.getElementById('workspace') || document.querySelector('main');
+    if(!box) return;
+    const items=textStore500();
+    box.innerHTML = `<p class="eyebrow">PRACOVNÍ REŽIM</p>
+      <h2>Knihovna textací</h2>
+      <p class="muted">Pracovní knihovna formulací, doložek, požadavků na pojišťovny a poznámek pro klientský výstup. Textaci lze zkopírovat nebo vložit do pracovních poznámek aktivního případu.</p>
+      <div class="tools text-tools-500"><button class="btn secondary" onclick="saveTextStore500(DEFAULT_TEXTS_500.slice());renderProductionTextace500()">Obnovit vzorové textace</button><button class="btn primary" onclick="addOwnText500()">+ Přidat textaci</button></div>
+      <div class="text-filter-500"><input id="textSearch500" placeholder="např. odpovědnost, výluka, drony, FVE, výrobek..." oninput="filterTextCards500(this.value)"><select><option>Všechny kategorie</option></select><select><option>Všechny tagy</option></select></div>
+      <div class="text-tabs-500"><button class="active">Centrální databáze</button><button>Moje textace</button><button>Návrhy ke schválení</button></div>
+      <section class="text-section-500"><h3>Centrální databáze textací</h3><p class="muted">Firemní / vzorové textace pro poradce. Poradce je může použít, kopírovat a vložit do poznámek.</p><div class="text-card-grid-500">${items.map((t,i)=>textCard500(t,i)).join('')}</div></section>
+      <section class="text-section-500"><h3>Pracovní poznámky k aktivnímu případu</h3><textarea id="caseNotes500" placeholder="Zde se budou skládat vybrané textace pro poptávku, nabídku nebo zprávu klientovi...">${esc500(st500().textation_notes||'')}</textarea></section>`;
+  };
+  function textCard500(t,i){
+    return `<article class="text-card-500" data-search="${esc500(clean500([t.title,t.category,t.usage,arr500(t.tags).join(' '),t.text].join(' ')))}">
+      <div class="text-card-top-500"><h4>${esc500(t.title)}</h4><span>Centrální</span></div>
+      <div class="text-card-meta-500">${esc500(t.category||'')} · ${esc500(t.usage||'')} · ${arr500(t.tags).map(x=>esc500(x)).join(' · ')}</div>
+      <p>${esc500(t.text||'')}</p>
+      <div class="tools"><button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText(textStore500()[${i}].text||'')">Kopírovat</button><button class="btn primary small" onclick="insertText500(${i})">Do poptávky</button><button class="btn secondary small" onclick="insertText500(${i})">Do nabídky</button><button class="btn secondary small" onclick="insertText500(${i})">Do klientského výstupu</button></div>
+    </article>`;
+  }
+  window.textStore500=textStore500; window.saveTextStore500=saveTextStore500; window.DEFAULT_TEXTS_500=DEFAULT_TEXTS_500;
+  window.insertText500=function(i){
+    const items=textStore500(); const t=items[i]; if(!t) return;
+    st500().textation_notes = (st500().textation_notes||'') + (st500().textation_notes?'\n\n':'') + t.text;
+    const ta=document.getElementById('caseNotes500'); if(ta) ta.value=st500().textation_notes;
+    if(typeof toast==='function') toast('Textace vložena do pracovních poznámek.');
+  };
+  window.filterTextCards500=function(q){
+    q=clean500(q);
+    document.querySelectorAll('.text-card-500').forEach(c=>c.style.display=!q || c.dataset.search.includes(q) ? '' : 'none');
+  };
+  window.addOwnText500=function(){
+    const items=textStore500();
+    items.unshift({title:'Nová textace',category:'Vlastní',usage:'Pracovní poznámka',tags:['vlastní'],text:'Sem doplňte vlastní formulaci.'});
+    saveTextStore500(items);
+    renderProductionTextace500();
+  };
+
+  // ---------- PRODUKČNÍ DOKUMENTY ----------
+  window.renderProductionDocuments500 = function(){
+    const box=document.getElementById('tabContent') || document.getElementById('workspace') || document.querySelector('main');
+    if(!box) return;
+    const cats=['VPP / DPP / ZPP','Nabídky pojišťoven','Škodní průběh','Revize / technické podklady','Fotodokumentace','Dotazníky a ostatní'];
+    box.innerHTML = `<p class="eyebrow">DOKUMENTOVÝ MODUL</p>
+      <h2>Dokumenty k obchodnímu případu</h2>
+      <p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky pojišťoven, škodní průběh, revize, fotodokumentaci a další podklady. Dokumenty se vztahují k aktivnímu obchodnímu případu.</p>
+      <div class="doc-grid-500">${cats.map(c=>`<div class="doc-card-500"><h3>${esc500(c)}</h3><p>Podklady vázané na aktivní obchodní případ.</p></div>`).join('')}</div>
+      <section class="doc-evidence-500"><div class="section-head"><h3>Evidence dokumentů</h3><button class="btn secondary" onclick="addDocumentRow500()">+ Přidat dokument</button></div>
+        <table class="doc-table-500"><thead><tr><th>Příloha</th><th>Kategorie</th><th>Povinná</th><th>Stav</th><th>Poznámka / soubor</th></tr></thead><tbody id="docRows500">${documentRows500()}</tbody></table></section>`;
+  };
+  function docs500(){ const st=st500(); st.documents=arr500(st.documents); if(!st.documents.length) st.documents=[{name:'Plná moc',category:'Základní',required:'ano',status:'chybí',note:'Plná moc klienta pro jednání s pojišťovnami a získání podkladů.'},{name:'Výpis z OR',category:'Základní',required:'ano',status:'chybí',note:'Aktuální výpis z obchodního rejstříku nebo obdobný identifikační doklad.'}]; return st.documents; }
+  function documentRows500(){ return docs500().map((d,i)=>`<tr><td><input value="${esc500(d.name||'')}" onchange="docs500()[${i}].name=this.value"></td><td><input value="${esc500(d.category||'')}" onchange="docs500()[${i}].category=this.value"></td><td><select onchange="docs500()[${i}].required=this.value"><option ${d.required==='ano'?'selected':''}>ano</option><option ${d.required==='ne'?'selected':''}>ne</option></select></td><td><select onchange="docs500()[${i}].status=this.value"><option ${d.status==='chybí'?'selected':''}>chybí</option><option ${d.status==='doloženo'?'selected':''}>doloženo</option><option ${d.status==='není potřeba'?'selected':''}>není potřeba</option></select></td><td><textarea onchange="docs500()[${i}].note=this.value">${esc500(d.note||'')}</textarea></td></tr>`).join(''); }
+  window.docs500=docs500; window.addDocumentRow500=function(){ docs500().push({name:'Nový dokument',category:'',required:'ne',status:'chybí',note:''}); renderProductionDocuments500(); };
+
+  // ---------- KLIENTSKÝ VÝSTUP ČTE DATA Z NABÍDEK ----------
+  window.renderClientOutput500 = function(){
+    const st=st500(), q=q500(), codes=selectedCodes500();
+    const box=document.getElementById('tabContent') || document.getElementById('workspace') || document.querySelector('main');
+    if(!box) return;
+    const rows=codes.map(c=>{
+      const o=offer500(c);
+      const riskVals=Object.values(o.risks||{});
+      const fulfilled=riskVals.filter(x=>String(x.status||'').toLowerCase()==='splněno').length;
+      return `<tr><td>${esc500(c==='koop'?'Kooperativa pojišťovna, a.s.':c==='gcp'?'Generali Česká pojišťovna a.s.':c==='cpp'?'Česká podnikatelská pojišťovna, a.s.':c)}<br><span class="mini">${esc500(c)}</span></td><td>${esc500(o.premium||'—')}</td><td>${esc500(o.deductible||q.deductible_preference||'—')}</td><td><span class="badge">${esc500(o.workflow_status||'rozpracováno')}</span><br>${fulfilled}/${arr500(st.risks).length} rizik splněno</td><td><span class="badge">${esc500(st.report?.client_selected_offer===c?'doporučeno':(o.workflow_status||'rozpracováno'))}</span></td></tr>`;
+    }).join('');
+    box.innerHTML = `<p class="eyebrow">ASTORIE – KLIENTSKÝ REPORT</p><h2>Doporučení pojistného řešení</h2>
+      <div class="grid3"><div class="section-soft"><h3>Klient</h3><b>${esc500(st.client?.name||'není vyplněn')}</b><p>IČO: ${esc500(st.client?.ico||'—')} · DIČ: ${esc500(st.client?.dic||'—')}</p><p>${esc500(st.client?.address||'')}</p></div><div class="section-soft"><h3>Doporučení poradce</h3><b>${esc500(st.report?.client_selected_offer||'není potvrzeno')}</b><p>${esc500(st.report?.client_choice_reason||'Doporučení bude doplněno po vyhodnocení nabídek a požadavků klienta.')}</p></div><div class="section-soft"><h3>Rizikový profil</h3><p>Činnost: ${esc500(st.activity?.name||q.activity_type||'—')}</p><p>Obrat: ${esc500(q.turnover||'—')}</p><p>Škodní průběh: ${esc500(q.claims_history||'nezadáno')}</p></div></div>
+      <div class="section-soft"><h3>Souhrn nabídek</h3><table class="pro-table"><thead><tr><th>Pojišťovna</th><th>Pojistné</th><th>Spoluúčast</th><th>Rozsah</th><th>Doporučení</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="section-soft"><h3>Obchodní komentář</h3><textarea onchange="st500().report=st500().report||{};st500().report.advisor_note=this.value">${esc500(st.report?.advisor_note||st.textation_notes||'')}</textarea></div>`;
+  };
+
+  // Robustní navázání bočního menu i tabů.
+  const oldShowView500=window.showView;
+  window.showView=function(view){
+    const v=String(view||'').toLowerCase();
+    if(v.includes('text')){ currentView=view; document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active', clean500(b.textContent).includes('textace'))); renderProductionTextace500(); return; }
+    if(v.includes('doc') || v.includes('dokument')){ currentView=view; document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active', clean500(b.textContent).includes('dokument'))); renderProductionDocuments500(); return; }
+    return oldShowView500 ? oldShowView500(view) : undefined;
+  };
+
+  document.addEventListener('click',function(ev){
+    const b=ev.target && ev.target.closest ? ev.target.closest('button,a') : null;
+    if(!b) return;
+    const t=clean500(b.textContent);
+    if(t==='textace'){ ev.preventDefault(); ev.stopPropagation(); renderProductionTextace500(); return; }
+    if(t==='dokumenty'){ ev.preventDefault(); ev.stopPropagation(); renderProductionDocuments500(); return; }
+    if(t.includes('klientsky vystup')){ setTimeout(()=>renderClientOutput500(),0); }
+  }, true);
+
+  const oldRenderWorkspace500=window.renderWorkspace;
+  if(typeof oldRenderWorkspace500 === 'function'){
+    window.renderWorkspace=function(){
+      const res=oldRenderWorkspace500.apply(this, arguments);
+      setTimeout(function(){
+        try{
+          markOfferButtons500();
+          if(typeof currentTab !== 'undefined' && currentTab==='output') renderClientOutput500();
+        }catch(e){ console.log('BRH500:',e); }
+      },60);
+      return res;
+    };
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(markOfferButtons500,300));
+  setTimeout(markOfferButtons500,500);
 })();
