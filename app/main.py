@@ -14,8 +14,8 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-APP_VERSION = "5.0.2"
-APP_RELEASE_NAME = "Textace Visibility Status Colors SAFE"
+APP_VERSION = "5.2.3"
+APP_RELEASE_NAME = "PROJECT_CENTER_INTUITIVE_TRELLO_SAFE"
 APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "TEST")).strip().upper() or "TEST"
 BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-5.0.2"))[:12]
 
@@ -204,6 +204,76 @@ def init_db() -> bool:
                 );
                 """
             )
+            # ASTORIE Projektové centrum – samostatný interní Trello-like modul.
+            # Nedotýká se obchodních případů ani pojistných workflow tabulek.
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS dev_projects (
+                    id SERIAL PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    description TEXT DEFAULT '',
+                    owner_name TEXT DEFAULT '',
+                    owner_email TEXT DEFAULT '',
+                    status TEXT NOT NULL DEFAULT 'Aktivní',
+                    priority TEXT NOT NULL DEFAULT 'Standardní',
+                    module_area TEXT DEFAULT '',
+                    start_date TEXT DEFAULT '',
+                    due_date TEXT DEFAULT '',
+                    version_target TEXT DEFAULT '',
+                    tags JSONB DEFAULT '[]'::jsonb,
+                    archived BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """
+            )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS dev_tasks (
+                    id SERIAL PRIMARY KEY,
+                    project_id INTEGER REFERENCES dev_projects(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    description TEXT DEFAULT '',
+                    column_key TEXT NOT NULL DEFAULT 'napady',
+                    priority TEXT NOT NULL DEFAULT 'Standardní',
+                    assignee_name TEXT DEFAULT '',
+                    assignee_email TEXT DEFAULT '',
+                    reporter_name TEXT DEFAULT '',
+                    due_date TEXT DEFAULT '',
+                    checklist JSONB DEFAULT '[]'::jsonb,
+                    attachments JSONB DEFAULT '[]'::jsonb,
+                    sort_order INTEGER DEFAULT 0,
+                    archived BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """
+            )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS dev_comments (
+                    id SERIAL PRIMARY KEY,
+                    task_id INTEGER REFERENCES dev_tasks(id) ON DELETE CASCADE,
+                    author_name TEXT DEFAULT '',
+                    author_email TEXT DEFAULT '',
+                    text TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """
+            )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS dev_activity (
+                    id SERIAL PRIMARY KEY,
+                    entity_type TEXT NOT NULL,
+                    entity_id INTEGER,
+                    action TEXT NOT NULL,
+                    actor_email TEXT DEFAULT '',
+                    detail JSONB DEFAULT '{}'::jsonb,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+                """
+            )
             for key, filename in [
                 ('activities', 'activities.json'),
                 ('risks', 'risks.json'),
@@ -248,6 +318,10 @@ def load_json(filename: str) -> Any:
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "app_version": APP_VERSION, "app_release_name": APP_RELEASE_NAME, "app_env": APP_ENV, "build_id": BUILD_ID})
+
+@app.head("/")
+def home_head():
+    return JSONResponse(content={})
 
 
 @app.get("/health")
@@ -775,5 +849,187 @@ def list_suggestions():
                 if r.get("created_at"):
                     r["created_at"] = r["created_at"].isoformat()
             return {"ok": True, "db": True, "items": rows}
+    finally:
+        conn.close()
+
+
+# -----------------------------------------------------------------------------
+# ASTORIE Projektové centrum – Trello-like interní řízení vývoje a projektů
+# Bezpečně odděleno od obchodních případů Business Risk Hubu.
+# -----------------------------------------------------------------------------
+PROJECT_COLUMNS = [
+    {"key": "napady", "title": "Nápady"},
+    {"key": "ke_schvaleni", "title": "Ke schválení"},
+    {"key": "zadani", "title": "Zadání"},
+    {"key": "vyvoj", "title": "Vývoj"},
+    {"key": "testovani", "title": "Testování"},
+    {"key": "nasazeni", "title": "Nasazení"},
+    {"key": "hotovo", "title": "Hotovo"},
+]
+
+
+def _seed_project_center():
+    return {
+        "columns": PROJECT_COLUMNS,
+        "projects": [
+            {"id": 1, "title": "Modul Odpovědnost", "description": "Rozvoj odpovědnostního modulu v Business Risk Hubu.", "owner_name": "Dagmar Nekudová", "status": "Aktivní", "priority": "Kritická", "module_area": "Business Risk Hub", "version_target": "5.x", "due_date": "", "tags": ["HUB", "odpovědnost"]},
+            {"id": 2, "title": "Modul Majetek", "description": "Příprava dalšího pojišťovacího modulu.", "owner_name": "", "status": "Příprava", "priority": "Vysoká", "module_area": "Business Risk Hub", "version_target": "6.x", "due_date": "", "tags": ["HUB", "majetek"]},
+        ],
+        "tasks": [
+            {"id": 1, "project_id": 1, "title": "Stabilizovat karty 8, 9 a 11", "description": "Ukládání, porovnání a klientský výstup.", "column_key": "testovani", "priority": "Kritická", "assignee_name": "Vývoj", "due_date": ""},
+            {"id": 2, "project_id": 2, "title": "Připravit zadání majetkového modulu", "description": "Rozsah polí, rizika, podklady a výstupy.", "column_key": "zadani", "priority": "Vysoká", "assignee_name": "Backoffice", "due_date": ""},
+        ],
+        "comments": [],
+        "activity": [],
+        "db": False,
+    }
+
+
+@app.get("/api/project-center")
+def project_center_data():
+    conn = _connect()
+    if not conn:
+        data = _seed_project_center(); data["ok"] = True; return data
+    try:
+        init_db()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * FROM dev_projects WHERE archived=FALSE ORDER BY updated_at DESC, id DESC")
+            projects = cur.fetchall()
+            cur.execute("SELECT * FROM dev_tasks WHERE archived=FALSE ORDER BY sort_order ASC, updated_at DESC, id DESC")
+            tasks = cur.fetchall()
+            cur.execute("SELECT * FROM dev_comments ORDER BY created_at ASC LIMIT 1000")
+            comments = cur.fetchall()
+            cur.execute("SELECT * FROM dev_activity ORDER BY created_at DESC LIMIT 80")
+            activity = cur.fetchall()
+            for coll in (projects, tasks, comments, activity):
+                for row in coll:
+                    for k in ("created_at", "updated_at"):
+                        if row.get(k): row[k] = row[k].isoformat()
+            return {"ok": True, "db": True, "columns": PROJECT_COLUMNS, "projects": projects, "tasks": tasks, "comments": comments, "activity": activity}
+    finally:
+        conn.close()
+
+
+@app.post("/api/project-center/projects")
+async def save_project_center_project(request: Request):
+    payload = await request.json()
+    title = (payload.get("title") or "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Doplňte název projektu.")
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "message": "Databáze není připojena. Projekt nebyl trvale uložen."}
+    try:
+        init_db()
+        with conn, conn.cursor() as cur:
+            data = {
+                "id": payload.get("id"), "title": title, "description": payload.get("description") or "",
+                "owner_name": payload.get("owner_name") or "", "owner_email": payload.get("owner_email") or "",
+                "status": payload.get("status") or "Aktivní", "priority": payload.get("priority") or "Standardní",
+                "module_area": payload.get("module_area") or "", "start_date": payload.get("start_date") or "",
+                "due_date": payload.get("due_date") or "", "version_target": payload.get("version_target") or "",
+                "tags": json.dumps(payload.get("tags") or []), "actor_email": payload.get("actor_email") or ""
+            }
+            if data["id"]:
+                cur.execute("""
+                    UPDATE dev_projects SET title=%(title)s, description=%(description)s, owner_name=%(owner_name)s,
+                    owner_email=%(owner_email)s, status=%(status)s, priority=%(priority)s, module_area=%(module_area)s,
+                    start_date=%(start_date)s, due_date=%(due_date)s, version_target=%(version_target)s,
+                    tags=%(tags)s::jsonb, updated_at=NOW() WHERE id=%(id)s RETURNING id
+                """, data)
+                row = cur.fetchone(); action = "update"
+                if not row: raise HTTPException(status_code=404, detail="Projekt nebyl nalezen.")
+                saved_id = row[0]
+            else:
+                cur.execute("""
+                    INSERT INTO dev_projects (title, description, owner_name, owner_email, status, priority, module_area, start_date, due_date, version_target, tags)
+                    VALUES (%(title)s,%(description)s,%(owner_name)s,%(owner_email)s,%(status)s,%(priority)s,%(module_area)s,%(start_date)s,%(due_date)s,%(version_target)s,%(tags)s::jsonb)
+                    RETURNING id
+                """, data)
+                saved_id = cur.fetchone()[0]; action = "create"
+            cur.execute("INSERT INTO dev_activity (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)", ("project", saved_id, action, data["actor_email"], json.dumps({"title": title})))
+        return {"ok": True, "db": True, "id": saved_id, "message": "Projekt byl uložen."}
+    finally:
+        conn.close()
+
+
+@app.post("/api/project-center/tasks")
+async def save_project_center_task(request: Request):
+    payload = await request.json()
+    title = (payload.get("title") or "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Doplňte název úkolu.")
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "message": "Databáze není připojena. Úkol nebyl trvale uložen."}
+    try:
+        init_db()
+        with conn, conn.cursor() as cur:
+            data = {
+                "id": payload.get("id"), "project_id": payload.get("project_id"), "title": title,
+                "description": payload.get("description") or "", "column_key": payload.get("column_key") or "napady",
+                "priority": payload.get("priority") or "Standardní", "assignee_name": payload.get("assignee_name") or "",
+                "assignee_email": payload.get("assignee_email") or "", "reporter_name": payload.get("reporter_name") or "",
+                "due_date": payload.get("due_date") or "", "checklist": json.dumps(payload.get("checklist") or []),
+                "attachments": json.dumps(payload.get("attachments") or []), "sort_order": int(payload.get("sort_order") or 0),
+                "actor_email": payload.get("actor_email") or ""
+            }
+            if data["id"]:
+                cur.execute("""
+                    UPDATE dev_tasks SET project_id=%(project_id)s, title=%(title)s, description=%(description)s,
+                    column_key=%(column_key)s, priority=%(priority)s, assignee_name=%(assignee_name)s,
+                    assignee_email=%(assignee_email)s, reporter_name=%(reporter_name)s, due_date=%(due_date)s,
+                    checklist=%(checklist)s::jsonb, attachments=%(attachments)s::jsonb, sort_order=%(sort_order)s,
+                    updated_at=NOW() WHERE id=%(id)s RETURNING id
+                """, data)
+                row=cur.fetchone(); action="update"
+                if not row: raise HTTPException(status_code=404, detail="Úkol nebyl nalezen.")
+                saved_id=row[0]
+            else:
+                cur.execute("""
+                    INSERT INTO dev_tasks (project_id,title,description,column_key,priority,assignee_name,assignee_email,reporter_name,due_date,checklist,attachments,sort_order)
+                    VALUES (%(project_id)s,%(title)s,%(description)s,%(column_key)s,%(priority)s,%(assignee_name)s,%(assignee_email)s,%(reporter_name)s,%(due_date)s,%(checklist)s::jsonb,%(attachments)s::jsonb,%(sort_order)s) RETURNING id
+                """, data)
+                saved_id=cur.fetchone()[0]; action="create"
+            cur.execute("INSERT INTO dev_activity (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)", ("task", saved_id, action, data["actor_email"], json.dumps({"title": title, "column": data["column_key"]})))
+        return {"ok": True, "db": True, "id": saved_id, "message": "Úkol byl uložen."}
+    finally:
+        conn.close()
+
+
+@app.post("/api/project-center/tasks/{task_id}/move")
+async def move_project_center_task(task_id: int, request: Request):
+    payload = await request.json()
+    column_key = payload.get("column_key") or "napady"
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "message": "Databáze není připojena. Přesun není trvale uložen."}
+    try:
+        init_db()
+        with conn, conn.cursor() as cur:
+            cur.execute("UPDATE dev_tasks SET column_key=%s, updated_at=NOW() WHERE id=%s RETURNING id", (column_key, task_id))
+            if not cur.fetchone(): raise HTTPException(status_code=404, detail="Úkol nebyl nalezen.")
+            cur.execute("INSERT INTO dev_activity (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)", ("task", task_id, "move", payload.get("actor_email") or "", json.dumps({"column_key": column_key})))
+        return {"ok": True, "db": True, "message": "Úkol byl přesunut."}
+    finally:
+        conn.close()
+
+
+@app.post("/api/project-center/comments")
+async def save_project_center_comment(request: Request):
+    payload = await request.json()
+    text = (payload.get("text") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Komentář je prázdný.")
+    conn = _connect()
+    if not conn:
+        return {"ok": True, "db": False, "message": "Databáze není připojena. Komentář nebyl trvale uložen."}
+    try:
+        init_db()
+        with conn, conn.cursor() as cur:
+            cur.execute("INSERT INTO dev_comments (task_id, author_name, author_email, text) VALUES (%s,%s,%s,%s) RETURNING id", (payload.get("task_id"), payload.get("author_name") or "", payload.get("author_email") or "", text))
+            saved_id=cur.fetchone()[0]
+            cur.execute("INSERT INTO dev_activity (entity_type, entity_id, action, actor_email, detail) VALUES (%s,%s,%s,%s,%s::jsonb)", ("task", payload.get("task_id"), "comment", payload.get("author_email") or "", json.dumps({"comment_id": saved_id})))
+        return {"ok": True, "db": True, "id": saved_id, "message": "Komentář byl uložen."}
     finally:
         conn.close()

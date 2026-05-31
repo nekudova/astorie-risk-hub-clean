@@ -589,3 +589,431 @@
 
 /* BRH 5.0.2 – Textace Visibility + Delete + Status Colors SAFE */
 .text-visible-targets-502 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.inserted-box-502{border:1px solid #d7e9ed;border-left:6px solid #FC4C02;border-radius:18px;background:#fff;padding:16px;margin:14px 0;color:#003D4C}.inserted-box-502.empty{border-left-color:#d7e9ed;background:#f7fbfc}.inserted-row-502{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-top:1px solid #e4f0f3;padding:12px 0}.inserted-row-502:first-of-type{border-top:0}.inserted-row-502 p{white-space:pre-wrap;margin:6px 0 0}.text-card-502 .tools{display:flex;flex-wrap:wrap;gap:8px}.btn.danger,.danger{background:#fff1ec!important;border:1px solid #ffb199!important;color:#b33418!important}.status-ok-502{background:#e7f7ef!important;color:#075333!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-warn-502{background:#fff3d6!important;color:#7a4a00!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-work-502{background:#e9f7fb!important;color:#00485a!important;border-radius:14px;padding:3px 8px;font-weight:800}.status-bad-502{background:#ffe6e0!important;color:#9b260d!important;border-radius:14px;padding:3px 8px;font-weight:800}@media(max-width:1100px){.text-visible-targets-502 .grid3{grid-template-columns:1fr}}
+
+/* === BRH 5.1.3 table/readability repair === */
+.table-wrap-513{overflow-x:auto;max-width:100%;}
+.offer-table-513,.comparison-table-513{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px;}
+.offer-table-513 th,.offer-table-513 td,.comparison-table-513 th,.comparison-table-513 td{vertical-align:top;padding:8px;border-bottom:1px solid #d9ebef;}
+.offer-table-513 thead th,.comparison-table-513 thead th{background:#eaf6f7;color:#003D4C;font-weight:800;position:sticky;top:0;z-index:2;}
+.offer-head-513{min-width:145px;background:#f4fbfc!important;color:#003D4C!important;}
+.risk-col-513,.risk-request-513{width:170px;background:#f8fcfd;color:#003D4C;}
+.insurer-name-513{font-weight:800;line-height:1.2;white-space:normal;color:#003D4C;}
+.insurer-code-513{letter-spacing:4px;color:#FC4C02;font-weight:900;margin:4px 0 6px;}
+.offer-head-513 input,.offer-head-513 select,.offer-cell-513 input,.offer-cell-513 select,.offer-cell-513 textarea{width:100%;box-sizing:border-box;min-width:0;margin:3px 0;padding:7px 8px;border-radius:12px;font-size:12px;}
+.offer-cell-513 textarea{min-height:48px;resize:vertical;}
+.offer-status-ok{background:#e7f8ee!important;}
+.offer-status-warn{background:#fff7dc!important;}
+.offer-status-bad{background:#ffece7!important;}
+.offer-status-check{background:#f6fbfc!important;}
+.btn.is-active{background:#003D4C!important;color:#fff!important;border-color:#003D4C!important;}
+.insurer-card-513 input{transform:scale(1.05);margin-right:8px;}
+.text-card-513{border:1px solid #d9ebef;border-radius:18px;padding:16px;background:#fff;margin-bottom:12px;box-shadow:0 8px 20px rgba(0,61,76,.06);} 
+.textation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+@media (max-width:1280px){.offer-table-513,.comparison-table-513{font-size:12px}.risk-col-513,.risk-request-513{width:150px}.offer-head-513{min-width:130px}.offer-head-513 input,.offer-head-513 select,.offer-cell-513 input,.offer-cell-513 select,.offer-cell-513 textarea{font-size:11px;padding:6px}}
+
+/* === BRH 5.1.4 – profesionální karta 8/9 === */
+.broker-notice-514{border-left:6px solid #FC4C02;background:#fff6f1;border-radius:18px;padding:14px 18px;margin:14px 0 18px;color:#003D4C;font-weight:700}
+.sticky-tools-514{position:sticky;top:94px;z-index:5;background:#EAF4F6;border:1px solid #cfe7ec;border-radius:20px;padding:12px;margin-bottom:14px}
+.offer-board-514{width:100%;overflow-x:auto;border:1px solid #cfe7ec;border-radius:22px;background:#fff;box-shadow:0 16px 38px rgba(0,61,76,.08)}
+.offer-table-514,.comparison-table-514{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px;color:#003D4C}
+.offer-table-514 th,.comparison-table-514 th{background:#003D4C;color:white;text-align:left;padding:12px 10px;vertical-align:top}
+.offer-table-514 td,.comparison-table-514 td{border-top:1px solid #d6edf1;padding:10px;vertical-align:top}
+.risk-col-514,.risk-request-514{width:190px;min-width:190px;background:#eaf4f6!important;color:#003D4C!important;font-weight:800}
+.risk-request-514 span{display:inline-block;margin:6px 0;padding:3px 8px;border-radius:999px;background:#dff0f3;font-size:11px;font-weight:900}.risk-request-514 p{margin:4px 0;font-size:12px}
+.offer-head-514{min-width:245px}.insurer-title-514{border-bottom:3px solid #FC4C02;margin-bottom:8px;padding-bottom:6px}.insurer-title-514 span{display:block;font-weight:900;line-height:1.15}.insurer-title-514 small{display:block;color:#FC4C02;letter-spacing:.36em;font-weight:900;margin-top:4px}
+.offer-head-514 select,.offer-head-514 input,.offer-cell-514 select,.offer-cell-514 input,.offer-cell-514 textarea{width:100%;box-sizing:border-box;border:1px solid #cfe7ec;border-radius:12px;padding:8px 10px;margin:4px 0;font-weight:700;color:#003D4C;background:white;font-size:12px}.offer-cell-514 textarea{min-height:54px;resize:vertical}
+.offer-ok-btn{width:100%;border:1px solid #b8dde5!important;background:#eef8fa!important;color:#003D4C!important;margin:6px 0!important}.offer-ok-btn.active,.insurer-all-ok .offer-ok-btn{background:#003D4C!important;color:white!important;border-color:#003D4C!important;box-shadow:0 0 0 3px rgba(252,76,2,.18)}
+.insurer-all-ok{background:#dff7ec!important}.offer-cell-514.status-splneno,.comparison-cell-514.status-splneno{background:#E6F7EF!important;border-left:4px solid #16834a}.offer-cell-514.status-omezene,.comparison-cell-514.status-omezene{background:#FFF4DE!important;border-left:4px solid #E6B15D}.offer-cell-514.status-vyluka,.comparison-cell-514.status-vyluka{background:#FDECEC!important;border-left:4px solid #c83232}.offer-cell-514.status-overit,.comparison-cell-514.status-overit{background:#F4FAFB!important;border-left:4px solid #8fbac2}
+.comparison-table-514 th small{display:block;color:#FC4C02;letter-spacing:.28em;margin-top:4px}.comparison-cell-514 b{display:inline-block;margin-bottom:5px;text-transform:uppercase}
+@media(max-width:1300px){.offer-table-514,.comparison-table-514{font-size:12px}.risk-col-514,.risk-request-514{width:165px;min-width:165px}.offer-head-514{min-width:210px}.offer-head-514 select,.offer-head-514 input,.offer-cell-514 select,.offer-cell-514 input,.offer-cell-514 textarea{font-size:11px;padding:7px}}
+
+
+
+/* === BRH 5.1.5 – profesionální karta 8/9 === */
+.offer-board-515{
+  width:100%;
+  overflow-x:auto;
+  border:1px solid #D7EDF1;
+  border-radius:22px;
+  background:#F7FCFD;
+  box-shadow:0 18px 44px rgba(0,61,76,.08);
+}
+.offer-table-515,.comparison-table-515{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+  font-size:13px;
+  color:#003D4C;
+}
+.offer-table-515 th,.offer-table-515 td,.comparison-table-515 th,.comparison-table-515 td{
+  border-bottom:1px solid #D7EDF1;
+  vertical-align:top;
+}
+.risk-col-515,.risk-request-515{
+  width:18%;
+  background:#003D4C !important;
+  color:#fff !important;
+}
+.risk-request-515{
+  padding:14px 12px;
+  font-weight:700;
+}
+.risk-request-515 span{
+  display:inline-block;
+  margin:6px 0;
+  padding:3px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  font-size:11px;
+}
+.risk-request-515 p{
+  margin:4px 0;
+  font-size:12px;
+  line-height:1.25;
+}
+.offer-head-515{
+  padding:12px;
+  background:#EAF7F8;
+  color:#003D4C;
+  border-left:1px solid #D7EDF1;
+}
+.offer-head-515.workflow-ok,.offer-head-515.insurer-all-ok{
+  background:linear-gradient(180deg,#E2F8EC,#F2FFF7);
+  box-shadow:inset 0 0 0 2px rgba(0,92,102,.18);
+}
+.offer-head-515.workflow-bad{
+  background:#FDECEC;
+}
+.insurer-title-515 span{
+  display:block;
+  font-size:14px;
+  line-height:1.15;
+  font-weight:900;
+  color:#003D4C;
+}
+.insurer-title-515 small{
+  display:block;
+  margin-top:4px;
+  color:#FC4C02;
+  font-weight:900;
+  letter-spacing:7px;
+}
+.offer-head-515 input,.offer-head-515 select,.offer-cell-515 input,.offer-cell-515 select,.offer-cell-515 textarea{
+  width:100%;
+  box-sizing:border-box;
+  min-width:0;
+  border:1px solid #CBE4E9;
+  border-radius:14px;
+  padding:8px 10px;
+  margin-top:7px;
+  color:#003D4C;
+  background:white;
+  font-size:12px;
+  font-weight:700;
+}
+.offer-cell-515{
+  padding:10px;
+  border-left:1px solid #D7EDF1;
+  background:white;
+}
+.offer-cell-515 textarea{
+  min-height:52px;
+  resize:vertical;
+  font-weight:600;
+}
+.offer-cell-515.status-splneno,.comparison-cell-515.status-splneno{
+  background:#E6F7EF !important;
+  box-shadow:inset 4px 0 0 #005C66;
+}
+.offer-cell-515.status-omezene,.comparison-cell-515.status-omezene{
+  background:#FFF4DE !important;
+  box-shadow:inset 4px 0 0 #E6B15D;
+}
+.offer-cell-515.status-vyluka,.comparison-cell-515.status-vyluka{
+  background:#FDECEC !important;
+  box-shadow:inset 4px 0 0 #B42318;
+}
+.offer-cell-515.status-overit,.comparison-cell-515.status-overit{
+  background:#F7FCFD !important;
+  box-shadow:inset 4px 0 0 #B8D8DE;
+}
+.offer-ok-btn-515.active{
+  background:#003D4C !important;
+  color:#fff !important;
+  border-color:#003D4C !important;
+  box-shadow:0 10px 26px rgba(0,61,76,.22);
+}
+.broker-notice-515{
+  margin:12px 0 14px;
+  padding:13px 18px;
+  border-left:6px solid #FC4C02;
+  border-radius:18px;
+  background:#FFF4DE;
+  color:#003D4C;
+}
+.sticky-tools-515{
+  position:sticky;
+  top:74px;
+  z-index:5;
+  background:#E6F7EF;
+  padding:10px;
+  border-radius:18px;
+  margin-bottom:14px;
+}
+.comparison-cell-515{
+  padding:12px;
+  line-height:1.35;
+  border-left:1px solid #D7EDF1;
+}
+.comparison-table-515 th{
+  padding:12px;
+  background:#EAF7F8;
+  color:#003D4C;
+  text-align:left;
+}
+.comparison-table-515 th small{
+  display:block;
+  margin-top:3px;
+  color:#FC4C02;
+  letter-spacing:5px;
+}
+@media (max-width: 1300px){
+  .offer-table-515,.comparison-table-515{font-size:12px;}
+  .offer-head-515 input,.offer-head-515 select,.offer-cell-515 input,.offer-cell-515 select,.offer-cell-515 textarea{font-size:11px;padding:7px 8px;}
+  .insurer-title-515 span{font-size:13px;}
+}
+
+
+/* === BRH 5.1.6 – ASTORIE brand only + readable tables ===
+   Pouze firemní barvy: petrolejová, oranžová, zlatá, neutrální bílé/krémové tóny. Bez zelené. */
+:root{
+  --ast-petrol:#003D4C;
+  --ast-petrol-2:#005C66;
+  --ast-orange:#FC4C02;
+  --ast-gold:#E6B15D;
+  --ast-ice:#EEF8FA;
+  --ast-ice-2:#F7FCFD;
+  --ast-cream:#FFF8F2;
+  --ast-line:#CFE6EB;
+}
+
+.broker-notice-515{
+  background:var(--ast-cream)!important;
+  border-left-color:var(--ast-orange)!important;
+  color:var(--ast-petrol)!important;
+}
+.sticky-tools-515{
+  background:linear-gradient(90deg,var(--ast-ice),#fff)!important;
+  border:1px solid var(--ast-line)!important;
+  box-shadow:0 10px 28px rgba(0,61,76,.08)!important;
+}
+.offer-board-515{
+  background:#fff!important;
+  border-color:var(--ast-line)!important;
+  box-shadow:0 18px 44px rgba(0,61,76,.10)!important;
+}
+.offer-table-515,.comparison-table-515{
+  table-layout:fixed!important;
+  font-size:13px!important;
+  line-height:1.28!important;
+}
+.offer-table-515 th,.offer-table-515 td,
+.comparison-table-515 th,.comparison-table-515 td{
+  border-color:var(--ast-line)!important;
+}
+.offer-table-515 thead th,
+.comparison-table-515 thead th{
+  background:var(--ast-petrol)!important;
+  color:#fff!important;
+}
+.risk-col-515,.risk-request-515{
+  width:260px!important;
+  min-width:260px!important;
+  max-width:260px!important;
+  background:var(--ast-petrol)!important;
+  color:#fff!important;
+  overflow:visible!important;
+}
+.risk-request-515{
+  padding:16px 14px!important;
+  word-break:normal!important;
+  overflow-wrap:anywhere!important;
+  hyphens:auto!important;
+}
+.risk-request-515 b{
+  display:block!important;
+  color:#fff!important;
+  font-size:13px!important;
+  line-height:1.28!important;
+  margin-bottom:6px!important;
+}
+.risk-request-515 span{
+  background:rgba(255,255,255,.18)!important;
+  color:#fff!important;
+  letter-spacing:.02em!important;
+  max-width:100%!important;
+  white-space:normal!important;
+}
+.risk-request-515 p{
+  color:#fff!important;
+  font-size:12px!important;
+  line-height:1.3!important;
+  margin:5px 0!important;
+  overflow-wrap:anywhere!important;
+}
+.offer-head-515{
+  background:var(--ast-ice)!important;
+  color:var(--ast-petrol)!important;
+  padding:14px 12px!important;
+  border-left:1px solid var(--ast-line)!important;
+}
+.offer-head-515.workflow-ok,.offer-head-515.insurer-all-ok{
+  background:linear-gradient(180deg,#EAF6F8,#FFFFFF)!important;
+  box-shadow:inset 0 0 0 3px var(--ast-orange)!important;
+}
+.offer-head-515.workflow-bad{
+  background:#FFF1EC!important;
+  box-shadow:inset 0 0 0 2px var(--ast-orange)!important;
+}
+.insurer-title-515 span{
+  color:var(--ast-petrol)!important;
+  line-height:1.18!important;
+  overflow-wrap:anywhere!important;
+}
+.insurer-title-515 small,
+.comparison-table-515 th small{
+  color:var(--ast-orange)!important;
+  letter-spacing:.30em!important;
+  text-transform:uppercase!important;
+}
+.offer-head-515 input,.offer-head-515 select,
+.offer-cell-515 input,.offer-cell-515 select,.offer-cell-515 textarea{
+  border-color:var(--ast-line)!important;
+  color:var(--ast-petrol)!important;
+  background:#fff!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  min-height:34px!important;
+}
+.offer-cell-515{
+  background:#fff!important;
+  padding:10px 12px!important;
+}
+.offer-cell-515 textarea{
+  min-height:60px!important;
+  line-height:1.25!important;
+}
+.offer-cell-515.status-splneno,.comparison-cell-515.status-splneno{
+  background:#EAF6F8!important;
+  box-shadow:inset 5px 0 0 var(--ast-petrol-2)!important;
+}
+.offer-cell-515.status-omezene,.comparison-cell-515.status-omezene{
+  background:#FFF6E6!important;
+  box-shadow:inset 5px 0 0 var(--ast-gold)!important;
+}
+.offer-cell-515.status-vyluka,.comparison-cell-515.status-vyluka{
+  background:#FFF1EC!important;
+  box-shadow:inset 5px 0 0 var(--ast-orange)!important;
+}
+.offer-cell-515.status-overit,.comparison-cell-515.status-overit{
+  background:var(--ast-ice-2)!important;
+  box-shadow:inset 5px 0 0 #9CC7D0!important;
+}
+.offer-ok-btn-515{
+  background:#fff!important;
+  color:var(--ast-petrol)!important;
+  border:1px solid var(--ast-line)!important;
+  white-space:normal!important;
+  line-height:1.15!important;
+}
+.offer-ok-btn-515.active{
+  background:var(--ast-petrol)!important;
+  color:#fff!important;
+  border-color:var(--ast-orange)!important;
+  box-shadow:0 0 0 3px rgba(252,76,2,.22),0 12px 28px rgba(0,61,76,.18)!important;
+}
+.comparison-cell-515{
+  background:#fff!important;
+  padding:13px 12px!important;
+  overflow-wrap:anywhere!important;
+}
+.comparison-cell-515 b{
+  color:var(--ast-petrol)!important;
+}
+
+@media (max-width: 1400px){
+  .risk-col-515,.risk-request-515{width:235px!important;min-width:235px!important;max-width:235px!important;}
+  .offer-table-515,.comparison-table-515{font-size:12px!important;}
+  .risk-request-515 b{font-size:12px!important;}
+  .offer-head-515 input,.offer-head-515 select,.offer-cell-515 input,.offer-cell-515 select,.offer-cell-515 textarea{font-size:11.5px!important;}
+}
+
+/* === BRH 5.1.7 – finální ASTORIE vizuál pro kartu 8 a 9 podle schváleného návrhu === */
+:root{--ast-petrol:#003D4C;--ast-petrol2:#005C66;--ast-orange:#FC4C02;--ast-gold:#E6B15D;--ast-ice:#EEF8FA;--ast-line:#CFE6EB;--ast-cream:#FFF8F2;}
+.broker-notice-517{background:linear-gradient(90deg,#FFF3EA,#fff);border-left:6px solid var(--ast-orange);border-radius:18px;padding:14px 18px;margin:14px 0 18px;color:var(--ast-petrol);box-shadow:0 8px 20px rgba(0,61,76,.06)}
+.sticky-tools-517{background:#fff;border:1px solid var(--ast-line);border-radius:22px;padding:12px;margin:0 0 18px;box-shadow:0 14px 36px rgba(0,61,76,.08)}
+.offer-board-517{border:1px solid var(--ast-line);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 18px 44px rgba(0,61,76,.10)}
+.offer-table-517,.comparison-table-517{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;color:var(--ast-petrol);font-size:13px;line-height:1.28}
+.offer-table-517 th,.offer-table-517 td,.comparison-table-517 th,.comparison-table-517 td{border-right:1px solid var(--ast-line);border-bottom:1px solid var(--ast-line);vertical-align:top}
+.offer-table-517 thead th,.comparison-table-517 thead th{background:var(--ast-petrol);color:#fff;text-align:left;padding:14px 14px}
+.risk-col-517,.risk-request-517{width:265px;min-width:265px;max-width:265px;background:var(--ast-petrol)!important;color:#fff!important;overflow-wrap:anywhere;hyphens:auto}
+.risk-request-517{padding:16px 14px!important;font-size:12px!important;line-height:1.32!important}
+.risk-request-517 b{display:block;color:#fff;font-size:13px;line-height:1.32;margin-bottom:7px}
+.risk-request-517 span{display:inline-block;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:4px 8px;font-size:10px;margin:2px 0 7px;max-width:100%;white-space:normal}
+.risk-request-517 p{margin:4px 0;color:#fff;font-size:12px;line-height:1.28}.risk-request-517 strong{color:#fff}
+.offer-head-517{background:var(--ast-petrol)!important;color:#fff!important;padding:14px 12px!important;position:relative;border-left:1px solid rgba(255,255,255,.18)!important}
+.offer-head-517.is-selected,.comparison-table-517 th.is-selected{background:var(--ast-orange)!important;color:#fff!important;box-shadow:inset 0 0 0 3px var(--ast-orange),0 0 0 1px var(--ast-orange)}
+.insurer-title-517 strong,.comparison-table-517 th strong{display:block;color:#fff!important;font-size:13px;line-height:1.18;font-weight:800;overflow-wrap:anywhere;margin-bottom:5px}
+.insurer-title-517 small,.comparison-table-517 th small{display:block;color:var(--ast-orange)!important;letter-spacing:.38em;text-transform:uppercase;font-size:11px;font-weight:900}.offer-head-517.is-selected .insurer-title-517 small,.comparison-table-517 th.is-selected small{color:#fff!important}
+.offer-head-517 select,.offer-head-517 input,.offer-cell-517 select,.offer-cell-517 input,.offer-cell-517 textarea{width:100%;box-sizing:border-box;border:1px solid var(--ast-line);border-radius:12px;background:#fff;color:var(--ast-petrol);font-weight:700;font-size:12px;line-height:1.25;padding:8px 10px;margin:5px 0;min-height:34px;outline:none}.offer-head-517 select:focus,.offer-head-517 input:focus,.offer-cell-517 select:focus,.offer-cell-517 input:focus,.offer-cell-517 textarea:focus{border-color:var(--ast-orange);box-shadow:0 0 0 2px rgba(252,76,2,.20)}
+.offer-ok-btn-517{width:100%;border:1px solid var(--ast-line);background:#fff;color:var(--ast-petrol);font-weight:900;border-radius:16px;padding:10px 8px;margin:6px 0 8px;line-height:1.15;cursor:pointer}.offer-ok-btn-517.active{background:var(--ast-petrol);border-color:#fff;color:#fff;box-shadow:0 0 0 3px rgba(252,76,2,.30)}
+.offer-head-517.is-selected .offer-ok-btn-517.active{background:#fff;color:var(--ast-orange);border-color:#fff;box-shadow:0 10px 24px rgba(0,61,76,.20)}
+.offer-cell-517{background:#fff;padding:10px 12px}.offer-cell-517 textarea{min-height:62px;resize:vertical;font-weight:700}.offer-cell-517.status-splneno,.comparison-cell-517.status-splneno{background:#FFF4ED!important;color:var(--ast-orange)!important;box-shadow:inset 5px 0 0 var(--ast-orange)}.offer-cell-517.status-splneno select,.comparison-cell-517.status-splneno b{color:var(--ast-orange)!important}.offer-cell-517.status-omezeno,.comparison-cell-517.status-omezeno{background:#FFF8E8!important;box-shadow:inset 5px 0 0 var(--ast-gold)}.offer-cell-517.status-vyluka,.comparison-cell-517.status-vyluka{background:#FFF1EC!important;box-shadow:inset 5px 0 0 var(--ast-orange)}.offer-cell-517.status-overit,.comparison-cell-517.status-overit{background:#F7FCFD!important;box-shadow:inset 5px 0 0 var(--ast-petrol2)}
+.comparison-cell-517{padding:14px 12px;overflow-wrap:anywhere}.comparison-cell-517 b{font-weight:900;color:var(--ast-petrol)}
+@media(max-width:1400px){.offer-table-517,.comparison-table-517{font-size:12px}.risk-col-517,.risk-request-517{width:245px;min-width:245px;max-width:245px}.offer-head-517 select,.offer-head-517 input,.offer-cell-517 select,.offer-cell-517 input,.offer-cell-517 textarea{font-size:11.5px;padding:7px 8px}.insurer-title-517 strong,.comparison-table-517 th strong{font-size:12px}}
+
+
+/* === BRH 5.1.8 – drobné doplnění ke kartě 9 a klientskému výstupu; navazuje na 5.1.7 === */
+.premium-head-518{margin-top:8px;font-size:12px;font-weight:900;color:#fff;background:rgba(255,255,255,.14);border-radius:10px;padding:6px 8px;line-height:1.15}.comparison-table-517 th.is-selected .premium-head-518{background:rgba(255,255,255,.22);color:#fff}.recommended-row-518{box-shadow:inset 5px 0 0 var(--ast-orange);background:#FFF4ED}.client-output-518 .report-card{border:1px solid var(--ast-line);border-radius:18px;padding:16px;background:#fff}.client-output-518 .client-report-table td,.client-output-518 .client-report-table th{vertical-align:top}.client-output-518 h3{color:var(--ast-petrol)}
+
+/* BRH 5.2.0 – ASTORIE Projektové centrum / Trello-like SAFE */
+.apc-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+.apc-metrics{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:14px;margin:18px 0}
+.apc-metrics div{border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px;box-shadow:0 8px 22px rgba(0,61,76,.05)}
+.apc-metrics b{font-size:30px;display:block;color:var(--petrol)}
+.apc-metrics span{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:900}
+.apc-toolbar{display:grid;grid-template-columns:320px 1fr;gap:14px;margin:18px 0 20px}
+.apc-board{display:grid;grid-template-columns:repeat(7,minmax(260px,1fr));gap:14px;overflow:auto;padding-bottom:12px}
+.apc-column{background:#f3fafb;border:1px solid var(--line);border-radius:22px;min-height:520px;display:flex;flex-direction:column;max-height:calc(100vh - 300px)}
+.apc-column-head{position:sticky;top:0;z-index:1;background:var(--petrol);color:#fff;border-radius:20px 20px 0 0;padding:14px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.apc-column-head strong{font-size:15px}.apc-column-head span{background:var(--orange);border-radius:999px;padding:4px 9px;font-weight:900}
+.apc-column-body{padding:12px;display:grid;gap:12px;overflow:auto}
+.apc-card{background:#fff;border:1px solid #d8edf0;border-left:5px solid var(--petrol2);border-radius:18px;padding:14px;box-shadow:0 10px 24px rgba(0,61,76,.08);cursor:pointer;transition:.14s ease}
+.apc-card:hover{transform:translateY(-1px);border-left-color:var(--orange);box-shadow:0 14px 28px rgba(0,61,76,.13)}
+.apc-card h3{font-size:16px;margin:8px 0;color:var(--petrol);line-height:1.2}.apc-card p{font-size:13px;color:#315d67;margin:0 0 10px;max-height:70px;overflow:hidden}
+.apc-priority{display:inline-block;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900;text-transform:uppercase;background:#eef7f8;color:var(--petrol)}
+.apc-priority.critical{background:var(--orange);color:#fff}.apc-priority.high{background:#fff4ed;color:var(--orange);border:1px solid #ffd1c3}.apc-priority.low{background:#eaf6f8;color:#607783}
+.apc-meta{display:flex;flex-wrap:wrap;gap:6px}.apc-meta span,.apc-due{display:inline-flex;border-radius:999px;background:#eaf6f8;color:var(--petrol);padding:5px 8px;font-size:12px;font-weight:900}.apc-due.bad,.apc-card.overdue .apc-due{background:#fff1ed;color:#a03518;border:1px solid #ffd1c3}
+.apc-empty{border:1px dashed #cfe7ec;border-radius:16px;background:#fff;padding:16px;text-align:center;color:var(--muted);font-weight:900}
+.apc-editor{position:fixed;inset:0;background:rgba(0,61,76,.38);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}.apc-modal{width:min(980px,100%)}.apc-form{position:relative;background:#fff;border-radius:26px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,61,76,.28);padding:28px}.apc-close{position:absolute;right:20px;top:18px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:#eaf6f8;color:var(--petrol);font-size:26px;font-weight:900;cursor:pointer}.apc-comments{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}.apc-comment{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fbfefe;margin:8px 0}.apc-comment small{display:block;color:var(--muted);font-weight:800}.apc-comment p{white-space:pre-wrap;margin:8px 0 0}
+@media(max-width:1300px){.apc-board{grid-template-columns:repeat(7,260px)}}@media(max-width:900px){.apc-head{display:block}.apc-metrics,.apc-toolbar{grid-template-columns:1fr}.apc-board{grid-template-columns:1fr;overflow:visible}.apc-column{max-height:none}}
+
+
+/* BRH 5.2.1 – Project Center Trello Plus */
+.apc-head-plus{align-items:center}.apc-toolbar-plus{grid-template-columns:260px 190px 220px 1fr}.apc-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.apc-alert{background:#fff4ed;color:var(--orange);border:1px solid #ffd1c3;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;text-transform:uppercase}.apc-card-foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.apc-chip{display:inline-flex;border-radius:999px;background:#eef7f8;color:var(--petrol);padding:5px 8px;font-size:12px;font-weight:900}.apc-roadmap{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 10px 28px rgba(0,61,76,.06)}.apc-section-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}.apc-section-head h2{margin:0}.apc-roadmap-table th{white-space:nowrap}.apc-roadmap-table td{vertical-align:top}.apc-roadmap-table td span{color:var(--muted);font-size:13px}.apc-progress{height:10px;border-radius:999px;background:#eaf6f8;overflow:hidden;margin:4px 0}.apc-progress i{display:block;height:100%;background:linear-gradient(90deg,var(--petrol),var(--orange));border-radius:999px}.apc-road-critical td:first-child{border-left:5px solid var(--orange)}.apc-road-high td:first-child{border-left:5px solid #E6B15D}.apc-road-standard td:first-child{border-left:5px solid var(--petrol2)}.btn.mini{padding:7px 10px;font-size:12px;border-radius:12px}@media(max-width:1200px){.apc-toolbar-plus{grid-template-columns:1fr 1fr}.apc-roadmap{overflow:auto}.apc-roadmap-table{min-width:900px}}@media(max-width:760px){.apc-toolbar-plus{grid-template-columns:1fr}.apc-section-head{display:block}.apc-section-head .btn{margin-top:10px}}
+
+/* BRH 5.2.2 – Projektové centrum: roadmapa modulů, šablony, audit aktivity */
+.apc-head-522 .tools{display:flex;flex-wrap:wrap;justify-content:flex-end}.apc-portfolio{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#ffffff 0%,#f7fcfd 100%);padding:18px;margin:16px 0;box-shadow:0 10px 28px rgba(0,61,76,.06)}.apc-portfolio h2{margin:0 0 6px;color:var(--petrol)}.apc-portfolio p{margin:0;color:var(--muted);line-height:1.45}.apc-milestones{display:grid;gap:8px}.apc-milestones span{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #d8edf0;background:#fff;border-radius:16px;padding:10px 12px}.apc-milestones b{color:var(--petrol)}.apc-milestones em{font-style:normal;color:var(--orange);font-weight:900}.apc-board-522{grid-template-columns:repeat(7,minmax(250px,1fr))}.apc-lower-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,.8fr);gap:18px;align-items:start}.apc-activity{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 10px 28px rgba(0,61,76,.06)}.apc-activity-item{border-left:4px solid var(--orange);background:#fbfefe;border-radius:14px;margin:8px 0;padding:10px 12px}.apc-activity-item b{display:block;color:var(--petrol);font-size:14px}.apc-activity-item span{display:block;color:var(--muted);font-weight:800;font-size:12px}.apc-activity-item small{color:var(--orange);font-weight:900}.apc-roadmap-table .btn.secondary.mini{margin-left:6px;background:#eef7f8;color:var(--petrol)}
+@media(max-width:1400px){.apc-board-522{grid-template-columns:repeat(7,250px)}}@media(max-width:1100px){.apc-portfolio,.apc-lower-grid{grid-template-columns:1fr}.apc-board-522{grid-template-columns:1fr;overflow:visible}.apc-column{max-height:none}}
+
+/* BRH 5.2.3 – Projektové centrum intuitivní pro běžné uživatele / Trello SAFE */
+.apc-head-523{border:1px solid var(--line);border-radius:26px;background:linear-gradient(135deg,#fff 0%,#f7fcfd 100%);padding:20px;box-shadow:0 14px 34px rgba(0,61,76,.07)}
+.apc-main-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}.apc-main-actions .btn.primary{font-size:16px;padding:14px 20px;border-radius:18px}
+.apc-guide-523{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.apc-guide-523 div{border:1px solid var(--line);border-radius:20px;background:#fff;padding:14px 16px;box-shadow:0 8px 22px rgba(0,61,76,.05);border-top:4px solid var(--orange)}.apc-guide-523 b{display:block;color:var(--petrol);font-size:15px}.apc-guide-523 span{display:block;color:var(--muted);font-weight:800;font-size:13px;margin-top:4px}
+.apc-metrics-523{grid-template-columns:repeat(4,minmax(130px,1fr))}.apc-metrics-523 button{border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px;text-align:left;box-shadow:0 8px 22px rgba(0,61,76,.05);cursor:pointer}.apc-metrics-523 button.active{border-color:var(--orange);box-shadow:0 0 0 2px rgba(252,76,2,.22),0 12px 26px rgba(0,61,76,.08)}.apc-metrics-523 button b{font-size:30px;display:block;color:var(--petrol)}.apc-metrics-523 button span{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:900}.apc-metrics-523 div{display:none}
+.apc-toolbar-523{grid-template-columns:260px 190px 220px 1fr;border:1px solid var(--line);border-radius:22px;background:#fff;padding:14px;box-shadow:0 8px 22px rgba(0,61,76,.04)}
+.apc-portfolio-523{border-left:5px solid var(--orange)}.apc-board-523{align-items:start}.apc-column-523{min-height:560px;background:#f7fcfd}.apc-column-523 .apc-column-head{background:linear-gradient(135deg,var(--petrol),#005C66)}.apc-column-help{background:#fff;color:var(--muted);font-size:12px;font-weight:900;padding:9px 14px;border-bottom:1px solid var(--line)}
+.apc-card-523{border-left:6px solid var(--petrol);padding:15px}.apc-card-523 h3{font-size:17px;line-height:1.22}.apc-card-523 p{max-height:88px;line-height:1.35}.apc-card-523.overdue{border-left-color:var(--orange);background:#fff8f4}.apc-progress-card{height:8px;margin:10px 0 4px}.apc-open-chip{border:0;border-radius:999px;background:var(--petrol);color:#fff;font-weight:900;font-size:12px;padding:5px 10px;cursor:pointer}.apc-card-523 small{color:var(--muted);font-weight:800}.apc-guide-compact{border:1px solid var(--line);border-left:5px solid var(--orange);border-radius:16px;background:#fff8f4;color:var(--petrol);padding:12px 14px;margin:12px 0;font-weight:800}.apc-wizard h2{font-size:28px}.apc-lower-grid-523{margin-top:20px}
+@media(max-width:1200px){.apc-guide-523,.apc-metrics-523,.apc-toolbar-523{grid-template-columns:1fr 1fr}.apc-board-523{grid-template-columns:repeat(7,250px)}}@media(max-width:760px){.apc-guide-523,.apc-metrics-523,.apc-toolbar-523{grid-template-columns:1fr}.apc-main-actions{justify-content:flex-start}.apc-board-523{grid-template-columns:1fr;overflow:visible}}

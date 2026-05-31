@@ -5321,3 +5321,1006 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   window.applyStatusColors502=function(){document.querySelectorAll('#tabContent td,#tabContent span,#tabContent div,#tabContent b').forEach(el=>{const txt=C(el.textContent);if(!txt)return;if(txt.includes('splneno'))el.classList.add('status-ok-502');else if(txt.includes('nutno overit')||txt.includes('overit'))el.classList.add('status-warn-502');else if(txt.includes('rozpracovano'))el.classList.add('status-work-502');else if(txt.includes('odmitnuto')||txt.includes('nesplneno'))el.classList.add('status-bad-502');});};
   document.addEventListener('change',function(){setTimeout(applyStatusColors502,50)},true);
 })();
+
+/* === BRH 5.1.3 – SAFE PRODUCTION REPAIR
+   Cílená oprava regresí z 5.1.1/5.1.2:
+   - výběr pojišťoven je jediný zdroj pravdy pro karty 7/8/9,
+   - pojišťovny se nepředvyplňují z nabídek ani z číselníku,
+   - karta 8/9 používá pouze vybraná rizika z aktivního případu,
+   - tlačítko „Tato pojišťovna splňuje vše“ je skutečný přepínač,
+   - Textace a Dokumenty mají vždy funkční produkční render.
+*/
+(function(){
+  const BRH513 = '5.1.3';
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function E(v){ return (typeof esc === 'function') ? esc(v) : String(v ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+  function N(v){ return String(v ?? '').trim(); }
+  function codeOf(i){ return (typeof insurerCode === 'function') ? insurerCode(i) : (i.code || i.shortcut || i.zkratka || i.key || i.name || ''); }
+  function riskK(r){ return (r && (r.risk_key || r.key || r.id || r.name)) || 'RIZIKO'; }
+  function riskTitle(r){ return (r && (r.name || r.label || r.risk_name || r.title || r.risk_key)) || 'Riziko'; }
+  function riskSpec(r){ return (r && (r.specification ?? r.client_note ?? r.note_for_insurer ?? '')) || ''; }
+  function unique(arr){ const out=[]; A(arr).forEach(x=>{ const c=N(x); if(c && !out.includes(c)) out.push(c); }); return out; }
+  function selectedStrict(){ state.selected_insurers = unique(state.selected_insurers); return state.selected_insurers; }
+  function selectedSet(){ return new Set(selectedStrict().map(String)); }
+  function pruneCaseToSelected(){
+    const keep = selectedSet();
+    state.offers = (state.offers && typeof state.offers === 'object' && !Array.isArray(state.offers)) ? state.offers : {};
+    state.insurer_requests = (state.insurer_requests && typeof state.insurer_requests === 'object' && !Array.isArray(state.insurer_requests)) ? state.insurer_requests : {};
+    Object.keys(state.offers).forEach(k => { if(!keep.has(k)) delete state.offers[k]; });
+    Object.keys(state.insurer_requests).forEach(k => { if(!keep.has(k)) delete state.insurer_requests[k]; });
+  }
+  window.brh513ReadSelectedFromDom = function(){
+    const boxes = Array.from(document.querySelectorAll('input[data-insurer-code]'));
+    if(boxes.length){ state.selected_insurers = unique(boxes.filter(b=>b.checked).map(b=>b.getAttribute('data-insurer-code'))); }
+    return selectedStrict();
+  };
+  window.brh513CleanCase = function(){ selectedStrict(); state.risks = A(state.risks).filter(r=>N(riskTitle(r))); pruneCaseToSelected(); return state; };
+
+  const originalNormalize = window.normalizeCase || (typeof normalizeCase === 'function' ? normalizeCase : null);
+  window.normalizeCase = normalizeCase = function(item){
+    const base = originalNormalize ? originalNormalize(item) : Object.assign(blankCase(), item || {});
+    const selected = unique(base.selected_insurers || base.selectedInsurers || base.insurers_selected || base.insurers || []);
+    base.selected_insurers = selected;
+    base.risks = A(base.risks).filter(r=>N(riskTitle(r)));
+    base.offers = (base.offers && typeof base.offers === 'object' && !Array.isArray(base.offers)) ? base.offers : {};
+    base.insurer_requests = (base.insurer_requests && typeof base.insurer_requests === 'object' && !Array.isArray(base.insurer_requests)) ? base.insurer_requests : {};
+    return base;
+  };
+
+  window.selectedInsurerCodes = selectedInsurerCodes = selectedStrict;
+  window.toggleInsurer = toggleInsurer = function(code,on){
+    code = N(code); if(!code) return;
+    const set = selectedSet();
+    if(on) set.add(code); else set.delete(code);
+    state.selected_insurers = Array.from(set);
+    if(typeof renderHeader === 'function') renderHeader();
+  };
+  window.addManualInsurer = addManualInsurer = function(){
+    const code = prompt('Zkratka pojišťovny mimo seznam:');
+    if(!N(code)) return;
+    toggleInsurer(N(code), true);
+    renderWorkspace();
+  };
+
+  const originalRead = window.readCurrentTab || (typeof readCurrentTab === 'function' ? readCurrentTab : null);
+  window.readCurrentTab = readCurrentTab = function(){
+    if(originalRead) originalRead();
+    if(currentTab === 'insurers') brh513ReadSelectedFromDom();
+    if(currentTab === 'offers' || currentTab === 'comparison' || currentTab === 'requests') selectedStrict();
+  };
+  const originalSave = window.saveCase || (typeof saveCase === 'function' ? saveCase : null);
+  if(originalSave){
+    window.saveCase = saveCase = async function(){
+      if(currentTab === 'insurers') brh513ReadSelectedFromDom();
+      brh513CleanCase();
+      return originalSave();
+    };
+  }
+
+  window.ensureOffer = ensureOffer = function(code){
+    code = N(code);
+    state.offers ||= {};
+    state.offers[code] ||= {premium:'',deductible:'',valid_until:'',insurance_start:'',insurance_period:'',payment_frequency:'',territory:'',workflow_status:'rozpracováno',risks:{}};
+    state.offers[code].risks ||= {};
+    return state.offers[code];
+  };
+  window.ensureInsurerRequest = ensureInsurerRequest = function(code){
+    code = N(code);
+    state.insurer_requests ||= {};
+    state.insurer_requests[code] ||= {status:'připraveno',sent_at:'',subject:'',email_note:'',internal_note:''};
+    return state.insurer_requests[code];
+  };
+
+  function cleanOfferRisks(o){
+    const keep = new Set(A(state.risks).map(r=>String(riskK(r))));
+    o.risks ||= {};
+    Object.keys(o.risks).forEach(k=>{ if(!keep.has(String(k))) delete o.risks[k]; });
+  }
+  function offerRisk(code, r){
+    const o = ensureOffer(code); cleanOfferRisks(o);
+    const k = String(riskK(r));
+    o.risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:'',exclusions:'',sublimits:'',source_reference:''};
+    return o.risks[k];
+  }
+  function statusClass(st){
+    st = N(st).toLowerCase();
+    if(st === 'splněno') return 'ok';
+    if(st === 'omezeno') return 'warn';
+    if(st === 'výluka' || st === 'vyluka') return 'bad';
+    return 'check';
+  }
+  window.setOfferRiskStatus = setOfferRiskStatus = function(code,k,status){ ensureOffer(code).risks[k] ||= {}; ensureOffer(code).risks[k].status=status; renderWorkspace(); };
+
+  window.fulfillAllRisksForInsurer = fulfillAllRisksForInsurer = function(code){
+    const o = ensureOffer(code); cleanOfferRisks(o);
+    const risks = A(state.risks);
+    const isAllDone = risks.length && risks.every(r => (o.risks[String(riskK(r))]||{}).status === 'splněno');
+    risks.forEach(r=>{
+      const k = String(riskK(r));
+      o.risks[k] ||= {};
+      if(isAllDone){
+        o.risks[k].status = 'nutno ověřit';
+        o.risks[k].offered_limit = '';
+        o.risks[k].deductible = '';
+      }else{
+        o.risks[k].status = 'splněno';
+        o.risks[k].offered_limit = r.requested_limit || r.limit || '';
+        o.risks[k].deductible = r.deductible || state.questionnaire?.deductible_preference || '';
+      }
+    });
+    renderWorkspace();
+    if(typeof toast === 'function') toast(isAllDone ? 'Nastavení „splňuje vše“ bylo vráceno zpět.' : 'Pojišťovna nastavena jako splněná.');
+  };
+  window.fulfillAllRisksEverywhere = fulfillAllRisksEverywhere = function(){ selectedStrict().forEach(c=>fulfillAllRisksForInsurer(c)); };
+
+  window.tabInsurers = tabInsurers = function(){
+    const selected = selectedSet();
+    const list = A(CATALOG.insurers).map(ins=>{
+      const code = codeOf(ins); const checked = selected.has(code) ? 'checked' : '';
+      return `<label class="form-card check-card insurer-card-513"><input data-insurer-code="${E(code)}" type="checkbox" ${checked} onchange="toggleInsurer('${E(code)}',this.checked)"> <b>${E(code)}</b><br>${E(ins.name||code)}<br><span class="muted">${E(ins.email||ins.request_email||'e-mail není doplněn')}</span></label>`;
+    }).join('');
+    return `<p class="eyebrow">5. Pojišťovny v poptávce</p><h2>Komu se bude poptávka posílat</h2><p class="muted">Do karet 7, 8 a 9 se přenesou pouze zde zaškrtnuté pojišťovny. Nezaškrtnuté pojišťovny se do poptávek ani nabídek nepřenášejí.</p><div class="grid3">${list||'<div class="empty">V číselníku nejsou pojišťovny.</div>'}</div><div class="tools"><button class="btn secondary" onclick="addManualInsurer()">+ Pojišťovna mimo seznam</button><button class="btn primary" onclick="brh513ReadSelectedFromDom();brh513CleanCase();currentTab='requests';renderWorkspace()">Pokračovat na poptávky pojišťovnám</button><button class="btn secondary" onclick="brh513ReadSelectedFromDom();brh513CleanCase();saveCase()">Uložit výběr pojišťoven</button></div>`;
+  };
+
+  function selectedInsurerRows513(){ return selectedStrict().map(code => ({code, ins:(typeof insurerByCode === 'function' ? insurerByCode(code) : {code,name:code}), req:ensureInsurerRequest(code)})); }
+  window.selectedInsurerRows = selectedInsurerRows = selectedInsurerRows513;
+
+  window.tabInsurerRequests = tabInsurerRequests = function(){
+    brh513CleanCase();
+    const codes = selectedStrict();
+    if(!codes.length) return `<p class="eyebrow">7. Poptávky pojišťovnám</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">V kartě 5 zaškrtněte pojišťovny, kterým se bude poptávka posílat.</div>`;
+    const cards = selectedInsurerRows513().map(({code,ins,req})=>`<div class="request-card"><div class="section-head"><div><p class="eyebrow">Pojišťovna</p><h2>${E(ins.name||code)}</h2><p class="muted"><b>${E(code)}</b> · ${E(ins.email||ins.request_email||'e-mail není doplněn')}</p></div><span class="badge">${E(req.status||'připraveno')}</span></div><div class="grid3"><label>Předmět e-mailu<input value="${E(req.subject||(typeof requestSubject==='function'?requestSubject(code):'Poptávka pojištění podnikatelských rizik'))}" onchange="ensureInsurerRequest('${E(code)}').subject=this.value"></label><label>Stav poptávky<select onchange="ensureInsurerRequest('${E(code)}').status=this.value"><option ${req.status==='připraveno'?'selected':''}>připraveno</option><option ${req.status==='odesláno'?'selected':''}>odesláno</option><option ${req.status==='čekáme na nabídku'?'selected':''}>čekáme na nabídku</option><option ${req.status==='nabídka přijata'?'selected':''}>nabídka přijata</option><option ${req.status==='nutné doplnění'?'selected':''}>nutné doplnění</option></select></label><label>Datum odeslání<input type="date" value="${E(req.sent_at||'')}" onchange="ensureInsurerRequest('${E(code)}').sent_at=this.value"></label></div><label>Doprovodný text pro pojišťovnu<textarea onchange="ensureInsurerRequest('${E(code)}').email_note=this.value">${E(req.email_note||(typeof defaultEmailNote==='function'?defaultEmailNote(code):''))}</textarea></label><label>Volné doplnění poradce do poptávky<textarea onchange="ensureInsurerRequest('${E(code)}').advisor_free_text=this.value" placeholder="Specifika, termín pro nabídku, poznámky k rizikům nebo komunikaci s pojišťovnou.">${E(req.advisor_free_text||'')}</textarea></label><div class="tools"><button class="btn primary" onclick="printInsurerRequest&&printInsurerRequest('${E(code)}')">PDF / tisk poptávky</button><button class="btn secondary" onclick="copyInsurerEmail&&copyInsurerEmail('${E(code)}')">Kopírovat e-mail</button><button class="btn ghost" onclick="ensureInsurerRequest('${E(code)}').status='odesláno';ensureInsurerRequest('${E(code)}').sent_at=new Date().toISOString().slice(0,10);saveCase()">Označit jako odesláno</button></div></div>`).join('');
+    return `<p class="eyebrow">7. Poptávky pojišťovnám</p><h2>Samostatná poptávka pro každou vybranou pojišťovnu</h2><p class="muted">Zobrazují se pouze pojišťovny zaškrtnuté v kartě 5.</p>${cards}<div class="tools"><button class="btn primary" onclick="saveCase()">Uložit stav poptávek</button><button class="btn secondary" onclick="currentTab='offers';renderWorkspace()">Pokračovat na nabídky</button></div>`;
+  };
+
+  function headerForOffer(code){
+    const ins = (typeof insurerByCode === 'function' ? insurerByCode(code) : {name:code});
+    const o = ensureOffer(code); cleanOfferRisks(o);
+    const allDone = A(state.risks).length && A(state.risks).every(r => (o.risks[String(riskK(r))]||{}).status === 'splněno');
+    return `<th class="offer-head-513"><div class="insurer-name-513">${E(ins.name||code)}</div><div class="mini insurer-code-513">${E(code)}</div><select onchange="ensureOffer('${E(code)}').workflow_status=this.value"><option ${o.workflow_status==='rozpracováno'?'selected':''}>rozpracováno</option><option ${o.workflow_status==='nabídka přijata'?'selected':''}>nabídka přijata</option><option ${o.workflow_status==='finální nabídka'?'selected':''}>finální nabídka</option><option ${o.workflow_status==='zamítnuto'?'selected':''}>zamítnuto</option></select><button type="button" class="btn small secondary ${allDone?'is-active':''}" onclick="fulfillAllRisksForInsurer('${E(code)}')">${allDone?'✓ Splňuje vše – vrátit zpět':'Tato pojišťovna splňuje vše'}</button><input placeholder="Pojistné" onchange="ensureOffer('${E(code)}').premium=this.value" value="${E(o.premium||'')}"><input placeholder="Počátek" type="date" onchange="ensureOffer('${E(code)}').insurance_start=this.value" value="${E(o.insurance_start||state.questionnaire?.insurance_start||'')}"><input placeholder="Frekvence" onchange="ensureOffer('${E(code)}').payment_frequency=this.value" value="${E(o.payment_frequency||state.questionnaire?.payment_frequency||'ročně')}"></th>`;
+  }
+  function offerCell513(code,r){
+    const k = String(riskK(r)); const x = offerRisk(code,r); const st = x.status || 'nutno ověřit';
+    return `<td class="offer-cell-513 offer-status-${statusClass(st)}"><select onchange="setOfferRiskStatus('${E(code)}','${E(k)}',this.value)"><option ${st==='splněno'?'selected':''}>splněno</option><option ${st==='omezeno'?'selected':''}>omezeno</option><option ${st==='výluka'?'selected':''}>výluka</option><option ${st==='nutno ověřit'?'selected':''}>nutno ověřit</option></select><input placeholder="Limit / částka" value="${E(x.offered_limit||'')}" onchange="ensureOffer('${E(code)}').risks['${E(k)}'].offered_limit=this.value"><input placeholder="Spoluúčast" value="${E(x.deductible||'')}" onchange="ensureOffer('${E(code)}').risks['${E(k)}'].deductible=this.value"><textarea placeholder="Výluky / sublimity / poznámka" onchange="ensureOffer('${E(code)}').risks['${E(k)}'].note=this.value">${E(x.note||'')}</textarea></td>`;
+  }
+  window.tabOffers = tabOffers = function(){
+    brh513CleanCase();
+    const codes = selectedStrict(); const risks = A(state.risks);
+    if(!codes.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Karta 8 používá pouze pojišťovny z karty 5.</div>`;
+    if(!risks.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte rizika</h2><div class="info-box">Do tabulky se přenášejí pouze rizika uložená v aktivním případu.</div>`;
+    const heads = codes.map(headerForOffer).join('');
+    const rows = risks.map(r=>`<tr><td class="risk-request-513"><b>${E(riskTitle(r))}</b><br><span class="badge">${E(riskK(r))}</span><br><b>Požadavek:</b> ${E(r.requested_limit||r.limit||'není uveden')}<br><b>Spoluúčast:</b> ${E(r.deductible||'není uvedena')}${riskSpec(r)?`<br><small>${E(riskSpec(r))}</small>`:''}</td>${codes.map(c=>offerCell513(c,r)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Požadavek klienta × nabídky vybraných pojišťoven</h2><p class="muted">Tabulka zobrazuje jen pojišťovny vybrané v kartě 5 a jen rizika uložená v aktivním případu.</p><div class="tools"><button class="btn secondary" onclick="selectedStrict().forEach(c=>fulfillAllRisksForInsurer(c))">Všude nastavit splněno</button><button class="btn primary" onclick="saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div><div class="table-wrap table-wrap-513"><table class="offer-table-513"><thead><tr><th class="risk-col-513">Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  window.tabComparison = tabComparison = function(){
+    brh513CleanCase();
+    const codes = selectedStrict(); const risks = A(state.risks);
+    if(!codes.length || !risks.length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve vyberte pojišťovny a rizika.</div>`;
+    const rows = risks.map(r=>`<tr><td class="risk-request-513"><b>${E(riskTitle(r))}</b><br>${E(r.requested_limit||r.limit||'limit neuveden')}</td>${codes.map(code=>{const x=offerRisk(code,r); const st=x.status||'nutno ověřit';return `<td class="offer-status-${statusClass(st)}"><b>${E(st)}</b><br>Limit: ${E(x.offered_limit||'–')}<br>Spoluúčast: ${E(x.deductible||'–')}<br>${E(x.note||'')}</td>`}).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Porovnání</p><h2>Makléřské porovnání nabídek</h2><div class="warning">Systém pouze zvýrazňuje rozdíly. Doporučení potvrzuje výhradně poradce.</div><div class="table-wrap table-wrap-513"><table class="comparison-table-513"><thead><tr><th>Riziko / požadavek</th>${codes.map(c=>`<th>${E((typeof insurerByCode==='function'?insurerByCode(c).name:c)||c)}<div class="mini">${E(c)}</div></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+
+  const docCats = ['VPP / DPP / ZPP','Nabídky pojišťoven','Škodní průběh','Revize / technické podklady','Fotodokumentace','Dotazníky a ostatní'];
+  window.renderProductionDocuments513 = function(){
+    const box = document.getElementById('caseDocsBox') || document.querySelector('#documentsView .panel');
+    if(!box) return;
+    state.documents ||= [];
+    const rows = state.documents.length ? state.documents.map((d,i)=>`<tr><td><input value="${E(d.title||'')}" onchange="state.documents[${i}].title=this.value"></td><td><select onchange="state.documents[${i}].category=this.value">${docCats.map(c=>`<option ${d.category===c?'selected':''}>${E(c)}</option>`).join('')}</select></td><td><select onchange="state.documents[${i}].status=this.value"><option ${d.status==='chybí'?'selected':''}>chybí</option><option ${d.status==='dodáno'?'selected':''}>dodáno</option><option ${d.status==='nutno doplnit'?'selected':''}>nutno doplnit</option></select></td><td><textarea onchange="state.documents[${i}].note=this.value">${E(d.note||'')}</textarea></td><td><button class="btn danger small" onclick="state.documents.splice(${i},1);renderProductionDocuments513()">Smazat</button></td></tr>`).join('') : '<tr><td colspan="5" class="muted">Zatím není evidován žádný dokument.</td></tr>';
+    box.innerHTML = `<p class="eyebrow">Dokumenty</p><h1>Dokumenty k obchodnímu případu</h1><p class="muted">Jedno místo pro VPP/DPP/ZPP, nabídky, škodní průběh, revize, fotodokumentaci a další podklady.</p><div class="tools"><button class="btn secondary" onclick="state.documents.push({title:'Nový dokument',category:'VPP / DPP / ZPP',status:'chybí',note:''});renderProductionDocuments513()">+ Přidat dokument</button><button class="btn primary" onclick="saveCase()">Uložit dokumenty</button></div><div class="table-wrap"><table class="pro-table"><thead><tr><th>Název</th><th>Kategorie</th><th>Stav</th><th>Poznámka</th><th>Akce</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  window.renderProductionTextace513 = function(){
+    const box = document.getElementById('textationsBox'); if(!box) return;
+    const all = A(CATALOG.textTemplates);
+    const cards = all.length ? all.map((t,i)=>`<div class="text-card-513"><h3>${E(t.title||t.name||'Textace')}</h3><p class="muted">${E(t.area||t.category||'')}</p><p>${E(t.text||t.body||t.content||'')}</p><div class="tools"><button class="btn secondary small" onclick="navigator.clipboard&&navigator.clipboard.writeText('${E(String(t.text||t.body||'').replace(/'/g,'\\\''))}')">Kopírovat</button><button class="btn primary small" onclick="addTextationToCase&&addTextationToCase(${i},'request')">Do poptávky</button><button class="btn secondary small" onclick="addTextationToCase&&addTextationToCase(${i},'offer')">Do nabídky</button><button class="btn secondary small" onclick="addTextationToCase&&addTextationToCase(${i},'report')">Do klientského výstupu</button></div></div>`).join('') : '<div class="empty">Textace nejsou načtené. Zkontrolujte app/data/text_templates.json.</div>';
+    box.innerHTML = `<p class="eyebrow">Textace</p><h1>Správa knihovny textací</h1><p class="muted">Centrální pracovní textace pro poradce, poptávky, nabídky a klientský výstup.</p><div class="textation-grid">${cards}</div>`;
+  };
+  const originalShowView = window.showView || (typeof showView === 'function' ? showView : null);
+  window.showView = showView = function(view){
+    if(originalShowView) originalShowView(view);
+    if(view === 'documents') renderProductionDocuments513();
+    if(view === 'textations') renderProductionTextace513();
+  };
+
+  const originalAdminPanel = window.adminPanel || (typeof adminPanel === 'function' ? adminPanel : null);
+  window.adminPanel = adminPanel = function(type){
+    if(type === 'documents'){
+      const box = document.getElementById('adminPanel'); if(box){ box.innerHTML = `<h2>Dokumenty</h2><p class="muted">Správa dokumentů je dostupná v produkčním modulu Dokumenty. Data se ukládají k aktivnímu případu.</p><button class="btn primary" onclick="showView('documents')">Otevřít dokumenty</button>`; }
+      return;
+    }
+    if(type === 'texts'){
+      const box = document.getElementById('adminPanel'); if(box){ box.innerHTML = `<h2>Textace</h2><p class="muted">Textace jsou dostupné v samostatném modulu Textace.</p><button class="btn primary" onclick="showView('textations')">Otevřít textace</button>`; }
+      return;
+    }
+    if(originalAdminPanel) return originalAdminPanel(type);
+  };
+
+  const originalRenderWorkspace = window.renderWorkspace || (typeof renderWorkspace === 'function' ? renderWorkspace : null);
+  window.renderWorkspace = renderWorkspace = function(){
+    selectedStrict();
+    if(originalRenderWorkspace) originalRenderWorkspace();
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const vb = document.getElementById('versionBadge');
+    if(vb && !vb.textContent.includes(BRH513)) vb.textContent = vb.textContent.replace(/Business Risk Hub [0-9.]+/, 'Business Risk Hub '+BRH513);
+  });
+})();
+
+/* === BRH 5.1.4 – CRITICAL WORKSPACE REPAIR
+   Oprava ukládání karty 8/9, filtr zobrazených pojišťoven/rizik a profesionální vizuální zvýraznění stavů.
+*/
+(function(){
+  const VER='5.1.4';
+  const BRAND={petrol:'#003D4C',petrol2:'#005C66',orange:'#FC4C02',ok:'#E6F7EF',warn:'#FFF4DE',bad:'#FDECEC',muted:'#EAF4F6'};
+  function A(v){return Array.isArray(v)?v:[];}
+  function S(v){return String(v??'').trim();}
+  function E(v){return (typeof esc==='function')?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function rk(r){return String((r&&(r.risk_key||r.key||r.id||r.name))||'RIZIKO').trim();}
+  function rt(r){return String((r&&(r.name||r.label||r.risk_name||r.title||r.risk_key))||'Riziko').trim();}
+  function uniq(arr){const out=[];A(arr).forEach(x=>{x=S(x); if(x&&!out.includes(x)) out.push(x)});return out;}
+  function selCodes(){state.selected_insurers=uniq(state.selected_insurers||[]);return state.selected_insurers;}
+  function selectedRisks(){
+    let risks=A(state.risks).filter(r=>r && rt(r));
+    // Pokud existuje novější zdroj z modulu odpovědnosti, nepoužívat starý fallback seznam.
+    if(Array.isArray(state.liability_items) && state.liability_items.length){
+      risks = state.liability_items.filter(r=>r && rt(r) && r.selected!==false && r.active!==false && r.included!==false).map(r=>({
+        risk_key: r.risk_key||r.key||r.id||r.name,
+        name: r.name||r.title||r.risk_name,
+        requested_limit: r.requested_limit||r.limit||r.default_limit||'',
+        deductible: r.deductible||'',
+        note: r.specification||r.note||r.description||''
+      }));
+    }
+    // Tvrdý filtr: nikdy nezobrazit katalogové/fallback položky, pokud nejsou skutečně v případu.
+    risks = risks.filter(r => r.selected!==false && r.active!==false && r.included!==false && r.removed!==true);
+    const seen=new Set();
+    return risks.filter(r=>{const k=rk(r); if(seen.has(k)) return false; seen.add(k); return true;});
+  }
+  function offer(code){code=S(code); state.offers ||= {}; state.offers[code] ||= {workflow_status:'rozpracováno',risks:{}}; state.offers[code].risks ||= {}; return state.offers[code];}
+  function offerRisk(code,r){const o=offer(code); const k=rk(r); o.risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:''}; return o.risks[k];}
+  function prune(){
+    const cset=new Set(selCodes());
+    state.offers ||= {}; state.insurer_requests ||= {};
+    Object.keys(state.offers).forEach(k=>{if(!cset.has(k)) delete state.offers[k];});
+    Object.keys(state.insurer_requests).forEach(k=>{if(!cset.has(k)) delete state.insurer_requests[k];});
+    const rset=new Set(selectedRisks().map(r=>rk(r)));
+    Object.values(state.offers).forEach(o=>{o.risks ||= {}; Object.keys(o.risks).forEach(k=>{if(!rset.has(k)) delete o.risks[k];});});
+  }
+  function statusClass(st){st=S(st).toLowerCase(); if(st==='splněno')return 'splneno'; if(st==='omezeno'||st==='částečně')return 'omezene'; if(st==='výluka'||st==='vyluka'||st==='nesplněno')return 'vyluka'; return 'overit';}
+  function readOffersFromDom(){
+    document.querySelectorAll('[data-offer-code]').forEach(el=>{
+      const code=el.getAttribute('data-offer-code'); const field=el.getAttribute('data-offer-field'); if(!code||!field)return;
+      offer(code)[field]=el.value;
+    });
+    document.querySelectorAll('[data-risk-offer-code]').forEach(el=>{
+      const code=el.getAttribute('data-risk-offer-code'); const risk=el.getAttribute('data-risk-key'); const field=el.getAttribute('data-risk-field'); if(!code||!risk||!field)return;
+      offer(code).risks ||= {}; offer(code).risks[risk] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:''};
+      offer(code).risks[risk][field]=el.value;
+    });
+  }
+  window.brh514ReadOffersFromDom=readOffersFromDom;
+  const oldRead=window.readCurrentTab;
+  window.readCurrentTab=readCurrentTab=function(){ if(oldRead) oldRead(); if(currentTab==='offers'||currentTab==='comparison') readOffersFromDom(); prune(); };
+  const oldSave=window.saveCase;
+  if(oldSave){window.saveCase=saveCase=async function(){readOffersFromDom(); prune(); return oldSave();};}
+  window.setOfferRiskStatus=function(code,k,status){
+    const r=selectedRisks().find(x=>rk(x)===String(k))||{};
+    const x=offer(code).risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:''};
+    x.status=status;
+    if(status==='splněno'){
+      if(!x.offered_limit) x.offered_limit=r.requested_limit||r.limit||'';
+      if(!x.deductible) x.deductible=r.deductible||state.questionnaire?.deductible_preference||'';
+    }
+    const td=document.querySelector(`[data-cell="${CSS.escape(code)}__${CSS.escape(k)}"]`);
+    if(td){td.className='offer-cell-514 status-'+statusClass(status);}
+  };
+  window.fulfillAllRisksForInsurer=function(code){
+    readOffersFromDom(); const risks=selectedRisks(); const o=offer(code);
+    const all=risks.length && risks.every(r=>(o.risks[rk(r)]||{}).status==='splněno');
+    risks.forEach(r=>{const k=rk(r); const x=o.risks[k] ||= {}; if(all){x.status='nutno ověřit'; x.offered_limit=''; x.deductible='';}else{x.status='splněno'; x.offered_limit=r.requested_limit||r.limit||''; x.deductible=r.deductible||state.questionnaire?.deductible_preference||'';}});
+    renderWorkspace(); if(typeof toast==='function') toast(all?'Nastavení bylo vráceno zpět.':'Pojišťovna označena jako splněná.');
+  };
+  function insurerName(code){try{const x=insurerByCode(code); return x?.name||code;}catch(e){return code;}}
+  function offerHead(code){const o=offer(code); const risks=selectedRisks(); const all=risks.length && risks.every(r=>(o.risks[rk(r)]||{}).status==='splněno');
+    return `<th class="offer-head-514 ${all?'insurer-all-ok':''}"><div class="insurer-title-514"><span>${E(insurerName(code))}</span><small>${E(code)}</small></div><select data-offer-code="${E(code)}" data-offer-field="workflow_status"><option value="rozpracováno" ${o.workflow_status==='rozpracováno'?'selected':''}>rozpracováno</option><option value="nabídka přijata" ${o.workflow_status==='nabídka přijata'?'selected':''}>nabídka přijata</option><option value="finální nabídka" ${o.workflow_status==='finální nabídka'?'selected':''}>finální nabídka</option><option value="zamítnuto" ${o.workflow_status==='zamítnuto'?'selected':''}>zamítnuto</option></select><button type="button" class="btn small offer-ok-btn ${all?'active':''}" onclick="fulfillAllRisksForInsurer('${E(code)}')">${all?'✓ Pojišťovna splňuje vše':'Tato pojišťovna splňuje vše'}</button><input data-offer-code="${E(code)}" data-offer-field="premium" placeholder="Pojistné" value="${E(o.premium||'')}"><input data-offer-code="${E(code)}" data-offer-field="insurance_start" type="date" value="${E(o.insurance_start||state.questionnaire?.insurance_start||'')}"><input data-offer-code="${E(code)}" data-offer-field="payment_frequency" placeholder="Frekvence" value="${E(o.payment_frequency||state.questionnaire?.payment_frequency||'ročně')}"></th>`;
+  }
+  function offerCell(code,r){const k=rk(r); const x=offerRisk(code,r); const cls=statusClass(x.status); return `<td data-cell="${E(code)}__${E(k)}" class="offer-cell-514 status-${cls}"><select data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="status" onchange="setOfferRiskStatus('${E(code)}','${E(k)}',this.value)"><option value="nutno ověřit" ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option><option value="splněno" ${x.status==='splněno'?'selected':''}>splněno</option><option value="omezeno" ${x.status==='omezeno'?'selected':''}>omezeno</option><option value="výluka" ${x.status==='výluka'?'selected':''}>výluka</option></select><input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="offered_limit" placeholder="Limit / částka" value="${E(x.offered_limit||'')}"><input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="deductible" placeholder="Spoluúčast" value="${E(x.deductible||'')}"><textarea data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="note" placeholder="Výluky / sublimity / poznámka">${E(x.note||'')}</textarea></td>`;}
+  window.tabOffers=tabOffers=function(){prune(); const codes=selCodes(); const risks=selectedRisks(); if(!codes.length)return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Karta 8 zobrazí pouze pojišťovny zaškrtnuté v kartě 5.</div>`; if(!risks.length)return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte rizika</h2><div class="info-box">Do karty 8 se přenáší pouze rizika uložená v aktivním případu.</div>`; const heads=codes.map(offerHead).join(''); const rows=risks.map(r=>`<tr><td class="risk-request-514"><b>${E(rt(r))}</b><span>${E(rk(r))}</span><p>Požadavek: <strong>${E(r.requested_limit||r.limit||'není uveden')}</strong></p><p>Spoluúčast: ${E(r.deductible||'není uvedena')}</p></td>${codes.map(c=>offerCell(c,r)).join('')}</tr>`).join(''); return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Požadavek klienta × nabídky vybraných pojišťoven</h2><div class="broker-notice-514">Zobrazeny jsou pouze vybrané pojišťovny a pouze rizika uložená v aktivním případu. Změny se ukládají tlačítkem <b>Uložit nabídky</b>.</div><div class="tools sticky-tools-514"><button class="btn secondary" onclick="selCodes().forEach(c=>fulfillAllRisksForInsurer(c))">Všude nastavit splněno</button><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="readCurrentTab();currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div><div class="offer-board-514"><table class="offer-table-514"><thead><tr><th class="risk-col-514">Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;};
+  window.tabComparison=tabComparison=function(){prune(); readOffersFromDom(); const codes=selCodes(); const risks=selectedRisks(); if(!codes.length||!risks.length)return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve vyberte pojišťovny a rizika.</div>`; const rows=risks.map(r=>`<tr><td class="risk-request-514"><b>${E(rt(r))}</b><br>${E(r.requested_limit||r.limit||'limit neuveden')}</td>${codes.map(code=>{const x=offerRisk(code,r);return `<td class="comparison-cell-514 status-${statusClass(x.status)}"><b>${E(x.status||'nutno ověřit')}</b><br>Limit: ${E(x.offered_limit||'–')}<br>Spoluúčast: ${E(x.deductible||'–')}<br>${E(x.note||'')}</td>`}).join('')}</tr>`).join(''); return `<p class="eyebrow">9. Porovnání</p><h2>Makléřské porovnání nabídek</h2><div class="broker-notice-514">Porovnání vychází výhradně z hodnot uložených na kartě 8.</div><div class="offer-board-514"><table class="comparison-table-514"><thead><tr><th>Riziko / požadavek</th>${codes.map(c=>`<th>${E(insurerName(c))}<small>${E(c)}</small></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;};
+  const oldNorm=window.normalizeCase;
+  if(oldNorm){window.normalizeCase=normalizeCase=function(item){const s=oldNorm(item); if(Array.isArray(s.selected_insurers))s.selected_insurers=uniq(s.selected_insurers); s.risks=A(s.risks).filter(r=>r && rt(r) && r.selected!==false && r.active!==false && r.included!==false); return s;};}
+  document.addEventListener('input',e=>{if(e.target?.matches('[data-offer-code],[data-risk-offer-code]')) readOffersFromDom();},true);
+  document.addEventListener('change',e=>{if(e.target?.matches('[data-offer-code],[data-risk-offer-code]')) readOffersFromDom();},true);
+  document.addEventListener('DOMContentLoaded',()=>{const vb=document.getElementById('versionBadge'); if(vb) vb.textContent=vb.textContent.replace(/Business Risk Hub [0-9.]+/,'Business Risk Hub '+VER);});
+})();
+
+
+
+/* === BRH 5.1.6 – BRAND VISUAL + READABILITY REPAIR
+   Pevný zdroj pravdy pro karty 8/9:
+   - pojišťovny pouze ze state.selected_insurers (karta 5),
+   - rizika pouze ze state.risks uložených v aktivním případu,
+   - karta 8 před uložením vždy načte DOM do state.offers,
+   - saveCase odesílá aktuální state přímo do /api/inquiries,
+   - karta 9 čte výhradně uloženou strukturu nabídky z karty 8.
+*/
+(function(){
+  const VER='5.1.6';
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function S(v){ return String(v ?? '').trim(); }
+  function E(v){
+    if(typeof esc === 'function') return esc(v);
+    return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function uniq(arr){
+    const out=[]; A(arr).forEach(x=>{ x=S(x); if(x && !out.includes(x)) out.push(x); });
+    return out;
+  }
+  function riskKey515(r){ return S(r && (r.risk_key || r.key || r.id || r.code || r.name)); }
+  function riskName515(r){ return S(r && (r.name || r.label || r.risk_name || r.title || r.risk_key || r.key)); }
+  function selectedCodes515(){
+    state.selected_insurers = uniq(state.selected_insurers || []);
+    return state.selected_insurers;
+  }
+  function selectedRisks515(){
+    // Jediný zdroj pro karty 8/9 je aktivní případ: state.risks.
+    // Nepoužíváme CATALOG.risks, riskModel ani žádný fallback, aby se nezobrazovala nevybraná rizika.
+    const seen = new Set();
+    return A(state.risks)
+      .filter(r => r && riskKey515(r) && riskName515(r))
+      .filter(r => r.selected !== false && r.active !== false && r.included !== false && r.removed !== true)
+      .filter(r => {
+        const k = riskKey515(r);
+        if(seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+  }
+  function insurerName515(code){
+    try { const ins = insurerByCode(code); return (ins && (ins.name || ins.full_name)) || code; }
+    catch(e){ return code; }
+  }
+  function offer515(code){
+    code=S(code);
+    state.offers ||= {};
+    state.offers[code] ||= {};
+    state.offers[code].workflow_status ||= state.offers[code].status || 'rozpracováno';
+    state.offers[code].status = state.offers[code].workflow_status; // kompatibilita starších vrstev
+    state.offers[code].risks ||= {};
+    return state.offers[code];
+  }
+  function riskOffer515(code, r){
+    const k = typeof r === 'string' ? r : riskKey515(r);
+    const o = offer515(code);
+    o.risks[k] ||= {status:'nutno ověřit', offered_limit:'', deductible:'', note:''};
+    return o.risks[k];
+  }
+  function prune515(){
+    const cset = new Set(selectedCodes515());
+    state.offers ||= {};
+    state.insurer_requests ||= {};
+    Object.keys(state.offers).forEach(k => { if(!cset.has(k)) delete state.offers[k]; });
+    Object.keys(state.insurer_requests).forEach(k => { if(!cset.has(k)) delete state.insurer_requests[k]; });
+
+    const rset = new Set(selectedRisks515().map(riskKey515));
+    Object.values(state.offers).forEach(o => {
+      o.risks ||= {};
+      Object.keys(o.risks).forEach(k => { if(!rset.has(k)) delete o.risks[k]; });
+    });
+  }
+  function statusClass515(st){
+    st=S(st).toLowerCase();
+    if(st === 'splněno') return 'splneno';
+    if(st === 'omezeno' || st === 'částečně') return 'omezene';
+    if(st === 'výluka' || st === 'vyluka' || st === 'nesplněno') return 'vyluka';
+    return 'overit';
+  }
+  function workflowClass515(st){
+    st=S(st).toLowerCase();
+    if(st === 'finální nabídka' || st === 'nabídka přijata' || st === 'splněno') return 'workflow-ok';
+    if(st === 'zamítnuto') return 'workflow-bad';
+    return 'workflow-work';
+  }
+  function readOffers515(){
+    document.querySelectorAll('[data-offer-code][data-offer-field]').forEach(el => {
+      const code = el.getAttribute('data-offer-code');
+      const field = el.getAttribute('data-offer-field');
+      if(!code || !field) return;
+      const o = offer515(code);
+      o[field] = el.value;
+      if(field === 'workflow_status') o.status = el.value;
+    });
+    document.querySelectorAll('[data-risk-offer-code][data-risk-key][data-risk-field]').forEach(el => {
+      const code = el.getAttribute('data-risk-offer-code');
+      const key = el.getAttribute('data-risk-key');
+      const field = el.getAttribute('data-risk-field');
+      if(!code || !key || !field) return;
+      const x = riskOffer515(code, key);
+      x[field] = el.value;
+    });
+    prune515();
+  }
+  window.brh515ReadOffers = readOffers515;
+
+  // Tvrdé přepsání přepínače pojišťoven: karta 5 je jediný zdroj výběru.
+  window.toggleInsurer = toggleInsurer = function(code, on){
+    code=S(code);
+    if(!code) return;
+    state.selected_insurers = uniq(state.selected_insurers || []);
+    if(on && !state.selected_insurers.includes(code)) state.selected_insurers.push(code);
+    if(!on) {
+      state.selected_insurers = state.selected_insurers.filter(x => x !== code);
+      if(state.offers) delete state.offers[code];
+      if(state.insurer_requests) delete state.insurer_requests[code];
+    }
+    state.selected_insurers = uniq(state.selected_insurers);
+    prune515();
+    if(typeof renderHeader === 'function') renderHeader();
+  };
+
+  const oldRead515 = window.readCurrentTab || (typeof readCurrentTab === 'function' ? readCurrentTab : null);
+  window.readCurrentTab = readCurrentTab = function(){
+    if(oldRead515) oldRead515();
+    if(currentTab === 'offers' || currentTab === 'comparison') readOffers515();
+  };
+
+  window.setOfferRiskStatus = function(code, key, status){
+    const r = selectedRisks515().find(x => riskKey515(x) === S(key)) || {};
+    const x = riskOffer515(code, key);
+    x.status = status;
+    if(status === 'splněno'){
+      if(!x.offered_limit) x.offered_limit = r.requested_limit || r.limit || '';
+      if(!x.deductible) x.deductible = r.deductible || state.questionnaire?.deductible_preference || '';
+    }
+    const cell = document.querySelector(`[data-cell="${CSS.escape(code)}__${CSS.escape(key)}"]`);
+    if(cell) cell.className = 'offer-cell-515 status-' + statusClass515(status);
+  };
+
+  window.fulfillAllRisksForInsurer = function(code){
+    readOffers515();
+    const risks = selectedRisks515();
+    const o = offer515(code);
+    const all = risks.length && risks.every(r => (o.risks[riskKey515(r)] || {}).status === 'splněno');
+    risks.forEach(r => {
+      const k = riskKey515(r);
+      const x = riskOffer515(code, k);
+      if(all){
+        x.status = 'nutno ověřit';
+        x.offered_limit = '';
+        x.deductible = '';
+      } else {
+        x.status = 'splněno';
+        x.offered_limit = r.requested_limit || r.limit || '';
+        x.deductible = r.deductible || state.questionnaire?.deductible_preference || '';
+      }
+    });
+    if(typeof renderWorkspace === 'function') renderWorkspace();
+    if(typeof toast === 'function') toast(all ? 'Splnění pojišťovny bylo vráceno zpět.' : 'Pojišťovna je označena jako splňující vybraná rizika.');
+  };
+
+  function offerHead515(code){
+    const o = offer515(code);
+    const risks = selectedRisks515();
+    const all = risks.length && risks.every(r => (o.risks[riskKey515(r)] || {}).status === 'splněno');
+    const wf = o.workflow_status || o.status || 'rozpracováno';
+    return `<th class="offer-head-515 ${all ? 'insurer-all-ok' : ''} ${workflowClass515(wf)}">
+      <div class="insurer-title-515"><span>${E(insurerName515(code))}</span><small>${E(code)}</small></div>
+      <select class="workflow-select-515" data-offer-code="${E(code)}" data-offer-field="workflow_status">
+        <option value="rozpracováno" ${wf==='rozpracováno'?'selected':''}>rozpracováno</option>
+        <option value="nabídka přijata" ${wf==='nabídka přijata'?'selected':''}>nabídka přijata</option>
+        <option value="finální nabídka" ${wf==='finální nabídka'?'selected':''}>finální nabídka</option>
+        <option value="zamítnuto" ${wf==='zamítnuto'?'selected':''}>zamítnuto</option>
+      </select>
+      <button type="button" class="btn small offer-ok-btn-515 ${all?'active':''}" onclick="fulfillAllRisksForInsurer('${E(code)}')">${all?'✓ Splňuje vybraná rizika':'Tato pojišťovna splňuje vše'}</button>
+      <input data-offer-code="${E(code)}" data-offer-field="premium" placeholder="Pojistné" value="${E(o.premium || '')}">
+      <input data-offer-code="${E(code)}" data-offer-field="insurance_start" type="date" value="${E(o.insurance_start || state.questionnaire?.insurance_start || '')}">
+      <input data-offer-code="${E(code)}" data-offer-field="payment_frequency" placeholder="Frekvence" value="${E(o.payment_frequency || state.questionnaire?.payment_frequency || 'ročně')}">
+    </th>`;
+  }
+
+  function offerCell515(code, r){
+    const k = riskKey515(r);
+    const x = riskOffer515(code, k);
+    const cls = statusClass515(x.status);
+    return `<td data-cell="${E(code)}__${E(k)}" class="offer-cell-515 status-${cls}">
+      <select data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="status" onchange="setOfferRiskStatus('${E(code)}','${E(k)}',this.value)">
+        <option value="nutno ověřit" ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option>
+        <option value="splněno" ${x.status==='splněno'?'selected':''}>splněno</option>
+        <option value="omezeno" ${x.status==='omezeno'?'selected':''}>omezeno</option>
+        <option value="výluka" ${x.status==='výluka'?'selected':''}>výluka</option>
+      </select>
+      <input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="offered_limit" placeholder="Limit / částka" value="${E(x.offered_limit || '')}">
+      <input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="deductible" placeholder="Spoluúčast" value="${E(x.deductible || '')}">
+      <textarea data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="note" placeholder="Výluky / sublimity / poznámka">${E(x.note || '')}</textarea>
+    </td>`;
+  }
+
+  window.tabOffers = tabOffers = function(){
+    prune515();
+    const codes = selectedCodes515();
+    const risks = selectedRisks515();
+    if(!codes.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Karta 8 zobrazí pouze pojišťovny zaškrtnuté v kartě 5.</div>`;
+    if(!risks.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte rizika</h2><div class="info-box">Karta 8 zobrazí pouze rizika uložená v aktivním případu.</div>`;
+    const heads = codes.map(offerHead515).join('');
+    const rows = risks.map(r => `<tr>
+      <td class="risk-request-515"><b>${E(riskName515(r))}</b><span>${E(riskKey515(r))}</span><p>Požadavek: <strong>${E(r.requested_limit || r.limit || 'není uveden')}</strong></p><p>Spoluúčast: ${E(r.deductible || 'není uvedena')}</p></td>
+      ${codes.map(c => offerCell515(c, r)).join('')}
+    </tr>`).join('');
+    return `<p class="eyebrow">8. Nabídky v jedné tabulce</p>
+      <h2>Požadavek klienta × nabídky vybraných pojišťoven</h2>
+      <div class="broker-notice-515"><b>Kontrola zdroje dat:</b> ${codes.length} vybrané pojišťovny, ${risks.length} vybraná rizika. Nic se nedoplňuje z katalogu automaticky.</div>
+      <div class="tools sticky-tools-515">
+        <button class="btn secondary" onclick="selectedCodes515Public().forEach(c=>fulfillAllRisksForInsurer(c))">Všude nastavit splněno</button>
+        <button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button>
+        <button class="btn secondary" onclick="readCurrentTab();currentTab='comparison';renderWorkspace()">Přejít na porovnání</button>
+      </div>
+      <div class="offer-board-515"><table class="offer-table-515"><thead><tr><th class="risk-col-515">Požadavek klienta</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  window.selectedCodes515Public = selectedCodes515;
+
+  window.tabComparison = tabComparison = function(){
+    readOffers515();
+    const codes = selectedCodes515();
+    const risks = selectedRisks515();
+    if(!codes.length || !risks.length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve vyberte pojišťovny a rizika.</div>`;
+    const rows = risks.map(r => `<tr>
+      <td class="risk-request-515"><b>${E(riskName515(r))}</b><br>${E(r.requested_limit || r.limit || 'limit neuveden')}</td>
+      ${codes.map(code => { const x = riskOffer515(code, r); return `<td class="comparison-cell-515 status-${statusClass515(x.status)}"><b>${E(x.status || 'nutno ověřit')}</b><br>Limit: ${E(x.offered_limit || '–')}<br>Spoluúčast: ${E(x.deductible || '–')}<br>${E(x.note || '')}</td>`; }).join('')}
+    </tr>`).join('');
+    return `<p class="eyebrow">9. Porovnání</p><h2>Makléřské porovnání nabídek</h2><div class="broker-notice-515">Porovnání vychází výhradně z hodnot uložených na kartě 8.</div><div class="offer-board-515"><table class="comparison-table-515"><thead><tr><th>Riziko / požadavek</th>${codes.map(c=>`<th>${E(insurerName515(c))}<small>${E(c)}</small></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+
+  // Kritická oprava: uložení neposílá starý stav, ale aktuálně načtený DOM.
+  window.saveCase = saveCase = async function(){
+    if(currentTab === 'offers' || currentTab === 'comparison') readOffers515();
+    else if(typeof oldRead515 === 'function') oldRead515();
+
+    prune515();
+    if(!S(state.client && state.client.name)){
+      if(typeof toast === 'function') toast('Nejdříve vyplňte název klienta.');
+      currentTab='client';
+      if(typeof showView === 'function') showView('workspace');
+      return;
+    }
+    state.title = state.title || `Obchodní případ – ${state.client.name}`;
+    try{
+      const data = await fetchJson('/api/inquiries', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(state)
+      });
+      if(data && data.id) state.id = data.id;
+      if(typeof toast === 'function') toast((data && data.message) || 'Případ uložen.');
+      if(typeof loadCases === 'function') await loadCases(false);
+      if(typeof renderAll === 'function') renderAll();
+      return data;
+    }catch(e){
+      if(typeof toast === 'function') toast('Uložení se nepodařilo: ' + (e && e.message ? e.message : e));
+      throw e;
+    }
+  };
+
+  document.addEventListener('input', e => {
+    if(e.target && e.target.matches('[data-offer-code],[data-risk-offer-code]')) readOffers515();
+  }, true);
+  document.addEventListener('change', e => {
+    if(e.target && e.target.matches('[data-offer-code],[data-risk-offer-code]')) readOffers515();
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const vb = document.getElementById('versionBadge');
+    if(vb) vb.textContent = vb.textContent.replace(/Business Risk Hub [0-9.]+/, 'Business Risk Hub ' + VER);
+  });
+})();
+
+/* === BRH 5.1.7 – karta 8/9 podle schváleného ASTORIE vizuálu; žádná funkční změna mimo karty 8 a 9 === */
+(function(){
+  const VER='5.1.7';
+  const S=v=>String(v??'').trim();
+  const A=v=>Array.isArray(v)?v:[];
+  const E=v=>S(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const uniq=arr=>[...new Set(A(arr).map(S).filter(Boolean))];
+  function codeOf(ins){return S(ins.code||ins.short_code||ins.id||ins.zkratka||ins.name).toUpperCase();}
+  function selectedCodes517(){
+    state.selected_insurers=uniq(state.selected_insurers||[]);
+    const catalog=new Set(A(CATALOG.insurers).map(codeOf));
+    return state.selected_insurers.filter(c=>!catalog.size||catalog.has(c)||state.offers?.[c]||state.insurer_requests?.[c]);
+  }
+  function insurerBy517(code){return A(CATALOG.insurers).find(i=>codeOf(i)===S(code))||{code,name:code};}
+  function insurerName517(code){return insurerBy517(code).name||code;}
+  function rk517(r){return S(r.risk_key||r.key||r.id||r.name||r.label);}
+  function rn517(r){return S(r.name||r.risk_name||r.label||r.risk_key||r.key);}
+  function risks517(){return A(state.risks).filter(r=>rk517(r)&&rn517(r));}
+  function offer517(code){
+    code=S(code); state.offers ||= {}; state.offers[code] ||= {premium:'',deductible:'',valid_until:'',insurance_start:'',insurance_period:'',payment_frequency:'',territory:'',workflow_status:'rozpracováno',risks:{}};
+    state.offers[code].risks ||= {}; return state.offers[code];
+  }
+  function prune517(){
+    const codes=new Set(selectedCodes517());
+    if(state.offers) Object.keys(state.offers).forEach(c=>{if(!codes.has(c)) delete state.offers[c];});
+    if(state.insurer_requests) Object.keys(state.insurer_requests).forEach(c=>{if(!codes.has(c)) delete state.insurer_requests[c];});
+    const keep=new Set(risks517().map(rk517));
+    Object.values(state.offers||{}).forEach(o=>{o.risks ||= {}; Object.keys(o.risks).forEach(k=>{if(!keep.has(k)) delete o.risks[k];});});
+  }
+  function riskOffer517(code,key){
+    const o=offer517(code); const k=S(key); o.risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:'',exclusions:'',sublimits:'',source_reference:''}; return o.risks[k];
+  }
+  function statusClass517(st){
+    st=S(st).toLowerCase();
+    if(st==='splněno') return 'splneno';
+    if(st==='omezeno') return 'omezeno';
+    if(st==='výluka'||st==='vyluka') return 'vyluka';
+    return 'overit';
+  }
+  function read517(){
+    document.querySelectorAll('[data-offer-code]').forEach(el=>{const o=offer517(el.dataset.offerCode); const f=el.dataset.offerField; if(f) o[f]=el.value;});
+    document.querySelectorAll('[data-risk-offer-code]').forEach(el=>{const x=riskOffer517(el.dataset.riskOfferCode,el.dataset.riskKey); const f=el.dataset.riskField; if(f) x[f]=el.value;});
+    prune517();
+  }
+  window.brh517ReadOffers=read517;
+  const oldRead=window.readCurrentTab;
+  window.readCurrentTab=readCurrentTab=function(){ if(oldRead) oldRead(); if(currentTab==='offers'||currentTab==='comparison') read517(); };
+  const oldSave=window.saveCase;
+  window.saveCase=saveCase=async function(){ if(currentTab==='offers'||currentTab==='comparison') read517(); return oldSave ? oldSave() : undefined; };
+  window.setOfferRiskStatus=function(code,key,status){
+    const r=risks517().find(x=>rk517(x)===S(key))||{}; const x=riskOffer517(code,key); x.status=status;
+    if(status==='splněno'){
+      if(!x.offered_limit) x.offered_limit=r.requested_limit||r.limit||'';
+      if(!x.deductible) x.deductible=r.deductible||state.questionnaire?.deductible_preference||'';
+    }
+    const cell=document.querySelector(`[data-cell="${CSS.escape(S(code))}__${CSS.escape(S(key))}"]`);
+    if(cell) cell.className='offer-cell-517 status-'+statusClass517(status);
+  };
+  window.fulfillAllRisksForInsurer=function(code){
+    read517(); const risks=risks517(); const o=offer517(code); const all=risks.length&&risks.every(r=>(o.risks[rk517(r)]||{}).status==='splněno');
+    risks.forEach(r=>{const k=rk517(r); const x=riskOffer517(code,k); if(all){x.status='nutno ověřit'; x.offered_limit=''; x.deductible='';}else{x.status='splněno'; x.offered_limit=r.requested_limit||r.limit||''; x.deductible=r.deductible||state.questionnaire?.deductible_preference||'';}});
+    renderWorkspace(); if(typeof toast==='function') toast(all?'Splnění pojišťovny bylo zrušeno.':'Pojišťovna označena jako splňující vybraná rizika.');
+  };
+  function allDone517(code){const o=offer517(code); const risks=risks517(); return risks.length&&risks.every(r=>(o.risks[rk517(r)]||{}).status==='splněno');}
+  function head517(code){
+    const o=offer517(code); const all=allDone517(code); const wf=o.workflow_status||o.status||'rozpracováno';
+    return `<th class="offer-head-517 ${all?'is-selected':''}">
+      <div class="insurer-title-517"><strong>${E(insurerName517(code))}</strong><small>${E(code)}</small></div>
+      <select data-offer-code="${E(code)}" data-offer-field="workflow_status">
+        <option value="rozpracováno" ${wf==='rozpracováno'?'selected':''}>rozpracováno</option>
+        <option value="nabídka přijata" ${wf==='nabídka přijata'?'selected':''}>nabídka přijata</option>
+        <option value="finální nabídka" ${wf==='finální nabídka'?'selected':''}>finální nabídka</option>
+        <option value="zamítnuto" ${wf==='zamítnuto'?'selected':''}>zamítnuto</option>
+      </select>
+      <button type="button" class="offer-ok-btn-517 ${all?'active':''}" onclick="fulfillAllRisksForInsurer('${E(code)}')">${all?'✓ Splňuje vybraná rizika':'Tato pojišťovna splňuje vše'}</button>
+      <input data-offer-code="${E(code)}" data-offer-field="premium" placeholder="Pojistné" value="${E(o.premium||'')}">
+      <input data-offer-code="${E(code)}" data-offer-field="insurance_start" type="date" value="${E(o.insurance_start||state.questionnaire?.insurance_start||'')}">
+      <input data-offer-code="${E(code)}" data-offer-field="payment_frequency" placeholder="Frekvence" value="${E(o.payment_frequency||state.questionnaire?.payment_frequency||'ročně')}">
+    </th>`;
+  }
+  function cell517(code,r){
+    const k=rk517(r); const x=riskOffer517(code,k); const cls=statusClass517(x.status);
+    return `<td data-cell="${E(code)}__${E(k)}" class="offer-cell-517 status-${cls}">
+      <select data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="status" onchange="setOfferRiskStatus('${E(code)}','${E(k)}',this.value)">
+        <option value="nutno ověřit" ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option>
+        <option value="splněno" ${x.status==='splněno'?'selected':''}>splněno</option>
+        <option value="omezeno" ${x.status==='omezeno'?'selected':''}>omezeno</option>
+        <option value="výluka" ${x.status==='výluka'?'selected':''}>výluka</option>
+      </select>
+      <input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="offered_limit" placeholder="Limit / částka" value="${E(x.offered_limit||'')}">
+      <input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="deductible" placeholder="Spoluúčast" value="${E(x.deductible||'')}">
+      <textarea data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="note" placeholder="Výluky / sublimity / poznámka">${E(x.note||'')}</textarea>
+    </td>`;
+  }
+  window.tabOffers=tabOffers=function(){
+    prune517(); const codes=selectedCodes517(); const risks=risks517();
+    if(!codes.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Karta 8 zobrazí pouze pojišťovny zaškrtnuté v kartě 5.</div>`;
+    if(!risks.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte rizika</h2><div class="info-box">Karta 8 zobrazí pouze rizika uložená v aktivním případu.</div>`;
+    const rows=risks.map(r=>`<tr><td class="risk-request-517"><b>${E(rn517(r))}</b><span>${E(rk517(r))}</span><p>Požadavek: <strong>${E(r.requested_limit||r.limit||'není uveden')}</strong></p><p>Spoluúčast: ${E(r.deductible||'není uvedena')}</p></td>${codes.map(c=>cell517(c,r)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Požadavek klienta × nabídky vybraných pojišťoven</h2><div class="broker-notice-517"><b>Kontrola zdroje dat:</b> ${codes.length} vybrané pojišťovny, ${risks.length} vybraná rizika. Nic se nedoplňuje z katalogu automaticky.</div><div class="tools sticky-tools-517"><button class="btn secondary" onclick="selectedCodes517Public().forEach(c=>fulfillAllRisksForInsurer(c))">Všude nastavit splněno</button><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="readCurrentTab();currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div><div class="offer-board-517"><table class="offer-table-517"><thead><tr><th class="risk-col-517">Požadavek klienta</th>${codes.map(head517).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  window.selectedCodes517Public=selectedCodes517;
+  window.tabComparison=tabComparison=function(){
+    read517(); const codes=selectedCodes517(); const risks=risks517();
+    if(!codes.length||!risks.length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve vyberte pojišťovny a rizika.</div>`;
+    const rows=risks.map(r=>`<tr><td class="risk-request-517"><b>${E(rn517(r))}</b><br>${E(r.requested_limit||r.limit||'limit neuveden')}</td>${codes.map(c=>{const x=riskOffer517(c,rk517(r));return `<td class="comparison-cell-517 status-${statusClass517(x.status)}"><b>${E(x.status||'nutno ověřit')}</b><br>Limit: ${E(x.offered_limit||'–')}<br>Spoluúčast: ${E(x.deductible||'–')}<br>${E(x.note||'')}</td>`;}).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Porovnání</p><h2>Makléřské porovnání nabídek</h2><div class="broker-notice-517">Porovnání vychází výhradně z hodnot uložených na kartě 8.</div><div class="offer-board-517"><table class="comparison-table-517"><thead><tr><th class="risk-col-517">Riziko / požadavek</th>${codes.map(c=>`<th class="${allDone517(c)?'is-selected':''}"><strong>${E(insurerName517(c))}</strong><small>${E(c)}</small></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  document.addEventListener('input',e=>{if(e.target&&e.target.matches('[data-offer-code],[data-risk-offer-code]')) read517();},true);
+  document.addEventListener('change',e=>{if(e.target&&e.target.matches('[data-offer-code],[data-risk-offer-code]')) read517();},true);
+  document.addEventListener('DOMContentLoaded',()=>{const vb=document.getElementById('versionBadge'); if(vb) vb.textContent=vb.textContent.replace(/Business Risk Hub [0-9.]+/,'Business Risk Hub '+VER);});
+})();
+
+
+/* === BRH 5.1.8 – cílená oprava karet 8/9/11: doplnění při samostatném Splněno, názvy pojišťoven a pojistné v porovnání, klientský souhrn === */
+(function(){
+  const VER='5.1.8';
+  const S=v=>String(v??'').trim();
+  const A=v=>Array.isArray(v)?v:[];
+  const E=v=>S(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const norm=v=>S(v).toUpperCase();
+
+  function catalogInsurers(){ return A(window.CATALOG?.insurers || CATALOG?.insurers); }
+  function codeOf518(ins){ return norm(ins?.code || ins?.short_code || ins?.id || ins?.zkratka || ins?.name); }
+  function selectedCodes518(){
+    const raw = A(state.selected_insurers).map(norm).filter(Boolean);
+    const catalog = catalogInsurers();
+    const known = new Map(catalog.map(i=>[codeOf518(i), i]));
+    const out=[];
+    raw.forEach(c=>{ if((known.size && known.has(c)) || state.offers?.[c] || state.offers?.[c.toLowerCase()] || state.insurer_requests?.[c] || state.insurer_requests?.[c.toLowerCase()]) out.push(c); });
+    state.selected_insurers = [...new Set(out)];
+    return state.selected_insurers;
+  }
+  function insurer518(code){ return catalogInsurers().find(i=>codeOf518(i)===norm(code)) || {code:norm(code), name:norm(code)}; }
+  function insurerName518(code){ return S(insurer518(code).name || code); }
+  function insurerCode518(code){ return norm(insurer518(code).code || insurer518(code).short_code || code); }
+  function riskKey518(r){ return S(r?.risk_key || r?.key || r?.id || r?.name || r?.label); }
+  function riskName518(r){ return S(r?.name || r?.risk_name || r?.label || r?.risk_key || r?.key); }
+  function risks518(){ return A(state.risks).filter(r=>riskKey518(r)&&riskName518(r)); }
+  function limitFromRisk518(r){
+    return S(r?.requested_limit || r?.limit || r?.insured_amount || r?.sum_insured || r?.amount || r?.pojistna_castka || r?.pojistna_suma || r?.recommended_limit || '');
+  }
+  function deductibleFromRisk518(r){ return S(r?.deductible || r?.requested_deductible || r?.spoluucast || state.questionnaire?.deductible_preference || ''); }
+  function normalizeOfferStore518(){
+    state.offers ||= {};
+    Object.keys(state.offers).forEach(k=>{
+      const up=norm(k);
+      if(up && up!==k){ state.offers[up] = Object.assign({}, state.offers[k], state.offers[up]||{}); delete state.offers[k]; }
+    });
+  }
+  function offer518(code){
+    normalizeOfferStore518(); code=norm(code); state.offers ||= {};
+    state.offers[code] ||= {premium:'',deductible:'',valid_until:'',insurance_start:'',insurance_period:'',payment_frequency:'',territory:'',workflow_status:'rozpracováno',risks:{}};
+    state.offers[code].risks ||= {}; return state.offers[code];
+  }
+  function riskOffer518(code,key){
+    const o=offer518(code); const k=S(key);
+    o.risks[k] ||= {status:'nutno ověřit',offered_limit:'',deductible:'',note:'',exclusions:'',sublimits:'',source_reference:''};
+    return o.risks[k];
+  }
+  function prune518(){
+    normalizeOfferStore518();
+    const codes=new Set(selectedCodes518());
+    Object.keys(state.offers||{}).forEach(c=>{ if(!codes.has(norm(c))) delete state.offers[c]; });
+    const keep=new Set(risks518().map(riskKey518));
+    Object.values(state.offers||{}).forEach(o=>{ o.risks ||= {}; Object.keys(o.risks).forEach(k=>{ if(!keep.has(k)) delete o.risks[k]; }); });
+  }
+  function statusClass518(st){ st=S(st).toLowerCase(); if(st==='splněno')return 'splneno'; if(st==='omezeno')return 'omezeno'; if(st==='výluka'||st==='vyluka')return 'vyluka'; return 'overit'; }
+  function fillRiskFromRequest518(code,key,force=false){
+    const r=risks518().find(x=>riskKey518(x)===S(key)) || {};
+    const x=riskOffer518(code,key);
+    const lim=limitFromRisk518(r), ded=deductibleFromRisk518(r);
+    if(force || !S(x.offered_limit)) x.offered_limit = lim;
+    if(force || !S(x.deductible)) x.deductible = ded;
+    return x;
+  }
+  function read518(){
+    document.querySelectorAll('[data-offer-code]').forEach(el=>{ const o=offer518(el.dataset.offerCode); const f=el.dataset.offerField; if(f) o[f]=el.value; });
+    document.querySelectorAll('[data-risk-offer-code]').forEach(el=>{ const x=riskOffer518(el.dataset.riskOfferCode,el.dataset.riskKey); const f=el.dataset.riskField; if(f) x[f]=el.value; });
+    prune518();
+  }
+  window.brh518ReadOffers=read518;
+  const prevRead=window.readCurrentTab;
+  window.readCurrentTab=readCurrentTab=function(){ if(prevRead) prevRead(); if(['offers','comparison','output'].includes(currentTab)) read518(); };
+  const prevSave=window.saveCase;
+  window.saveCase=saveCase=async function(){ if(['offers','comparison','output'].includes(currentTab)) read518(); return prevSave ? prevSave() : undefined; };
+
+  window.setOfferRiskStatus=function(code,key,status){
+    code=norm(code); read518(); const x=riskOffer518(code,key); x.status=status;
+    if(status==='splněno') fillRiskFromRequest518(code,key,true);
+    const cell=document.querySelector(`[data-cell="${CSS.escape(code)}__${CSS.escape(S(key))}"]`);
+    if(cell) cell.className='offer-cell-517 status-'+statusClass518(status);
+    const lim=document.querySelector(`[data-risk-offer-code="${CSS.escape(code)}"][data-risk-key="${CSS.escape(S(key))}"][data-risk-field="offered_limit"]`);
+    const ded=document.querySelector(`[data-risk-offer-code="${CSS.escape(code)}"][data-risk-key="${CSS.escape(S(key))}"][data-risk-field="deductible"]`);
+    if(lim) lim.value=x.offered_limit||''; if(ded) ded.value=x.deductible||'';
+  };
+  window.fulfillAllRisksForInsurer=function(code){
+    read518(); code=norm(code); const rs=risks518(); const o=offer518(code); const all=rs.length&&rs.every(r=>(o.risks[riskKey518(r)]||{}).status==='splněno');
+    rs.forEach(r=>{ const k=riskKey518(r); const x=riskOffer518(code,k); if(all){x.status='nutno ověřit'; x.offered_limit=''; x.deductible='';} else {x.status='splněno'; fillRiskFromRequest518(code,k,true);} });
+    renderWorkspace(); if(typeof toast==='function') toast(all?'Splnění pojišťovny bylo zrušeno.':'Pojišťovna označena jako splňující vybraná rizika.');
+  };
+  function allDone518(code){ const o=offer518(code); const rs=risks518(); return rs.length&&rs.every(r=>(o.risks[riskKey518(r)]||{}).status==='splněno'); }
+  function head518(code){
+    code=norm(code); const o=offer518(code); const all=allDone518(code); const wf=o.workflow_status||o.status||'rozpracováno';
+    return `<th class="offer-head-517 ${all?'is-selected':''}"><div class="insurer-title-517"><strong>${E(insurerName518(code))}</strong><small>${E(insurerCode518(code))}</small></div><select data-offer-code="${E(code)}" data-offer-field="workflow_status"><option value="rozpracováno" ${wf==='rozpracováno'?'selected':''}>rozpracováno</option><option value="nabídka přijata" ${wf==='nabídka přijata'?'selected':''}>nabídka přijata</option><option value="finální nabídka" ${wf==='finální nabídka'?'selected':''}>finální nabídka</option><option value="zamítnuto" ${wf==='zamítnuto'?'selected':''}>zamítnuto</option></select><button type="button" class="offer-ok-btn-517 ${all?'active':''}" onclick="fulfillAllRisksForInsurer('${E(code)}')">${all?'✓ Splňuje vybraná rizika':'Tato pojišťovna splňuje vše'}</button><input data-offer-code="${E(code)}" data-offer-field="premium" placeholder="Pojistné" value="${E(o.premium||'')}"><input data-offer-code="${E(code)}" data-offer-field="insurance_start" type="date" value="${E(o.insurance_start||state.questionnaire?.insurance_start||'')}"><input data-offer-code="${E(code)}" data-offer-field="payment_frequency" placeholder="Frekvence" value="${E(o.payment_frequency||state.questionnaire?.payment_frequency||'ročně')}"></th>`;
+  }
+  function cell518(code,r){
+    code=norm(code); const k=riskKey518(r); const x=riskOffer518(code,k); const cls=statusClass518(x.status);
+    return `<td data-cell="${E(code)}__${E(k)}" class="offer-cell-517 status-${cls}"><select data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="status" onchange="setOfferRiskStatus('${E(code)}','${E(k)}',this.value)"><option value="nutno ověřit" ${x.status==='nutno ověřit'?'selected':''}>nutno ověřit</option><option value="splněno" ${x.status==='splněno'?'selected':''}>splněno</option><option value="omezeno" ${x.status==='omezeno'?'selected':''}>omezeno</option><option value="výluka" ${x.status==='výluka'?'selected':''}>výluka</option></select><input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="offered_limit" placeholder="Limit / částka" value="${E(x.offered_limit||'')}"><input data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="deductible" placeholder="Spoluúčast" value="${E(x.deductible||'')}"><textarea data-risk-offer-code="${E(code)}" data-risk-key="${E(k)}" data-risk-field="note" placeholder="Výluky / sublimity / poznámka">${E(x.note||'')}</textarea></td>`;
+  }
+  window.tabOffers=tabOffers=function(){
+    prune518(); const codes=selectedCodes518(); const rs=risks518();
+    if(!codes.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte pojišťovny</h2><div class="info-box">Karta 8 zobrazí pouze pojišťovny zaškrtnuté v kartě 5.</div>`;
+    if(!rs.length) return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Nejdříve vyberte rizika</h2><div class="info-box">Karta 8 zobrazí pouze rizika uložená v aktivním případu.</div>`;
+    const rows=rs.map(r=>`<tr><td class="risk-request-517"><b>${E(riskName518(r))}</b><span>${E(riskKey518(r))}</span><p>Požadavek: <strong>${E(limitFromRisk518(r)||'není uveden')}</strong></p><p>Spoluúčast: ${E(deductibleFromRisk518(r)||'není uvedena')}</p></td>${codes.map(c=>cell518(c,r)).join('')}</tr>`).join('');
+    return `<p class="eyebrow">8. Nabídky v jedné tabulce</p><h2>Požadavek klienta × nabídky vybraných pojišťoven</h2><div class="broker-notice-517"><b>Kontrola zdroje dat:</b> ${codes.length} vybrané pojišťovny, ${rs.length} vybraná rizika. Nic se nedoplňuje z katalogu automaticky.</div><div class="tools sticky-tools-517"><button class="btn secondary" onclick="selectedCodes518Public().forEach(c=>fulfillAllRisksForInsurer(c))">Všude nastavit splněno</button><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit nabídky</button><button class="btn secondary" onclick="readCurrentTab();currentTab='comparison';renderWorkspace()">Přejít na porovnání</button></div><div class="offer-board-517"><table class="offer-table-517"><thead><tr><th class="risk-col-517">Požadavek klienta</th>${codes.map(head518).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  window.selectedCodes518Public=selectedCodes518;
+  window.tabComparison=tabComparison=function(){
+    read518(); const codes=selectedCodes518(); const rs=risks518();
+    if(!codes.length||!rs.length) return `<p class="eyebrow">9. Porovnání</p><h2>Porovnání zatím nelze sestavit</h2><div class="info-box">Nejdříve vyberte pojišťovny a rizika.</div>`;
+    const rows=rs.map(r=>`<tr><td class="risk-request-517"><b>${E(riskName518(r))}</b><br>${E(limitFromRisk518(r)||'limit neuveden')}</td>${codes.map(c=>{const x=riskOffer518(c,riskKey518(r));return `<td class="comparison-cell-517 status-${statusClass518(x.status)}"><b>${E(x.status||'nutno ověřit')}</b><br>Limit: ${E(x.offered_limit||'–')}<br>Spoluúčast: ${E(x.deductible||'–')}<br>${E(x.note||'')}</td>`;}).join('')}</tr>`).join('');
+    return `<p class="eyebrow">9. Porovnání</p><h2>Makléřské porovnání nabídek</h2><div class="broker-notice-517">Porovnání vychází výhradně z hodnot uložených na kartě 8.</div><div class="offer-board-517"><table class="comparison-table-517"><thead><tr><th class="risk-col-517">Riziko / požadavek</th>${codes.map(c=>{const o=offer518(c);return `<th class="${allDone518(c)?'is-selected':''}"><strong>${E(insurerName518(c))}</strong><small>${E(insurerCode518(c))}</small><div class="premium-head-518">Pojistné: ${E(o.premium||'—')}</div></th>`;}).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  function offerSummaryRow518(c){
+    const o=offer518(c); const rs=risks518(); const fulfilled=rs.filter(r=>(o.risks?.[riskKey518(r)]||{}).status==='splněno').length;
+    const rec = norm(state.report?.client_selected_offer)===norm(c);
+    return `<tr class="${rec?'recommended-row-518':''}"><td><strong>${E(insurerName518(c))}</strong><br><span class="mini insurer-code-513">${E(insurerCode518(c))}</span></td><td>${E(o.premium||'—')}</td><td>${E(o.deductible||state.questionnaire?.deductible_preference||'—')}</td><td>${fulfilled}/${rs.length} rizik splněno<br><span class="badge">${E(o.workflow_status||'rozpracováno')}</span></td><td>${rec?'<strong>DOPORUČENO</strong>':E(o.workflow_status||'rozpracováno')}</td></tr>`;
+  }
+  window.renderClientOutput518=function(){
+    read518(); const codes=selectedCodes518(); const chosen=state.report?.client_selected_offer ? insurerName518(state.report.client_selected_offer) : 'Doporučení není potvrzeno';
+    const box=document.getElementById('tabContent') || document.getElementById('workspace') || document.querySelector('main'); if(!box) return;
+    box.innerHTML=`<p class="eyebrow">11. Klientský výstup</p><h2>Doporučení pojistného řešení pro klienta</h2><div class="client-output-518"><div class="report-grid"><div class="report-card"><h3>Klient</h3><p><strong>${E(state.client?.name||'—')}</strong></p><p>IČO: ${E(state.client?.ico||'—')} · DIČ: ${E(state.client?.dic||'—')}</p><p>${E(state.client?.address||'')}</p></div><div class="report-card"><h3>Doporučení poradce</h3><p><strong>${E(chosen)}</strong></p><p>${E(state.report?.client_choice_reason||state.report?.advisor_note||'Doporučení bude doplněno po vyhodnocení nabídek.')}</p></div><div class="report-card"><h3>Rizikový profil</h3><p>Činnost: ${E(state.activity?.name||'—')}</p><p>Počet porovnaných nabídek: ${codes.length}</p><p>Počet hodnocených rizik: ${risks518().length}</p></div></div><div class="section-soft"><h3>Souhrn nabídek</h3><table class="pro-table client-report-table"><thead><tr><th>Pojišťovna</th><th>Pojistné</th><th>Spoluúčast</th><th>Rozsah krytí</th><th>Doporučení</th></tr></thead><tbody>${codes.map(offerSummaryRow518).join('') || '<tr><td colspan="5">Nabídky zatím nejsou uloženy na kartě 8.</td></tr>'}</tbody></table></div><div class="section-soft"><h3>Obchodní komentář pro klienta</h3><textarea id="advisor_note" placeholder="Doplňte finální komentář poradce pro klientský výstup...">${E(state.report?.advisor_note||'')}</textarea><div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit klientský výstup</button><button class="btn secondary" onclick="currentTab='audit';renderWorkspace()">Zkontrolovat úplnost</button></div></div></div>`;
+  };
+  window.tabOutput=tabOutput=function(){ setTimeout(()=>renderClientOutput518(),0); return `<p class="eyebrow">11. Klientský výstup</p><h2>Načítám klientský výstup…</h2>`; };
+  document.addEventListener('input',e=>{ if(e.target&&e.target.matches('[data-offer-code],[data-risk-offer-code]')) read518(); },true);
+  document.addEventListener('change',e=>{ if(e.target&&e.target.matches('[data-offer-code],[data-risk-offer-code]')) read518(); },true);
+  document.addEventListener('DOMContentLoaded',()=>{ const vb=document.getElementById('versionBadge'); if(vb) vb.textContent=vb.textContent.replace(/Business Risk Hub [0-9.]+/,'Business Risk Hub '+VER); });
+})();
+
+
+/* BRH 5.2.3 – ASTORIE Projektové centrum / Intuitivní Trello SAFE
+   Rozšíření pouze interního projektového centra. Obchodní případy, karty 8/9/11 a pojistné moduly se nemění. */
+(function(){
+  const APC_COLUMNS = [
+    ['napady','Nápady'], ['ke_schvaleni','Ke schválení'], ['zadani','Zadání'], ['vyvoj','Vývoj'],
+    ['testovani','Testování'], ['nasazeni','Nasazení'], ['hotovo','Hotovo']
+  ];
+  const PRIORITIES = ['Všechny priority','Nízká','Standardní','Vysoká','Kritická'];
+  const MODULE_TEMPLATES = {
+    insuranceModule: {
+      title:'Šablona nového modulu pojištění',
+      tasks:[
+        ['Zpracovat zadání modulu','Vymezit účel modulu, cílové uživatele, rozsah dat a navazující výstupy.','zadani','Vysoká','[ ] Popis cíle modulu\n[ ] Role uživatelů\n[ ] Povinná pole\n[ ] Vazby na výstupy'],
+        ['Připravit datový model a číselníky','Definovat produkty, rizika, limity, dokumenty, textace a administrační položky.','zadani','Vysoká','[ ] Tabulky / JSON struktury\n[ ] Povinné číselníky\n[ ] Admin editace\n[ ] Testovací data'],
+        ['Navrhnout pracovní workflow poradce','Popsat kroky práce od zadání klienta po klientský výstup.','vyvoj','Vysoká','[ ] Vstupní dotazník\n[ ] Poptávky\n[ ] Nabídky\n[ ] Porovnání\n[ ] Doporučení\n[ ] Klientský výstup'],
+        ['Napojit textace a dokumenty','Připravit šablony textací, seznam požadovaných dokumentů a pravidla doplnění do výstupů.','vyvoj','Standardní','[ ] Textace\n[ ] Dokumenty\n[ ] Exporty\n[ ] Interní poznámky'],
+        ['Otestovat modul na vzorovém případu','Provést regresní kontrolu, uložit testovací záznam a ověřit výstupy.','testovani','Kritická','[ ] Uložení dat\n[ ] Filtry\n[ ] Porovnání\n[ ] Výstup pro klienta\n[ ] Bez regrese ostatních modulů'],
+        ['Připravit release poznámky','Sepsat změny, rizika, postup nasazení a rollback.','nasazeni','Standardní','[ ] Changelog\n[ ] Kontrolní seznam\n[ ] Verze v aplikaci\n[ ] Rollback poznámka']
+      ]
+    }
+  };
+
+  let apc = {
+    projects:[], tasks:[], comments:[], activity:[],
+    columns:APC_COLUMNS.map(([key,title])=>({key,title})),
+    selectedProjectId:'all', search:'', priority:'Všechny priority', assignee:'all', focus:'all'
+  };
+
+  const oldShowView = window.showView || showView;
+  window.showView = showView = function(view){ oldShowView(view); if(view==='projectCenter') loadProjectCenter(false); };
+
+  function val(x){ return x==null ? '' : String(x); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function currentPerson(){ return ((state.adviser||{}).name || (state.adviser||{}).email || '').trim(); }
+  function same(a,b){ return String(a||'').toLowerCase().trim()===String(b||'').toLowerCase().trim(); }
+  function safeEsc(x){ return (typeof esc==='function') ? esc(x) : String(x??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function projectOptions(){ return `<option value="all">Všechny projekty</option>` + (apc.projects||[]).map(p=>`<option value="${p.id}" ${String(apc.selectedProjectId)===String(p.id)?'selected':''}>${safeEsc(p.title||'Projekt')}</option>`).join(''); }
+  function priorityOptions(){ return PRIORITIES.map(p=>`<option ${apc.priority===p?'selected':''}>${p}</option>`).join(''); }
+  function assigneeOptions(){
+    const people = [...new Set((apc.tasks||[]).map(t=>val(t.assignee_name).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'));
+    return `<option value="all">Všechny osoby</option>` + people.map(x=>`<option value="${safeEsc(x)}" ${apc.assignee===x?'selected':''}>${safeEsc(x)}</option>`).join('');
+  }
+  function apcPriorityClass(p){ const x=String(p||'').toLowerCase(); if(x.includes('krit')) return 'critical'; if(x.includes('vys')) return 'high'; if(x.includes('níz')) return 'low'; return 'standard'; }
+  function apcProjectById(id){ return (apc.projects||[]).find(p=>String(p.id)===String(id))||{}; }
+  function apcTaskComments(id){ return (apc.comments||[]).filter(c=>String(c.task_id)===String(id)); }
+  function apcTaskChecklist(t){ try{ return Array.isArray(t.checklist)?t.checklist:JSON.parse(t.checklist||'[]'); }catch(e){ return []; } }
+  function isDoneTask(t){ return ['hotovo','archiv'].includes(String(t.column_key||'')); }
+  function isOverdue(t){ return !!(t.due_date && t.due_date < todayISO() && !isDoneTask(t)); }
+  function taskHaystack(t){ return (typeof norm==='function'?norm:String)([t.title,t.description,t.assignee_name,apcProjectById(t.project_id).title,t.priority,t.column_key].join(' ')).toLowerCase(); }
+  function apcFilteredTasks(){
+    const q=(typeof norm==='function'?norm:String)(apc.search||'').toLowerCase();
+    return (apc.tasks||[]).filter(t=>{
+      if(apc.selectedProjectId!=='all' && String(t.project_id)!==String(apc.selectedProjectId)) return false;
+      if(apc.priority && apc.priority!=='Všechny priority' && !same(t.priority,apc.priority)) return false;
+      if(apc.assignee && apc.assignee!=='all' && !same(t.assignee_name,apc.assignee)) return false;
+      if(apc.focus==='mine' && currentPerson() && !same(t.assignee_name,currentPerson())) return false;
+      if(apc.focus==='overdue' && !isOverdue(t)) return false;
+      if(apc.focus==='critical' && !String(t.priority||'').toLowerCase().includes('krit')) return false;
+      if(!q) return true;
+      return taskHaystack(t).includes(q);
+    });
+  }
+  function projectTasks(projectId){ return (apc.tasks||[]).filter(t=>String(t.project_id)===String(projectId)); }
+  function projectProgress(projectId){ const ts=projectTasks(projectId); if(!ts.length) return 0; const done=ts.filter(isDoneTask).length; return Math.round(done/ts.length*100); }
+  function projectRiskClass(p){ const ts=projectTasks(p.id); const overdue=ts.some(isOverdue); if(String(p.priority||'').toLowerCase().includes('krit') || overdue || p.status==='Riziko') return 'critical'; if(String(p.priority||'').toLowerCase().includes('vys')) return 'high'; return 'standard'; }
+  function apcDashboardMetrics(){ const tasks=apcFilteredTasks(); return {projects:(apc.projects||[]).length, active:(apc.projects||[]).filter(p=>!['Dokončeno','Archiv'].includes(p.status)).length, critical:tasks.filter(t=>String(t.priority).toLowerCase().includes('krit')).length, overdue:tasks.filter(isOverdue).length, mine:tasks.filter(t=>currentPerson() && same(t.assignee_name,currentPerson())).length}; }
+  function apcNextMilestones(){ return (apc.projects||[]).filter(p=>p.due_date).sort((a,b)=>String(a.due_date).localeCompare(String(b.due_date))).slice(0,5); }
+
+  window.loadProjectCenter = async function(showToast=true){
+    try{ const data = await fetchJson('/api/project-center'); apc.projects = data.projects||[]; apc.tasks = data.tasks||[]; apc.comments = data.comments||[]; apc.activity=data.activity||[]; apc.columns = data.columns||apc.columns; renderProjectCenter(); if(showToast) toast('Projektové centrum načteno.'); }
+    catch(e){ toast('Projektové centrum se nepodařilo načíst: '+e.message); renderProjectCenter(); }
+  };
+
+  window.apcSetFocus=function(focus){ apc.focus = focus || 'all'; renderProjectCenter(); };
+  window.apcSetMine=function(){ const me=currentPerson(); if(!me){ toast('Neznám aktuálního uživatele.'); return; } apc.assignee=me; apc.focus='mine'; renderProjectCenter(); };
+
+  window.renderProjectCenter = function(){
+    const box=$('projectCenterBox'); if(!box) return;
+    const m=apcDashboardMetrics();
+    box.innerHTML=`
+      <div class="apc-head apc-head-plus apc-head-523">
+        <div><p class="eyebrow">ASTORIE PROJECT CENTER</p><h1>Projektové centrum ASTORIE</h1><p class="muted">Trello nástěnka pro řízení vývoje nových modulů pojištění. Každý poradce má rychle vidět, co má udělat, kdo je odpovědný a co blokuje další krok.</p></div>
+        <div class="tools apc-main-actions"><button class="btn primary" onclick="apcOpenModuleWizard()">+ Nový modul pojištění</button><button class="btn secondary" onclick="apcOpenTaskForm()">+ Nový úkol</button><button class="btn ghost" onclick="loadProjectCenter(true)">Obnovit</button></div>
+      </div>
+      <div class="apc-guide-523">
+        <div><b>1. Vyber projekt</b><span>např. Odpovědnost, Majetek, Vozidla</span></div>
+        <div><b>2. Přesuň kartu</b><span>drag & drop mezi sloupci jako v Trellu</span></div>
+        <div><b>3. Otevři detail</b><span>doplň checklist, komentář a termín</span></div>
+      </div>
+      <div class="apc-metrics apc-metrics-523"><button onclick="apcSetFocus('all')" class="${apc.focus==='all'?'active':''}"><b>${m.projects}</b><span>projektů</span></button><button onclick="apcSetMine()" class="${apc.focus==='mine'?'active':''}"><b>${m.mine}</b><span>moje úkoly</span></button><button onclick="apcSetFocus('critical')" class="${apc.focus==='critical'?'active':''}"><b>${m.critical}</b><span>kritických</span></button><button onclick="apcSetFocus('overdue')" class="${apc.focus==='overdue'?'active':''}"><b>${m.overdue}</b><span>po termínu</span></button></div>
+      ${apcPortfolioStrip()}
+      <div class="apc-toolbar apc-toolbar-plus apc-toolbar-523">
+        <label>Projekt<select onchange="apc.selectedProjectId=this.value;renderProjectCenter()">${projectOptions()}</select></label>
+        <label>Priorita<select onchange="apc.priority=this.value;renderProjectCenter()">${priorityOptions()}</select></label>
+        <label>Odpovědná osoba<select onchange="apc.assignee=this.value;apc.focus='all';renderProjectCenter()">${assigneeOptions()}</select></label>
+        <label>Vyhledat<input placeholder="Hledat modul, úkol, odpovědnou osobu…" value="${safeEsc(apc.search||'')}" oninput="apc.search=this.value;renderProjectCenter()"></label>
+      </div>
+      <div class="apc-board apc-board-522 apc-board-523">${(apc.columns||[]).map(c=>apcColumn(c)).join('')}</div>
+      <div class="apc-lower-grid apc-lower-grid-523">${apcRoadmap()}${apcActivityFeed()}</div>
+      <div id="apcEditor" class="apc-editor hidden"></div>`;
+  };
+
+  function apcPortfolioStrip(){
+    const ms=apcNextMilestones();
+    return `<section class="apc-portfolio apc-portfolio-523"><div><p class="eyebrow">Roadmapa modulů</p><h2>Řízení vývoje nových modulů pojištění</h2><p>Modul se zakládá přes průvodce. Systém připraví standardní úkoly: zadání, data, workflow, textace/dokumenty, test, release.</p></div><div class="apc-milestones">${ms.length?ms.map(p=>`<span><b>${safeEsc(p.title)}</b><em>${safeEsc(p.due_date)}</em></span>`).join(''):'<span><b>Bez termínovaných milníků</b><em>Doplňte termíny projektů</em></span>'}</div></section>`;
+  }
+  function apcColumn(c){
+    const tasks=apcFilteredTasks().filter(t=>(t.column_key||'napady')===c.key);
+    return `<section class="apc-column apc-column-523" ondragover="event.preventDefault()" ondrop="apcDropTask(event,'${c.key}')"><div class="apc-column-head"><strong>${safeEsc(c.title)}</strong><span>${tasks.length}</span></div><div class="apc-column-help">${columnHelp(c.key)}</div><div class="apc-column-body">${tasks.length?tasks.map(apcTaskCard).join(''):`<div class="apc-empty">Sem přesuňte úkol, až bude ve fázi „${safeEsc(c.title)}“.</div>`}</div></section>`;
+  }
+  function columnHelp(key){ return ({napady:'Náměty a návrhy',ke_schvaleni:'Čeká na rozhodnutí',zadani:'Připravuje se přesné zadání',vyvoj:'Pracuje se na řešení',testovani:'Kontrola a připomínky',nasazeni:'Připraveno k vydání',hotovo:'Uzavřeno'})[key]||''; }
+  function apcTaskCard(t){
+    const p=apcProjectById(t.project_id); const overdue=isOverdue(t); const cc=apcTaskComments(t.id).length; const cl=apcTaskChecklist(t); const done=cl.filter(x=>x.done).length; const prog=cl.length?Math.round(done/cl.length*100):0;
+    return `<article class="apc-card apc-card-523 ${overdue?'overdue':''}" draggable="true" ondragstart="apcDragTask(event,${t.id})" onclick="apcOpenTaskForm(${t.id})">
+      <div class="apc-card-top"><span class="apc-priority ${apcPriorityClass(t.priority)}">${safeEsc(t.priority||'Standardní')}</span>${overdue?'<span class="apc-alert">Po termínu</span>':''}</div>
+      <h3>${safeEsc(t.title||'Úkol')}</h3><p>${safeEsc(t.description||'')}</p>
+      <div class="apc-meta"><span>${safeEsc(p.title||'Bez projektu')}</span><span>${safeEsc(t.assignee_name||'Nepřiřazeno')}</span></div>
+      ${cl.length?`<div class="apc-progress apc-progress-card"><i style="width:${prog}%"></i></div><small>${done}/${cl.length} bodů checklistu hotovo</small>`:''}
+      <div class="apc-card-foot">${t.due_date?`<span class="apc-due ${overdue?'bad':''}">Termín: ${safeEsc(t.due_date)}</span>`:'<span class="apc-due">Bez termínu</span>'}${cc?`<span class="apc-chip">${cc} koment.</span>`:''}<button class="apc-open-chip" type="button">Otevřít</button></div>
+    </article>`;
+  }
+  function apcRoadmap(){
+    const rows=(apc.projects||[]).map(p=>{ const ts=projectTasks(p.id); const prog=projectProgress(p.id); const risk=projectRiskClass(p); return `<tr class="apc-road-${risk}"><td><strong>${safeEsc(p.title||'Projekt')}</strong><br><span>${safeEsc(p.description||'')}</span></td><td>${safeEsc(p.owner_name||'—')}</td><td><span class="apc-priority ${apcPriorityClass(p.priority)}">${safeEsc(p.priority||'Standardní')}</span></td><td>${safeEsc(p.status||'—')}</td><td>${safeEsc(p.version_target||'—')}</td><td>${ts.length} úkolů<br><div class="apc-progress"><i style="width:${prog}%"></i></div><small>${prog}% hotovo</small></td><td><button class="btn mini" onclick="apcOpenProjectForm(${p.id})">Upravit</button><button class="btn mini secondary" onclick="apcApplyTemplate(${p.id})">Šablona</button></td></tr>`; }).join('');
+    return `<section class="apc-roadmap"><div class="apc-section-head"><div><p class="eyebrow">Roadmapa vývoje</p><h2>Přehled projektů a modulů</h2></div><button class="btn secondary" onclick="apcOpenProjectForm()">+ Přidat projekt</button></div><table class="pro-table apc-roadmap-table"><thead><tr><th>Projekt / modul</th><th>Odpovědný</th><th>Priorita</th><th>Stav</th><th>Verze</th><th>Dokončenost</th><th>Akce</th></tr></thead><tbody>${rows||'<tr><td colspan="7">Zatím není založen žádný projekt.</td></tr>'}</tbody></table></section>`;
+  }
+  function apcActivityFeed(){
+    const items=(apc.activity||[]).slice(0,12).map(a=>`<div class="apc-activity-item"><b>${safeEsc(apcActionName(a.action))}</b><span>${safeEsc(a.entity_type||'')} #${safeEsc(a.entity_id||'')}</span><small>${safeEsc((a.created_at||'').slice(0,16).replace('T',' '))}</small></div>`).join('');
+    return `<section class="apc-activity"><div class="apc-section-head"><div><p class="eyebrow">Audit změn</p><h2>Poslední aktivita</h2></div></div>${items||'<div class="apc-empty">Zatím bez aktivity.</div>'}</section>`;
+  }
+  function apcActionName(a){ return ({create:'Vytvořeno',update:'Upraveno',move:'Přesunuto',comment:'Komentář'})[a]||a||'Změna'; }
+
+  window.apcDragTask=function(ev,id){ ev.dataTransfer.setData('text/plain',String(id)); };
+  window.apcDropTask=async function(ev,column){ ev.preventDefault(); const id=ev.dataTransfer.getData('text/plain'); const t=(apc.tasks||[]).find(x=>String(x.id)===String(id)); if(!t) return; const old=t.column_key; t.column_key=column; renderProjectCenter(); try{ await fetchJson(`/api/project-center/tasks/${id}/move`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({column_key:column,actor_email:(state.adviser||{}).email||''})}); }catch(e){ t.column_key=old; renderProjectCenter(); toast('Přesun se nepodařilo uložit: '+e.message); } };
+
+  window.apcApplyTemplate=async function(projectId){
+    const pid=projectId || (apc.selectedProjectId!=='all'?apc.selectedProjectId:(apc.projects[0]||{}).id); if(!pid){ toast('Nejdříve založte projekt.'); return; }
+    const tpl=MODULE_TEMPLATES.insuranceModule; const p=apcProjectById(pid); if(!confirm(`Vložit do projektu "${p.title||pid}" standardní šablonu úkolů pro nový modul pojištění?`)) return;
+    try{ for(const [title,description,column_key,priority,checklistText] of tpl.tasks){ await fetchJson('/api/project-center/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project_id:pid,title,description,column_key,priority,assignee_name:p.owner_name||'',due_date:'',checklist:textToChecklist(checklistText),actor_email:(state.adviser||{}).email||''})}); } await loadProjectCenter(false); toast('Šablona modulu byla vložena.'); }
+    catch(e){ toast('Šablonu se nepodařilo vložit: '+e.message); }
+  };
+
+  window.apcOpenModuleWizard=function(){
+    const box=$('apcEditor'); if(!box) return; box.classList.remove('hidden');
+    box.innerHTML=`<div class="apc-modal"><div class="apc-form apc-wizard"><button class="apc-close" onclick="$('apcEditor').classList.add('hidden')">×</button><p class="eyebrow">Nový modul pojištění</p><h2>Rychlé založení projektu</h2><p class="muted">Vyplňte pouze základ. Systém založí projekt a vloží standardní sadu úkolů pro vývoj modulu.</p><div class="grid2"><label>Název modulu<input id="apc_w_title" placeholder="např. Modul Majetek"></label><label>Odpovědná osoba<input id="apc_w_owner" placeholder="jméno odpovědné osoby"></label></div><label>Popis / cíl modulu<textarea id="apc_w_desc" placeholder="Co má modul řešit a jaký bude výstup pro poradce / vedení…"></textarea></label><div class="grid3"><label>Priorita<select id="apc_w_priority"><option>Standardní</option><option selected>Vysoká</option><option>Kritická</option><option>Nízká</option></select></label><label>Cílová verze<input id="apc_w_version" placeholder="např. 6.0.0"></label><label>Termín<input type="date" id="apc_w_due"></label></div><div class="apc-guide-compact"><b>Vytvoří se úkoly:</b> zadání, datový model, workflow, textace/dokumenty, testování, release.</div><div class="tools"><button class="btn primary" onclick="apcCreateModuleFromWizard()">Založit modul a úkoly</button><button class="btn secondary" onclick="$('apcEditor').classList.add('hidden')">Zavřít</button></div></div></div>`;
+  };
+  window.apcCreateModuleFromWizard=async function(){
+    const title=($('apc_w_title')?.value||'').trim(); if(!title){ toast('Doplňte název modulu.'); return; }
+    const payload={title,description:$('apc_w_desc')?.value||'',module_area:'Business Risk Hub',owner_name:$('apc_w_owner')?.value||'',status:'Příprava',priority:$('apc_w_priority')?.value||'Vysoká',version_target:$('apc_w_version')?.value||'',start_date:todayISO(),due_date:$('apc_w_due')?.value||'',actor_email:(state.adviser||{}).email||''};
+    try{
+      const saved=await fetchJson('/api/project-center/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const pid=saved.id; const tpl=MODULE_TEMPLATES.insuranceModule;
+      if(pid){ for(const [tt,description,column_key,priority,checklistText] of tpl.tasks){ await fetchJson('/api/project-center/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project_id:pid,title:tt,description,column_key,priority,assignee_name:payload.owner_name,due_date:'',checklist:textToChecklist(checklistText),actor_email:payload.actor_email})}); } }
+      $('apcEditor').classList.add('hidden'); apc.selectedProjectId=pid||'all'; await loadProjectCenter(true); toast('Modul byl založen včetně úkolů.');
+    }catch(e){ toast('Modul se nepodařilo založit: '+e.message); }
+  };
+
+  window.apcOpenProjectForm=function(id){
+    const p=id ? (apc.projects||[]).find(x=>String(x.id)===String(id)) : {title:'',description:'',owner_name:'',owner_email:'',status:'Aktivní',priority:'Standardní',module_area:'Business Risk Hub',version_target:'',start_date:'',due_date:'',tags:[]}; const box=$('apcEditor'); if(!box) return; box.classList.remove('hidden');
+    box.innerHTML=`<div class="apc-modal"><div class="apc-form"><button class="apc-close" onclick="$('apcEditor').classList.add('hidden')">×</button><p class="eyebrow">Projekt / modul</p><h2>${id?'Upravit projekt':'Nový projekt'}</h2><div class="grid2"><label>Název projektu<input id="apc_p_title" value="${safeEsc(p.title||'')}"></label><label>Oblast / systém<input id="apc_p_area" value="${safeEsc(p.module_area||'Business Risk Hub')}"></label></div><label>Popis<textarea id="apc_p_desc" placeholder="Co se má v modulu/projektu vytvořit a proč…">${safeEsc(p.description||'')}</textarea></label><div class="grid4"><label>Odpovědná osoba<input id="apc_p_owner" value="${safeEsc(p.owner_name||'')}"></label><label>Stav<select id="apc_p_status">${['Příprava','Aktivní','Čeká na podklady','Pozastaveno','Riziko','Dokončeno','Archiv'].map(x=>`<option ${p.status===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Priorita<select id="apc_p_priority">${['Nízká','Standardní','Vysoká','Kritická'].map(x=>`<option ${p.priority===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Cílová verze<input id="apc_p_version" value="${safeEsc(p.version_target||'')}" placeholder="např. 6.1.0"></label></div><div class="grid2"><label>Zahájení<input type="date" id="apc_p_start" value="${safeEsc(p.start_date||'')}"></label><label>Termín<input type="date" id="apc_p_due" value="${safeEsc(p.due_date||'')}"></label></div><div class="tools"><button class="btn primary" onclick="apcSaveProject(${id||'null'})">Uložit projekt</button>${id?`<button class="btn secondary" onclick="apcApplyTemplate(${id})">Vložit šablonu modulu</button>`:''}<button class="btn secondary" onclick="$('apcEditor').classList.add('hidden')">Zavřít</button></div></div></div>`;
+  };
+  window.apcSaveProject=async function(id){ const payload={id:id,title:$('apc_p_title').value,description:$('apc_p_desc').value,module_area:$('apc_p_area').value,owner_name:$('apc_p_owner').value,status:$('apc_p_status').value,priority:$('apc_p_priority').value,version_target:$('apc_p_version').value,start_date:$('apc_p_start').value,due_date:$('apc_p_due').value,actor_email:(state.adviser||{}).email||''}; try{ await fetchJson('/api/project-center/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); $('apcEditor').classList.add('hidden'); await loadProjectCenter(true); }catch(e){ toast('Projekt se nepodařilo uložit: '+e.message); } };
+  function checklistToText(list){ return (list||[]).map(x=>(x.done?'[x] ':'[ ] ')+(x.text||'')).join('\n'); }
+  function textToChecklist(txt){ return String(txt||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).map(line=>({done:/^\[x\]/i.test(line), text:line.replace(/^\[(x| )\]\s*/i,'')})); }
+  window.apcOpenTaskForm=function(id){
+    const t=id ? (apc.tasks||[]).find(x=>String(x.id)===String(id)) : {project_id:apc.selectedProjectId==='all'?(apc.projects[0]||{}).id:apc.selectedProjectId,title:'',description:'',column_key:'napady',priority:'Standardní',assignee_name:'',assignee_email:'',reporter_name:(state.adviser||{}).name||'',due_date:'',checklist:[]}; const taskComments=apcTaskComments(id); const cl=apcTaskChecklist(t); const box=$('apcEditor'); if(!box) return; box.classList.remove('hidden');
+    box.innerHTML=`<div class="apc-modal"><div class="apc-form"><button class="apc-close" onclick="$('apcEditor').classList.add('hidden')">×</button><p class="eyebrow">Úkol</p><h2>${id?'Detail úkolu':'Nový úkol'}</h2><div class="grid2"><label>Projekt<select id="apc_t_project">${(apc.projects||[]).map(p=>`<option value="${p.id}" ${String(t.project_id)===String(p.id)?'selected':''}>${safeEsc(p.title)}</option>`).join('')}</select></label><label>Sloupec<select id="apc_t_column">${(apc.columns||[]).map(c=>`<option value="${c.key}" ${t.column_key===c.key?'selected':''}>${safeEsc(c.title)}</option>`).join('')}</select></label></div><label>Název úkolu<input id="apc_t_title" value="${safeEsc(t.title||'')}"></label><label>Popis<textarea id="apc_t_desc" placeholder="Zadání, očekávaný výsledek, návaznosti…">${safeEsc(t.description||'')}</textarea></label><div class="grid4"><label>Priorita<select id="apc_t_priority">${['Nízká','Standardní','Vysoká','Kritická'].map(x=>`<option ${t.priority===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Odpovědná osoba<input id="apc_t_assignee" value="${safeEsc(t.assignee_name||'')}"></label><label>E-mail odpovědné osoby<input id="apc_t_email" value="${safeEsc(t.assignee_email||'')}"></label><label>Termín<input type="date" id="apc_t_due" value="${safeEsc(t.due_date||'')}"></label></div><label>Checklist <span class="muted">každý bod na nový řádek, hotovo lze psát jako [x]</span><textarea id="apc_t_checklist" placeholder="[ ] Připravit zadání\n[ ] Otestovat\n[x] Schváleno">${safeEsc(checklistToText(cl))}</textarea></label>${id?`<div class="apc-comments"><h3>Komentáře</h3>${taskComments.length?taskComments.map(c=>`<div class="apc-comment"><b>${safeEsc(c.author_name||'Uživatel')}</b><small>${safeEsc((c.created_at||'').slice(0,16).replace('T',' '))}</small><p>${safeEsc(c.text||'')}</p></div>`).join(''):'<div class="apc-empty">Zatím bez komentáře.</div>'}<label>Nový komentář<textarea id="apc_comment_text"></textarea></label><button class="btn secondary" onclick="apcSaveComment(${id})">Přidat komentář</button></div>`:''}<div class="tools"><button class="btn primary" onclick="apcSaveTask(${id||'null'})">Uložit úkol</button><button class="btn secondary" onclick="$('apcEditor').classList.add('hidden')">Zavřít</button></div></div></div>`;
+  };
+  window.apcSaveTask=async function(id){ const payload={id:id,project_id:$('apc_t_project').value,title:$('apc_t_title').value,description:$('apc_t_desc').value,column_key:$('apc_t_column').value,priority:$('apc_t_priority').value,assignee_name:$('apc_t_assignee').value,assignee_email:$('apc_t_email')?.value||'',due_date:$('apc_t_due').value,checklist:textToChecklist($('apc_t_checklist')?.value||''),actor_email:(state.adviser||{}).email||''}; try{ await fetchJson('/api/project-center/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); $('apcEditor').classList.add('hidden'); await loadProjectCenter(true); }catch(e){ toast('Úkol se nepodařilo uložit: '+e.message); } };
+  window.apcSaveComment=async function(taskId){ try{ await fetchJson('/api/project-center/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:taskId,text:$('apc_comment_text').value,author_name:(state.adviser||{}).name||'ASTORIE',author_email:(state.adviser||{}).email||''})}); await loadProjectCenter(false); apcOpenTaskForm(taskId); }catch(e){ toast('Komentář se nepodařilo uložit: '+e.message); } };
+})();
