@@ -14,10 +14,10 @@ from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(__file__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-APP_VERSION = "5.2.4"
-APP_RELEASE_NAME = "PROJECT_CENTER_WORKFLOW_SAFE"
+APP_VERSION = "5.3.0"
+APP_RELEASE_NAME = "CLIENT_PUBLIC_REGISTRY_DATA_SAFE"
 APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "TEST")).strip().upper() or "TEST"
-BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-5.2.4"))[:12]
+BUILD_ID = os.getenv("RENDER_GIT_COMMIT", os.getenv("BUILD_ID", "zip-5.0.2"))[:12]
 
 app = FastAPI(title="ASTORIE Business Risk Hub", version=APP_VERSION)
 app.add_middleware(
@@ -274,6 +274,39 @@ def init_db() -> bool:
                 );
                 """
             )
+
+            # Business Risk Hub 5.3.0 – veřejná data klienta.
+            # Bezpečně oddělená tabulka: nezasahuje do obchodních případů, nabídek ani projektového centra.
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_registry_data (
+                    id SERIAL PRIMARY KEY,
+                    client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+                    ico TEXT,
+                    ares_json JSONB DEFAULT '{}'::jsonb,
+                    or_json JSONB DEFAULT '{}'::jsonb,
+                    rzp_json JSONB DEFAULT '{}'::jsonb,
+                    nace_json JSONB DEFAULT '{}'::jsonb,
+                    registry_status JSONB DEFAULT '{}'::jsonb,
+                    loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE(client_id)
+                );
+                """
+            )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_risk_profile (
+                    id SERIAL PRIMARY KEY,
+                    client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+                    status TEXT NOT NULL DEFAULT 'prepared',
+                    payload JSONB DEFAULT '{}'::jsonb,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE(client_id)
+                );
+                """
+            )
             for key, filename in [
                 ('activities', 'activities.json'),
                 ('risks', 'risks.json'),
@@ -437,13 +470,135 @@ async def ares(ico: str):
             "name": data.get("obchodniJmeno") or "",
             "legal_form": str(data.get("pravniForma") or ""),
             "address": adresa,
-            "data_box": data.get("datovaSchranka") or "",
+            "created_date": data.get("datumVzniku") or "",
+            "status": data.get("stavSubjektu") or data.get("stav") or "",
+            "cz_nace": data.get("czNace") or data.get("nace") or [],
         }
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"ARES není dostupný: {exc}")
 
+
+
+
+def _safe_list(value: Any) -> List[Any]:
+    if isinstance(value, list):
+        return value
+    if value in (None, ""):
+        return []
+    return [value]
+
+
+def _extract_nace(data: Dict[str, Any]) -> Dict[str, Any]:
+    raw = data.get("czNace") or data.get("nace") or data.get("ekonomickeCinnosti") or []
+    items: List[Dict[str, str]] = []
+    for item in _safe_list(raw):
+        if isinstance(item, dict):
+            code = str(item.get("kod") or item.get("code") or item.get("czNace") or item.get("nace") or "").strip()
+            name = str(item.get("nazev") or item.get("name") or item.get("text") or "").strip()
+        else:
+            code = str(item or "").strip()
+            name = ""
+        if code or name:
+            items.append({"code": code, "name": name})
+    return {
+        "main": items[0] if items else {},
+        "secondary": items[1:] if len(items) > 1 else [],
+        "items": items,
+    }
+
+
+def _registry_links(ico: str) -> Dict[str, str]:
+    return {
+        "ares": f"https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/{ico}",
+        "justice": f"https://or.justice.cz/ias/ui/rejstrik-$firma?ico={ico}",
+        "rzp": f"https://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&OKRES=&CASTOBCE=&OBEC=&ULICE=&CDOM=&COR=&COZ=&ICO={ico}&OBCHJM=&OBCHJMATD=0&ROLES=P&JMENO=&PRIJMENI=&NAROZENI=&ROLE=&VYPIS=2",
+        "czso_nace": "https://www.czso.cz/csu/czso/klasifikace_ekonomickych_cinnosti_cz_nace",
+    }
+
+
+@app.post("/api/client/load-public-data")
+async def load_client_public_data(request: Request):
+    payload = await request.json()
+    ico_clean = "".join(ch for ch in str(payload.get("ico") or "") if ch.isdigit())
+    if len(ico_clean) != 8:
+        raise HTTPException(status_code=400, detail="IČO musí mít 8 číslic.")
+
+    ares_data: Dict[str, Any] = {}
+    status = {
+        "ares": {"state": "not_loaded", "message": "ARES nebyl načten."},
+        "or": {"state": "link", "message": "Veřejný rejstřík je připraven pro ověření přes detail subjektu."},
+        "rzp": {"state": "link", "message": "Živnostenská oprávnění jsou připravena pro ověření přes RŽP."},
+        "nace": {"state": "not_loaded", "message": "CZ-NACE nebylo načteno."},
+    }
+    links = _registry_links(ico_clean)
+
+    try:
+        url = links["ares"]
+        async with httpx.AsyncClient(timeout=15) as client:
+            r = await client.get(url)
+        if r.status_code == 404:
+            raise HTTPException(status_code=404, detail="Subjekt nebyl v ARES nalezen.")
+        r.raise_for_status()
+        ares_data = r.json()
+        status["ares"] = {"state": "ok", "message": "ARES načten."}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        status["ares"] = {"state": "error", "message": f"ARES není dostupný: {exc}"}
+
+    sidlo = ares_data.get("sidlo") or {}
+    nace = _extract_nace(ares_data)
+    if nace.get("items"):
+        status["nace"] = {"state": "ok", "message": "CZ-NACE načteno z dostupných údajů ARES/registrů."}
+    else:
+        status["nace"] = {"state": "missing", "message": "CZ-NACE nebylo v odpovědi registru dostupné."}
+
+    # Veřejný rejstřík: v této bezpečné fázi nepřebíráme členy orgánů.
+    # Zobrazujeme pouze typ požadovaných údajů a odkaz na ověření; způsob jednání/zastupování se napojí na samostatný zdroj OR.
+    or_data = {
+        "representation_method": "",
+        "external_representatives": [],
+        "note": "Připraveno pro napojení na otevřená data veřejného rejstříku. Nezobrazují se členové představenstva; cílem je způsob jednání a osoby zastupující společnost navenek.",
+        "source_url": links["justice"],
+    }
+    rzp_data = {
+        "active_trades": [],
+        "craft_trades": [],
+        "regulated_trades": [],
+        "concessions": [],
+        "note": "Připraveno pro napojení na RŽP. Provozovny se záměrně nenačítají.",
+        "source_url": links["rzp"],
+    }
+
+    result = {
+        "ok": True,
+        "ico": ico_clean,
+        "loaded_at": datetime.now(timezone.utc).isoformat(),
+        "client": {
+            "ico": ares_data.get("ico") or ico_clean,
+            "name": ares_data.get("obchodniJmeno") or "",
+            "legal_form": str(ares_data.get("pravniForma") or ""),
+            "address": sidlo.get("textovaAdresa") or "",
+            "created_date": ares_data.get("datumVzniku") or "",
+            "status": ares_data.get("stavSubjektu") or ares_data.get("stav") or "",
+        },
+        "registry_status": status,
+        "ares": {
+            "name": ares_data.get("obchodniJmeno") or "",
+            "legal_form": str(ares_data.get("pravniForma") or ""),
+            "address": sidlo.get("textovaAdresa") or "",
+            "created_date": ares_data.get("datumVzniku") or "",
+            "status": ares_data.get("stavSubjektu") or ares_data.get("stav") or "",
+            "source_url": links["ares"],
+        },
+        "or": or_data,
+        "rzp": rzp_data,
+        "nace": nace | {"source_url": links["czso_nace"]},
+        "links": links,
+    }
+    return result
 
 def upsert_client(cur, client: Dict[str, Any]) -> int:
     ico = (client.get("ico") or "").strip()

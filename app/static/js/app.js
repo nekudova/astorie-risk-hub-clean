@@ -6324,3 +6324,100 @@ window.readCurrentTab=readCurrentTab=function(){ensure483();if(currentTab==='adv
   window.apcSaveTask=async function(id){ const payload={id:id,project_id:$('apc_t_project').value,title:$('apc_t_title').value,description:$('apc_t_desc').value,column_key:$('apc_t_column').value,priority:$('apc_t_priority').value,assignee_name:$('apc_t_assignee').value,assignee_email:$('apc_t_email')?.value||'',due_date:$('apc_t_due').value,checklist:textToChecklist($('apc_t_checklist')?.value||''),actor_email:(state.adviser||{}).email||''}; try{ await fetchJson('/api/project-center/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); $('apcEditor').classList.add('hidden'); await loadProjectCenter(true); }catch(e){ toast('Úkol se nepodařilo uložit: '+e.message); } };
   window.apcSaveComment=async function(taskId){ try{ await fetchJson('/api/project-center/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:taskId,text:$('apc_comment_text').value,author_name:(state.adviser||{}).name||'ASTORIE',author_email:(state.adviser||{}).email||''})}); await loadProjectCenter(false); apcOpenTaskForm(taskId); }catch(e){ toast('Komentář se nepodařilo uložit: '+e.message); } };
 })();
+
+/* ASTORIE BRH 5.3.0 – Inteligentní karta klienta: veřejná data klienta.
+   Bezpečný klientský override: mění pouze kartu klienta a související načtení registrů. */
+(function(){
+  const OLD_READ_CURRENT_TAB_530 = typeof readCurrentTab === 'function' ? readCurrentTab : function(){};
+
+  function safeHtml(x){ return (typeof esc === 'function') ? esc(x) : String(x ?? '').replace(/[&<>\"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function nrm(x){ return (typeof norm === 'function') ? norm(x) : String(x || '').trim(); }
+  function registryData(){ state.client ||= {}; state.client.public_registry_data ||= {}; return state.client.public_registry_data; }
+  function regStatusLabel(key, label){
+    const d = registryData(); const st = ((d.registry_status || {})[key] || {}).state || 'not_loaded';
+    const text = st === 'ok' ? 'OK' : (st === 'link' ? 'ověřit' : (st === 'missing' ? 'nenalezeno' : (st === 'error' ? 'chyba' : 'nenačteno')));
+    return `<div class="registry-status-item ${safeHtml(st)}"><b>${safeHtml(label)}</b><span>${safeHtml(text)}</span></div>`;
+  }
+  function registryStatusPanel(){
+    const d = registryData();
+    const loaded = d.loaded_at ? `<small>Poslední aktualizace: ${safeHtml(String(d.loaded_at).slice(0,16).replace('T',' '))}</small>` : '<small>Data zatím nejsou načtena.</small>';
+    return `<div class="registry-status-panel"><div><p class="eyebrow">Stav registrů</p>${loaded}</div><div class="registry-status-grid">${regStatusLabel('ares','ARES')}${regStatusLabel('or','Veřejný rejstřík')}${regStatusLabel('rzp','Živnosti')}${regStatusLabel('nace','CZ-NACE')}</div></div>`;
+  }
+  function linkButton(url, label){ return url ? `<a class="btn secondary small" href="${safeHtml(url)}" target="_blank" rel="noopener">${safeHtml(label)}</a>` : ''; }
+  function naceRows(items){
+    if(!items || !items.length) return '<div class="empty compact">CZ-NACE zatím není načteno nebo nebylo v odpovědi registru dostupné.</div>';
+    return `<div class="registry-table"><div class="registry-row head"><span>Kód</span><span>Název činnosti</span></div>${items.map(i=>`<div class="registry-row"><b>${safeHtml(i.code||'')}</b><span>${safeHtml(i.name||'Název není v registru vrácen.')}</span></div>`).join('')}</div>`;
+  }
+  function publicRegistrySections(){
+    const d = registryData();
+    const a = d.ares || {}; const or = d.or || {}; const rzp = d.rzp || {}; const nace = d.nace || {};
+    const representatives = (or.external_representatives || []).length ? (or.external_representatives || []).map(x=>`<li>${safeHtml(x)}</li>`).join('') : '<li>Zatím není načteno. Pro tuto fázi se neberou členové představenstva; cílem je pouze způsob jednání a zastupování navenek.</li>';
+    const trades = (rzp.active_trades || []).length ? (rzp.active_trades || []).map(x=>`<li>${safeHtml(x)}</li>`).join('') : '<li>Zatím není načteno. Provozovny se záměrně nenačítají.</li>';
+    return `<div class="registry-sections">
+      <section class="registry-box"><div class="registry-box-head"><h3>ARES – základní identifikace</h3>${linkButton(a.source_url || (d.links||{}).ares, 'Otevřít zdroj')}</div><div class="grid3 compact-grid"><div><b>Název</b><span>${safeHtml(a.name || state.client.name || '—')}</span></div><div><b>Právní forma</b><span>${safeHtml(a.legal_form || state.client.legal_form || '—')}</span></div><div><b>Stav subjektu</b><span>${safeHtml(a.status || '—')}</span></div></div><p class="registry-address"><b>Sídlo:</b> ${safeHtml(a.address || state.client.address || '—')}</p></section>
+      <section class="registry-box"><div class="registry-box-head"><h3>Veřejný rejstřík – zastupování navenek</h3>${linkButton(or.source_url || (d.links||{}).justice, 'Ověřit v rejstříku')}</div><label>Způsob jednání<textarea readonly>${safeHtml(or.representation_method || 'Připraveno pro napojení zdroje. Ručně ověřte ve veřejném rejstříku, než bude doplněna automatická integrační vrstva.')}</textarea></label><b>Kdo společnost zastupuje navenek</b><ul>${representatives}</ul></section>
+      <section class="registry-box"><div class="registry-box-head"><h3>Živnostenská oprávnění</h3>${linkButton(rzp.source_url || (d.links||{}).rzp, 'Ověřit v RŽP')}</div><p class="muted">Načítáme živnosti bez provozoven.</p><ul>${trades}</ul></section>
+      <section class="registry-box"><div class="registry-box-head"><h3>Ekonomická činnost – CZ-NACE</h3>${linkButton(nace.source_url || (d.links||{}).czso_nace, 'Klasifikace CZ-NACE')}</div>${naceRows(nace.items || [])}</section>
+    </div>`;
+  }
+
+  loadAres = async function(){
+    const ico = nrm($('client_ico')?.value);
+    if(!ico){ toast('Nejdříve zadejte IČO.'); return; }
+    try{
+      const d = await fetchJson(`/api/ares/${encodeURIComponent(ico)}`);
+      state.client.ico = d.ico || ico;
+      state.client.name = d.name || state.client.name;
+      state.client.legal_form = d.legal_form || state.client.legal_form;
+      state.client.address = d.address || state.client.address;
+      // Datová schránka se v této verzi záměrně nenačítá ani nezobrazuje.
+      renderWorkspace(); toast('Data z ARES byla načtena bez datové schránky.');
+    }catch(e){ toast('ARES se nepodařilo načíst: '+e.message); }
+  };
+
+  window.loadClientPublicData = async function(){
+    const ico = nrm($('client_ico')?.value);
+    if(!ico){ toast('Nejdříve zadejte IČO.'); return; }
+    try{
+      const d = await fetchJson('/api/client/load-public-data', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ico})});
+      state.client.public_registry_data = d;
+      if(d.client){
+        state.client.ico = d.client.ico || state.client.ico;
+        state.client.name = d.client.name || state.client.name;
+        state.client.legal_form = d.client.legal_form || state.client.legal_form;
+        state.client.address = d.client.address || state.client.address;
+      }
+      renderWorkspace(); toast('Veřejná data klienta byla načtena.');
+    }catch(e){ toast('Veřejná data se nepodařilo načíst: '+e.message); }
+  };
+
+  readCurrentTab = function(){
+    if(currentTab === 'client'){
+      state.client ||= {};
+      ['ico','name','legal_form','address','contact_person','contact_email','contact_phone','website','registered_office','billing_email'].forEach(k=>{ const el=$('client_'+k); if(el) state.client[k]=el.value; });
+      const advName=$('adviser_name'); const advEmail=$('adviser_email'); if(advName) state.adviser.name=advName.value; if(advEmail) state.adviser.email=advEmail.value;
+      if(document.querySelectorAll('[data-contact-row]').length){
+        state.client.contacts = Array.from(document.querySelectorAll('[data-contact-row]')).map(row=>({
+          surname_name: row.querySelector('[data-contact="surname_name"]')?.value || '',
+          email: row.querySelector('[data-contact="email"]')?.value || '',
+          phone: row.querySelector('[data-contact="phone"]')?.value || '',
+          insurance_area: row.querySelector('[data-contact="insurance_area"]')?.value || ''
+        })).filter(c=>c.surname_name||c.email||c.phone||c.insurance_area);
+      }
+      return;
+    }
+    return OLD_READ_CURRENT_TAB_530();
+  };
+
+  tabClient = function(){
+    state.client ||= {}; state.client.contacts ||= [];
+    const clientRows = clients.length ? `<div class="client-results">${clients.map((c,i)=>`<div class="case-row"><div><strong>${safeHtml(c.name)}</strong><small>IČO: ${safeHtml(c.ico||'neuvedeno')} · ${safeHtml(c.address||'')}</small></div><button class="btn secondary" onclick="useClient(${i})">Použít klienta</button></div>`).join('')}</div>` : '';
+    const contacts=(state.client.contacts||[]).map((c,i)=>`<div class="contact-card-pro" data-contact-row><label>Příjmení a jméno<input data-contact="surname_name" value="${safeHtml(c.surname_name||'')}" placeholder="např. Novák Jan"></label><label>E-mail<input data-contact="email" value="${safeHtml(c.email||'')}" placeholder="jmeno@firma.cz"></label><label>Telefon<input data-contact="phone" value="${safeHtml(c.phone||'')}" placeholder="+420..."></label><label>Oblast pojištění<input data-contact="insurance_area" value="${safeHtml(c.insurance_area||'')}" placeholder="odpovědnost / majetek / flotila"></label><button class="btn danger" onclick="removeClientContact(${i})">Smazat</button></div>`).join('') || '<div class="empty">Zatím není doplněna žádná kontaktní osoba pro jednání.</div>';
+    return `<p class="eyebrow">1. Karta klienta</p><div class="client-card-pro premium"><div><h2>Profesionální karta klienta</h2><p class="muted">Identifikace klienta, kontakty pro jednání a nově i veřejně dostupná data z registrů. Odborná pojistná data zůstávají v kartě pro pojištění.</p></div><div class="client-card-badge">CASE ${safeHtml(state.id||'nový')}</div></div>
+    <div class="tools"><input id="clientSearch" class="grow" placeholder="Vyhledat klienta v DB podle názvu nebo IČO"><button class="btn secondary" onclick="searchClients()">Načíst klienta z DB</button></div>${clientRows}
+    <div class="section-soft pro-form-block"><p class="eyebrow">Identifikace klienta</p><div class="grid3"><label>Název klienta<input id="client_name" value="${safeHtml(state.client.name)}"></label><label>IČO<div class="inline-field"><input id="client_ico" value="${safeHtml(state.client.ico)}"><button class="btn secondary small" onclick="loadAres()">ARES</button></div></label><label>Právní forma<input id="client_legal_form" value="${safeHtml(state.client.legal_form)}"></label></div><label>Sídlo / adresa<input id="client_address" value="${safeHtml(state.client.address)}"></label><div class="grid3"><label>Hlavní kontaktní osoba<input id="client_contact_person" value="${safeHtml(state.client.contact_person)}"></label><label>E-mail<input id="client_contact_email" value="${safeHtml(state.client.contact_email)}"></label><label>Telefon<input id="client_contact_phone" value="${safeHtml(state.client.contact_phone)}"></label></div><div class="grid3"><label>Web<input id="client_website" value="${safeHtml(state.client.website)}"></label><label>Fakturační / obecný e-mail<input id="client_billing_email" value="${safeHtml(state.client.billing_email)}"></label><label>Další adresa / poznámka<input id="client_registered_office" value="${safeHtml(state.client.registered_office)}"></label></div><div class="grid2"><label>Poradce<input id="adviser_name" value="${safeHtml(state.adviser.name)}"></label><label>E-mail poradce<input id="adviser_email" value="${safeHtml(state.adviser.email)}"></label></div></div>
+    <div class="section-soft registry-panel-pro"><div class="section-head"><div><p class="eyebrow">Veřejná data klienta</p><h2>Načtení registrů podle IČO</h2><p class="muted">Datová schránka se záměrně nenačítá. U veřejného rejstříku sledujeme způsob jednání a zastupování navenek, nikoli členy představenstva. U živností se nenačítají provozovny.</p></div><button class="btn primary" onclick="readCurrentTab();loadClientPublicData()">Načíst veřejná data</button></div>${registryStatusPanel()}${publicRegistrySections()}</div>
+    <div class="section-soft"><div class="section-head"><div><p class="eyebrow">Kontaktní osoby pro jednání o pojistné smlouvě</p><h2>Kontakty klienta</h2></div><button class="btn secondary" onclick="addClientContact()">+ Přidat kontaktní osobu</button></div><div class="contacts-grid">${contacts}</div></div>
+    <div class="tools"><button class="btn primary" onclick="readCurrentTab();saveCase()">Uložit kartu klienta</button><button class="btn secondary" onclick="readCurrentTab();currentTab='insurance';renderWorkspace()">Pokračovat na kartu pro pojištění</button></div>`;
+  };
+})();

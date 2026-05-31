@@ -1017,3 +1017,28 @@
 .apc-portfolio-523{border-left:5px solid var(--orange)}.apc-board-523{align-items:start}.apc-column-523{min-height:560px;background:#f7fcfd}.apc-column-523 .apc-column-head{background:linear-gradient(135deg,var(--petrol),#005C66)}.apc-column-help{background:#fff;color:var(--muted);font-size:12px;font-weight:900;padding:9px 14px;border-bottom:1px solid var(--line)}
 .apc-card-523{border-left:6px solid var(--petrol);padding:15px}.apc-card-523 h3{font-size:17px;line-height:1.22}.apc-card-523 p{max-height:88px;line-height:1.35}.apc-card-523.overdue{border-left-color:var(--orange);background:#fff8f4}.apc-progress-card{height:8px;margin:10px 0 4px}.apc-open-chip{border:0;border-radius:999px;background:var(--petrol);color:#fff;font-weight:900;font-size:12px;padding:5px 10px;cursor:pointer}.apc-card-523 small{color:var(--muted);font-weight:800}.apc-guide-compact{border:1px solid var(--line);border-left:5px solid var(--orange);border-radius:16px;background:#fff8f4;color:var(--petrol);padding:12px 14px;margin:12px 0;font-weight:800}.apc-wizard h2{font-size:28px}.apc-lower-grid-523{margin-top:20px}
 @media(max-width:1200px){.apc-guide-523,.apc-metrics-523,.apc-toolbar-523{grid-template-columns:1fr 1fr}.apc-board-523{grid-template-columns:repeat(7,250px)}}@media(max-width:760px){.apc-guide-523,.apc-metrics-523,.apc-toolbar-523{grid-template-columns:1fr}.apc-main-actions{justify-content:flex-start}.apc-board-523{grid-template-columns:1fr;overflow:visible}}
+
+/* ASTORIE BRH 5.3.0 – veřejná data klienta */
+.registry-panel-pro{border-left:5px solid var(--orange,#FC4C02);}
+.registry-status-panel{display:flex;align-items:center;justify-content:space-between;gap:18px;background:#fff7f2;border:1px solid #ffd8c8;border-radius:22px;padding:16px 18px;margin:16px 0;}
+.registry-status-grid{display:grid;grid-template-columns:repeat(4,minmax(110px,1fr));gap:10px;min-width:520px;}
+.registry-status-item{border-radius:16px;padding:10px 12px;background:#fff;border:1px solid #d9edf0;display:flex;flex-direction:column;gap:2px;color:#003D4C;}
+.registry-status-item.ok{border-color:#FC4C02;box-shadow:0 0 0 2px rgba(252,76,2,.12) inset;}
+.registry-status-item.link{border-color:#005C66;}
+.registry-status-item.error{border-color:#FC4C02;background:#fff2ed;}
+.registry-status-item span{font-weight:800;text-transform:uppercase;font-size:.78rem;letter-spacing:.08em;color:#FC4C02;}
+.registry-sections{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
+.registry-box{background:#fff;border:1px solid #d8eef1;border-radius:22px;padding:16px;box-shadow:0 10px 26px rgba(0,61,76,.05);}
+.registry-box-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.registry-box h3{margin:0;color:#003D4C;font-size:1.05rem;}
+.registry-box textarea[readonly]{min-height:88px;background:#f8fcfd;color:#003D4C;}
+.registry-address{margin:12px 0 0;color:#003D4C;}
+.compact-grid{font-size:.92rem;}
+.compact-grid div{background:#f5fbfc;border:1px solid #d9edf0;border-radius:14px;padding:10px;}
+.compact-grid b{display:block;color:#003D4C;margin-bottom:4px;}
+.registry-table{border:1px solid #d9edf0;border-radius:16px;overflow:hidden;}
+.registry-row{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:10px 12px;border-top:1px solid #e8f3f5;color:#003D4C;}
+.registry-row.head{background:#003D4C;color:#fff;border-top:0;font-weight:800;}
+.registry-row b{color:#FC4C02;letter-spacing:.08em;}
+.empty.compact{padding:12px;border-radius:14px;background:#f8fcfd;border:1px dashed #cde6ea;color:#57717a;}
+@media(max-width:1100px){.registry-sections{grid-template-columns:1fr}.registry-status-panel{align-items:flex-start;flex-direction:column}.registry-status-grid{min-width:0;width:100%;grid-template-columns:repeat(2,1fr)}}
